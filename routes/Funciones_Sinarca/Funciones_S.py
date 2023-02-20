@@ -6,15 +6,37 @@ para luego extraer la diferencia entre la fecha actual y la de nacimiento obtien
 actualizable en el tiempo
 """
 from datetime import datetime, date, timedelta
+#importacion del modelo
+from models.modelo_inventarios import modelo_bovinos_inventario
+# importacion del modulo de base de datos
+from config.db import condb,engine
+
+from datetime import date
+
+from sqlalchemy import  select
+#libreria Fastapi para realizar la conxion con el modulo temporalmente
+from fastapi import APIRouter, Response, status
+funciones_bovinos = APIRouter()
+from schemas.post_bovinos import Esquema_bovinos
 
 
-def calculoEdad(Fecha_Nacimiento):
-    fecha_N = datetime.strptime(Fecha_Nacimiento, "%d/%m/%Y")
+"""
+La siguiente funcion toma el parametro de codigo del bovino retornando un dato data.time que indica la fecha de nacimiento del bovino
+def ConsultarFechaNacimiento(cod_bovino:int):
+    consulta_fecha_nacimiento = condb.execute(select(modelo_bovinos_inventario.columns.fecha_nacimiento).where(modelo_bovinos_inventario.columns.cod_bovino == cod_bovino)).first()
+    return consulta_fecha_nacimiento
+print(ConsultarFechaNacimiento(2))
+"""
+
+def calculoEdad(cod_bovino:int):
+    consulta_fecha_nacimiento = condb.execute(select(modelo_bovinos_inventario.columns.fecha_nacimiento).where(
+        modelo_bovinos_inventario.columns.cod_bovino == cod_bovino)).first()
+    fecha_N = datetime(consulta_fecha_nacimiento)
     Edad_Animal = (date.today().year - fecha_N.year) * 12 + date.today().month - fecha_N.month
-    print(Edad_Animal)
+    return Edad_Animal
 
+calculoEdad(2)
 
-calculoEdad("01/01/2022")
 
 """"para la funcion de intervalos partos se utilizan las librerias datetime 
 la funcion convierte las fechas ingresadas (tipo string) en un formato fecha
@@ -187,9 +209,9 @@ def Peso_Ceba(Peso):
 
 Peso_Ceba(340)
 
-def Dias_Abiertos(Fecha_Ultimo_Parto, Fecha_Ultima_Preñez):
+def Dias_Abiertos(Fecha_Ultimo_Parto, Fecha_Ultima_Prenez):
     fecha_2 = datetime.strptime(Fecha_Ultimo_Parto, "%d/%m/%Y")
-    fecha_1 = datetime.strptime(Fecha_Ultima_Preñez, "%d/%m/%Y")
+    fecha_1 = datetime.strptime(Fecha_Ultima_Prenez, "%d/%m/%Y")
     Dias_A = (fecha_1.year - fecha_2.year) * 365 + (fecha_1.month - fecha_2.month)*30 +\
              (fecha_1.day-fecha_2.day)
     print(Dias_A)
@@ -199,3 +221,4 @@ def Dias_Abiertos(Fecha_Ultimo_Parto, Fecha_Ultima_Preñez):
         print("Este animal lleva mas de meses sin preñarse, debes revisarlo")
 
 Dias_Abiertos("01/01/2021","01/07/2021")
+

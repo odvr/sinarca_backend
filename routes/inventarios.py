@@ -30,8 +30,8 @@ La siguiente funcion retorna un diccionario con la consulta de un ID del la tabl
 """
 @rutas_bovinos.get("/listar_inventarios/{id}",response_model=Esquema_bovinos
                    )
-def id_inventario_bovino(id:int):
-    consulta = condb.execute(modelo_bovinos_inventario.select().where(modelo_bovinos_inventario.columns.id_inven_Bovino == id)).first()
+def id_inventario_bovino(cod_bovino:int):
+    consulta = condb.execute(modelo_bovinos_inventario.select().where(modelo_bovinos_inventario.columns.cod_bovino == cod_bovino)).first()
     return consulta
 
 
@@ -51,21 +51,21 @@ def crear_bovinos(esquemaBovinos:Esquema_bovinos):
 La siguiente funcion realiza la actualizacion completa de la tabla de bovinos para cambiar los registros
 '''
 @rutas_bovinos.put("/cambiar_estado_bovino/{idbovino}",response_model=Esquema_bovinos)
-def cambiar_esta_bovino(data_update:Esquema_bovinos,idbovino:int):
+def cambiar_esta_bovino(data_update:Esquema_bovinos,cod_bovino:int):
      condb.execute( modelo_bovinos_inventario.update().values(
-         raza=data_update.raza, sexo=data_update.sexo, edad=data_update.edad, peso=data_update.peso,
-          marca=data_update.marca, lugar_Procedencia=data_update.lugar_Procedencia, fecha_nacimiento=data_update.fecha_nacimiento,
-         Mansedumbre=data_update.Mansedumbre).where(modelo_bovinos_inventario.columns.id == idbovino))
+         fecha_nacimiento=data_update.fecha_nacimiento, sexo=data_update.sexo, raza=data_update.raza,
+          peso=data_update.peso, marca=data_update.marca,cod_proposito=data_update.cod_proposito,
+         mansedumbre=data_update.mansedumbre,cod_estado=data_update.cod_estado).where(modelo_bovinos_inventario.columns.cod_bovino == cod_bovino))
      # Retorna una consulta con el id actualizado
-     resultado_actualizado =  condb.execute(modelo_bovinos_inventario.select().where(modelo_bovinos_inventario.columns.id_inven_Bovino == idbovino)).first()
+     resultado_actualizado =  condb.execute(modelo_bovinos_inventario.select().where(modelo_bovinos_inventario.columns.cod_bovino == cod_bovino)).first()
      condb.commit()
      return resultado_actualizado
 """
 Esta funcion elimina por ID los registros de la tabla de bovinos
 """
 @rutas_bovinos.delete("/eliminar_bovino/{idbovino}",status_code=HTTP_204_NO_CONTENT)
-def eliminar_bovino(idbovino:int):
-    condb.execute(modelo_bovinos_inventario.delete().where(modelo_bovinos_inventario.c.id_inven_Bovino == idbovino))
+def eliminar_bovino(cod_bovino:int):
+    condb.execute(modelo_bovinos_inventario.delete().where(modelo_bovinos_inventario.c.cod_bovino == cod_bovino))
     condb.commit()
     #retorna un estado de no contenido
     return Response(status_code=HTTP_204_NO_CONTENT)
