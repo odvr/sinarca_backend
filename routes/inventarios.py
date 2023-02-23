@@ -8,8 +8,8 @@ from fastapi import APIRouter, Response, status
 #importa la conexion de la base de datos
 from config.db import condb,engine
 #importa el esquema de los bovinos
-from models.modelo_inventarios import modelo_bovinos_inventario
-from schemas.post_bovinos import Esquema_bovinos
+from models.modelo_bovinos import modelo_bovinos_inventario
+from schemas.schemas_bovinos import Esquema_bovinos
 from sqlalchemy import  select,insert,values
 from starlette.status import HTTP_204_NO_CONTENT
 
