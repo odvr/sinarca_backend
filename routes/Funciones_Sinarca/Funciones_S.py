@@ -7,7 +7,7 @@ actualizable en el tiempo
 """
 from datetime import datetime, date, timedelta
 #importacion del modelo
-from models.modelo_inventarios import modelo_bovinos_inventario
+from models.modelo_bovinos import modelo_bovinos_inventario
 # importacion del modulo de base de datos
 from config.db import condb,engine
 
@@ -17,7 +17,7 @@ from sqlalchemy import  select
 #libreria Fastapi para realizar la conxion con el modulo temporalmente
 from fastapi import APIRouter, Response, status
 funciones_bovinos = APIRouter()
-from schemas.post_bovinos import Esquema_bovinos
+from schemas.schemas_bovinos import Esquema_bovinos
 
 
 """

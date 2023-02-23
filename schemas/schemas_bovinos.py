@@ -10,6 +10,7 @@ from datetime import date
 class Esquema_bovinos(BaseModel):
     id_bovino : int
     fecha_nacimiento: date
+    edad: int
     sexo_id :int
     raza : str
     peso: int
@@ -69,6 +70,7 @@ class esquema_produccion_leche(BaseModel):
     prod_lactancia : int
     dura_lactancia :str
     id_proposito:int
+    fecha_primer_parto: date
     fecha_inicial_ordeno : date
     fecha_fin_ordeno: date
     num_partos:int
@@ -76,6 +78,9 @@ class esquema_produccion_leche(BaseModel):
     id_bovino:int
     tipo_parto:int
     datos_prenez:int
+    fecha_ultimo_parto: date
+    fecha_ultima_prenez: date
+    dias_abiertos: int
     class Config:
         orm_mode = True
         env_file = ".env"

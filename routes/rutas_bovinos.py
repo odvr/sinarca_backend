@@ -6,14 +6,15 @@ Librerias requeridas
 '''
 from fastapi import APIRouter, Response, status
 #importa la conexion de la base de datos
-from config.db import condb,engine
+#from APi.config.db import condb
+from config.db import condb
 #importa el esquema de los bovinos
-from models.modelo_bovinos import modelo_bovinos_inventario
+from models.modelo_bovinos import modelo_bovinos_inventario, modelo_leche
 from schemas.schemas_bovinos import Esquema_bovinos
 from sqlalchemy import  select,insert,values
 from starlette.status import HTTP_204_NO_CONTENT
 
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 
 rutas_bovinos = APIRouter()
 """
@@ -46,6 +47,7 @@ def crear_bovinos(esquemaBovinos:Esquema_bovinos):
     bovinos_dic =esquemaBovinos.dict()
     ingreso = modelo_bovinos_inventario.insert().values(bovinos_dic)
     condb.execute(ingreso)
+    condb.commit()
     return Response(status_code=HTTP_204_NO_CONTENT)
 
 
@@ -61,7 +63,7 @@ def cambiar_esta_bovino(data_update:Esquema_bovinos,idbovino:int):
          id_mansedumbre=data_update.id_mansedumbre,id_estado=data_update.id_estado).where(modelo_bovinos_inventario.columns.id_bovino == idbovino))
      # Retorna una consulta con el id actualizado
      resultado_actualizado =  condb.execute(modelo_bovinos_inventario.select().where(modelo_bovinos_inventario.columns.id_bovino == idbovino)).first()
-     #condb.commit()
+     condb.commit()
      return resultado_actualizado
 """
 Esta funcion elimina por ID los registros de la tabla de bovinos
@@ -69,7 +71,7 @@ Esta funcion elimina por ID los registros de la tabla de bovinos
 @rutas_bovinos.delete("/eliminar_bovino/{idbovino}",status_code=HTTP_204_NO_CONTENT)
 def eliminar_bovino(id_bovino:int):
     condb.execute(modelo_bovinos_inventario.delete().where(modelo_bovinos_inventario.c.id_bovino == id_bovino))
-    #condb.commit()
+    condb.commit()
     #retorna un estado de no contenido
     return Response(status_code=HTTP_204_NO_CONTENT)
 
@@ -84,25 +86,102 @@ print(ConsultarFechaNacimiento(2))
 """
 
 
-@rutas_bovinos.get("/calcular_edad/{id}",response_model=Esquema_bovinos
+@rutas_bovinos.post("/calcular_edad/{id}",response_model=Esquema_bovinos
                    )
 def calculoEdad(id_bovino_edad:int):
     consulta_fecha_nacimiento = condb.execute(select(modelo_bovinos_inventario.columns.fecha_nacimiento).where(
         modelo_bovinos_inventario.columns.id_bovino == id_bovino_edad)).first()
-    fecha_N = datetime(consulta_fecha_nacimiento)
-    Edad_Animal = (date.today().year - fecha_N.year) * 12 + date.today().month - fecha_N.month
+    fecha_N = consulta_fecha_nacimiento.__str__().split('(').pop(2).split(')').pop(0)
+    fecha_N2 = "".join(fecha_N).replace(', ', '/')
+    fecha_N3 = datetime.strptime(fecha_N2, "%Y/%m/%d")
+    Edad_Animal = (datetime.today().year - fecha_N3.year) * 12 + datetime.today().month - fecha_N3.month
     return Edad_Animal
 
+"""
+para la funcion de edad al primer parto se utilizan las librerias datetime 
+la funcion convierte las fechas ingresadas (tipo string) en un formato fecha
+posteriormente calcula la diferencia en meses entre la fecha del primer parto
+y la fecha de nacimiento para devolver la eeda (en meses) en la que la novilla
+ tuvo su primer parto
+"""
+def Edad_Primer_Parto(id_bovino:int):
+    fecha_P,fecha_N = condb.execute(select(modelo_leche.columns.fecha_primer_parto,
+        modelo_bovinos_inventario.columns.fecha_nacimiento).where(
+        modelo_leche.columns.id_bovino == id_bovino,
+        modelo_bovinos_inventario.columns.id_bovino == id_bovino)).first()
+    Edad_primer_parto = (fecha_P.year - fecha_N.year) * 12 + fecha_P.month - fecha_N.month
+    return Edad_primer_parto
+"""
+"para la funcion de Duracion de lactancia se utilizan las librerias datetime 
+la funcion convierte las fechas ingresadas (tipo string) en un formato fecha
+posteriormente calcula la diferencia en dias entre la fecha del ultimo ordeño
+y la fecha del primer ordeño y devuelve la cantidad de dias en que se ordeño 
+la vaca
+"""
 
 
+def Duracion_Lactancia(id_bovino:int):
+    fecha_Inicio_O,fecha_Final_O = condb.execute(select(modelo_leche.columns.fecha_inicial_ordeno,
+        modelo_leche.columns.fecha_fin_ordeno).where(
+        modelo_leche.columns.id_bovino == id_bovino,
+        modelo_leche.columns.id_bovino == id_bovino)).first()
+    Duracion_Lac = (fecha_Final_O.year - fecha_Inicio_O.year) * 12 + fecha_Final_O.month - fecha_Inicio_O.month
+    return Duracion_Lac
+
+"""
+esta funcion recibe como parametro la fecha del primer parto y
+hace uso de la lidbreria datatime ( timedelta),primero convierte 
+la fecha del primer parto a tipo fecha y luego toma este valor
+y lo suma con el tiempo util (72.3 meses) para determinar la fecha
+en que dicho animal dejara de ser productivo, posteriormente tambien
+devolvera el tiempo restante para llegar a esa fecha mediante la resta
+del tiempo actual
+"""
 
 
+def Edad_Sacrificio_Lecheras(id_bovino:int):
+    Consulta_P1 = condb.execute(select(modelo_leche.columns.fecha_primer_parto).where(
+        modelo_leche.columns.id_bovino == id_bovino)).first()
+    fecha_P = Consulta_P1.__str__().split('(').pop(2).split(')').pop(0)
+    fecha_P1 = "".join(fecha_P).replace(', ', '/')
+    fecha_Parto_1 = datetime.strptime(fecha_P1, "%Y/%m/%d")
+    fecha_Vida_Util = fecha_Parto_1 + timedelta(2169)
+    return fecha_Vida_Util
 
+"""
+"""
+def Estado_Optimo_Levante(id_bovino:int):
+    edad,peso = condb.execute(select(modelo_bovinos_inventario.columns.edad,
+        modelo_bovinos_inventario.columns.peso).where(
+        modelo_bovinos_inventario.columns.id_bovino == id_bovino,
+        modelo_bovinos_inventario.columns.id_bovino == id_bovino)).first()
+    if peso >= 140 and edad in range(8,11):
+        estado_levante ="Estado optimo"
+        return estado_levante
 
+    else:
+        estado_levante ="Estado no optimo"
+        return estado_levante
 
+def Estado_Optimo_Ceba(id_bovino:int):
+    edad,peso = condb.execute(select(modelo_bovinos_inventario.columns.edad,
+        modelo_bovinos_inventario.columns.peso).where(
+        modelo_bovinos_inventario.columns.id_bovino == id_bovino,
+        modelo_bovinos_inventario.columns.id_bovino == id_bovino)).first()
+    if peso >= 350 and edad in range(24, 36):
+        estado_levante = "Estado optimo"
+        return estado_levante
+    else:
+        estado_levante = "Estado no optimo"
+        return estado_levante
+"""
+"""
 
-
-
-
-
-
+def Dias_Abiertos(id_bovino:int):
+    fecha_ultimo_p,fecha_ultima_prenez = condb.execute(select(modelo_leche.columns.fecha_ultimo_parto,
+        modelo_leche.columns.fecha_ultima_prenez).where(
+        modelo_leche.columns.id_bovino == id_bovino,
+        modelo_leche.columns.id_bovino == id_bovino)).first()
+    Dias_A = (fecha_ultima_prenez.year - fecha_ultimo_p.year) * 365 + (fecha_ultima_prenez.month - fecha_ultimo_p.month)*30 +\
+             (fecha_ultima_prenez.day-fecha_ultimo_p.day)
+    return Dias_A
