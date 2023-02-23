@@ -5,8 +5,7 @@ la funcion creada convierte una fecha ingresada (como tipo string) en un formato
 para luego extraer la diferencia entre la fecha actual y la de nacimiento obtiendo asi una variable
 actualizable en el tiempo
 """
-from ast import parse
-from datetime import datetime, date, timedelta, time
+from datetime import datetime, date, timedelta
 #importacion del modelo
 from models.modelo_inventarios import modelo_bovinos_inventario
 # importacion del modulo de base de datos
@@ -32,12 +31,13 @@ print(ConsultarFechaNacimiento(2))
 def calculoEdad(cod_bovino:int):
     consulta_fecha_nacimiento = condb.execute(select(modelo_bovinos_inventario.columns.fecha_nacimiento).where(
         modelo_bovinos_inventario.columns.cod_bovino == cod_bovino)).first()
-    fecha_N = consulta_fecha_nacimiento.__str__().split('(').pop(2).split(')').pop(0)
-    fecha_N2 = "".join(fecha_N).replace(', ','/')
-    fecha_N3 =datetime.strptime(fecha_N2, "%Y/%m/%d")
-    Edad_Animal = (datetime.today().year - fecha_N3.year) * 12 + datetime.today().month - fecha_N3.month
-    print(Edad_Animal)
-calculoEdad(3)
+    fecha_N = datetime(consulta_fecha_nacimiento)
+    Edad_Animal = (date.today().year - fecha_N.year) * 12 + date.today().month - fecha_N.month
+    return Edad_Animal
+
+calculoEdad(2)
+
+
 """"para la funcion de intervalos partos se utilizan las librerias datetime 
 la funcion convierte las fechas ingresadas (tipo string) en un formato fecha
 posteriormente calcula la diferencia en meses entre la ficha del ultimo parto
@@ -221,3 +221,4 @@ def Dias_Abiertos(Fecha_Ultimo_Parto, Fecha_Ultima_Prenez):
         print("Este animal lleva mas de meses sin preñarse, debes revisarlo")
 
 Dias_Abiertos("01/01/2021","01/07/2021")
+
