@@ -3,6 +3,7 @@
 el siguiente codigo realiza la creacion de las tablas que se ge
 """
 #librerias requeridas
+#,
 from sqlalchemy import Table,Column
 #importacion del cong para la conexion con la base de datos
 from config.db  import meta,engine

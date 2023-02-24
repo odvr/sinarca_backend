@@ -4,6 +4,7 @@ El siguiente codigo permitira realizar el esquema de bases de datos para el meto
 """
 #importar los tipos de datos
 # permite modelar los datos o crearlos
+#,
 from pydantic import BaseModel
 from datetime import date
 
