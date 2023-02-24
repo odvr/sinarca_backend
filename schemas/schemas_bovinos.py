@@ -62,15 +62,16 @@ class esquema_produccion_levante(BaseModel):
     id_levante : int
     id_bovino :int
     id_proposito:int
-    Estado_optimo_levante : str
+    estado_optimo_levante : str
     class Config:
         orm_mode = True
         env_file = ".env"
 class esquema_produccion_leche(BaseModel):
     prod_lactancia : int
-    dura_lactancia :str
+    dura_lactancia :int
     id_proposito:int
     fecha_primer_parto: date
+    edad_primer_parto: int
     fecha_inicial_ordeno : date
     fecha_fin_ordeno: date
     num_partos:int
@@ -81,6 +82,7 @@ class esquema_produccion_leche(BaseModel):
     fecha_ultimo_parto: date
     fecha_ultima_prenez: date
     dias_abiertos: int
+    fecha_vida_util:date
     class Config:
         orm_mode = True
         env_file = ".env"
