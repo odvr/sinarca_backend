@@ -207,5 +207,3 @@ def Dias_Abiertos(id_bovino:int):
                   where(modelo_leche.columns.id_bovino == id_bovino).
                   values(dias_abiertos=Dias_A))
     condb.commit()
-"""
-"""
