@@ -25,7 +25,6 @@ modelo_bovinos_inventario = Table("bovinos", meta, Column("id_bovino", Integer, 
                                   Column("id_proposito", Integer,ForeignKey("proposito.id_proposito")),
                                   Column("id_mansedumbre", Integer,ForeignKey("mansedumbre.id_mansedumbre")),
                                   Column("id_estado", Integer,ForeignKey("estado.id_estado")))
-
 """
 modelo de columnas para definir el sexo
 """
@@ -60,12 +59,14 @@ modelo_ceba = Table("produccion_ceba", meta, Column("id_ceba", Integer, primary_
 
 modelo_levante = Table("produccion_levante", meta, Column("id_levante", Integer, primary_key=True),
                                   Column("id_bovino", Integer,ForeignKey("bovinos.id_bovino")),
-                                  Column("id_proposito", Integer,ForeignKey("proposito.id_proposito")),Column("estado_optimo_levante", String(300)))
+                                  Column("id_proposito", Integer,ForeignKey("proposito.id_proposito")),
+                                  Column("estado_optimo_levante", String(300)))
 
 modelo_leche = Table("produccion_leche", meta, Column("id_leche", Integer, primary_key=True),
                                   Column("fecha_primer_parto", DateTime),
+                                  Column("edad_primer_parto", Integer),
                                   Column("prod_lactancia",Integer),
-                                  Column("dura_lactancia",String(300)),
+                                  Column("dura_lactancia",Integer),
                                   Column("fecha_inicial_ordeno",DateTime),
                                   Column("fecha_fin_ordeno",DateTime),
                                   Column("num_partos",Integer),
@@ -75,7 +76,8 @@ modelo_leche = Table("produccion_leche", meta, Column("id_leche", Integer, prima
                                   Column("datos_prenez", Integer,ForeignKey("datos_prenez.id_datos_prenez")),
                                   Column("fecha_ultimo_parto",DateTime),
                                   Column("fecha_ultima_prenez",DateTime),
-                                  Column("dias_abiertos", Integer))
+                                  Column("dias_abiertos", Integer),
+                                  Column("fecha_vida_util",DateTime))
 
 modelo_tipo_parto = Table("tipo_parto", meta, Column("id_tipo_parto", Integer, primary_key=True),
                                   Column("descri_tipo_parto", String(300)))
