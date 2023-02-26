@@ -84,6 +84,9 @@ class esquema_produccion_leche(BaseModel):
     fecha_ultima_prenez: date
     dias_abiertos: int
     fecha_vida_util:date
+    id_ordeno:int
+    promedio_litros:int
+    litros_diarios:int
     class Config:
         orm_mode = True
         env_file = ".env"
@@ -119,6 +122,24 @@ class esquema_arbol_genialogico(BaseModel):
     id_bovino_madre: int
     id_bovino_padre: int
     id_bovino:int
+    class Config:
+        orm_mode = True
+        env_file = ".env"
+class esquema_indicadores(BaseModel):
+    id_indicadores: int
+    perdida_de_terneros: int
+    tasa_supervivencia: int
+    vacas_vacias:int
+    vacas_prenadas:int
+    animales_levante:int
+    animales_ceba:int
+    animales_leche:int
+    animales_fallecidos:int
+    animales_vendidos:int
+    machos:int
+    hembras:int
+    vacas_en_ordeno:int
+    porcentaje_ordeno:int
     class Config:
         orm_mode = True
         env_file = ".env"

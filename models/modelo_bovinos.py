@@ -49,13 +49,13 @@ modelo_estado = Table("estado", meta, Column("id_estado", Integer, primary_key=T
                                   Column("descri_estado", String(300)))
 
 
-modelo_estado = Table("mansedumbre", meta, Column("id_mansedumbre", Integer, primary_key=True),
+modelo_mansedumbre = Table("mansedumbre", meta, Column("id_mansedumbre", Integer, primary_key=True),
                                   Column("descri_mansedumbre", String(300)))
 
 
 modelo_ceba = Table("produccion_ceba", meta, Column("id_ceba", Integer, primary_key=True),
-                                  Column("id_bovino", Integer,ForeignKey("bovinos.id_bovino")),
-                                  Column("id_proposito", Integer,ForeignKey("proposito.id_proposito")),Column("estado_optimo_ceba", String(300)))
+                            Column("id_bovino", Integer,ForeignKey("bovinos.id_bovino")),
+                            Column("id_proposito", Integer,ForeignKey("proposito.id_proposito")), Column("estado_optimo_ceba", String(300)))
 
 
 modelo_levante = Table("produccion_levante", meta, Column("id_levante", Integer, primary_key=True),
@@ -78,7 +78,10 @@ modelo_leche = Table("produccion_leche", meta, Column("id_leche", Integer, prima
                                   Column("fecha_ultimo_parto",DateTime),
                                   Column("fecha_ultima_prenez",DateTime),
                                   Column("dias_abiertos", Integer),
-                                  Column("fecha_vida_util",DateTime))
+                                  Column("fecha_vida_util",DateTime),
+                                  Column("id_ordeno", Integer,ForeignKey("ordeno.id_ordeno")),
+                                  Column("promedio_litros", Integer),
+                                  Column("litros_diarios", Integer))
 
 modelo_tipo_parto = Table("tipo_parto", meta, Column("id_tipo_parto", Integer, primary_key=True),
                                   Column("descri_tipo_parto", String(300)))
@@ -96,7 +99,24 @@ modelo_arbol_genialogico = Table("arbol_genialogico", meta, Column("id_arbol_gen
                                   Column("id_bovino_padre", Integer,ForeignKey("bovinos.id_bovino")),Column("id_bovino", Integer,ForeignKey("bovinos.id_bovino")),
 
                                   )
+"""modelo para indicadores"""
+modelo_indicadores = Table("indicadores", meta, Column("id_indicadores", Integer, primary_key=True),
+                                  Column("perdida_de_terneros", Integer),
+                                  Column("tasa_supervivencia", Integer),
+                                  Column("vacas_vacias", Integer),
+                                  Column("vacas_prenadas", Integer),
+                                  Column("animales_levante", Integer),
+                                  Column("animales_ceba", Integer),
+                                  Column("animales_leche", Integer),
+                                  Column("animales_fallecidos", Integer),
+                                  Column("animales_vendidos", Integer),
+                                  Column("machos", Integer),
+                                  Column("hembras", Integer),
+                                  Column("vacas_en_ordeno",Integer),
+                                  Column("porcentaje_ordeno", Integer))
 
+modelo_ordeno = Table("ordeno", meta, Column("id_ordeno", Integer, primary_key=True),
+                                  Column("descripcion", String(300)))
 meta.create_all(engine)
 
 
