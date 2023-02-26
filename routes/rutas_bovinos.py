@@ -16,7 +16,7 @@ from sqlalchemy.engine import cursor, row
 from config.db import condb
 #importa el esquema de los bovinos
 from models.modelo_bovinos import modelo_bovinos_inventario, modelo_leche, modelo_levante, \
-    modelo_indicadores
+    modelo_indicadores, modelo_ceba
 from schemas.schemas_bovinos import Esquema_bovinos, esquema_produccion_leche, esquema_produccion_levante, \
     esquema_produccion_ceba
 from sqlalchemy import select, insert, values, update, bindparam, between
@@ -111,7 +111,6 @@ def calculoEdad(id_bovino_edad:int):
         modelo_bovinos_inventario.select().where(modelo_bovinos_inventario.columns.id_bovino == id_bovino_edad)).first()
     condb.commit()
     return resultado_actualizado
-
 """
 para la funcion de edad al primer parto se utilizan las librerias datetime 
 la funcion convierte las fechas ingresadas (tipo string) en un formato fecha
@@ -170,7 +169,6 @@ def Edad_Sacrificio_Lecheras(id_bovino:int):
                   where(modelo_leche.columns.id_bovino == id_bovino).
                   values(fecha_vida_util=fecha_Vida_Util))
     condb.commit()
-
 """
 la siguiente funcion determina si la condicion de un animal para
 levante es optima, para ello, trae los valores de la edad y peso 
@@ -188,7 +186,7 @@ def Estado_Optimo_Levante(id_bovino:int):
         estado_levante ="Estado optimo"
 
     else:
-        estado_levante ="Estado nooptimo"
+        estado_levante ="Estado no optimo"
     condb.execute(update(modelo_levante).
                   where(modelo_levante.columns.id_bovino == id_bovino).
                   values(estado_optimo_levante=estado_levante))
@@ -210,8 +208,8 @@ def Estado_Optimo_Ceba(id_bovino:int):
         estado_ceba = "Estado optimo"
     else:
         estado_ceba = "Estado no optimo"
-    condb.execute(update(modelo_indicadores).
-                  where(modelo_indicadores.columns.id_bovino == id_bovino).
+    condb.execute(update(modelo_ceba).
+                  where(modelo_ceba.columns.id_bovino == id_bovino).
                   values(estado_optimo_ceba=estado_ceba))
     condb.commit()
 """
@@ -293,9 +291,9 @@ def animal_proposito():
     estado_vendido= condb.execute(select(modelo_bovinos_inventario).
                                   where(modelo_bovinos_inventario.columns.id_estado == 3)).rowcount
     machos= condb.execute(select(modelo_bovinos_inventario).
-                                  where(modelo_bovinos_inventario.columns.id_sexo == 1).filter_by(id_estado=1)).rowcount
+                                  where(modelo_bovinos_inventario.columns.sexo_id == 1).filter_by(id_estado=1)).rowcount
     hembras= condb.execute(select(modelo_bovinos_inventario).
-                                  where(modelo_bovinos_inventario.columns.id_sexo == 2).filter_by(id_estado=1)).rowcount
+                                  where(modelo_bovinos_inventario.columns.sexo_id == 2).filter_by(id_estado=1)).rowcount
     vacas_ordeno=condb.execute(select(modelo_leche).
                                   where(modelo_leche.columns.id_ordeno == 1).filter_by(id_estado=1)).rowcount
     vacas_no_ordeno = condb.execute(select(modelo_leche).

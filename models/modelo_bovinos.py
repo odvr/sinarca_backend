@@ -81,7 +81,8 @@ modelo_leche = Table("produccion_leche", meta, Column("id_leche", Integer, prima
                                   Column("fecha_vida_util",DateTime),
                                   Column("id_ordeno", Integer,ForeignKey("ordeno.id_ordeno")),
                                   Column("promedio_litros", Integer),
-                                  Column("litros_diarios", Integer))
+                                  Column("litros_diarios", Integer),
+                                  Column("id_estado", Integer,ForeignKey("estado.id_estado")))
 
 modelo_tipo_parto = Table("tipo_parto", meta, Column("id_tipo_parto", Integer, primary_key=True),
                                   Column("descri_tipo_parto", String(300)))

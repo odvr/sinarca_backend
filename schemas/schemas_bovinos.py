@@ -87,6 +87,7 @@ class esquema_produccion_leche(BaseModel):
     id_ordeno:int
     promedio_litros:int
     litros_diarios:int
+    id_estado: int
     class Config:
         orm_mode = True
         env_file = ".env"
