@@ -19,13 +19,13 @@ from sqlalchemy.types import Integer, Text, String, DateTime
 modelo_bovinos_inventario = Table("bovinos", meta, Column("id_bovino", Integer, primary_key=True),
                                   Column("fecha_nacimiento", DateTime),
                                   Column("edad", Integer),
-                                  Column("sexo_id", Integer,ForeignKey("sexo.id_sexo")),
+                                  Column("sexo_id", String(300)),
                                   Column("raza", String(300)),
                                   Column("peso", Integer),
                                   Column("marca", String(300)),
-                                  Column("id_proposito", Integer,ForeignKey("proposito.id_proposito")),
-                                  Column("id_mansedumbre", Integer,ForeignKey("mansedumbre.id_mansedumbre")),
-                                  Column("id_estado", Integer,ForeignKey("estado.id_estado")))
+                                  Column("id_proposito", String(300)),
+                                  Column("id_mansedumbre", String(300)),
+                                  Column("id_estado", String(300)))
 """
 modelo de columnas para definir el sexo
 """

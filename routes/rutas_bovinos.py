@@ -57,7 +57,7 @@ def crear_bovinos(esquemaBovinos:Esquema_bovinos):
     bovinos_dic =esquemaBovinos.dict()
     ingreso = modelo_bovinos_inventario.insert().values(bovinos_dic)
     condb.execute(ingreso)
-    condb.commit()
+    #   condb.commit()
     return Response(status_code=HTTP_204_NO_CONTENT)
 
 
@@ -128,7 +128,7 @@ def Edad_Primer_Parto(id_bovino:int):
     condb.execute(update(modelo_leche).
                            where(modelo_leche.columns.id_bovino == id_bovino).
               values(edad_primer_parto=Edad_primer_parto))
-    condb.commit()
+    #condb.commit()
 """
 "para la funcion de Duracion de lactancia se utilizan las librerias datetime 
 la funcion convierte las fechas ingresadas (tipo string) en un formato fecha

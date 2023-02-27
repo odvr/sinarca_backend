@@ -28,7 +28,4 @@ app.add_middleware(
 )
 
 
-
-
-app = FastAPI()
 app.include_router(rutas_bovinos)

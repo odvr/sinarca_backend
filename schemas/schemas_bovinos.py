@@ -12,13 +12,13 @@ class Esquema_bovinos(BaseModel):
     id_bovino : int
     fecha_nacimiento: date
     edad: int
-    sexo_id :int
+    sexo_id :str
     raza : str
     peso: int
     marca :str
-    id_proposito: int
-    id_mansedumbre : int
-    id_estado: int
+    id_proposito: str
+    id_mansedumbre : str
+    id_estado: str
     #Este Config La clase se utiliza para proporcionar configuraciones a Pydantic.
     class Config:
         orm_mode = True
