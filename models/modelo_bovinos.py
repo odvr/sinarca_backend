@@ -4,7 +4,7 @@ el siguiente codigo realiza la creacion de las tablas que se ge
 """
 #librerias requeridas
 #,
-from sqlalchemy import Table,Column
+from sqlalchemy import Table, Column, Date
 #importacion del cong para la conexion con la base de datos
 from config.db  import meta,engine
 from sqlalchemy import ForeignKey
@@ -16,94 +16,61 @@ from sqlalchemy.types import Integer, Text, String, DateTime
  sexo
   
 """
-modelo_bovinos_inventario = Table("bovinos", meta, Column("id_bovino", Integer, primary_key=True),
-                                  Column("fecha_nacimiento", DateTime),
+modelo_bovinos_inventario = Table("bovinos", meta, Column("id_bovino", String(300), primary_key=True),
+                                  Column("fecha_nacimiento", Date),
                                   Column("edad", Integer),
-                                  Column("sexo_id", String(300)),
+                                  Column("sexo", String(300)),
                                   Column("raza", String(300)),
                                   Column("peso", Integer),
                                   Column("marca", String(300)),
-                                  Column("id_proposito", String(300)),
-                                  Column("id_mansedumbre", String(300)),
-                                  Column("id_estado", String(300)))
-"""
-modelo de columnas para definir el sexo
-"""
-
-modelo_sexo = Table("sexo", meta, Column("id_sexo", Integer, primary_key=True),
-                                  Column("descri_sexo", String(300)))
-
-
-"""
-Modelo para el proposito de los animales
-
-"""
-modelo_proposito = Table("proposito", meta, Column("id_proposito", Integer, primary_key=True),
-                                  Column("descri_proposito", String(300)))
-
-
-
-"""
-"""
-modelo_estado = Table("estado", meta, Column("id_estado", Integer, primary_key=True),
-                                  Column("descri_estado", String(300)))
-
-
-modelo_mansedumbre = Table("mansedumbre", meta, Column("id_mansedumbre", Integer, primary_key=True),
-                                  Column("descri_mansedumbre", String(300)))
-
+                                  Column("proposito", String(300)),
+                                  Column("mansedumbre", String(300)),
+                                  Column("estado", String(300)))
 
 modelo_ceba = Table("produccion_ceba", meta, Column("id_ceba", Integer, primary_key=True),
-                            Column("id_bovino", Integer,ForeignKey("bovinos.id_bovino")),
-                            Column("id_proposito", Integer,ForeignKey("proposito.id_proposito")), Column("estado_optimo_ceba", String(300)))
+                            Column("id_bovino", String(300),ForeignKey("bovinos.id_bovino")),
+                            Column("estado_optimo_ceba", String(300)))
 
 
 modelo_levante = Table("produccion_levante", meta, Column("id_levante", Integer, primary_key=True),
-                                  Column("id_bovino", Integer,ForeignKey("bovinos.id_bovino")),
-                                  Column("id_proposito", Integer,ForeignKey("proposito.id_proposito")),
-                                  Column("estado_optimo_levante", String(300)))
+                       Column("id_bovino", String(300), ForeignKey("bovinos.id_bovino")),
+                       Column("estado_optimo_levante", String(300)))
 
 modelo_leche = Table("produccion_leche", meta, Column("id_leche", Integer, primary_key=True),
-                                  Column("fecha_primer_parto", DateTime),
+                                  Column("id_bovino", String(300), ForeignKey("bovinos.id_bovino")),
+                                  Column("fecha_primer_parto", Date),
                                   Column("edad_primer_parto", Integer),
                                   Column("prod_lactancia",Integer),
                                   Column("dura_lactancia",Integer),
-                                  Column("fecha_inicial_ordeno",DateTime),
-                                  Column("fecha_fin_ordeno",DateTime),
+                                  Column("fecha_inicial_ordeno",Date),
+                                  Column("fecha_fin_ordeno",Date),
                                   Column("num_partos",Integer),
-                                  Column("id_proposito", Integer,ForeignKey("proposito.id_proposito")),
-                                  Column("id_bovino", Integer,ForeignKey("bovinos.id_bovino")),
-                                  Column("tipo_parto", Integer,ForeignKey("tipo_parto.id_tipo_parto")),
-                                  Column("datos_prenez", Integer,ForeignKey("datos_prenez.id_datos_prenez")),
-                                  Column("fecha_ultimo_parto",DateTime),
-                                  Column("fecha_ultima_prenez",DateTime),
+                                  Column("tipo_parto", String(300)),
+                                  Column("datos_prenez", String(300)),
+                                  Column("fecha_ultimo_parto",Date),
+                                  Column("fecha_ultima_prenez",Date),
                                   Column("dias_abiertos", Integer),
-                                  Column("fecha_vida_util",DateTime),
-                                  Column("id_ordeno", Integer,ForeignKey("ordeno.id_ordeno")),
+                                  Column("fecha_vida_util",Date),
+                                  Column("ordeno", String(300)),
                                   Column("promedio_litros", Integer),
-                                  Column("litros_diarios", Integer),
-                                  Column("id_estado", Integer,ForeignKey("estado.id_estado")))
+                                  Column("litros_diarios", Integer))
 
-modelo_tipo_parto = Table("tipo_parto", meta, Column("id_tipo_parto", Integer, primary_key=True),
-                                  Column("descri_tipo_parto", String(300)))
-
-modelo_datos_prenez = Table("datos_prenez", meta, Column("id_datos_prenez", Integer, primary_key=True),
-                                  Column("descri_datos_prenez", String(300)))
 
 modelo_datos_muerte = Table("datos_muerte", meta, Column("id_datos_muerte", Integer, primary_key=True),
-                                  Column("id_bovino", Integer,ForeignKey("bovinos.id_bovino")),
-                                  Column("id_estado", Integer,ForeignKey("estado.id_estado")),Column("razon_muerte", String(300)),Column("fecha_muerte", DateTime))
+                                  Column("id_bovino", String(300),ForeignKey("bovinos.id_bovino")),
+                                  Column("razon_muerte", String(300)),
+                                  Column("fecha_muerte", Date))
 
 
 modelo_arbol_genialogico = Table("arbol_genialogico", meta, Column("id_arbol_genialogico", Integer, primary_key=True),
-                                  Column("id_bovino_madre", Integer,ForeignKey("bovinos.id_bovino")),
-                                  Column("id_bovino_padre", Integer,ForeignKey("bovinos.id_bovino")),Column("id_bovino", Integer,ForeignKey("bovinos.id_bovino")),
-
-                                  )
+                                  Column("id_bovino", String(300),ForeignKey("bovinos.id_bovino")),
+                                  Column("id_bovino_madre", Integer),
+                                  Column("id_bovino_padre", Integer))
 """modelo para indicadores"""
 modelo_indicadores = Table("indicadores", meta, Column("id_indicadores", Integer, primary_key=True),
                                   Column("perdida_de_terneros", Integer),
                                   Column("tasa_supervivencia", Integer),
+                                  Column("total_animales", Integer),
                                   Column("vacas_vacias", Integer),
                                   Column("vacas_prenadas", Integer),
                                   Column("animales_levante", Integer),
@@ -114,10 +81,14 @@ modelo_indicadores = Table("indicadores", meta, Column("id_indicadores", Integer
                                   Column("machos", Integer),
                                   Column("hembras", Integer),
                                   Column("vacas_en_ordeno",Integer),
-                                  Column("porcentaje_ordeno", Integer))
-
-modelo_ordeno = Table("ordeno", meta, Column("id_ordeno", Integer, primary_key=True),
-                                  Column("descripcion", String(300)))
+                                  Column("porcentaje_ordeno", Integer),
+                                  Column("animales_rango_edades_0_9", Integer),
+                                  Column("animales_rango_edades_9_12", Integer),
+                                  Column("animales_rango_edades_12_24", Integer),
+                                  Column("animales_rango_edades_24_36", Integer),
+                                  Column("animales_rango_edades_mayor_36", Integer),
+                                  Column("animales_optimos_levante", Integer),
+                                  Column("animales_optimos_ceba", Integer) )
 meta.create_all(engine)
 
 
