@@ -43,7 +43,6 @@ class esquema_produccion_leche(BaseModel):
     id_bovino:str
     prod_lactancia : int
     dura_lactancia :int
-    id_proposito:int
     fecha_primer_parto: date
     edad_primer_parto: int
     fecha_inicial_ordeno : date

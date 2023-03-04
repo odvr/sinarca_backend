@@ -8,6 +8,7 @@ import threading
 from tkinter import INSERT
 
 import sqlalchemy
+from typing import Dict, Any
 from fastapi import APIRouter, Response, status
 from sqlalchemy.engine import cursor, row
 
@@ -17,8 +18,7 @@ from config.db import condb
 #importa el esquema de los bovinos
 from models.modelo_bovinos import modelo_bovinos_inventario, modelo_leche, modelo_levante, \
     modelo_indicadores, modelo_ceba
-from schemas.schemas_bovinos import Esquema_bovinos, esquema_produccion_leche, esquema_produccion_levante, \
-    esquema_produccion_ceba
+from schemas.schemas_bovinos import Esquema_bovinos, esquema_produccion_leche, esquema_produccion_levante,esquema_produccion_ceba
 from sqlalchemy import select, insert, values, update, bindparam, between, join
 from starlette.status import HTTP_204_NO_CONTENT
 
@@ -38,13 +38,27 @@ def inventario_bovino():
     items = condb.execute(modelo_bovinos_inventario.select()).fetchall()
     return items
 
+
+"""
+Lista los datos de la tabla prod leche inventario
+"""
+@rutas_bovinos.get("/listar_prod_leche",
+                    tags=["listar_pro_leche"]
+                   )
+def inventario_prod_leche():
+    itemsLeche = condb.execute(modelo_leche.select()).fetchall()
+    return itemsLeche
+
+
+
 """
 La siguiente funcion retorna un diccionario con la consulta de un ID del la tabla bovinos,
 """
-@rutas_bovinos.get("/listar_bovino/{id}",response_model=Esquema_bovinos
+@rutas_bovinos.get("/listar_bovino/{id_bovino}",  response_model=Esquema_bovinos,
                    )
-def id_inventario_bovino(idbovino:str):
-    consulta = condb.execute(modelo_bovinos_inventario.select().where(modelo_bovinos_inventario.columns.id_bovino == idbovino)).first()
+def id_inventario_bovino(id_bovino:str):
+    consulta = condb.execute(modelo_bovinos_inventario.select().where(modelo_bovinos_inventario.columns.id_bovino == id_bovino)).first()
+    #condb.commit()
     return consulta
 
 
@@ -57,28 +71,45 @@ def crear_bovinos(esquemaBovinos:Esquema_bovinos):
     bovinos_dic =esquemaBovinos.dict()
     ingreso = modelo_bovinos_inventario.insert().values(bovinos_dic)
     condb.execute(ingreso)
-    #   condb.commit()
+    #condb.commit()
     return Response(status_code=HTTP_204_NO_CONTENT)
+
+
+"""
+La siguiente api inserte 
+ 
+"""
+@rutas_bovinos.post("/crear_prod_leche/{fecha_primer_parto}/{id_bovino}/{fecha_inicial_ordeno}/{fecha_fin_ordeno}/{fecha_ultimo_parto}/{fecha_ultima_prenez}/{num_partos}/{tipo_parto}/{datos_prenez}/{ordeno}",status_code=HTTP_204_NO_CONTENT)
+def CrearProdLeche(fecha_primer_parto: date,id_bovino:str,fecha_inicial_ordeno:date,fecha_fin_ordeno:date,fecha_ultimo_parto:date,fecha_ultima_prenez:date,num_partos:int,tipo_parto:str,datos_prenez:str,ordeno:str):
+    ingresopleche = modelo_leche.insert().values(fecha_primer_parto=fecha_primer_parto,id_bovino=id_bovino,fecha_inicial_ordeno=fecha_inicial_ordeno,fecha_fin_ordeno=fecha_fin_ordeno,fecha_ultimo_parto=fecha_ultimo_parto,fecha_ultima_prenez=fecha_ultima_prenez,num_partos=num_partos,tipo_parto=tipo_parto,datos_prenez=datos_prenez,ordeno=ordeno)
+    condb.execute(ingresopleche)
+    return Response(status_code=HTTP_204_NO_CONTENT)
+
+
+
+
+
+
 
 
 
 '''
 La siguiente funcion realiza la actualizacion completa de la tabla de bovinos para cambiar los registros
 '''
-@rutas_bovinos.put("/cambiar_datos_bovino/{idbovino}",response_model=Esquema_bovinos)
-def cambiar_esta_bovino(data_update:Esquema_bovinos,idbovino:str):
+@rutas_bovinos.put("/cambiar_datos_bovino/{id_bovino}",response_model=Esquema_bovinos)
+def cambiar_esta_bovino(data_update:Esquema_bovinos,id_bovino:str):
      condb.execute( modelo_bovinos_inventario.update().values(
          fecha_nacimiento=data_update.fecha_nacimiento, sexo=data_update.sexo, raza=data_update.raza,
           peso=data_update.peso, marca=data_update.marca,proposito=data_update.proposito,
-         mansedumbre=data_update.mansedumbre,estado=data_update.estado).where(modelo_bovinos_inventario.columns.id_bovino == idbovino))
+         mansedumbre=data_update.mansedumbre,estado=data_update.estado).where(modelo_bovinos_inventario.columns.id_bovino == id_bovino))
      # Retorna una consulta con el id actualizado
-     resultado_actualizado =  condb.execute(modelo_bovinos_inventario.select().where(modelo_bovinos_inventario.columns.id_bovino == idbovino)).first()
-     condb.commit()
+     resultado_actualizado =  condb.execute(modelo_bovinos_inventario.select().where(modelo_bovinos_inventario.columns.id_bovino == id_bovino)).first()
+     #condb.commit()
      return resultado_actualizado
 """
 Esta funcion elimina por ID los registros de la tabla de bovinos
 """
-@rutas_bovinos.delete("/eliminar_bovino/{idbovino}",status_code=HTTP_204_NO_CONTENT)
+@rutas_bovinos.delete("/eliminar_bovino/{id_bovino}",status_code=HTTP_204_NO_CONTENT)
 def eliminar_bovino(id_bovino:str):
     condb.execute(modelo_bovinos_inventario.delete().where(modelo_bovinos_inventario.c.id_bovino == id_bovino))
     condb.commit()
@@ -96,11 +127,11 @@ print(ConsultarFechaNacimiento(2))
 """
 
 
-@rutas_bovinos.post("/calcular_edad/{id}",response_model=Esquema_bovinos)
-def calculoEdad(id_bovino_edad:str):
+@rutas_bovinos.post("/calcular_edad/{id_bovino}",response_model=Esquema_bovinos)
+def calculoEdad(id_bovino:str):
     #consulta fecha de nacimmiento con el id_bovino
     consulta_fecha_nacimiento = condb.execute(select(modelo_bovinos_inventario.columns.fecha_nacimiento).where(
-        modelo_bovinos_inventario.columns.id_bovino == id_bovino_edad)).first()
+        modelo_bovinos_inventario.columns.id_bovino == id_bovino)).first()
     #transformaacion de dato a tipo string y luego a tipo date
     fecha_N = consulta_fecha_nacimiento.__str__().split('(').pop(2).split(')').pop(0)
     fecha_N2 = "".join(fecha_N).replace(', ', '/')
@@ -109,10 +140,10 @@ def calculoEdad(id_bovino_edad:str):
     Edad_Animal = (datetime.today().year - fecha_N3.year) * 12 + datetime.today().month - fecha_N3.month
     #actualizacion del campo en la base de datos
     condb.execute(modelo_bovinos_inventario.update().values(edad=Edad_Animal).where(
-        modelo_bovinos_inventario.columns.id_bovino == id_bovino_edad))
+        modelo_bovinos_inventario.columns.id_bovino == id_bovino))
     resultado_actualizado = condb.execute(
-        modelo_bovinos_inventario.select().where(modelo_bovinos_inventario.columns.id_bovino == id_bovino_edad)).first()
-    condb.commit()
+        modelo_bovinos_inventario.select().where(modelo_bovinos_inventario.columns.id_bovino == id_bovino)).first()
+    #condb.commit()
     return resultado_actualizado
 """
 para la funcion de edad al primer parto se utilizan las librerias datetime 
@@ -121,7 +152,7 @@ posteriormente calcula la diferencia en meses entre la fecha del primer parto
 y la fecha de nacimiento para devolver la eeda (en meses) en la que la novilla
  tuvo su primer parto
 """
-@rutas_bovinos.post("/calcular_edad_parto_1/{id}",response_model=esquema_produccion_leche)
+@rutas_bovinos.post("/calcular_edad_parto_1/{id_bovino}")
 def Edad_Primer_Parto(id_bovino:str):
     #consulta de las fecha de primer parto y fecha de nacimiento
     fecha_P,fecha_N = condb.execute(select(modelo_leche.columns.fecha_primer_parto,
@@ -134,7 +165,7 @@ def Edad_Primer_Parto(id_bovino:str):
     condb.execute(update(modelo_leche).
                            where(modelo_leche.columns.id_bovino == id_bovino).
               values(edad_primer_parto=Edad_primer_parto))
-    condb.commit()
+    #condb.commit()
 """
 "para la funcion de Duracion de lactancia se utilizan las librerias datetime 
 la funcion convierte las fechas ingresadas (tipo string) en un formato fecha
@@ -166,7 +197,7 @@ en que dicho animal dejara de ser productivo, posteriormente tambien
 devolvera el tiempo restante para llegar a esa fecha mediante la resta
 del tiempo actual
 """
-@rutas_bovinos.post("/calcular_Edad_Sacrificio/{id}",response_model=esquema_produccion_leche)
+@rutas_bovinos.post("/calcular_Edad_Sacrificio/{id}")
 def Edad_Sacrificio_Lecheras(id_bovino:str):
     #consulta de la fecha de primer parto
     Consulta_P1 = condb.execute(select(modelo_leche.columns.fecha_primer_parto).where(
@@ -249,7 +280,7 @@ de productividad, pues si una vaca tiene mas de 120 dias abiertos, indica
 que no esta teniendo un ternero al año, lo que indica que no esta siendo
 productiva
 """
-@rutas_bovinos.post("/calcular_dias_abiertos/{id}",response_model=esquema_produccion_leche)
+@rutas_bovinos.post("/calcular_dias_abiertos/{id}")
 def Dias_Abiertos(id_bovino:str):
     #consulta fecha ultimo parto y fecha ultima preñez del animal
     fecha_ultimo_p,fecha_ultima_prenez = condb.execute(select(modelo_leche.columns.fecha_ultimo_parto,
@@ -431,8 +462,8 @@ def Rango_Edades():
     condb.execute(update(modelo_indicadores).
                   where(modelo_indicadores.columns.id_indicadores).
                   values(animales_rango_edades_mayor_36=edades_36))
-    condb.commit()
-Rango_Edades()
+    #condb.commit()
+
 def Porcentaje_Optimo_Levante_y_Ceba():
     #join tablas de levante e inventarios
     join_tabla_levante = modelo_bovinos_inventario.join(modelo_levante,modelo_bovinos_inventario.columns.id_bovino == modelo_levante.columns.id_bovino)
