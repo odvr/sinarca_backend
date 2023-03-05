@@ -82,16 +82,18 @@ class esquema_indicadores(BaseModel):
     perdida_de_terneros: int
     tasa_supervivencia: int
     total_animales:int
-    vacas_vacias:int
-    vacas_prenadas:int
+    vacas_prenadas_porcentaje:int
     animales_levante:int
     animales_ceba:int
     animales_leche:int
+    vacas_prenadas:int
+    vacas_vacias:int
     animales_fallecidos:int
     animales_vendidos:int
     machos:int
     hembras:int
     vacas_en_ordeno:int
+    vacas_no_ordeno:int
     porcentaje_ordeno:int
     animales_rango_edades_0_9:int
     animales_rango_edades_9_12:int

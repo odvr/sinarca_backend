@@ -71,7 +71,7 @@ def crear_bovinos(esquemaBovinos:Esquema_bovinos):
     bovinos_dic =esquemaBovinos.dict()
     ingreso = modelo_bovinos_inventario.insert().values(bovinos_dic)
     condb.execute(ingreso)
-    #condb.commit()
+    condb.commit()
     return Response(status_code=HTTP_204_NO_CONTENT)
 
 
@@ -84,13 +84,6 @@ def CrearProdLeche(fecha_primer_parto: date,id_bovino:str,fecha_inicial_ordeno:d
     ingresopleche = modelo_leche.insert().values(fecha_primer_parto=fecha_primer_parto,id_bovino=id_bovino,fecha_inicial_ordeno=fecha_inicial_ordeno,fecha_fin_ordeno=fecha_fin_ordeno,fecha_ultimo_parto=fecha_ultimo_parto,fecha_ultima_prenez=fecha_ultima_prenez,num_partos=num_partos,tipo_parto=tipo_parto,datos_prenez=datos_prenez,ordeno=ordeno)
     condb.execute(ingresopleche)
     return Response(status_code=HTTP_204_NO_CONTENT)
-
-
-
-
-
-
-
 
 
 '''
@@ -119,15 +112,12 @@ def eliminar_bovino(id_bovino:str):
 
 
 """
-La siguiente funcion toma el parametro de codigo del bovino retornando un dato data.time que indica la fecha de nacimiento del bovino
-def ConsultarFechaNacimiento(cod_bovino:int):
-    consulta_fecha_nacimiento = condb.execute(select(modelo_bovinos_inventario.columns.fecha_nacimiento).where(modelo_bovinos_inventario.columns.cod_bovino == cod_bovino)).first()
-    return consulta_fecha_nacimiento
-print(ConsultarFechaNacimiento(2))
+La siguiente funcion consulta la fecha de nacimiento del bovino mediante su id y
+calcula la edad del animal (en meses) utilizando la fecha actual
 """
 
 
-@rutas_bovinos.post("/calcular_edad/{id_bovino}",response_model=Esquema_bovinos)
+@rutas_bovinos.post("/calcular_edad/{id_bovino}")
 def calculoEdad(id_bovino:str):
     #consulta fecha de nacimmiento con el id_bovino
     consulta_fecha_nacimiento = condb.execute(select(modelo_bovinos_inventario.columns.fecha_nacimiento).where(
@@ -141,10 +131,9 @@ def calculoEdad(id_bovino:str):
     #actualizacion del campo en la base de datos
     condb.execute(modelo_bovinos_inventario.update().values(edad=Edad_Animal).where(
         modelo_bovinos_inventario.columns.id_bovino == id_bovino))
-    resultado_actualizado = condb.execute(
-        modelo_bovinos_inventario.select().where(modelo_bovinos_inventario.columns.id_bovino == id_bovino)).first()
-    #condb.commit()
-    return resultado_actualizado
+    condb.commit()
+
+
 """
 para la funcion de edad al primer parto se utilizan las librerias datetime 
 la funcion convierte las fechas ingresadas (tipo string) en un formato fecha
@@ -165,18 +154,19 @@ def Edad_Primer_Parto(id_bovino:str):
     condb.execute(update(modelo_leche).
                            where(modelo_leche.columns.id_bovino == id_bovino).
               values(edad_primer_parto=Edad_primer_parto))
-    #condb.commit()
+    condb.commit()
+
 """
 "para la funcion de Duracion de lactancia se utilizan las librerias datetime 
 la funcion convierte las fechas ingresadas (tipo string) en un formato fecha
-posteriormente calcula la diferencia en dias entre la fecha del ultimo ordeño
-y la fecha del primer ordeño y devuelve la cantidad de dias en que se ordeño 
+posteriormente calcula la diferencia en dias entre la fecha del ultimo ordeno
+y la fecha del primer ordeno y devuelve la cantidad de dias en que se ordeno 
 la vaca
 """
 
-@rutas_bovinos.post("/calcular_Dur_Lac/{id}",response_model=esquema_produccion_leche)
+@rutas_bovinos.post("/calcular_Dur_Lac/{id}")
 def Duracion_Lactancia(id_bovino:str):
-    #consulta de la fecha inicial y final de ordeño
+    #consulta de la fecha inicial y final de ordeno
     fecha_Inicio_O,fecha_Final_O = condb.execute(select(modelo_leche.columns.fecha_inicial_ordeno,
         modelo_leche.columns.fecha_fin_ordeno).where(
         modelo_leche.columns.id_bovino == id_bovino,
@@ -233,7 +223,7 @@ def Estado_Optimo_Levante(id_bovino:str):
     elif peso<140 and edad in range(8,13):
         estado_levante= "Estado NO Optimo, este animal tiene un peso menor a 140 kilos"
     elif peso<140 and edad<8:
-        estado_levante= "Estado NO Optimo, este animal tiene un peso menor a 140 kilos y menos de 8 mese de edad"
+        estado_levante= "Estado NO Optimo, este animal tiene un peso menor a 140 kilos y menos de 8 meses de edad"
     elif peso>=140 and edad<8:
         estado_levante= "Estado NO Optimo, este animal tiene menos de 8 meses de edad"
     else:
@@ -250,7 +240,7 @@ del animal y los compara con los rangos recomendados (peso igual o
 mayor a 350 kg y edad de 24 a 36 meses), delvolviendo asi un string
 que dicta si la condicion es o no optima
 """
-@rutas_bovinos.post("/calcular_Estado_ceba/{id}", response_model=esquema_produccion_ceba)
+@rutas_bovinos.post("/calcular_Estado_ceba/{id}",)
 def Estado_Optimo_Ceba(id_bovino:str):
     # consulta de la edad y peso del animal
     edad,peso = condb.execute(select(modelo_bovinos_inventario.columns.edad,
@@ -277,12 +267,12 @@ def Estado_Optimo_Ceba(id_bovino:str):
 esta funcion calcula los dias abiertos apartir de la diferencia en dias
 entre la fecha de ultimo parto y fecha de ultima prenez, siendo una medida
 de productividad, pues si una vaca tiene mas de 120 dias abiertos, indica 
-que no esta teniendo un ternero al año, lo que indica que no esta siendo
+que no esta teniendo un ternero al ano, lo que indica que no esta siendo
 productiva
 """
 @rutas_bovinos.post("/calcular_dias_abiertos/{id}")
 def Dias_Abiertos(id_bovino:str):
-    #consulta fecha ultimo parto y fecha ultima preñez del animal
+    #consulta fecha ultimo parto y fecha ultima prenez del animal
     fecha_ultimo_p,fecha_ultima_prenez = condb.execute(select(modelo_leche.columns.fecha_ultimo_parto,
         modelo_leche.columns.fecha_ultima_prenez).where(
         modelo_leche.columns.id_bovino == id_bovino,
@@ -298,6 +288,7 @@ def Dias_Abiertos(id_bovino:str):
 """esta funcion determina el porcentaje de animales vivos que
 existen en el hato,para ello utiliza la cantidad de animales vivos,
 muertos y totales"""
+@rutas_bovinos.post("/Calcular_Tasa_Sobrevivencia/{}")
 def Tasa_Sobrevivencia():
     #consulta y seleccion de los animales vivos
     estado_vivo=condb.execute(select(modelo_bovinos_inventario).
@@ -315,10 +306,11 @@ def Tasa_Sobrevivencia():
                   values(tasa_supervivencia=tasa))
     condb.commit()
 """esta funcion calcula en terminos de porcentaje, cuantos terneros
-(animales de 8 a 9 meses) han fallecido, para ello consulta la cantidad 
+(animales de 0 a 6 meses) han fallecido, para ello consulta la cantidad 
 de animales muertos y el total para mediante una regla de 3 obtener
 el porcentaje
 """
+@rutas_bovinos.post("/Calcular_perdida_Terneros/{}")
 def perdida_Terneros():
     #consulta, seleccion y conteo de animales con edad de 0 a 6 meses que se encuentren muertos
    muertos= condb.execute(select(modelo_bovinos_inventario).
@@ -334,153 +326,250 @@ def perdida_Terneros():
                  where(modelo_indicadores.columns.id_indicadores).
                  values(perdida_de_terneros=tasa_perd))
    condb.commit()
-"""esta funcion determina la cantidad de vacas preñadas y vacias
-esto con el  fin de mostrar cuantos vientres estan produciendo en el hato"""
-def vacas_estado_prenez():
-    #join de la tabla de bovinos con la tabla de produccion leche
-    join_tabla = modelo_bovinos_inventario.join(modelo_leche,modelo_bovinos_inventario.columns.id_bovino == modelo_leche.columns.id_bovino)
-    #consulta en la tabla de join de animales con estado de preñez vacia
-    consulta_vacias = condb.execute(select(join_tabla).where(modelo_leche.columns.datos_prenez=="Vacia")).all()
-    #conversion a string y conteo de aquellos con estado vivo
-    vacas_v= consulta_vacias.__str__().count("Vivo")
-    #consulta en la tabla de join de animales con estado de preñez preñada
-    consulta_prenadas=condb.execute(select(join_tabla).where(modelo_leche.columns.datos_prenez=="Preñada")).all()
-    #conversion a string y conteo de aquellos con estado vivo
-    vacas_pren=consulta_prenadas.__str__().count("Vivo")
-    #calculo del total de vacas (preñadas + vacias)
-    totales= vacas_pren + vacas_v
-    #calculo procentaje de vacas vacias
-    vacas_estado_Vacias=(vacas_v/totales)*100
-    #calculo procentaje de vacas preñadas
-    vacas_estado_pren= (vacas_pren/totales)*100
-    #actualizacion de campos
-    condb.execute(update(modelo_indicadores).
-                  where(modelo_indicadores.columns.id_indicadores).
-                  values(vacas_vacias=vacas_estado_Vacias))
-    condb.execute(update(modelo_indicadores).
-                  where(modelo_indicadores.columns.id_indicadores).
-                  values(vacas_prenadas=vacas_estado_pren))
-    condb.commit()
-"""este funcion muestra la cantidad de animales de levante, ceba y
-leche existentes en el hato, ademas de los totales, animales fallecidos,
-vendidos"""
-def animal_proposito():
-    #consulta de total de animales vivos
-    total_animales = condb.execute(select(modelo_bovinos_inventario).
-                              where(modelo_bovinos_inventario.columns.estado=="Vivo")).rowcount
-    #consulta de total de animales vivos con proposito de ceba
-    prop_ceba=condb.execute(select(modelo_bovinos_inventario).
-                              where(modelo_bovinos_inventario.columns.proposito=="Ceba").filter_by(estado="Vivo")).rowcount
-    #consulta de total de animales vivos con proposito de levante
-    prop_levante=condb.execute(select(modelo_bovinos_inventario).
-                              where(modelo_bovinos_inventario.columns.proposito=="Levante").filter_by(estado="Vivo")).rowcount
-    #consulta de total de animales vivos con proposito de leche
-    prop_leche=condb.execute(select(modelo_bovinos_inventario).
-                              where(modelo_bovinos_inventario.columns.proposito=="Leche").filter_by(estado="Vivo")).rowcount
-    #consulta de total de animales muertos
-    estado_muerto = condb.execute(select(modelo_bovinos_inventario).
-                                  where(modelo_bovinos_inventario.columns.estado =="Muerto")).rowcount
-    #consulta de total de animales vendidos
-    estado_vendido= condb.execute(select(modelo_bovinos_inventario).
-                                  where(modelo_bovinos_inventario.columns.estado =="Vendido")).rowcount
-    #consulta de total de animales vivos con sexo macho
-    machos= condb.execute(select(modelo_bovinos_inventario).
-                                  where(modelo_bovinos_inventario.columns.sexo =="Macho").filter_by(estado="Vivo")).rowcount
-    #consulta de total de animales vivos con sexo hembra
-    hembras= condb.execute(select(modelo_bovinos_inventario).
-                                  where(modelo_bovinos_inventario.columns.sexo =="Hembra").filter_by(estado="Vivo")).rowcount
+"""esta funcion determina la cantidad de vacas vacias (no prenadas)
+esto con el  fin de mostrar cuantos vientres NO estan produciendo en el hato"""
+@rutas_bovinos.post("/Calcular_vacas_vacias/{}")
+def vacas_vacias():
     # join de la tabla de bovinos con la tabla de produccion leche
     join_tabla = modelo_bovinos_inventario.join(modelo_leche,
                                                 modelo_bovinos_inventario.columns.id_bovino == modelo_leche.columns.id_bovino)
-    # consulta en la tabla de join de animales en ordeño
-    consulta_ordeno = condb.execute(select(join_tabla).where(modelo_leche.columns.ordeno =="En Ordeño")).all()
-    # conversion a string y conteo de aquellos con estado vivo en ordeño
-    vacas_ordeno=consulta_ordeno.__str__().count("Vivo")
-    #consulta de total de animales que no son ordeñados
-    consulta_NO_ordeno = condb.execute(select(join_tabla).where(modelo_leche.columns.ordeno =="No Ordeño")).all()
-    # conversion a string y conteo de aquellos con estado vivo en ordeño
-    vacas_no_ordeno = consulta_NO_ordeno.__str__().count("Vivo")
-    #porcentaje de vacas en ordeño
-    vacas_ordeno_porcentaje= (vacas_ordeno/(vacas_no_ordeno+vacas_ordeno))*100
+    # consulta en la tabla de join de animales con estado de prenez vacia
+    consulta_vacias = condb.execute(select(join_tabla).where(modelo_leche.columns.datos_prenez == "Vacia")).all()
+    # conversion a string y conteo de aquellos con estado vivo
+    vacas_v = consulta_vacias.__str__().count("Vivo")
+    #actualizacion del campo
+    condb.execute(update(modelo_indicadores).
+                  where(modelo_indicadores.columns.id_indicadores).
+                  values(vacas_vacias=vacas_v))
+    condb.commit()
+"""esta funcion determina la cantidad de vacas no prenadas
+esto con el  fin de mostrar cuantos vientres estan produciendo en el hato"""
+@rutas_bovinos.post("/Calcular_vacas_prenadas/{}")
+def vacas_prenadas():
+    # join de la tabla de bovinos con la tabla de produccion leche
+    join_tabla = modelo_bovinos_inventario.join(modelo_leche,
+                                                modelo_bovinos_inventario.columns.id_bovino == modelo_leche.columns.id_bovino)
+    # consulta en la tabla de join de animales con estado de prenez prenada
+    consulta_prenadas = condb.execute(select(join_tabla).where(modelo_leche.columns.datos_prenez == "Prenada")).all()
+    # conversion a string y conteo de aquellos con estado vivo
+    vacas_pren = consulta_prenadas.__str__().count("Vivo")
+    # actualizacion del campo
+    condb.execute(update(modelo_indicadores).
+                  where(modelo_indicadores.columns.id_indicadores).
+                  values(vacas_prenadas=vacas_pren))
+    condb.commit()
+"""esta funcion calcula el porcentaje de vacas que se encuentran preñadas"""
+@rutas_bovinos.post("/Calcular_vacas_prenadas_porcentaje/{}")
+def vacas_prenadas_porcentaje():
+    prenadas,vacias = condb.execute(select(modelo_indicadores.columns.vacas_prenadas,
+        modelo_indicadores.columns.vacas_vacias).where(
+        modelo_indicadores.columns.id_indicadores,
+        modelo_indicadores.columns.id_indicadores)).first()
+    totales= prenadas + vacias
+    #calculo procentaje de vacas prenadas
+    vacas_estado_pren= (prenadas/totales)*100
+    #actualizacion de campos
+    condb.execute(update(modelo_indicadores).
+                  where(modelo_indicadores.columns.id_indicadores).
+                  values(vacas_prenadas_porcentaje=vacas_estado_pren))
+    condb.commit()
+
+"""estas funciones muestra la cantidad de animales totales, tambien segun su
+proposito, sexo, estado, rango de edades y estado de ordeno"""
+@rutas_bovinos.post("/Calcular_animales_totales/{}")
+def animales_totales():
+    #consulta de total de animales vivos
+    total_animales = condb.execute(select(modelo_bovinos_inventario).
+                              where(modelo_bovinos_inventario.columns.estado=="Vivo")).rowcount
     #actualizacion de campos
     condb.execute(update(modelo_indicadores).
                   where(modelo_indicadores.columns.id_indicadores).
                   values(total_animales=total_animales))
-    condb.execute(update(modelo_indicadores).
-                  where(modelo_indicadores.columns.id_indicadores).
-                  values(animales_levante=prop_levante))
+    condb.commit()
+@rutas_bovinos.post("/Calcular_animales_ceba/{}")
+def animales_ceba():
+    #consulta de total de animales vivos con proposito de ceba
+    prop_ceba=condb.execute(select(modelo_bovinos_inventario).
+                              where(modelo_bovinos_inventario.columns.proposito=="Ceba").filter_by(estado="Vivo")).rowcount
+    #actualizacion de campos
     condb.execute(update(modelo_indicadores).
                   where(modelo_indicadores.columns.id_indicadores).
                   values(animales_ceba=prop_ceba))
+    condb.commit()
+@rutas_bovinos.post("/Calcular_animales_levante/{}")
+def animales_levante():
+    #consulta de total de animales vivos con proposito de levante
+    prop_levante=condb.execute(select(modelo_bovinos_inventario).
+                              where(modelo_bovinos_inventario.columns.proposito=="Levante").filter_by(estado="Vivo")).rowcount
+    #actualizacion de campos
+    condb.execute(update(modelo_indicadores).
+                  where(modelo_indicadores.columns.id_indicadores).
+                  values(animales_levante=prop_levante))
+    condb.commit()
+@rutas_bovinos.post("/Calcular_animales_leche/{}")
+def animales_leche():
+    #consulta de total de animales vivos con proposito de leche
+    prop_leche=condb.execute(select(modelo_bovinos_inventario).
+                              where(modelo_bovinos_inventario.columns.proposito=="Leche").filter_by(estado="Vivo")).rowcount
+    #actualizacion de campos
     condb.execute(update(modelo_indicadores).
                   where(modelo_indicadores.columns.id_indicadores).
                   values(animales_leche=prop_leche))
+    condb.commit()
+@rutas_bovinos.post("/Calcular_animales_muertos/{}")
+def animales_muertos():
+    #consulta de total de animales muertos
+    estado_muerto = condb.execute(select(modelo_bovinos_inventario).
+                                  where(modelo_bovinos_inventario.columns.estado =="Muerto")).rowcount
+    #actualizacion de campos
     condb.execute(update(modelo_indicadores).
                   where(modelo_indicadores.columns.id_indicadores).
                   values(animales_fallecidos=estado_muerto))
+    condb.commit()
+@rutas_bovinos.post("/Calcular_animales_vendidos/{}")
+def animales_vendidos():
+    #consulta de total de animales vendidos
+    estado_vendido= condb.execute(select(modelo_bovinos_inventario).
+                                  where(modelo_bovinos_inventario.columns.estado =="Vendido")).rowcount
+    #actualizacion de campos
     condb.execute(update(modelo_indicadores).
                   where(modelo_indicadores.columns.id_indicadores).
                   values(animales_vendidos=estado_vendido))
+    condb.commit()
+@rutas_bovinos.post("/Calcular_animales_machos/{}")
+def animales_sexo_macho():
+    #consulta de total de animales vivos con sexo macho
+    machos= condb.execute(select(modelo_bovinos_inventario).
+                     where(modelo_bovinos_inventario.columns.sexo =="Macho").filter_by(estado="Vivo")).rowcount
+    #actualizacion de campos
     condb.execute(update(modelo_indicadores).
                   where(modelo_indicadores.columns.id_indicadores).
                   values(machos=machos))
+    condb.commit()
+@rutas_bovinos.post("/Calcular_animales_hembras/{}")
+def animales_sexo_hembra():
+    #consulta de total de animales vivos con sexo hembra
+    hembras= condb.execute(select(modelo_bovinos_inventario).
+                      where(modelo_bovinos_inventario.columns.sexo =="Hembra").filter_by(estado="Vivo")).rowcount
+    #actualizacion de campos
     condb.execute(update(modelo_indicadores).
                   where(modelo_indicadores.columns.id_indicadores).
                   values(hembras=hembras))
+    condb.commit()
+@rutas_bovinos.post("/Calcular_animales_ordeno/{}")
+def animales_en_ordeno():
+    #join de la tabla de bovinos con la tabla de produccion leche
+    join_tabla = modelo_bovinos_inventario.join(modelo_leche,
+                                                modelo_bovinos_inventario.columns.id_bovino == modelo_leche.columns.id_bovino)
+    # consulta en la tabla de join de animales en ordeno
+    consulta_ordeno = condb.execute(select(join_tabla).where(modelo_leche.columns.ordeno =="Si")).all()
+    # conversion a string y conteo de aquellos con estado vivo en ordeno
+    vacas_ordeno=consulta_ordeno.__str__().count("Vivo")
+    #actualizacion de campos
     condb.execute(update(modelo_indicadores).
                   where(modelo_indicadores.columns.id_indicadores).
                   values(vacas_en_ordeno=vacas_ordeno))
+    condb.commit()
+@rutas_bovinos.post("/Calcular_animales_no_ordeno/{}")
+def animales_no_ordeno():
+    #join de la tabla de bovinos con la tabla de produccion leche
+    join_tabla = modelo_bovinos_inventario.join(modelo_leche,
+                            modelo_bovinos_inventario.columns.id_bovino == modelo_leche.columns.id_bovino)
+    #consulta de total de animales que no son ordenados
+    consulta_NO_ordeno = condb.execute(select(join_tabla).where(modelo_leche.columns.ordeno =="No")).all()
+    # conversion a string y conteo de aquellos con estado vivo en no ordeno
+    vacas_no_ordeno = consulta_NO_ordeno.__str__().count("Vivo")
+    #actualizacion de campos
+    condb.execute(update(modelo_indicadores).
+                  where(modelo_indicadores.columns.id_indicadores).
+                  values(vacas_no_ordeno=vacas_no_ordeno))
+    condb.commit()
+@rutas_bovinos.post("/Calcular_porcentaje_ordeno/{}")
+def porcentaje_ordeno():
+    #consulta y conteo de animales ordenados y no ordenados
+    ordeno,no_ordeno = condb.execute(select(modelo_indicadores.columns.vacas_en_ordeno,
+        modelo_indicadores.columns.vacas_no_ordeno).where(
+        modelo_indicadores.columns.id_indicadores,
+        modelo_indicadores.columns.id_indicadores)).first()
+    #porcentaje de vacas en ordeno
+    vacas_ordeno_porcentaje= (ordeno/(no_ordeno+ordeno))*100
+    #actualizacion de campos
     condb.execute(update(modelo_indicadores).
                   where(modelo_indicadores.columns.id_indicadores).
                   values(porcentaje_ordeno=vacas_ordeno_porcentaje))
     condb.commit()
-def Rango_Edades():
-    #consulta de animales (cantidad) segun rango de edades
+@rutas_bovinos.post("/Calcular_animales_edad_0_9/{}")
+def animales_edad_0_9():
+    #consulta y conteo de animales con edades entre 0 a 9 meses
     edades_0_9 = condb.execute(select(modelo_bovinos_inventario).
                               where(between(modelo_bovinos_inventario.columns.edad,0,9)).filter_by(estado="Vivo")).rowcount
+    #actualizacion de campos
+    condb.execute(update(modelo_indicadores).
+                  where(modelo_indicadores.columns.id_indicadores).
+                  values(animales_rango_edades_0_9=edades_0_9))
+    condb.commit()
+@rutas_bovinos.post("/Calcular_animales_edad_9_12/{}")
+def animales_edad_9_12():
+    #consulta y conteo de animales con edades entre 10 a 12 meses
     edades_9_12 = condb.execute(select(modelo_bovinos_inventario).
                               where(between(modelo_bovinos_inventario.columns.edad,10,12)).filter_by(estado="Vivo")).rowcount
+    #actualizacion de campos
+    condb.execute(update(modelo_indicadores).
+                  where(modelo_indicadores.columns.id_indicadores).
+                  values(animales_rango_edades_9_12=edades_9_12))
+    condb.commit()
+@rutas_bovinos.post("/Calcular_animales_edad_12_24/{}")
+def animales_edad_12_24():
+    #consulta y conteo de animales con edades entre 13 a 24 meses
     edades_12_24 = condb.execute(select(modelo_bovinos_inventario).
                               where(between(modelo_bovinos_inventario.columns.edad,13,24)).filter_by(estado="Vivo")).rowcount
+    #actualizacion de campos
+    condb.execute(update(modelo_indicadores).
+                  where(modelo_indicadores.columns.id_indicadores).
+                  values(animales_rango_edades_12_24=edades_12_24))
+    condb.commit()
+@rutas_bovinos.post("/Calcular_animales_edad_24_36/{}")
+def animales_edad_24_36():
+    #consulta y conteo de animales con edades entre 25 a 36 meses
     edades_24_36 = condb.execute(select(modelo_bovinos_inventario).
                               where(between(modelo_bovinos_inventario.columns.edad,25,36)).filter_by(estado="Vivo")).rowcount
+    #actualizacion de campos
+    condb.execute(update(modelo_indicadores).
+                  where(modelo_indicadores.columns.id_indicadores).
+                  values(animales_rango_edades_24_36=edades_24_36))
+    condb.commit()
+@rutas_bovinos.post("/Calcular_animales_edad_mayor_36/{}")
+def animales_edad_mayor_a_36():
+    #consulta y conteo de animales con edades igual o mayor a 37 meses
     edades_36 = condb.execute(select(modelo_bovinos_inventario).
                                  where(between(modelo_bovinos_inventario.columns.edad,37,500)).filter_by(estado="Vivo")).rowcount
     #actualizacion de campos
     condb.execute(update(modelo_indicadores).
                   where(modelo_indicadores.columns.id_indicadores).
-                  values(animales_rango_edades_0_9=edades_0_9))
-    condb.execute(update(modelo_indicadores).
-                  where(modelo_indicadores.columns.id_indicadores).
-                  values(animales_rango_edades_9_12=edades_9_12))
-    condb.execute(update(modelo_indicadores).
-                  where(modelo_indicadores.columns.id_indicadores).
-                  values(animales_rango_edades_12_24=edades_12_24))
-    condb.execute(update(modelo_indicadores).
-                  where(modelo_indicadores.columns.id_indicadores).
-                  values(animales_rango_edades_24_36=edades_24_36))
-    condb.execute(update(modelo_indicadores).
-                  where(modelo_indicadores.columns.id_indicadores).
                   values(animales_rango_edades_mayor_36=edades_36))
-    #condb.commit()
-
-def Porcentaje_Optimo_Levante_y_Ceba():
+    condb.commit()
+@rutas_bovinos.post("/Calcular_Animales_Optimo_Levante/{}")
+def Animales_Optimo_Levante():
     #join tablas de levante e inventarios
     join_tabla_levante = modelo_bovinos_inventario.join(modelo_levante,modelo_bovinos_inventario.columns.id_bovino == modelo_levante.columns.id_bovino)
     #consulta a la tabla join de animales con estado optimo
     consulta_estado_levante = condb.execute(select(join_tabla_levante).where(modelo_levante.columns.estado_optimo_levante == "Estado Optimo")).all()
     #conversion a string y conteo de aquellos con estado vivo
     levante_optimo= consulta_estado_levante.__str__().count("Vivo")
-    #join tablas de ceba e inventarios
-    join_tabla_ceba = modelo_bovinos_inventario.join(modelo_ceba,modelo_bovinos_inventario.columns.id_bovino == modelo_ceba.columns.id_bovino)
-    #consulta a la tabla join de animales con estado optimo
-    consulta_estado_ceba = condb.execute(select(join_tabla_levante).where(modelo_ceba.columns.estado_optimo_ceba == "Estado Optimo")).all()
-    # conversion a string y conteo de aquellos con estado vivo
-    ceba_optimo = consulta_estado_ceba.__str__().count("Vivo")
     #actualizacion de campos
     condb.execute(update(modelo_indicadores).
                   where(modelo_indicadores.columns.id_indicadores).
                   values(animales_optimos_levante=levante_optimo))
+    condb.commit()
+@rutas_bovinos.post("/Calcular_Animales_Optimo_Ceba/{}")
+def Animales_Optimo_Ceba():
+    #join tablas de ceba e inventarios
+    join_tabla_ceba = modelo_bovinos_inventario.join(modelo_ceba,modelo_bovinos_inventario.columns.id_bovino == modelo_ceba.columns.id_bovino)
+    #consulta a la tabla join de animales en ceba con estado optimo
+    consulta_estado_ceba = condb.execute(select(join_tabla_ceba).where(modelo_ceba.columns.estado_optimo_ceba == "Estado Optimo")).all()
+    # conversion a string y conteo de aquellos con estado vivo
+    ceba_optimo = consulta_estado_ceba.__str__().count("Vivo")
+    #actualizacion de campos
     condb.execute(update(modelo_indicadores).
                   where(modelo_indicadores.columns.id_indicadores).
                   values(animales_optimos_ceba=ceba_optimo))
