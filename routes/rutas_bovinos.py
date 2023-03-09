@@ -24,7 +24,6 @@ from schemas.schemas_bovinos import Esquema_bovinos, esquema_produccion_leche, e
     esquema_produccion_ceba
 from sqlalchemy import select, insert, values, update, bindparam, between, join, func
 from starlette.status import HTTP_204_NO_CONTENT
-import apply
 from sqlalchemy.orm import query
 
 from datetime import date, datetime, timedelta, time

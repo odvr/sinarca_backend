@@ -32,8 +32,8 @@ class esquema_produccion_ceba(BaseModel):
         orm_mode = True
         env_file = ".env"
 class esquema_produccion_levante(BaseModel):
-    id_levante :int
-    id_bovino :str
+    id_levante:int
+    id_bovino:str
     estado_optimo_levante : str
     class Config:
         orm_mode = True
