@@ -6,18 +6,10 @@ Librerias requeridas
 '''
 
 import logging
-import os.path
-import os
-import sqlalchemy
-from typing import Dict, Any
-from fastapi import APIRouter, Response, status
-from sqlalchemy.engine import cursor, row
+from fastapi import APIRouter, Response
 
 # importa la conexion de la base de datos
-
 from config.db import condb, session
-
-
 # importa el esquema de los bovinos
 from models.modelo_bovinos import modelo_bovinos_inventario, modelo_leche, modelo_levante, \
     modelo_indicadores, modelo_ceba
@@ -25,8 +17,7 @@ from schemas.schemas_bovinos import Esquema_bovinos, esquema_produccion_leche, e
     esquema_produccion_ceba
 from sqlalchemy import select, insert, values, update, bindparam, between, join, func
 from starlette.status import HTTP_204_NO_CONTENT
-from sqlalchemy.orm import query
-from datetime import date, datetime, timedelta, time
+from datetime import date, datetime, timedelta
 
 
 # Configuracion de las rutas para fash api
@@ -175,7 +166,6 @@ async def CrearProdLeche(fecha_primer_parto: date, id_bovino: str, fecha_inicial
         condb.execute(ingresopleche)
         condb.commit()
 
-
     except Exception as e:
         logger.error(f'Error al Crear Bovino para la tabla de Produccion de Leche: {e}')
         raise
@@ -264,12 +254,7 @@ async def vacas_vacias():
     finally:
         session.close()
 
-    return consulta_vacias
-
-
-
-
-
+    #return consulta_vacias
 
 """
 La siguiente funcion consulta la fecha de nacimiento del bovino mediante su id y
@@ -277,6 +262,7 @@ calcula la edad del animal (en meses) utilizando la fecha actual
 """
 @rutas_bovinos.post("/calcular_edad")
 def calculoEdad():
+ try:
     # Realiza la consulta general de la tabla de bovinos
     consulta_fecha_nacimiento = condb.execute(modelo_bovinos_inventario.select()).fetchall()
     #Recorre los campos de la consulta
@@ -290,9 +276,14 @@ def calculoEdad():
         # actualizacion del campo en la base de datos tomando la variable ID
         condb.execute(modelo_bovinos_inventario.update().values(edad=Edad_Animal).where(
             modelo_bovinos_inventario.columns.id_bovino == id ))
+        logger.info(f'Funcion calculo Edad  {Edad_Animal} ')
         condb.commit()
-
-
+ except Exception as e:
+     logger.error(f'Error Funcion calculo Edad: {e}')
+     raise
+ finally:
+    condb.close()
+        #return Edad_Animal
 
 
 
@@ -304,25 +295,35 @@ y la fecha de nacimiento para devolver la eeda (en meses) en la que la novilla
  tuvo su primer parto
 """
 
-
-@rutas_bovinos.post("/calcular_edad_parto_1/{id_bovino}")
-def Edad_Primer_Parto(id_bovino: str):
-    # consulta de las fecha de primer parto y fecha de nacimiento
-    fecha_P, fecha_N = session.query \
-        (modelo_leche.c.fecha_primer_parto,
-         modelo_bovinos_inventario.c.fecha_nacimiento). \
-        where(modelo_leche.c.id_bovino == id_bovino,
-              modelo_bovinos_inventario.c.id_bovino == id_bovino).first()
-    # calculo de la edad al primer parto
-    Edad_primer_parto = (fecha_P.year - fecha_N.year) * 12 + fecha_P.month - fecha_N.month
-    # actualizacin del campo
-    session.execute(update(modelo_leche).
-                    where(modelo_leche.c.id_bovino == id_bovino).
-                    values(edad_primer_parto=Edad_primer_parto))
-    session.commit()
-    return Edad_primer_parto
-
-
+@rutas_bovinos.post("/calcular_edad_parto_1")
+def Edad_Primer_Parto():
+  try:
+    # join de las tablas de leche y bovinos con los campos requeridos
+    consulta_global = session.query(modelo_bovinos_inventario.c.id_bovino,
+                      modelo_bovinos_inventario.c.fecha_nacimiento, modelo_leche.c.fecha_primer_parto). \
+        join(modelo_leche, modelo_bovinos_inventario.c.id_bovino == modelo_leche.c.id_bovino).all()
+    # Recorre los campos de la consulta
+    for i in consulta_global:
+        # Toma el ID del bovino para calcular la la edad del primer parto de cada animal
+        id = i[0]
+        # Toma la fecha de nacimiento del animal en este caso es el campo 1
+        fecha_nacimiento = i[1]
+        # Toma la fecha de primer parto del animal en este caso es el campo 2
+        fecha_primer_parto = i[2]
+        # calculo de la edad al primer parto
+        Edad_primer_parto = (fecha_primer_parto.year - fecha_nacimiento.year) * 12 +\
+                        fecha_primer_parto.month - fecha_nacimiento.month
+    # actualizacion del campo
+        condb.execute(modelo_leche.update().values(edad_primer_parto=Edad_primer_parto).where(
+          modelo_leche.columns.id_bovino == id))
+        logger.info(f'Funcion Edad_Primer_Parto {Edad_primer_parto} ')
+        condb.commit()
+  except Exception as e:
+    logger.error(f'Error Funcion Edad_Primer_Parto: {e}')
+    raise
+  finally:
+      condb.close()
+        #return Edad_primer_parto
 """
 "para la funcion de Duracion de lactancia se utilizan las librerias datetime 
 la funcion convierte las fechas ingresadas (tipo string) en un formato fecha
@@ -332,25 +333,33 @@ la vaca
 """
 
 
-@rutas_bovinos.post("/calcular_Dur_Lac/{id}")
-def Duracion_Lactancia(id_bovino: str):
-    # consulta de la fecha inicial y final de ordeno
-    fecha_Inicio_O, fecha_Final_O = session.query \
-        (modelo_leche.c.fecha_inicial_ordeno,
-         modelo_leche.c.fecha_fin_ordeno). \
-        where(modelo_bovinos_inventario.c.id_bovino == id_bovino,
-              modelo_bovinos_inventario.c.id_bovino == id_bovino).first()
+@rutas_bovinos.post("/calcular_Dur_Lac")
+def Duracion_Lactancia():
+  try:
+    #consulta de fecha de incio de ordeno y fecha final de ordeno
+    consulta_fechas = condb.execute(modelo_leche.select()).fetchall()
+    # Recorre los campos de la consulta
+    for i in consulta_fechas:
+        # Toma el ID del bovino para calcular la duracion de lactancia de cada animal
+        id = i[1]
+        # Toma la fecha de inicio de ordeno del animal en este caso es el campo 6
+        fecha_inicial_ordeno = i[6]
+        # Toma la fecha final de ordeno del animal en este caso es el campo 7
+        fecha_fin_ordeno = i[7]
     # calculo de la duracion de la lactancia
-    Duracion_Lac = (fecha_Final_O.year - fecha_Inicio_O.year) * 360 + \
-                   (fecha_Final_O.month - fecha_Inicio_O.month) * 30
+        Duracion_Lac = (fecha_fin_ordeno.year - fecha_inicial_ordeno.year) * 360 + \
+                   (fecha_fin_ordeno.month - fecha_inicial_ordeno.month) * 30
     # actualizacion del campo
-    session.execute(update(modelo_leche).
-                    where(modelo_leche.c.id_bovino == id_bovino).
-                    values(dura_lactancia=Duracion_Lac))
-    session.commit()
-    return Duracion_Lac
-
-
+        condb.execute(modelo_leche.update().values(dura_lactancia=Duracion_Lac).where(
+          modelo_leche.columns.id_bovino == id))
+        logger.info(f'Funcion Duracion_Lactancia {Duracion_Lac} ')
+        condb.commit()
+  except Exception as e:
+    logger.error(f'Error Funcion Duracion_Lactancia: {e}')
+    raise
+  finally:
+      condb.close()
+        #return Duracion_Lac
 """
 esta funcion recibe como parametro la fecha del primer parto y
 hace uso de la lidbreria datatime ( timedelta),primero convierte 
@@ -362,25 +371,30 @@ del tiempo actual
 """
 
 
-@rutas_bovinos.post("/calcular_Edad_Sacrificio/{id}")
-def Edad_Sacrificio_Lecheras(id_bovino: str):
+@rutas_bovinos.post("/calcular_Edad_Sacrificio")
+def Edad_Sacrificio_Lecheras():
+  try:
     # consulta de la fecha de primer parto
-    Consulta_P1 = session.query \
-        (modelo_leche.c.fecha_primer_parto). \
-        where(modelo_leche.c.id_bovino == id_bovino).first()
-    # conversion de la fecha a tipo string y luago a tipo date
-    fecha_P = Consulta_P1.__str__().split('(').pop(2).split(')').pop(0)
-    fecha_P1 = "".join(fecha_P).replace(', ', '/')
-    fecha_Parto_1 = datetime.strptime(fecha_P1, "%Y/%m/%d")
-    # calculo de la vida util mediante la suma del promedio de vida util con la fecha de parto
-    fecha_Vida_Util = fecha_Parto_1 + timedelta(2169)
-    # actualizacion del campo
-    session.execute(update(modelo_leche).
-                    where(modelo_leche.c.id_bovino == id_bovino).
-                    values(fecha_vida_util=fecha_Vida_Util))
-    session.commit()
-    return fecha_Vida_Util
-
+    Consulta_P1 = condb.execute(modelo_leche.select()).fetchall()
+    # Recorre los campos de la consulta
+    for i in Consulta_P1:
+        # Toma el ID del bovino para calcular la edad de vida util
+        id = i[1]
+        # Toma la fecha de primer parto del animal en este caso es el campo 2
+        fecha_Parto_1 = i[2]
+     # calculo de la vida util mediante la suma del promedio de vida util con la fecha de parto
+        fecha_Vida_Util = fecha_Parto_1 + timedelta(2169)
+        # actualizacion del campo
+        condb.execute(modelo_leche.update().values(fecha_vida_util=fecha_Vida_Util).where(
+          modelo_leche.columns.id_bovino == id))
+        logger.info(f'Funcion Edad_Sacrificio_Lecheras {fecha_Vida_Util} ')
+        condb.commit()
+  except Exception as e:
+    logger.error(f'Error Funcion Edad_Sacrificio_Lecheras: {e}')
+    raise
+  finally:
+      condb.close()
+        #return fecha_Vida_Util
 
 """
 la siguiente funcion determina si la condicion de un animal para
@@ -391,32 +405,40 @@ que dicta si la condicion es o no optima
 """
 
 
-@rutas_bovinos.post("/calcular_Estado_levante/{id}")
-def Estado_Optimo_Levante(id_bovino: str):
-    # consulta de la edad y peso del animal
-    edad, peso = session.query \
-        (modelo_bovinos_inventario.c.edad,
-         modelo_bovinos_inventario.c.peso). \
-        where(modelo_bovinos_inventario.c.id_bovino == id_bovino,
-              modelo_bovinos_inventario.c.id_bovino == id_bovino).first()
-    # bucle if que determina si cumple con el estado optimo o no y el porque no cumple
-    if peso >= 140 and edad in range(8, 13):
-        estado_levante = "Estado Optimo"
-    elif peso < 140 and edad in range(8, 13):
-        estado_levante = "Estado NO Optimo, este animal tiene un peso menor a 140 kilos"
-    elif peso < 140 and edad < 8:
-        estado_levante = "Estado NO Optimo, este animal tiene un peso menor a 140 kilos y menos de 8 meses de edad"
-    elif peso >= 140 and edad < 8:
-        estado_levante = "Estado NO Optimo, este animal tiene menos de 8 meses de edad"
-    else:
-        estado_levante = "Estado NO Optimo, este animal tiene una edad mayor a 12 meses, considera pasarlo a ceba"
-    # actualizacion del campo
-    session.execute(update(modelo_levante).
-                    where(modelo_levante.c.id_bovino == id_bovino).
-                    values(estado_optimo_levante=estado_levante))
-    session.commit()
-    return estado_levante
-
+@rutas_bovinos.post("/calcular_Estado_levante")
+def Estado_Optimo_Levante():
+  try:
+    consulta_levante = condb.execute(modelo_bovinos_inventario.select()).fetchall()
+    # Recorre los campos de la consulta
+    for i in consulta_levante:
+        # Toma el ID del bovino para calcular su estado optimo en este caso es el campo 0
+        id = i[0]
+        # Toma la edad del animal en este caso es el campo 2
+        edad = i[2]
+        # Toma el peso del animal en este caso es el campo 5
+        peso = i[5]
+        # bucle if que determina si cumple con el estado optimo o no y el porque no cumple
+        if peso >= 140 and edad in range(8, 13):
+            estado_levante = "Estado Optimo"
+        elif peso < 140 and edad in range(8, 13):
+            estado_levante = "Estado NO Optimo, este animal tiene un peso menor a 140 kilos"
+        elif peso < 140 and edad < 8:
+            estado_levante = "Estado NO Optimo, este animal tiene un peso menor a 140 kilos y menos de 8 meses de edad"
+        elif peso >= 140 and edad < 8:
+            estado_levante = "Estado NO Optimo, este animal tiene menos de 8 meses de edad"
+        else:
+            estado_levante = "Estado NO Optimo, este animal tiene una edad mayor a 12 meses, considera pasarlo a ceba"
+        #actualizacion del campo
+        condb.execute(modelo_levante.update().values(estado_optimo_levante=estado_levante).\
+                      where(modelo_levante.columns.id_bovino == id))
+        logger.info(f'Funcion Estado_Optimo_Levante {estado_levante} ')
+        condb.commit()
+  except Exception as e:
+    logger.error(f'Error Funcion Estado_Optimo_Levante: {e}')
+    raise
+  finally:
+      condb.close()
+         # return estado_levante
 
 """
 la siguiente funcion determina si la condicion de un animal para
@@ -427,32 +449,41 @@ que dicta si la condicion es o no optima
 """
 
 
-@rutas_bovinos.post("/calcular_Estado_ceba/{id}", )
-def Estado_Optimo_Ceba(id_bovino: str):
-    # consulta de la edad y peso del animal
-    edad, peso = session.query \
-        (modelo_bovinos_inventario.c.edad,
-         modelo_bovinos_inventario.c.peso). \
-        where(modelo_bovinos_inventario.c.id_bovino == id_bovino,
-              modelo_bovinos_inventario.c.id_bovino == id_bovino).first()
+@rutas_bovinos.post("/calcular_Estado_ceba")
+def Estado_Optimo_Ceba():
+  try:
+    consulta_levante = condb.execute(modelo_bovinos_inventario.select()).fetchall()
+    # Recorre los campos de la consulta
+    for i in consulta_levante:
+        # Toma el ID del bovino para calcular su estado optimo en este caso es el campo 0
+        id = i[0]
+        # Toma la edad del animal en este caso es el campo 2
+        edad = i[2]
+        # Toma el peso del animal en este caso es el campo 5
+        peso = i[5]
     # bucle if que determina si cumple con el estado optimo o no y el porque no cumple
-    if peso >= 350 and edad in range(24, 37):
-        estado_ceba = "Estado Optimo"
-    elif peso < 350 and edad in range(24, 37):
-        estado_ceba = "Estado NO Optimo, este animal tiene un peso menor a 350 kilos"
-    elif peso >= 350 and edad < 24:
-        estado_ceba = "Estado NO Optimo, este animal tiene menos de 24 meses de edad"
-    elif peso < 350 and edad < 24:
-        estado_ceba = "Estado NO Optimo, este animal tiene menos de 24 meses de edad y menos de 350 kilos"
-    else:
-        estado_ceba = "Estado NO Optimo, este animal tiene una edad mayor a 36 meses"
+        if peso >= 350 and edad in range(24, 37):
+           estado_ceba = "Estado Optimo"
+        elif peso < 350 and edad in range(24, 37):
+           estado_ceba = "Estado NO Optimo, este animal tiene un peso menor a 350 kilos"
+        elif peso >= 350 and edad < 24:
+            estado_ceba = "Estado NO Optimo, este animal tiene menos de 24 meses de edad"
+        elif peso < 350 and edad < 24:
+            estado_ceba = "Estado NO Optimo, este animal tiene menos de 24 meses de edad y menos de 350 kilos"
+        else:
+            estado_ceba = "Estado NO Optimo, este animal tiene una edad mayor a 36 meses"
         # actualizacion del campo
-    session.execute(update(modelo_ceba).
-                    where(modelo_ceba.c.id_bovino == id_bovino).
-                    values(estado_optimo_ceba=estado_ceba))
-    session.commit()
-    return estado_ceba
-
+    # actualizacion del campo
+        condb.execute(modelo_ceba.update().values(estado_optimo_ceba=estado_ceba). \
+                  where(modelo_ceba.columns.id_bovino == id))
+        logger.info(f'Funcion Estado_Optimo_Ceba {estado_ceba} ')
+        condb.commit()
+  except Exception as e:
+    logger.error(f'Error Funcion Estado_Optimo_Ceba: {e}')
+    raise
+  finally:
+      condb.close()
+       # return estado_ceba
 
 """
 esta funcion calcula los dias abiertos apartir de la diferencia en dias
@@ -463,33 +494,43 @@ productiva
 """
 
 
-@rutas_bovinos.post("/calcular_dias_abiertos/{id}")
-def Dias_Abiertos(id_bovino: str):
-    # consulta fecha ultimo parto y fecha ultima prenez del animal
-    fecha_ultimo_p, fecha_ultima_prenez = session.query \
-        (modelo_leche.c.fecha_ultimo_parto,
-         modelo_leche.c.fecha_ultima_prenez). \
-        where(modelo_leche.c.id_bovino == id_bovino,
-              modelo_leche.c.id_bovino == id_bovino).first()
+@rutas_bovinos.post("/calcular_dias_abiertos")
+def Dias_Abiertos():
+  try:
+    # consulta a la tabla
+    Consulta_fechas = condb.execute(modelo_leche.select()).fetchall()
+    # Recorre los campos de la consulta
+    for i in Consulta_fechas:
+        # Toma el ID del bovino para calcular la variable
+        id = i[1]
+        # Toma la fecha de ultimmo parto del animal en este caso es el campo 11
+        fecha_ultimo_p = i[11]
+        # Toma la fecha de ultima prenez del animal en este caso es el campo 12
+        fecha_ultima_prenez = i[12]
     # calculo de los dias entre las dos fechas (dias abiertos)
-    Dias_A = (fecha_ultima_prenez.year - fecha_ultimo_p.year) * 360 + (
+        Dias_A = (fecha_ultima_prenez.year - fecha_ultimo_p.year) * 360 + (
                 fecha_ultima_prenez.month - fecha_ultimo_p.month) * 30 + \
              (fecha_ultima_prenez.day - fecha_ultimo_p.day)
     # actualizacion del campo
-    session.execute(update(modelo_leche).
-                    where(modelo_leche.c.id_bovino == id_bovino).
-                    values(dias_abiertos=Dias_A))
-    session.commit()
-    return Dias_A
-
+        condb.execute(modelo_leche.update().values(dias_abiertos=Dias_A).\
+                      where(modelo_leche.columns.id_bovino == id))
+        logger.info(f'Funcion Dias_Abiertos {Dias_A} ')
+        condb.commit()
+  except Exception as e:
+    logger.error(f'Error Funcion Dias_Abiertos: {e}')
+    raise
+  finally:
+      condb.close()
+        #return Dias_A
 
 """esta funcion determina el porcentaje de animales vivos que
 existen en el hato,para ello utiliza la cantidad de animales vivos,
 muertos y totales"""
 
 
-@rutas_bovinos.post("/Calcular_Tasa_Sobrevivencia/{}")
+@rutas_bovinos.post("/Calcular_Tasa_Sobrevivencia")
 def Tasa_Sobrevivencia():
+  try:
     # consulta y seleccion de los animales vivos
     estado_vivo = session.query(modelo_bovinos_inventario). \
         filter(modelo_bovinos_inventario.c.estado == "Vivo").count()
@@ -504,9 +545,14 @@ def Tasa_Sobrevivencia():
     session.execute(update(modelo_indicadores).
                     where(modelo_indicadores.c.id_indicadores == 1).
                     values(tasa_supervivencia=tasa))
+    logger.info(f'Funcion Tasa_Sobrevivencia {tasa} ')
     session.commit()
-    return tasa
-
+  except Exception as e:
+      logger.error(f'Error Funcion Tasa_Sobrevivencia: {e}')
+      raise
+  finally:
+      session.close()
+    #return tasa
 
 """esta funcion calcula en terminos de porcentaje, cuantos terneros
 (animales de 0 a 6 meses) han fallecido, para ello consulta la cantidad 
@@ -515,8 +561,9 @@ el porcentaje
 """
 
 
-@rutas_bovinos.post("/Calcular_perdida_Terneros/{}")
+@rutas_bovinos.post("/Calcular_perdida_Terneros")
 def perdida_Terneros():
+ try:
     # consulta, seleccion y conteo de animales con edad de 0 a 6 meses que se encuentren muertos
     muertos = session.query(modelo_bovinos_inventario). \
         where(between(modelo_bovinos_inventario.columns.edad, 0, 6)). \
@@ -530,8 +577,14 @@ def perdida_Terneros():
     session.execute(update(modelo_indicadores).
                     where(modelo_indicadores.c.id_indicadores == 1).
                     values(perdida_de_terneros=tasa_perd))
+    logger.info(f'Funcion perdida_Terneros {tasa_perd} ')
     session.commit()
-    return tasa_perd
+ except Exception as e:
+     logger.error(f'Error Funcion perdida_Terneros: {e}')
+     raise
+ finally:
+     session.close()
+     #return tasa_perd
 
 
 
@@ -539,8 +592,9 @@ def perdida_Terneros():
 esto con el  fin de mostrar cuantos vientres estan produciendo en el hato"""
 
 
-@rutas_bovinos.get("/Calcular_vacas_prenadas/{}")
+@rutas_bovinos.get("/Calcular_vacas_prenadas")
 def vacas_prenadas():
+  try:
     # join de tabla bovinos y tabla leche mediante id_bovino \
     # filtrado y conteo animales con datos prenez Prenada que se encuentren vivos
     consulta_prenadas = session.query(modelo_bovinos_inventario.c.estado, modelo_leche.c.datos_prenez). \
@@ -550,8 +604,14 @@ def vacas_prenadas():
     session.execute(update(modelo_indicadores).
                     where(modelo_indicadores.c.id_indicadores == 1).
                     values(vacas_prenadas=consulta_prenadas))
+    logger.info(f'Funcion vacas_prenadas {consulta_prenadas} ')
     session.commit()
-    return consulta_prenadas
+  except Exception as e:
+      logger.error(f'Error Funcion vacas_prenadas: {e}')
+      raise
+  finally:
+      session.close()
+     #return consulta_prenadas
 
 
 """esta funcion calcula el porcentaje de vacas que se encuentran preñadas"""
@@ -559,6 +619,7 @@ def vacas_prenadas():
 
 @rutas_bovinos.get("/Calcular_vacas_prenadas_porcentaje")
 def vacas_prenadas_porcentaje():
+  try:
     # consulta de vacas prenadas y vacas vacias en la base de datos
     prenadas, vacias = session.query \
         (modelo_indicadores.c.vacas_prenadas, modelo_indicadores.c.vacas_vacias).first()
@@ -570,16 +631,23 @@ def vacas_prenadas_porcentaje():
     session.execute(update(modelo_indicadores).
                     where(modelo_indicadores.c.id_indicadores == 1).
                     values(vacas_prenadas_porcentaje=vacas_estado_pren))
+    logger.info(f'Funcion vacas_prenadas_porcentaje {vacas_estado_pren} ')
     session.commit()
-    return vacas_estado_pren
+  except Exception as e:
+      logger.error(f'Error Funcion vacas_prenadas_porcentaje: {e}')
+      raise
+  finally:
+      session.close()
+    #return vacas_estado_pren
 
 
 """estas funciones muestra la cantidad de animales totales, tambien segun su
 proposito, sexo, estado, rango de edades y estado de ordeno"""
 
 
-@rutas_bovinos.post("/Calcular_animales_totales/{}")
+@rutas_bovinos.post("/Calcular_animales_totales")
 def animales_totales():
+  try:
     # consulta de total de animales vivos
     total_animales = session.query(modelo_bovinos_inventario). \
         filter(modelo_bovinos_inventario.c.estado == "Vivo").count()
@@ -587,12 +655,18 @@ def animales_totales():
     session.execute(update(modelo_indicadores).
                     where(modelo_indicadores.columns.id_indicadores == 1).
                     values(total_animales=total_animales))
+    logger.info(f'Funcion animales_totales {total_animales} ')
     session.commit()
-    return total_animales
+  except Exception as e:
+      logger.error(f'Error Funcion animales_totales: {e}')
+      raise
+  finally:
+      session.close()
+    #return total_animales
 
-
-@rutas_bovinos.post("/Calcular_animales_ceba/{}")
+@rutas_bovinos.post("/Calcular_animales_ceba")
 def animales_ceba():
+  try:
     # consulta de total de animales vivos con proposito de ceba
     prop_ceba = session.query(modelo_bovinos_inventario). \
         filter(modelo_bovinos_inventario.c.estado == "Vivo",
@@ -601,11 +675,17 @@ def animales_ceba():
     session.execute(update(modelo_indicadores).
                     where(modelo_indicadores.c.id_indicadores == 1).
                     values(animales_ceba=prop_ceba))
+    logger.info(f'Funcion animales_ceba {prop_ceba} ')
     session.commit()
-    return prop_ceba
+  except Exception as e:
+      logger.error(f'Error Funcion animales_ceba: {e}')
+      raise
+  finally:
+      session.close()
+    #return prop_ceba
 
 
-@rutas_bovinos.post("/Calcular_animales_levante/{}")
+@rutas_bovinos.post("/Calcular_animales_levante")
 def animales_levante():
     # consulta de total de animales vivos con proposito de levante
     prop_levante = session.query(modelo_bovinos_inventario). \
@@ -616,11 +696,12 @@ def animales_levante():
                     where(modelo_indicadores.c.id_indicadores == 1).
                     values(animales_levante=prop_levante))
     session.commit()
-    return prop_levante
+    #return prop_levante
 
 
-@rutas_bovinos.post("/Calcular_animales_leche/{}")
+@rutas_bovinos.post("/Calcular_animales_leche")
 def animales_leche():
+  try:
     # consulta de total de animales vivos con proposito de leche
     prop_leche = session.query(modelo_bovinos_inventario). \
         filter(modelo_bovinos_inventario.c.estado == "Vivo",
@@ -629,12 +710,19 @@ def animales_leche():
     session.execute(update(modelo_indicadores).
                     where(modelo_indicadores.c.id_indicadores == 1).
                     values(animales_leche=prop_leche))
+    logger.info(f'Funcion animales_leche {prop_leche} ')
     session.commit()
-    return prop_leche
+  except Exception as e:
+      logger.error(f'Error Funcion animales_leche: {e}')
+      raise
+  finally:
+      session.close()
+    #return prop_leche
 
 
-@rutas_bovinos.post("/Calcular_animales_muertos/{}")
+@rutas_bovinos.post("/Calcular_animales_muertos")
 def animales_muertos():
+  try:
     # consulta de total de animales muertos
     estado_muerto = session.query(modelo_bovinos_inventario). \
         filter(modelo_bovinos_inventario.c.estado == "Muerto").count()
@@ -642,12 +730,19 @@ def animales_muertos():
     session.execute(update(modelo_indicadores).
                     where(modelo_indicadores.c.id_indicadores == 1).
                     values(animales_fallecidos=estado_muerto))
+    logger.info(f'Funcion animales_muertos {estado_muerto} ')
     session.commit()
-    return estado_muerto
+  except Exception as e:
+      logger.error(f'Error Funcion animales_muertos: {e}')
+      raise
+  finally:
+      session.close()
+    #return estado_muerto
 
 
-@rutas_bovinos.post("/Calcular_animales_vendidos/{}")
+@rutas_bovinos.post("/Calcular_animales_vendidos")
 def animales_vendidos():
+  try:
     # consulta de total de animales vendidos
     estado_vendido = session.query(modelo_bovinos_inventario). \
         filter(modelo_bovinos_inventario.c.estado == "Vendido").count()
@@ -655,12 +750,19 @@ def animales_vendidos():
     session.execute(update(modelo_indicadores).
                     where(modelo_indicadores.c.id_indicadores == 1).
                     values(animales_vendidos=estado_vendido))
+    logger.info(f'Funcion animales_vendidos {estado_vendido} ')
     session.commit()
-    return estado_vendido
+  except Exception as e:
+    logger.error(f'Error Funcion animales_vendidos: {e}')
+    raise
+  finally:
+    session.close()
+    #return estado_vendido
 
 
-@rutas_bovinos.post("/Calcular_animales_machos/{}")
+@rutas_bovinos.post("/Calcular_animales_machos")
 def animales_sexo_macho():
+  try:
     # consulta de total de animales vivos con sexo macho
     machos = session.query(modelo_bovinos_inventario). \
         filter(modelo_bovinos_inventario.c.estado == "Vivo",
@@ -669,12 +771,19 @@ def animales_sexo_macho():
     session.execute(update(modelo_indicadores).
                     where(modelo_indicadores.c.id_indicadores == 1).
                     values(machos=machos))
+    logger.info(f'Funcion animales_sexo_macho {machos} ')
     session.commit()
-    return machos
+  except Exception as e:
+      logger.error(f'Error Funcion animales_sexo_macho: {e}')
+      raise
+  finally:
+      session.close()
+    #return machos
 
 
-@rutas_bovinos.post("/Calcular_animales_hembras/{}")
+@rutas_bovinos.post("/Calcular_animales_hembras")
 def animales_sexo_hembra():
+  try:
     # consulta de total de animales vivos con sexo hembra
     hembras = session.query(modelo_bovinos_inventario). \
         filter(modelo_bovinos_inventario.c.estado == "Vivo",
@@ -683,12 +792,19 @@ def animales_sexo_hembra():
     session.execute(update(modelo_indicadores).
                     where(modelo_indicadores.c.id_indicadores == 1).
                     values(hembras=hembras))
+    logger.info(f'Funcion animales_sexo_hembra {hembras} ')
     session.commit()
-    return hembras
+  except Exception as e:
+      logger.error(f'Error Funcion animales_sexo_hembra: {e}')
+      raise
+  finally:
+      session.close()
+    #return hembras
 
 
-@rutas_bovinos.post("/Calcular_animales_ordeno/{}")
+@rutas_bovinos.post("/Calcular_animales_ordeno")
 def animales_en_ordeno():
+ try:
     # join, consulta y conteo de animales vivos que son ordenados
     vacas_ordeno = session.query(modelo_bovinos_inventario.c.estado, modelo_leche.c.ordeno). \
         join(modelo_leche, modelo_bovinos_inventario.c.id_bovino == modelo_leche.c.id_bovino). \
@@ -697,12 +813,18 @@ def animales_en_ordeno():
     session.execute(update(modelo_indicadores).
                     where(modelo_indicadores.c.id_indicadores == 1).
                     values(vacas_en_ordeno=vacas_ordeno))
+    logger.info(f'Funcion animales_en_ordeno {vacas_ordeno} ')
     session.commit()
-    return vacas_ordeno
+ except Exception as e:
+     logger.error(f'Error Funcion animales_en_ordeno: {e}')
+     raise
+ finally:
+     session.close()
+    #return vacas_ordeno
 
-
-@rutas_bovinos.post("/Calcular_animales_no_ordeno/{}")
+@rutas_bovinos.post("/Calcular_animales_no_ordeno")
 def animales_no_ordeno():
+  try:
     # join, consulta y conteo de animales vivos que no son ordenados
     vacas_no_ordeno = session.query(modelo_bovinos_inventario.c.estado, modelo_leche.c.ordeno). \
         join(modelo_leche, modelo_bovinos_inventario.c.id_bovino == modelo_leche.c.id_bovino). \
@@ -711,12 +833,19 @@ def animales_no_ordeno():
     session.execute(update(modelo_indicadores).
                     where(modelo_indicadores.c.id_indicadores == 1).
                     values(vacas_no_ordeno=vacas_no_ordeno))
+    logger.info(f'Funcion animales_no_ordeno {vacas_no_ordeno} ')
     session.commit()
-    return vacas_no_ordeno
+  except Exception as e:
+      logger.error(f'Error Funcion animales_no_ordeno: {e}')
+      raise
+  finally:
+      session.close()
+    #return vacas_no_ordeno
 
 
-@rutas_bovinos.post("/Calcular_porcentaje_ordeno/{}")
+@rutas_bovinos.post("/Calcular_porcentaje_ordeno")
 def porcentaje_ordeno():
+  try:
     # consulta de animales ordenados y no ordenados
     ordeno, no_ordeno = session.query \
         (modelo_indicadores.c.vacas_en_ordeno, modelo_indicadores.c.vacas_no_ordeno).first()
@@ -726,12 +855,19 @@ def porcentaje_ordeno():
     session.execute(update(modelo_indicadores).
                     where(modelo_indicadores.c.id_indicadores == 1).
                     values(porcentaje_ordeno=vacas_ordeno_porcentaje))
+    logger.info(f'Funcion porcentaje_ordeno {vacas_ordeno_porcentaje} ')
     session.commit()
-    return vacas_ordeno_porcentaje
+  except Exception as e:
+      logger.error(f'Error Funcion porcentaje_ordeno: {e}')
+      raise
+  finally:
+      session.close()
+    #return vacas_ordeno_porcentaje
 
 
 @rutas_bovinos.post("/Calcular_animales_edad_0_9/{}")
 def animales_edad_0_9():
+  try:
     # consulta y conteo de animales con edades entre 0 a 9 meses
     edades_0_9 = session.query(modelo_bovinos_inventario). \
         where(between(modelo_bovinos_inventario.columns.edad, 0, 9)). \
@@ -740,12 +876,19 @@ def animales_edad_0_9():
     session.execute(update(modelo_indicadores).
                     where(modelo_indicadores.c.id_indicadores == 1).
                     values(animales_rango_edades_0_9=edades_0_9))
+    logger.info(f'Funcion animales_edad_0_9 {edades_0_9} ')
     session.commit()
-    return edades_0_9
+  except Exception as e:
+      logger.error(f'Error Funcion animales_edad_0_9: {e}')
+      raise
+  finally:
+      session.close()
+    #return edades_0_9
 
 
-@rutas_bovinos.post("/Calcular_animales_edad_9_12/{}")
+@rutas_bovinos.post("/Calcular_animales_edad_9_12")
 def animales_edad_9_12():
+  try:
     # consulta y conteo de animales con edades entre 10 a 12 meses
     edades_9_12 = session.query(modelo_bovinos_inventario). \
         where(between(modelo_bovinos_inventario.columns.edad, 10, 12)). \
@@ -754,12 +897,19 @@ def animales_edad_9_12():
     session.execute(update(modelo_indicadores).
                     where(modelo_indicadores.c.id_indicadores == 1).
                     values(animales_rango_edades_9_12=edades_9_12))
+    logger.info(f'Funcion animales_edad_9_12 {edades_9_12} ')
     session.commit()
-    return edades_9_12
+  except Exception as e:
+      logger.error(f'Error Funcion animales_edad_9_12: {e}')
+      raise
+  finally:
+      session.close()
+    #return edades_9_12
 
 
-@rutas_bovinos.post("/Calcular_animales_edad_12_24/{}")
+@rutas_bovinos.post("/Calcular_animales_edad_12_24/")
 def animales_edad_12_24():
+ try:
     # consulta y conteo de animales con edades entre 13 a 24 meses
     edades_12_24 = session.query(modelo_bovinos_inventario). \
         where(between(modelo_bovinos_inventario.columns.edad, 13, 24)). \
@@ -768,12 +918,19 @@ def animales_edad_12_24():
     session.execute(update(modelo_indicadores).
                     where(modelo_indicadores.c.id_indicadores == 1).
                     values(animales_rango_edades_12_24=edades_12_24))
+    logger.info(f'Funcion animales_edad_12_24 {edades_12_24} ')
     session.commit()
-    return edades_12_24
+ except Exception as e:
+     logger.error(f'Error Funcion animales_edad_12_24: {e}')
+     raise
+ finally:
+     session.close()
+    #return edades_12_24
 
 
-@rutas_bovinos.post("/Calcular_animales_edad_24_36/{}")
+@rutas_bovinos.post("/Calcular_animales_edad_24_36")
 def animales_edad_24_36():
+  try:
     # consulta y conteo de animales con edades entre 25 a 36 meses
     edades_24_36 = session.query(modelo_bovinos_inventario). \
         where(between(modelo_bovinos_inventario.columns.edad, 25, 36)). \
@@ -782,12 +939,19 @@ def animales_edad_24_36():
     session.execute(update(modelo_indicadores).
                     where(modelo_indicadores.c.id_indicadores == 1).
                     values(animales_rango_edades_24_36=edades_24_36))
+    logger.info(f'Funcion animales_edad_24_36 {edades_24_36} ')
     session.commit()
-    return edades_24_36
+  except Exception as e:
+      logger.error(f'Error Funcion animales_edad_24_36: {e}')
+      raise
+  finally:
+      session.close()
+    #return edades_24_36
 
 
-@rutas_bovinos.post("/Calcular_animales_edad_mayor_36/{}")
+@rutas_bovinos.post("/Calcular_animales_edad_mayor_36")
 def animales_edad_mayor_a_36():
+  try:
     # consulta y conteo de animales con edades igual o mayor a 37 meses
     edades_mayor_36 = session.query(modelo_bovinos_inventario). \
         where(between(modelo_bovinos_inventario.columns.edad, 37, 500)). \
@@ -796,12 +960,19 @@ def animales_edad_mayor_a_36():
     session.execute(update(modelo_indicadores).
                     where(modelo_indicadores.c.id_indicadores == 1).
                     values(animales_rango_edades_mayor_36=edades_mayor_36))
+    logger.info(f'Funcion animales_edad_mayor_a_36 {edades_mayor_36} ')
     session.commit()
-    return edades_mayor_36
+  except Exception as e:
+      logger.error(f'Error Funcion animales_edad_mayor_a_36: {e}')
+      raise
+  finally:
+      session.close()
+    #return edades_mayor_36
 
 
-@rutas_bovinos.post("/Calcular_Animales_Optimo_Levante/{}")
+@rutas_bovinos.post("/Calcular_Animales_Optimo_Levante")
 def Animales_Optimo_Levante():
+ try:
     # join,consulta y conteo de animales vivos con estado optimo
     levante_optimo = session.query(modelo_bovinos_inventario.c.estado, modelo_levante.c.estado_optimo_levante). \
         join(modelo_levante, modelo_bovinos_inventario.c.id_bovino == modelo_levante.c.id_bovino). \
@@ -811,12 +982,19 @@ def Animales_Optimo_Levante():
     session.execute(update(modelo_indicadores).
                     where(modelo_indicadores.c.id_indicadores == 1).
                     values(animales_optimos_levante=levante_optimo))
+    logger.info(f'Funcion Animales_Optimo_Levante {levante_optimo} ')
     session.commit()
-    return levante_optimo
+ except Exception as e:
+     logger.error(f'Error Funcion Animales_Optimo_Levante: {e}')
+     raise
+ finally:
+     session.close()
+    #return levante_optimo
 
 
-@rutas_bovinos.post("/Calcular_Animales_Optimo_Ceba/{}")
+@rutas_bovinos.post("/Calcular_Animales_Optimo_Ceba")
 def Animales_Optimo_Ceba():
+  try:
     # join,consulta y conteo de animales vivos con estado optimo
     ceba_optimo = session.query(modelo_bovinos_inventario.c.estado, modelo_ceba.c.estado_optimo_ceba). \
         join(modelo_ceba, modelo_bovinos_inventario.c.id_bovino == modelo_ceba.c.id_bovino). \
@@ -826,10 +1004,11 @@ def Animales_Optimo_Ceba():
     session.execute(update(modelo_indicadores).
                     where(modelo_indicadores.c.id_indicadores == 1).
                     values(animales_optimos_ceba=ceba_optimo))
+    logger.info(f'Funcion Animales_Optimo_Ceba {ceba_optimo} ')
     session.commit()
-    return ceba_optimo
-
-
-
-
-
+  except Exception as e:
+      logger.error(f'Error Funcion Animales_Optimo_Ceba: {e}')
+      raise
+  finally:
+      session.close()
+    #return ceba_optimo
