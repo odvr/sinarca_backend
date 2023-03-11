@@ -53,8 +53,6 @@ async def inventario_bovino():
     calculoEdad()
     try:
         items = condb.execute(modelo_bovinos_inventario.select()).fetchall()
-
-
         logger.info(f'Se obtuvieron {len(items)} registros de inventario de bovinos.')
 
     except Exception as e:
@@ -70,6 +68,13 @@ async def inventario_bovino():
 
 @rutas_bovinos.get("/listar_prod_leche" )
 async def inventario_prod_leche():
+
+    # llamado de funciones
+    Edad_Primer_Parto()
+    Duracion_Lactancia()
+    Edad_Sacrificio_Lecheras()
+    Dias_Abiertos()
+    animales_no_ordeno()
     try:
         itemsLeche = session.execute(modelo_leche.select()).all()
         logger.info(f'Se obtuvieron {len(itemsLeche)} registros de inventario de Produccion Leche.')
@@ -80,6 +85,43 @@ async def inventario_prod_leche():
         session.close()
     return itemsLeche
 
+"""
+Lista los animales en Levante
+
+"""
+
+@rutas_bovinos.get("/listar_prod_levante" )
+async def inventario_levante():
+    Estado_Optimo_Levante()
+    try:
+        itemsLevante = session.execute(modelo_levante.select()).all()
+        logger.info(f'Se obtuvieron {len(itemsLevante)} registros de inventario de Produccion Levante.')
+    except Exception as e:
+        logger.error(f'Error al obtener inventario de Produccion Levante: {e}')
+        raise
+    finally:
+        session.close()
+    return itemsLevante
+
+
+
+'''Listar animales en Ceba'''
+
+
+@rutas_bovinos.get("/listar_prod_ceba" )
+async def inventario_ceba():
+    #llamdo de la funcion para calcular
+    Estado_Optimo_Ceba()
+    try:
+        itemsceba = session.execute(modelo_ceba.select()).all()
+        logger.info(f'Se obtuvieron {len(itemsceba)} registros de inventario de Produccion Levante.')
+    except Exception as e:
+        logger.error(f'Error al obtener inventario de Produccion Levante: {e}')
+        raise
+    finally:
+        session.close()
+    return itemsceba
+
 
 """
 Lista los datos de la tabla prod leche inventario
@@ -87,6 +129,9 @@ Lista los datos de la tabla prod leche inventario
 
 @rutas_bovinos.get("/listar_bovino_prodLeche/{id_bovino}")
 async def id_inventario_bovino_leche(id_bovino: str):
+
+
+
     try:
         consulta = session.execute(
             modelo_leche.select().where(modelo_leche.columns.id_bovino == id_bovino)).first()
@@ -111,8 +156,11 @@ async def id_inventario_bovino(id_bovino: str):
         consulta = condb.execute(
             modelo_bovinos_inventario.select().where(modelo_bovinos_inventario.columns.id_bovino == id_bovino)).first()
 
+
+
     except Exception as e:
-        logger.error(f'Error al obtener Listar Unico Bovino Produccion  Leche: {e}')
+
+        logger.error(f'Error al obtener Listar Unico Bovino del Inventario : {e}')
         raise
     
     # condb.commit()
@@ -175,6 +223,68 @@ async def CrearProdLeche(fecha_primer_parto: date, id_bovino: str, fecha_inicial
     return Response(status_code=HTTP_204_NO_CONTENT)
 
 
+
+
+
+
+"""
+La siguiente api crea en la tabla de leche con la llave foranea de id_bovino esto es habilitado en el formulario en la opcion de porposito leche
+"""
+
+"""
+Funcion crear Levante
+"""
+@rutas_bovinos.post(
+    "/crear_prod_levante/{id_bovino}",
+    status_code=HTTP_204_NO_CONTENT)
+async def CrearProdLevante(id_bovino: str):
+
+    try:
+        ingresoplevante = modelo_levante.insert().values(id_bovino=id_bovino)
+        logger.info(f'Se creo el siguiente Bovino en la tabla de produccion de leche {ingresoplevante} ')
+
+        condb.execute(ingresoplevante)
+        condb.commit()
+
+    except Exception as e:
+        logger.error(f'Error al Crear Bovino para la tabla de Produccion de Levante: {e}')
+        raise
+    finally:
+        condb.close()
+
+    return Response(status_code=HTTP_204_NO_CONTENT)
+
+
+"""
+Crear Ceba
+"""
+@rutas_bovinos.post(
+    "/crear_prod_ceba/{id_bovino}",
+    status_code=HTTP_204_NO_CONTENT)
+async def CrearProdCeba(id_bovino: str):
+
+    try:
+        ingresopceba = modelo_ceba.insert().values(id_bovino=id_bovino)
+        logger.info(f'Se creo el siguiente Bovino en la tabla de produccion de leche {ingresopceba} ')
+
+        condb.execute(ingresopceba)
+        condb.commit()
+
+    except Exception as e:
+        logger.error(f'Error al Crear Bovino para la tabla de Produccion de Ceba: {e}')
+        raise
+    finally:
+        condb.close()
+
+    return Response(status_code=HTTP_204_NO_CONTENT)
+
+
+
+
+
+
+
+
 '''
 La siguiente funcion realiza la actualizacion completa de la tabla de bovinos para cambiar los registros
 '''
@@ -234,7 +344,6 @@ esto con el  fin de mostrar cuantos vientres NO estan produciendo en el hato"""
 
 @rutas_bovinos.get("/Calcular_vacas_vacias")
 async def vacas_vacias():
-
     try:
         # join de tabla bovinos y tabla leche mediante id_bovino \
         # filtrado y conteo animales con datos prenez Vacia que se encuentren vivos
@@ -254,13 +363,13 @@ async def vacas_vacias():
     finally:
         session.close()
 
-    #return consulta_vacias
+    return consulta_vacias
 
 """
 La siguiente funcion consulta la fecha de nacimiento del bovino mediante su id y
 calcula la edad del animal (en meses) utilizando la fecha actual
 """
-@rutas_bovinos.post("/calcular_edad")
+
 def calculoEdad():
  try:
     # Realiza la consulta general de la tabla de bovinos
@@ -283,7 +392,7 @@ def calculoEdad():
      raise
  finally:
     condb.close()
-        #return Edad_Animal
+
 
 
 
@@ -295,7 +404,7 @@ y la fecha de nacimiento para devolver la eeda (en meses) en la que la novilla
  tuvo su primer parto
 """
 
-@rutas_bovinos.post("/calcular_edad_parto_1")
+
 def Edad_Primer_Parto():
   try:
     # join de las tablas de leche y bovinos con los campos requeridos
@@ -323,7 +432,7 @@ def Edad_Primer_Parto():
     raise
   finally:
       condb.close()
-        #return Edad_primer_parto
+
 """
 "para la funcion de Duracion de lactancia se utilizan las librerias datetime 
 la funcion convierte las fechas ingresadas (tipo string) en un formato fecha
@@ -333,7 +442,7 @@ la vaca
 """
 
 
-@rutas_bovinos.post("/calcular_Dur_Lac")
+
 def Duracion_Lactancia():
   try:
     #consulta de fecha de incio de ordeno y fecha final de ordeno
@@ -371,7 +480,7 @@ del tiempo actual
 """
 
 
-@rutas_bovinos.post("/calcular_Edad_Sacrificio")
+
 def Edad_Sacrificio_Lecheras():
   try:
     # consulta de la fecha de primer parto
@@ -405,7 +514,7 @@ que dicta si la condicion es o no optima
 """
 
 
-@rutas_bovinos.post("/calcular_Estado_levante")
+
 def Estado_Optimo_Levante():
   try:
     consulta_levante = condb.execute(modelo_bovinos_inventario.select()).fetchall()
@@ -449,7 +558,7 @@ que dicta si la condicion es o no optima
 """
 
 
-@rutas_bovinos.post("/calcular_Estado_ceba")
+
 def Estado_Optimo_Ceba():
   try:
     consulta_levante = condb.execute(modelo_bovinos_inventario.select()).fetchall()
@@ -494,7 +603,7 @@ productiva
 """
 
 
-@rutas_bovinos.post("/calcular_dias_abiertos")
+
 def Dias_Abiertos():
   try:
     # consulta a la tabla
@@ -561,8 +670,8 @@ el porcentaje
 """
 
 
-@rutas_bovinos.post("/Calcular_perdida_Terneros")
-def perdida_Terneros():
+@rutas_bovinos.get("/Calcular_perdida_Terneros")
+async def perdida_Terneros():
  try:
     # consulta, seleccion y conteo de animales con edad de 0 a 6 meses que se encuentren muertos
     muertos = session.query(modelo_bovinos_inventario). \
@@ -584,7 +693,7 @@ def perdida_Terneros():
      raise
  finally:
      session.close()
-     #return tasa_perd
+ return tasa_perd
 
 
 
@@ -593,7 +702,7 @@ esto con el  fin de mostrar cuantos vientres estan produciendo en el hato"""
 
 
 @rutas_bovinos.get("/Calcular_vacas_prenadas")
-def vacas_prenadas():
+async def vacas_prenadas():
   try:
     # join de tabla bovinos y tabla leche mediante id_bovino \
     # filtrado y conteo animales con datos prenez Prenada que se encuentren vivos
@@ -611,14 +720,14 @@ def vacas_prenadas():
       raise
   finally:
       session.close()
-     #return consulta_prenadas
+  return consulta_prenadas
 
 
 """esta funcion calcula el porcentaje de vacas que se encuentran preñadas"""
 
 
 @rutas_bovinos.get("/Calcular_vacas_prenadas_porcentaje")
-def vacas_prenadas_porcentaje():
+async def vacas_prenadas_porcentaje():
   try:
     # consulta de vacas prenadas y vacas vacias en la base de datos
     prenadas, vacias = session.query \
@@ -638,15 +747,15 @@ def vacas_prenadas_porcentaje():
       raise
   finally:
       session.close()
-    #return vacas_estado_pren
+  return vacas_estado_pren
 
 
 """estas funciones muestra la cantidad de animales totales, tambien segun su
 proposito, sexo, estado, rango de edades y estado de ordeno"""
 
 
-@rutas_bovinos.post("/Calcular_animales_totales")
-def animales_totales():
+@rutas_bovinos.get("/Calcular_animales_totales")
+async def animales_totales():
   try:
     # consulta de total de animales vivos
     total_animales = session.query(modelo_bovinos_inventario). \
@@ -662,10 +771,10 @@ def animales_totales():
       raise
   finally:
       session.close()
-    #return total_animales
+  return total_animales
 
-@rutas_bovinos.post("/Calcular_animales_ceba")
-def animales_ceba():
+@rutas_bovinos.get("/Calcular_animales_ceba")
+async def animales_ceba():
   try:
     # consulta de total de animales vivos con proposito de ceba
     prop_ceba = session.query(modelo_bovinos_inventario). \
@@ -682,11 +791,11 @@ def animales_ceba():
       raise
   finally:
       session.close()
-    #return prop_ceba
+  return prop_ceba
 
 
-@rutas_bovinos.post("/Calcular_animales_levante")
-def animales_levante():
+@rutas_bovinos.get("/Calcular_animales_levante")
+async def animales_levante():
     # consulta de total de animales vivos con proposito de levante
     prop_levante = session.query(modelo_bovinos_inventario). \
         filter(modelo_bovinos_inventario.c.estado == "Vivo",
@@ -696,7 +805,7 @@ def animales_levante():
                     where(modelo_indicadores.c.id_indicadores == 1).
                     values(animales_levante=prop_levante))
     session.commit()
-    #return prop_levante
+    return prop_levante
 
 
 @rutas_bovinos.post("/Calcular_animales_leche")
@@ -720,8 +829,8 @@ def animales_leche():
     #return prop_leche
 
 
-@rutas_bovinos.post("/Calcular_animales_muertos")
-def animales_muertos():
+@rutas_bovinos.get("/Calcular_animales_muertos")
+async def animales_muertos():
   try:
     # consulta de total de animales muertos
     estado_muerto = session.query(modelo_bovinos_inventario). \
@@ -737,11 +846,11 @@ def animales_muertos():
       raise
   finally:
       session.close()
-    #return estado_muerto
+  return estado_muerto
 
 
-@rutas_bovinos.post("/Calcular_animales_vendidos")
-def animales_vendidos():
+@rutas_bovinos.get("/Calcular_animales_vendidos")
+async def animales_vendidos():
   try:
     # consulta de total de animales vendidos
     estado_vendido = session.query(modelo_bovinos_inventario). \
@@ -757,11 +866,11 @@ def animales_vendidos():
     raise
   finally:
     session.close()
-    #return estado_vendido
+  return estado_vendido
 
 
-@rutas_bovinos.post("/Calcular_animales_machos")
-def animales_sexo_macho():
+@rutas_bovinos.get("/Calcular_animales_machos")
+async def animales_sexo_macho():
   try:
     # consulta de total de animales vivos con sexo macho
     machos = session.query(modelo_bovinos_inventario). \
@@ -778,11 +887,11 @@ def animales_sexo_macho():
       raise
   finally:
       session.close()
-    #return machos
+  return machos
 
 
-@rutas_bovinos.post("/Calcular_animales_hembras")
-def animales_sexo_hembra():
+@rutas_bovinos.get("/Calcular_animales_hembras")
+async def animales_sexo_hembra():
   try:
     # consulta de total de animales vivos con sexo hembra
     hembras = session.query(modelo_bovinos_inventario). \
@@ -799,11 +908,11 @@ def animales_sexo_hembra():
       raise
   finally:
       session.close()
-    #return hembras
+  return hembras
 
 
-@rutas_bovinos.post("/Calcular_animales_ordeno")
-def animales_en_ordeno():
+@rutas_bovinos.get("/Calcular_animales_ordeno")
+async def animales_en_ordeno():
  try:
     # join, consulta y conteo de animales vivos que son ordenados
     vacas_ordeno = session.query(modelo_bovinos_inventario.c.estado, modelo_leche.c.ordeno). \
@@ -820,10 +929,10 @@ def animales_en_ordeno():
      raise
  finally:
      session.close()
-    #return vacas_ordeno
+ return vacas_ordeno
 
-@rutas_bovinos.post("/Calcular_animales_no_ordeno")
-def animales_no_ordeno():
+@rutas_bovinos.get("/Calcular_animales_no_ordeno")
+async def animales_no_ordeno():
   try:
     # join, consulta y conteo de animales vivos que no son ordenados
     vacas_no_ordeno = session.query(modelo_bovinos_inventario.c.estado, modelo_leche.c.ordeno). \
@@ -840,11 +949,11 @@ def animales_no_ordeno():
       raise
   finally:
       session.close()
-    #return vacas_no_ordeno
+  return vacas_no_ordeno
 
 
-@rutas_bovinos.post("/Calcular_porcentaje_ordeno")
-def porcentaje_ordeno():
+@rutas_bovinos.get("/Calcular_porcentaje_ordeno")
+async def porcentaje_ordeno():
   try:
     # consulta de animales ordenados y no ordenados
     ordeno, no_ordeno = session.query \
@@ -862,11 +971,11 @@ def porcentaje_ordeno():
       raise
   finally:
       session.close()
-    #return vacas_ordeno_porcentaje
+  return vacas_ordeno_porcentaje
 
 
-@rutas_bovinos.post("/Calcular_animales_edad_0_9/{}")
-def animales_edad_0_9():
+@rutas_bovinos.get("/Calcular_animales_edad_0_9")
+async def animales_edad_0_9():
   try:
     # consulta y conteo de animales con edades entre 0 a 9 meses
     edades_0_9 = session.query(modelo_bovinos_inventario). \
@@ -883,11 +992,11 @@ def animales_edad_0_9():
       raise
   finally:
       session.close()
-    #return edades_0_9
+  return edades_0_9
 
 
-@rutas_bovinos.post("/Calcular_animales_edad_9_12")
-def animales_edad_9_12():
+@rutas_bovinos.get("/Calcular_animales_edad_9_12")
+async def animales_edad_9_12():
   try:
     # consulta y conteo de animales con edades entre 10 a 12 meses
     edades_9_12 = session.query(modelo_bovinos_inventario). \
@@ -904,11 +1013,11 @@ def animales_edad_9_12():
       raise
   finally:
       session.close()
-    #return edades_9_12
+  return edades_9_12
 
 
-@rutas_bovinos.post("/Calcular_animales_edad_12_24/")
-def animales_edad_12_24():
+@rutas_bovinos.get("/Calcular_animales_edad_12_24")
+async def animales_edad_12_24():
  try:
     # consulta y conteo de animales con edades entre 13 a 24 meses
     edades_12_24 = session.query(modelo_bovinos_inventario). \
@@ -925,11 +1034,11 @@ def animales_edad_12_24():
      raise
  finally:
      session.close()
-    #return edades_12_24
+ return edades_12_24
 
 
-@rutas_bovinos.post("/Calcular_animales_edad_24_36")
-def animales_edad_24_36():
+@rutas_bovinos.get("/Calcular_animales_edad_24_36")
+async def animales_edad_24_36():
   try:
     # consulta y conteo de animales con edades entre 25 a 36 meses
     edades_24_36 = session.query(modelo_bovinos_inventario). \
@@ -946,11 +1055,11 @@ def animales_edad_24_36():
       raise
   finally:
       session.close()
-    #return edades_24_36
+  return edades_24_36
 
 
-@rutas_bovinos.post("/Calcular_animales_edad_mayor_36")
-def animales_edad_mayor_a_36():
+@rutas_bovinos.get("/Calcular_animales_edad_mayor_36")
+async def animales_edad_mayor_a_36():
   try:
     # consulta y conteo de animales con edades igual o mayor a 37 meses
     edades_mayor_36 = session.query(modelo_bovinos_inventario). \
@@ -967,11 +1076,11 @@ def animales_edad_mayor_a_36():
       raise
   finally:
       session.close()
-    #return edades_mayor_36
+  return edades_mayor_36
 
 
-@rutas_bovinos.post("/Calcular_Animales_Optimo_Levante")
-def Animales_Optimo_Levante():
+@rutas_bovinos.get("/Calcular_Animales_Optimo_Levante")
+async def Animales_Optimo_Levante():
  try:
     # join,consulta y conteo de animales vivos con estado optimo
     levante_optimo = session.query(modelo_bovinos_inventario.c.estado, modelo_levante.c.estado_optimo_levante). \
@@ -989,11 +1098,11 @@ def Animales_Optimo_Levante():
      raise
  finally:
      session.close()
-    #return levante_optimo
+ return levante_optimo
 
 
-@rutas_bovinos.post("/Calcular_Animales_Optimo_Ceba")
-def Animales_Optimo_Ceba():
+@rutas_bovinos.get("/Calcular_Animales_Optimo_Ceba")
+async def Animales_Optimo_Ceba():
   try:
     # join,consulta y conteo de animales vivos con estado optimo
     ceba_optimo = session.query(modelo_bovinos_inventario.c.estado, modelo_ceba.c.estado_optimo_ceba). \
@@ -1011,4 +1120,4 @@ def Animales_Optimo_Ceba():
       raise
   finally:
       session.close()
-    #return ceba_optimo
+  return ceba_optimo
