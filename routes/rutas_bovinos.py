@@ -95,6 +95,9 @@ async def inventario_levante():
     Estado_Optimo_Levante()
     try:
         itemsLevante = session.execute(modelo_levante.select()).all()
+        #itemsLevante = session.query(modelo_bovinos_inventario.c.estado).join( modelo_bovinos_inventario.c.id_bovino == modelo_levante.c.id_bovino).all()
+
+
         logger.info(f'Se obtuvieron {len(itemsLevante)} registros de inventario de Produccion Levante.')
     except Exception as e:
         logger.error(f'Error al obtener inventario de Produccion Levante: {e}')
@@ -129,9 +132,6 @@ Lista los datos de la tabla prod leche inventario
 
 @rutas_bovinos.get("/listar_bovino_prodLeche/{id_bovino}")
 async def id_inventario_bovino_leche(id_bovino: str):
-
-
-
     try:
         consulta = session.execute(
             modelo_leche.select().where(modelo_leche.columns.id_bovino == id_bovino)).first()
@@ -143,6 +143,30 @@ async def id_inventario_bovino_leche(id_bovino: str):
         session.close()
     # condb.commit()
     return consulta 
+
+
+
+
+
+"""
+Lista los datos de la tabla prod levante para la opcion de editar bovino
+"""
+
+@rutas_bovinos.get("/listar_bovino_prolevante/{id_bovino}")
+async def id_inventario_bovino_levante(id_bovino: str):
+    try:
+        consulta = session.execute(
+            modelo_levante.select().where(modelo_levante.columns.id_bovino == id_bovino)).first()
+        logger.info(f'Se listo el siguiente Bovino de levante {consulta} ')
+    except Exception as e:
+        logger.error(f'Error al obtener Listar Produccion Leche: {e}')
+        raise
+    finally:
+        session.close()
+    # condb.commit()
+    return consulta
+
+
 
 
 """
