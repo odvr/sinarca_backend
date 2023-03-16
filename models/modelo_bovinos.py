@@ -29,11 +29,17 @@ modelo_bovinos_inventario = Table("bovinos", meta, Column("id_bovino", String(30
 
 modelo_ceba = Table("produccion_ceba", meta, Column("id_ceba", Integer, primary_key=True),
                             Column("id_bovino", String(300),ForeignKey("bovinos.id_bovino")),
+                            Column("edad", Integer),
+                            Column("peso", Integer),
+                            Column("estado", String(300)),
                             Column("estado_optimo_ceba", String(300)))
 
 
 modelo_levante = Table("produccion_levante", meta, Column("id_levante", Integer, primary_key=True),
                        Column("id_bovino", String(300), ForeignKey("bovinos.id_bovino")),
+                       Column("edad", Integer),
+                       Column("peso", Integer),
+                       Column("estado", String(300)),
                        Column("estado_optimo_levante", String(300)))
 
 modelo_leche = Table("produccion_leche", meta, Column("id_leche", Integer, primary_key=True),
