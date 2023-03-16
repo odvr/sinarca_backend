@@ -159,13 +159,32 @@ async def id_inventario_bovino_levante(id_bovino: str):
             modelo_levante.select().where(modelo_levante.columns.id_bovino == id_bovino)).first()
         logger.info(f'Se listo el siguiente Bovino de levante {consulta} ')
     except Exception as e:
-        logger.error(f'Error al obtener Listar Produccion Leche: {e}')
+        logger.error(f'Error al obtener Listar Produccion Ceba: {e}')
         raise
     finally:
         session.close()
     # condb.commit()
     return consulta
 
+
+
+"""
+Lista los datos de la tabla prod levante para la opcion de editar bovino
+"""
+
+@rutas_bovinos.get("/listar_bovino_proceba/{id_bovino}")
+async def id_inventario_bovino_ceba(id_bovino: str):
+    try:
+        consulta = session.execute(
+            modelo_ceba.select().where(modelo_ceba.columns.id_bovino == id_bovino)).first()
+        logger.info(f'Se listo el siguiente Bovino de Ceba {consulta} ')
+    except Exception as e:
+        logger.error(f'Error al obtener Listar Produccion Ceba: {e}')
+        raise
+    finally:
+        session.close()
+    # condb.commit()
+    return consulta
 
 
 
@@ -247,6 +266,16 @@ async def CrearProdLeche(fecha_primer_parto: date, id_bovino: str, fecha_inicial
     return Response(status_code=HTTP_204_NO_CONTENT)
 
 
+
+"""
+Eliminar los duplicados
+"""
+def eliminarduplicados():
+
+    consultaduplicados = session.query(modelo_leche.c.id_bovino).union_all(session.query(modelo_levante.c.id_bovino)).union_all(session.query(modelo_ceba.c.id_bovino))
+    print(consultaduplicados)
+
+eliminarduplicados()
 
 
 
