@@ -26,6 +26,7 @@ class Esquema_bovinos(BaseModel):
 
 class esquema_produccion_ceba(BaseModel):
     id_ceba:int
+    proposito: str
     id_bovino : str
     edad: int
     peso: int
@@ -40,6 +41,7 @@ class esquema_produccion_levante(BaseModel):
     edad: int
     peso: int
     estado: str
+    proposito: str
     estado_optimo_levante : str
     class Config:
         orm_mode = True
@@ -61,6 +63,7 @@ class esquema_produccion_leche(BaseModel):
     dias_abiertos: int
     fecha_vida_util:date
     ordeno:str
+    proposito: str
     promedio_litros:int
     litros_diarios:int
     class Config:

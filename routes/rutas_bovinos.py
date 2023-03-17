@@ -51,6 +51,9 @@ La siguiente funcion retorna un diccionario con la consulta general del la tabla
 async def inventario_bovino():
     # Se llama la funcion con el fin que esta realice el calculo pertinete a la edad del animal ingresado
     calculoEdad()
+    eliminarduplicados()
+
+
     try:
         items = condb.execute(modelo_bovinos_inventario.select()).fetchall()
         logger.info(f'Se obtuvieron {len(items)} registros de inventario de bovinos.')
@@ -68,14 +71,18 @@ async def inventario_bovino():
 
 @rutas_bovinos.get("/listar_prod_leche" )
 async def inventario_prod_leche():
-
     # llamado de funciones
     Edad_Primer_Parto()
     Duracion_Lactancia()
     Edad_Sacrificio_Lecheras()
     Dias_Abiertos()
     animales_no_ordeno()
+    eliminarduplicados()
+
     try:
+
+        #itemsLeche = session.execute(modelo_leche.select().
+         #                              where(modelo_leche.columns.proposito == "Leche")).fetchall()
         itemsLeche = session.execute(modelo_leche.select()).all()
         logger.info(f'Se obtuvieron {len(itemsLeche)} registros de inventario de Produccion Leche.')
     except Exception as e:
@@ -90,11 +97,17 @@ Lista los animales en Levante
 
 """
 
-@rutas_bovinos.get("/listar_prod_levante" )
+@rutas_bovinos.get("/listar_prod_levante",response_model=list[esquema_produccion_levante] )
 async def inventario_levante():
     Estado_Optimo_Levante()
+    eliminarduplicados()
+
     try:
+        #itemsLevante = session.execute(modelo_levante.select().
+         #                               where(modelo_levante.columns.proposito == "Levante")).fetchall()
+
         itemsLevante = session.execute(modelo_levante.select()).all()
+
         #itemsLevante = session.query(modelo_bovinos_inventario.c.estado).join( modelo_bovinos_inventario.c.id_bovino == modelo_levante.c.id_bovino).all()
 
 
@@ -115,7 +128,13 @@ async def inventario_levante():
 async def inventario_ceba():
     #llamdo de la funcion para calcular
     Estado_Optimo_Ceba()
+    eliminarduplicados()
+
+
     try:
+
+        #itemsceba = session.execute(modelo_ceba.select().
+         #                              where(modelo_ceba.columns.proposito == "Ceba")).fetchall()
         itemsceba = session.execute(modelo_ceba.select()).all()
         logger.info(f'Se obtuvieron {len(itemsceba)} registros de inventario de Produccion Levante.')
     except Exception as e:
@@ -133,6 +152,7 @@ Lista los datos de la tabla prod levante para la opcion de editar bovino
 
 @rutas_bovinos.get("/listar_bovino_proceba/{id_bovino}")
 async def id_inventario_bovino_ceba(id_bovino: str):
+    eliminarduplicados()
     try:
         consulta = session.execute(
             modelo_ceba.select().where(modelo_ceba.columns.id_bovino == id_bovino)).first()
@@ -155,6 +175,7 @@ Lista los datos de la tabla prod leche inventario
 
 @rutas_bovinos.get("/listar_bovino_prodLeche/{id_bovino}")
 async def id_inventario_bovino_leche(id_bovino: str):
+    eliminarduplicados()
     try:
         consulta = session.execute(
             modelo_leche.select().where(modelo_leche.columns.id_bovino == id_bovino)).first()
@@ -222,6 +243,7 @@ la clase Esquema_bovinos  recibira como base para crear el animal esto con fin d
 
 @rutas_bovinos.post("/crear_bovino", status_code=HTTP_204_NO_CONTENT)
 async def crear_bovinos(esquemaBovinos: Esquema_bovinos):
+    eliminarduplicados()
     try:
         bovinos_dic = esquemaBovinos.dict()
         ingreso = modelo_bovinos_inventario.insert().values(bovinos_dic)
@@ -243,19 +265,19 @@ La siguiente api crea en la tabla de leche con la llave foranea de id_bovino est
 
 
 @rutas_bovinos.post(
-    "/crear_prod_leche/{fecha_primer_parto}/{id_bovino}/{fecha_inicial_ordeno}/{fecha_fin_ordeno}/{fecha_ultimo_parto}/{fecha_ultima_prenez}/{num_partos}/{tipo_parto}/{datos_prenez}/{ordeno}",
+    "/crear_prod_leche/{fecha_primer_parto}/{id_bovino}/{fecha_inicial_ordeno}/{fecha_fin_ordeno}/{fecha_ultimo_parto}/{fecha_ultima_prenez}/{num_partos}/{tipo_parto}/{datos_prenez}/{ordeno}/{proposito}",
     status_code=HTTP_204_NO_CONTENT)
 async def CrearProdLeche(fecha_primer_parto: date, id_bovino: str, fecha_inicial_ordeno: date, fecha_fin_ordeno: date,
                    fecha_ultimo_parto: date, fecha_ultima_prenez: date, num_partos: int, tipo_parto: str,
-                   datos_prenez: str, ordeno: str):
-
+                   datos_prenez: str, ordeno: str,proposito:str):
+    eliminarduplicados()
     try:
         ingresopleche = modelo_leche.insert().values(fecha_primer_parto=fecha_primer_parto, id_bovino=id_bovino,
                                                      fecha_inicial_ordeno=fecha_inicial_ordeno,
                                                      fecha_fin_ordeno=fecha_fin_ordeno,
                                                      fecha_ultimo_parto=fecha_ultimo_parto,
                                                      fecha_ultima_prenez=fecha_ultima_prenez, num_partos=num_partos,
-                                                     tipo_parto=tipo_parto, datos_prenez=datos_prenez, ordeno=ordeno)
+                                                     tipo_parto=tipo_parto, datos_prenez=datos_prenez, ordeno=ordeno,proposito=proposito)
         logger.info(f'Se creo el siguiente Bovino en la tabla de produccion de leche {ingresopleche} ')
 
         condb.execute(ingresopleche)
@@ -282,12 +304,12 @@ La siguiente api crea en la tabla de leche con la llave foranea de id_bovino est
 Funcion crear Levante
 """
 @rutas_bovinos.post(
-    "/crear_prod_levante/{id_bovino}",
+    "/crear_prod_levante/{id_bovino}/{proposito}",
     status_code=HTTP_204_NO_CONTENT)
-async def CrearProdLevante(id_bovino: str):
-
+async def CrearProdLevante(id_bovino: str,proposito:str):
+    eliminarduplicados()
     try:
-        ingresoplevante = modelo_levante.insert().values(id_bovino=id_bovino)
+        ingresoplevante = modelo_levante.insert().values(id_bovino=id_bovino, proposito = proposito)
         logger.info(f'Se creo el siguiente Bovino en la tabla de produccion de leche {ingresoplevante} ')
 
         condb.execute(ingresoplevante)
@@ -306,12 +328,12 @@ async def CrearProdLevante(id_bovino: str):
 Crear Ceba
 """
 @rutas_bovinos.post(
-    "/crear_prod_ceba/{id_bovino}",
+    "/crear_prod_ceba/{id_bovino}/{proposito}",
     status_code=HTTP_204_NO_CONTENT)
-async def CrearProdCeba(id_bovino: str):
+async def CrearProdCeba(id_bovino: str,proposito:str):
 
     try:
-        ingresopceba = modelo_ceba.insert().values(id_bovino=id_bovino)
+        ingresopceba = modelo_ceba.insert().values(id_bovino=id_bovino,proposito=proposito)
         logger.info(f'Se creo el siguiente Bovino en la tabla de produccion de leche {ingresopceba} ')
 
         condb.execute(ingresopceba)
@@ -325,6 +347,40 @@ async def CrearProdCeba(id_bovino: str):
 
     return Response(status_code=HTTP_204_NO_CONTENT)
 
+
+
+
+'''
+La siguiente funcion realiza la actualizacion completa de la tabla de bovinos para cambiar los registros
+'''
+@rutas_bovinos.put("/cambiar_datos_bovino/{id_bovino}", status_code=HTTP_204_NO_CONTENT)
+async def cambiar_esta_bovino(data_update: Esquema_bovinos, id_bovino: str):
+    try:
+        condb.execute(modelo_bovinos_inventario.update().values(
+            fecha_nacimiento=data_update.fecha_nacimiento, sexo=data_update.sexo, raza=data_update.raza,
+            peso=data_update.peso, marca=data_update.marca, proposito=data_update.proposito,
+            mansedumbre=data_update.mansedumbre, estado=data_update.estado).where(
+            modelo_bovinos_inventario.columns.id_bovino == id_bovino))
+        condb.execute(modelo_levante.update().values(proposito=data_update.proposito).where(
+            modelo_levante.columns.id_bovino == id_bovino))
+        condb.execute(modelo_ceba.update().values(proposito=data_update.proposito).where(
+            modelo_ceba.columns.id_bovino == id_bovino))
+        condb.execute(modelo_leche.update().values(proposito=data_update.proposito).where(
+            modelo_levante.columns.id_bovino == id_bovino))
+        condb.commit()
+
+            # Retorna una consulta con el id actualizado
+            #resultado_actualizado = condb.execute(
+            #modelo_bovinos_inventario.select().where(modelo_bovinos_inventario.columns.id_bovino == id_bovino)).first()
+
+    except Exception as e:
+        logger.error(f'Error al Editar Bovino: {e}')
+        raise
+
+    finally:
+        condb.close()
+
+    return Response(status_code=HTTP_204_NO_CONTENT)
 
 
 
@@ -379,6 +435,53 @@ async def eliminar_bovino(id_bovino: str):
 
     # retorna un estado de no contenido
     return Response(status_code=HTTP_204_NO_CONTENT)
+
+
+
+
+'''
+Eliminar duplicados
+'''
+def eliminarduplicados():
+    #consulta_ceba = condb.execute(modelo_bovinos_inventario.select().
+                        #where(modelo_bovinos_inventario.columns.proposito=="Ceba")).fetchall()
+    itemsCeba = session.execute(modelo_ceba.select()).all()
+
+
+    for i in itemsCeba:
+        proposito = i[5]
+        id = i[0]
+        if proposito == 'Leche':
+            condb.execute(modelo_ceba.delete().where(modelo_ceba.c.id_ceba == id))
+            condb.commit()
+        if proposito == 'Levante':
+            condb.execute(modelo_ceba.delete().where(modelo_ceba.c.id_ceba == id))
+            condb.commit()
+    itemsLevante = session.execute(modelo_levante.select()).all()
+    for i in itemsLevante:
+        proposito = i[5]
+        idle = i[0]
+        if proposito == 'Leche':
+            condb.execute(modelo_levante.delete().where(modelo_levante.c.id_levante == idle))
+            condb.commit()
+        if proposito == 'Ceba':
+            condb.execute(modelo_levante.delete().where(modelo_levante.c.id_levante == idle))
+            condb.commit()
+    itemsLeche = session.execute(modelo_leche.select()).all()
+    for i in itemsLeche:
+        proposito = i[16]
+        idle = i[0]
+
+        if proposito == 'Levante':
+            condb.execute(modelo_leche.delete().where(modelo_leche.c.id_leche == idle))
+            condb.commit()
+        if proposito == 'Ceba':
+            condb.execute(modelo_leche.delete().where(modelo_leche.c.id_leche == idle))
+            condb.commit()
+
+
+eliminarduplicados()
+
 
 
 
@@ -574,6 +677,8 @@ def Estado_Optimo_Levante():
         edad = i[2]
         # Toma el peso del animal en este caso es el campo 5
         peso = i[5]
+
+
         # Toma el estado del animal en este caso es el campo 9
         estado = i[9]
         # bucle if que determina si cumple con el estado optimo o no y el porque no cumple
@@ -606,6 +711,7 @@ def Estado_Optimo_Levante():
   finally:
       condb.close()
          #return estado_levante
+
 """
 la siguiente funcion determina si la condicion de un animal para
 ceba es optima, para ello, trae los valores de la edad y peso 
@@ -822,6 +928,8 @@ proposito, sexo, estado, rango de edades y estado de ordeno"""
 
 @rutas_bovinos.get("/Calcular_animales_totales")
 async def animales_totales():
+
+
   try:
     # consulta de total de animales vivos
     total_animales = session.query(modelo_bovinos_inventario). \

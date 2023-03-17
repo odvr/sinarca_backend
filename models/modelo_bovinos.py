@@ -32,6 +32,7 @@ modelo_ceba = Table("produccion_ceba", meta, Column("id_ceba", Integer, primary_
                             Column("edad", Integer),
                             Column("peso", Integer),
                             Column("estado", String(300)),
+Column("proposito", String(300)),
                             Column("estado_optimo_ceba", String(300)))
 
 
@@ -40,6 +41,7 @@ modelo_levante = Table("produccion_levante", meta, Column("id_levante", Integer,
                        Column("edad", Integer),
                        Column("peso", Integer),
                        Column("estado", String(300)),
+Column("proposito", String(300)),
                        Column("estado_optimo_levante", String(300)))
 
 modelo_leche = Table("produccion_leche", meta, Column("id_leche", Integer, primary_key=True),
@@ -58,6 +60,7 @@ modelo_leche = Table("produccion_leche", meta, Column("id_leche", Integer, prima
                                   Column("dias_abiertos", Integer),
                                   Column("fecha_vida_util",Date),
                                   Column("ordeno", String(300)),
+Column("proposito", String(300)),
                                   Column("promedio_litros", Integer),
                                   Column("litros_diarios", Integer))
 
