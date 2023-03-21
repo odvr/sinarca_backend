@@ -111,6 +111,126 @@ class esquema_indicadores(BaseModel):
     animales_rango_edades_mayor_36:int
     animales_optimos_levante:int
     animales_optimos_ceba:int
+    vientres_aptos:int
+    relacion_toros_vientres_aptos:int
+    interpretacion_relacion_toros_vientres_aptos:str
+    consumo_global_agua:str
+    total_unidades_animales:str
+    calculadora_hectareas:str
+    calculadora_consumo_agua:str
+    temperatura:int
+    class Config:
+        orm_mode = True
+        env_file = ".env"
+
+class esquema_macho_reproductor(BaseModel):
+    id_macho: int
+    id_bovino: str
+    id_bovino_madre: str
+    id_bovino_padre: str
+    edad: int
+    peso: int
+    estado: str
+    fecha_vida_util: date
+    class Config:
+        orm_mode = True
+        env_file = ".env"
+
+class esquema_modelo_ventas(BaseModel):
+    id_venta: int
+    id_bovino: str
+    edad: int
+    peso: int
+    numero_bono_venta: str
+    fecha_venta: date
+    precio_venta:int
+    razon_venta:str
+    medio_pago: str
+    comprador: str
+    class Config:
+        orm_mode = True
+        env_file = ".env"
+
+class esquema_veterinaria(BaseModel):
+    id_veterinaria: int
+    id_bovino: str
+    edad: int
+    peso: int
+    estado: str
+    sexo: str
+    proposito: str
+    sintomas: str
+    fecha_sintomas: date
+    comportamiento:str
+    condicion_corporal: str
+    postura: str
+    mucosa_ocular: str
+    mucosa_bucal: str
+    mucosa_rectal: str
+    mucosa_vulvar_prepusial: str
+    tratamiento: str
+    evolucion: str
+    class Config:
+        orm_mode = True
+        env_file = ".env"
+
+class esquema_descarte(BaseModel):
+    id_descarte: int
+    id_bovino: str
+    edad: int
+    peso: int
+    razon_descarte: str
+    class Config:
+        orm_mode = True
+        env_file = ".env"
+
+class esquema_partos(BaseModel):
+    id_parto: int
+    id_bovino: str
+    edad: int
+    peso: int
+    fecha_estimada_prenez: date
+    fecha_estimada_parto: date
+    class Config:
+        orm_mode = True
+        env_file = ".env"
+
+class esquema_carga_animal_y_consumo_agua(BaseModel):
+    id_carga_animal: int
+    id_bovino: str
+    edad: int
+    peso: int
+    estado: str
+    valor_unidad_animal: int
+    consumo_forraje_vivo:int
+    consumo_agua:int
+    class Config:
+        orm_mode = True
+        env_file = ".env"
+
+class esquema_capacidad_carga(BaseModel):
+    id_capacidad: int
+    hectareas_forraje: int
+    produccion_forraje: int
+    capacidad_animales: str
+    class Config:
+        orm_mode = True
+        env_file = ".env"
+
+class esquema_calculadora_hectareas_pastoreo(BaseModel):
+    id_pastoreo: int
+    id_bovino: str
+    hectareas_necesarias: int
+    consumo_agua: int
+    class Config:
+        orm_mode = True
+        env_file = ".env"
+
+class esquema_vientres_aptos(BaseModel):
+    id_vientre: int
+    id_bovino: str
+    edad: int
+    peso: int
     class Config:
         orm_mode = True
         env_file = ".env"
