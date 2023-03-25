@@ -19,6 +19,7 @@ class Esquema_bovinos(BaseModel):
     proposito: str
     mansedumbre : str
     estado: str
+    descarte: str
     #Este Config La clase se utiliza para proporcionar configuraciones a Pydantic.
     class Config:
         orm_mode = True
@@ -178,7 +179,7 @@ class esquema_descarte(BaseModel):
     id_descarte: int
     id_bovino: str
     edad: int
-    peso: int
+    peso: float
     razon_descarte: str
     class Config:
         orm_mode = True

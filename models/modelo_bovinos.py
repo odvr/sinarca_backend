@@ -191,4 +191,3 @@ modelo_vientres_aptos = Table("vientres_aptos", meta, Column("id_vientre", Integ
 meta.create_all(engine)
 
 
-

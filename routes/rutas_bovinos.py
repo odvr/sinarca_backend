@@ -16,8 +16,8 @@ from config.db import condb, session
 # importa el esquema de los bovinos
 from models.modelo_bovinos import modelo_bovinos_inventario, modelo_leche, modelo_levante, \
     modelo_indicadores, modelo_ceba, modelo_macho_reproductor, modelo_carga_animal_y_consumo_agua, \
-    modelo_capacidad_carga, modelo_calculadora_hectareas_pastoreo, modelo_partos, modelo_vientres_aptos
-from schemas.schemas_bovinos import Esquema_bovinos, esquema_produccion_leche, esquema_produccion_levante, \
+    modelo_capacidad_carga, modelo_calculadora_hectareas_pastoreo, modelo_partos, modelo_vientres_aptos,modelo_descarte
+from schemas.schemas_bovinos import Esquema_bovinos, esquema_produccion_leche, esquema_produccion_levante,esquema_descarte, \
     esquema_produccion_ceba
 from sqlalchemy import select, insert, values, update, bindparam, between, join, func, null
 from starlette.status import HTTP_204_NO_CONTENT
@@ -56,6 +56,7 @@ async def inventario_bovino():
     # Se llama la funcion con el fin que esta realice el calculo pertinete a la edad del animal ingresado
     calculoEdad()
     eliminarduplicados()
+    vida_util_macho_reproductor()
 
 
     try:
@@ -73,6 +74,7 @@ async def inventario_bovino():
 @rutas_bovinos.get("/listar_bovino_v/{id_bovino}", response_model=Esquema_bovinos)
 async def id_inventario_bovino_v(id_bovino: str):
     try:
+
         consulta = condb.execute(
             modelo_bovinos_inventario.select().where(modelo_bovinos_inventario.columns.id_bovino == id_bovino)).first()
 
@@ -125,12 +127,9 @@ async def inventario_levante():
     eliminarduplicados()
 
     try:
-        #itemsLevante = session.execute(modelo_levante.select().
-         #                               where(modelo_levante.columns.proposito == "Levante")).fetchall()
-
         itemsLevante = session.execute(modelo_levante.select()).all()
 
-        #itemsLevante = session.query(modelo_bovinos_inventario.c.estado).join( modelo_bovinos_inventario.c.id_bovino == modelo_levante.c.id_bovino).all()
+
 
 
         logger.info(f'Se obtuvieron {len(itemsLevante)} registros de inventario de Produccion Levante.')
@@ -165,6 +164,66 @@ async def inventario_ceba():
     finally:
         session.close()
     return itemsceba
+
+
+
+
+@rutas_bovinos.get("/listar_reproductor" )
+async def listar_reproductor():
+    #llamdo de la funcion para calcular
+    vida_util_macho_reproductor()
+    try:
+        vida_util_macho_reproductor()
+        itemsreproductor = session.execute(modelo_macho_reproductor.select()).all()
+        logger.info(f'Se obtuvieron {len(itemsreproductor)} registros de inventario de REPRODUCTOR.')
+    except Exception as e:
+        logger.error(f'Error al obtener inventario de REPRODUCTOR: {e}')
+        raise
+    finally:
+        session.close()
+    return itemsreproductor
+
+
+"""
+Lista la tabla de carga de animales
+"""
+
+@rutas_bovinos.get("/listar_carga_animales" )
+async def listar_carga_animales():
+
+    try:
+        itemscargaAnimales = session.execute(modelo_carga_animal_y_consumo_agua.select()).all()
+
+    except Exception as e:
+        logger.error(f'Error al obtener inventario de LISTAR CARGA ANIMALES: {e}')
+        raise
+    finally:
+        session.close()
+    return itemscargaAnimales
+
+
+
+
+"""
+Listado de vientres aptos
+"""
+@rutas_bovinos.get("/listar_vientres_aptos" )
+
+async def listar_vientres_aptos():
+
+
+    try:
+        vida_util_macho_reproductor()
+
+        query = session.execute(
+            modelo_indicadores.select().where(modelo_indicadores.columns.vientres_aptos))
+
+    except Exception as e:
+        logger.error(f'Error al obtener inventario de REPRODUCTOR: {e}')
+        raise
+    finally:
+        session.close()
+    return query
 
 
 
@@ -208,7 +267,7 @@ async def id_inventario_bovino_leche(id_bovino: str):
     finally:
         session.close()
     # condb.commit()
-    return consulta 
+    return consulta
 
 
 
@@ -370,6 +429,53 @@ async def CrearProdCeba(id_bovino: str,proposito:str):
     return Response(status_code=HTTP_204_NO_CONTENT)
 
 
+"""
+Crear Descarte
+"""
+@rutas_bovinos.post(
+    "/crear_descarte/{id_bovino}/{edad}/{peso}/{razon_descarte}",
+    status_code=HTTP_204_NO_CONTENT)
+async def CrearDescarte(id_bovino: str,edad:int,peso:float,razon_descarte:str):
+
+    try:
+        ingresodescarte = modelo_descarte.insert().values(id_bovino=id_bovino,edad=edad,peso=peso,razon_descarte=razon_descarte)
+        logger.info(f'Se creo el siguiente Bovino en la tabla de produccion de DESCARTE {ingresodescarte} ')
+
+        condb.execute(ingresodescarte)
+        condb.commit()
+
+    except Exception as e:
+        logger.error(f'Error al Crear Bovino para la tabla de Produccion de DESCARTE: {e}')
+        raise
+    finally:
+        condb.close()
+
+    return Response(status_code=HTTP_204_NO_CONTENT)
+
+
+"""
+Crear Macho Reproductor
+"""
+@rutas_bovinos.post(
+    "/crear_reproductor/{id_bovino}",
+    status_code=HTTP_204_NO_CONTENT)
+async def CrearReproductor(id_bovino: str):
+    try:
+        CrearMacho = modelo_macho_reproductor.insert().values(id_bovino=id_bovino)
+        logger.info(f'Se creo el siguiente Bovino en la tabla MACHO REPRODUCTOR {CrearMacho} ')
+
+        condb.execute(CrearMacho)
+        condb.commit()
+
+    except Exception as e:
+        logger.error(f'Error al Crear Bovino para la tabla de MACHO REPRODUCTOR: {e}')
+        raise
+    finally:
+        condb.close()
+
+    return Response(status_code=HTTP_204_NO_CONTENT)
+
+
 
 
 '''
@@ -490,16 +596,18 @@ def eliminarduplicados():
             condb.execute(modelo_levante.delete().where(modelo_levante.c.id_levante == idle))
             condb.commit()
     itemsLeche = session.execute(modelo_leche.select()).all()
-    for i in itemsLeche:
-        proposito = i[16]
-        idle = i[0]
-
-        if proposito == 'Levante':
-            condb.execute(modelo_leche.delete().where(modelo_leche.c.id_leche == idle))
-            condb.commit()
-        if proposito == 'Ceba':
-            condb.execute(modelo_leche.delete().where(modelo_leche.c.id_leche == idle))
-            condb.commit()
+    for ileche in itemsLeche:
+        propositoleche = ileche[16]
+        idleche = ileche[0]
+        print(propositoleche,idleche)
+        if propositoleche == 'Levante':
+            eliminarlevanteleche = condb.execute(modelo_leche.delete().where(modelo_leche.c.id_leche == idleche))
+            logger.info(f'Se ELIMINA EL DATO REPETIDO DE LECHE LEVANTE =  {eliminarlevanteleche} ')
+            condb.commit(eliminarlevanteleche)
+        if propositoleche == 'Ceba':
+            eliminarcebaleche = condb.execute(modelo_leche.delete().where(modelo_leche.c.id_leche == idleche))
+            logger.info(f'Se ELIMINA EL DATO REPETIDO DE LECHE CEBA =  {eliminarcebaleche} ')
+            condb.commit(eliminarcebaleche)
 
 
 eliminarduplicados()

@@ -1,7 +1,6 @@
 from fastapi import FastAPI
 from routes.rutas_bovinos import rutas_bovinos
-#from routes.Funciones_Sinarca.Funciones_S import funciones_bovinos
-#from acceso.main import applogin
+
 
 
 from fastapi.middleware.cors import CORSMiddleware
@@ -14,15 +13,12 @@ en las que una interfaz que se ejecuta en un navegador tiene código JavaScript 
 '''
 app = FastAPI()
 
-origins = [
-    "*",
-
-]
+origins = ["*"]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
-
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
