@@ -105,8 +105,6 @@ async def inventario_prod_leche():
 
     try:
 
-        #itemsLeche = session.execute(modelo_leche.select().
-         #                              where(modelo_leche.columns.proposito == "Leche")).fetchall()
         itemsLeche = session.execute(modelo_leche.select()).all()
         logger.info(f'Se obtuvieron {len(itemsLeche)} registros de inventario de Produccion Leche.')
     except Exception as e:
@@ -129,10 +127,6 @@ async def inventario_levante():
     try:
         itemsLevante = session.execute(modelo_levante.select()).all()
 
-
-
-
-        logger.info(f'Se obtuvieron {len(itemsLevante)} registros de inventario de Produccion Levante.')
     except Exception as e:
         logger.error(f'Error al obtener inventario de Produccion Levante: {e}')
         raise
@@ -154,10 +148,8 @@ async def inventario_ceba():
 
     try:
 
-        #itemsceba = session.execute(modelo_ceba.select().
-         #                              where(modelo_ceba.columns.proposito == "Ceba")).fetchall()
         itemsceba = session.execute(modelo_ceba.select()).all()
-        logger.info(f'Se obtuvieron {len(itemsceba)} registros de inventario de Produccion Levante.')
+
     except Exception as e:
         logger.error(f'Error al obtener inventario de Produccion Levante: {e}')
         raise
@@ -172,6 +164,7 @@ async def inventario_ceba():
 async def listar_reproductor():
     #llamdo de la funcion para calcular
     vida_util_macho_reproductor()
+
     try:
         vida_util_macho_reproductor()
         itemsreproductor = session.execute(modelo_macho_reproductor.select()).all()
@@ -192,6 +185,8 @@ Lista la tabla de carga de animales
 async def listar_carga_animales():
 
     try:
+        consumo_global_agua_y_totalidad_unidades_animales()
+        carga_animal()
         itemscargaAnimales = session.execute(modelo_carga_animal_y_consumo_agua.select()).all()
 
     except Exception as e:
@@ -208,22 +203,162 @@ async def listar_carga_animales():
 Listado de vientres aptos
 """
 @rutas_bovinos.get("/listar_vientres_aptos" )
-
 async def listar_vientres_aptos():
-
-
     try:
         vida_util_macho_reproductor()
+        vientres_aptoss = session.query(modelo_indicadores.c.vientres_aptos).first()
 
-        query = session.execute(
-            modelo_indicadores.select().where(modelo_indicadores.columns.vientres_aptos))
 
     except Exception as e:
         logger.error(f'Error al obtener inventario de REPRODUCTOR: {e}')
         raise
     finally:
         session.close()
-    return query
+    return vientres_aptoss
+
+
+
+
+"""
+Listado de total_unidades_animales
+"""
+@rutas_bovinos.get("/total_unidades_animales" )
+async def total_unidades_animales():
+    try:
+        total_unidades_animales = session.query(modelo_indicadores.c.total_unidades_animales).first()
+    except Exception as e:
+        logger.error(f'Error al obtener inventario de total_unidades_animales: {e}')
+        raise
+    finally:
+        session.close()
+    return total_unidades_animales
+
+
+
+"""
+Listado de calculadora_hectareas
+"""
+@rutas_bovinos.get("/consumo_global_agua" )
+async def consumo_global_agua():
+    try:
+
+
+        consumo_global_agua = session.query(modelo_indicadores.c.consumo_global_agua).first()
+
+
+    except Exception as e:
+        logger.error(f'Error al obtener inventario de total_unidades_animales: {e}')
+        raise
+    finally:
+        session.close()
+    return consumo_global_agua
+
+
+
+" relacion_toros_vientres_aptos Lista la relacion entre el toro y los vientres aptos"
+
+@rutas_bovinos.get("/relacion_toros_vientres_aptos" )
+async def relacion_toros_vientres_aptos():
+    try:
+        vida_util_macho_reproductor()
+        toro_Vientres = session.query(modelo_indicadores.c.relacion_toros_vientres_aptos).first()
+
+    except Exception as e:
+        logger.error(f'Error al obtener la consulta de RELACION Y VIENTRES APTOS=  {e}')
+        raise
+    finally:
+        session.close()
+    return toro_Vientres
+
+"""
+
+
+
+"""
+
+@rutas_bovinos.get("/interpretacion_relacion_toros_vientres_aptos" )
+async def interpretacion_relacion_toros_vientres_aptos():
+    try:
+
+
+        interpretacion_relacion_toros_vientres_aptos = session.query(modelo_indicadores.c.interpretacion_relacion_toros_vientres_aptos).first()
+
+    except Exception as e:
+        logger.error(f'Error al obtener la consulta de interpretacion_relacion_toros_vientres_aptos=  {e}')
+        raise
+    finally:
+        session.close()
+    return interpretacion_relacion_toros_vientres_aptos
+
+
+"""
+
+Lista   hectareas_forrajeget
+
+"""
+
+
+@rutas_bovinos.get("/hectareas_forraje")
+async def hectareas_forraje():
+    try:
+
+        hectareas_forraje_ = session.query(
+            modelo_capacidad_carga.c.hectareas_forraje).first()
+
+    except Exception as e:
+        logger.error(f'Error al obtener la consulta de hectareas_forraje=  {e}')
+        raise
+    finally:
+        session.close()
+    return hectareas_forraje_
+
+
+"""
+
+Lista   hectareas_forrajeget
+
+"""
+
+
+@rutas_bovinos.get("/capacidad_animales")
+async def capacidad_animales():
+    try:
+
+        capacidad_animales = session.query(
+            modelo_capacidad_carga.c.capacidad_animales).first()
+
+    except Exception as e:
+        logger.error(f'Error al obtener la consulta de capacidad_animales=  {e}')
+        raise
+    finally:
+        session.close()
+    return capacidad_animales
+
+
+
+
+"""
+Listar la temperatura
+"""
+
+@rutas_bovinos.get("/listarTemperatura" )
+async def listarTemperatura():
+    try:
+        listarTempAmbiente = session.query(modelo_indicadores.c.temperatura_ambiente).where(modelo_indicadores.c.id_indicadores == 1).first()
+        #listarTempAmbiente = session.execute(modelo_indicadores.c.temperatura_ambiente).first()
+
+
+
+
+    except Exception as e:
+
+        logger.error(f'Error al obtener la consulta de TEMPERATURA=  {e}')
+        raise
+    finally:
+        session.close()
+    return listarTempAmbiente
+
+
 
 
 
@@ -403,6 +538,92 @@ async def CrearProdLevante(id_bovino: str,proposito:str):
         condb.close()
 
     return Response(status_code=HTTP_204_NO_CONTENT)
+
+
+
+
+
+
+"""
+Funcion Caga Animal
+"""
+@rutas_bovinos.post(
+    "/crear_carga_animal/{id_bovino}",
+    status_code=HTTP_204_NO_CONTENT)
+async def CrearCargaAnimal(id_bovino: str):
+    eliminarduplicados()
+    try:
+        ingresoCargaAnimal = modelo_carga_animal_y_consumo_agua.insert().values(id_bovino=id_bovino)
+
+
+        condb.execute(ingresoCargaAnimal)
+        condb.commit()
+
+    except Exception as e:
+        logger.error(f'Error al Crear Bovino para la tabla CARGA ANIMAL: {e}')
+        raise
+    finally:
+        condb.close()
+
+    return Response(status_code=HTTP_204_NO_CONTENT)
+
+
+
+
+
+"""
+Funcion crear La temperatura
+"""
+@rutas_bovinos.post(
+    "/crear_temperatura/{temperatura_ambiente}",
+    status_code=HTTP_204_NO_CONTENT)
+async def crear_temperatura(temperatura_ambiente: float):
+    eliminarduplicados()
+    try:
+        #temperatura_ambiente_indicadores = modelo_indicadores.insert().values(temperatura_ambiente=temperatura_ambiente).where(modelo_indicadores.c.id_indicadores == 1)
+
+        temperatura_ambiente_indicadores = update(modelo_indicadores).where(modelo_indicadores.c.id_indicadores == 1).values(temperatura_ambiente=temperatura_ambiente)
+        condb.execute(temperatura_ambiente_indicadores)
+        condb.commit()
+
+    except Exception as e:
+        logger.error(f'Error al Crear Bovino para la tabla de TEMPERATURA: {e}')
+        raise
+    finally:
+        condb.close()
+
+    return Response(status_code=HTTP_204_NO_CONTENT)
+
+
+
+
+
+
+"""
+Funcion inserta las hectareas aproximadas para realizar el calculo para el modulo de capacidad de carga  hectareas_forraje
+"""
+@rutas_bovinos.post(
+    "/crear_hectareas_forraje/{hectareas_forraje}",
+    status_code=HTTP_204_NO_CONTENT)
+async def hectareas_forraje(hectareas_forraje: float):
+
+    try:
+
+        capacidad_carga()
+        hectareas_forraje = update(modelo_capacidad_carga).where(modelo_capacidad_carga.c.id_capacidad == 1).values(hectareas_forraje=hectareas_forraje)
+        condb.execute(hectareas_forraje)
+        condb.commit()
+        capacidad_carga()
+    except Exception as e:
+        logger.error(f'Error al Crear Bovino para la tabla de CAPACIDAD DE CARGA hectareas_forraje : {e}')
+        raise
+    finally:
+        condb.close()
+
+    return Response(status_code=HTTP_204_NO_CONTENT)
+
+
+
 
 
 """
@@ -1476,16 +1697,16 @@ def relacion_macho_reproductor_vientres_aptos():
     cantidad_recomendada = cantidad_vientres_aptos/25
     #interpretacion del calculo de la relacion toros-vientres
     if relacion < 4:
-          interpretacion = f'no tienes suficientes machos reproductores, debes tener {cantidad_recomendada} machos reproductores para tus {cantidad_vientres_aptos} hembras aptas '
+          interpretacion = f'no Tienes suficientes machos reproductores, debes tener {cantidad_recomendada} machos reproductores para tus {cantidad_vientres_aptos} hembras aptas '
     elif relacion > 4:
         if cantidad_reproductores==1 and cantidad_vientres_aptos < 25:
-          interpretacion = f'tienes la cantidad correcta de reproductores, tienes {cantidad_reproductores} macho reproductor para tus {cantidad_vientres_aptos} hembras aptas'
+          interpretacion = f'Tienes la cantidad correcta de reproductores, tienes {cantidad_reproductores} macho reproductor para tus {cantidad_vientres_aptos} hembras aptas'
         elif cantidad_reproductores > 1 and cantidad_vientres_aptos < 25:
-          interpretacion = f'tienes demasiados machos reproductores, debes tener solamente un macho reproductor para tus {cantidad_vientres_aptos} hembras aptas '
+          interpretacion = f'Tienes demasiados machos reproductores, debes tener solamente un macho reproductor para tus {cantidad_vientres_aptos} hembras aptas '
         else:
-          interpretacion = f'tienes demasiados machos reproductores, debes tener {cantidad_recomendada} machos reproductores para tus {cantidad_vientres_aptos} hembras aptas '
+          interpretacion = f'Tienes demasiados machos reproductores, debes tener {cantidad_recomendada} machos reproductores para tus {cantidad_vientres_aptos} hembras aptas '
     elif relacion==4:
-          interpretacion = f'tienes la cantidad correcta de reproductores, tienes {cantidad_reproductores} machos reproductores para tus {cantidad_vientres_aptos} hembras aptas'
+          interpretacion = f'Tienes la cantidad correcta de reproductores, tienes {cantidad_reproductores} machos reproductores para tus {cantidad_vientres_aptos} hembras aptas'
     # actualizacion de campo de cantidad de vientres aptos
     session.execute(update(modelo_indicadores).
                     where(modelo_indicadores.c.id_indicadores == 1).
@@ -1640,10 +1861,10 @@ def consumo_global_agua_y_totalidad_unidades_animales():
         consumo_unidades= total_unidades_animales*16
         metros_de_forraje_requerido= (consumo_unidades*3)/1000
         hectareas_requeridas=metros_de_forraje_requerido/10000
-        interpretacion=f'tienes un total de {round(total_unidades_animales,2)} unidades animales, que requieren de {round(hectareas_requeridas,3)} hectareas de o {round(metros_de_forraje_requerido,3)} metros cuadrados forraje para mantenerse'
+        interpretacion=f'Tienes un total de {round(total_unidades_animales,2)} unidades animales, que requieren de {round(hectareas_requeridas,3)} hectareas de o {round(metros_de_forraje_requerido,3)} metros cuadrados forraje para mantenerse'
     for i in consulta_consumo_agua:
         # Toma la totalidad del consumo de agua en este caso es el campo 0
-        total_consumo_agua =f'tus animales necesitan {round(i[0],2)} litros de agua al dia (equivalente a {round((i[0]/500),2)} bebederos de 500 litros)'
+        total_consumo_agua =f'Tus animales necesitan {round(i[0],2)} litros de agua al dia (equivalente a {round((i[0]/500),2)} bebederos de 500 litros)'
         session.execute(modelo_indicadores.update().values(consumo_global_agua=total_consumo_agua,
                                                                total_unidades_animales=interpretacion). \
                         where(modelo_indicadores.columns.id_indicadores == 1))
@@ -1699,7 +1920,7 @@ def consumo_agua_y_hectareas_por_lote():
         total_hectareas =i[0]
     for i in consulta_suma_consumo_agua:
         # Toma la totalidad de consumos de agua requeridos al dia por animal en este caso es el campo 0
-        total_consumo_agua =f'tus animales necesitan {round(i[0],2)} litros de agua al dia (equivalente a {round((i[0]/500),2)} bebederos de 500 litros)'
+        total_consumo_agua =f'Tus animales necesitan {round(i[0],2)} litros de agua al dia (equivalente a {round((i[0]/500),2)} bebederos de 500 litros)'
         #actualizacion de campos
         session.execute(modelo_indicadores.update().values(calculadora_hectareas=total_hectareas,
                                                                calculadora_consumo_agua=total_consumo_agua). \
@@ -1730,7 +1951,7 @@ def fecha_aproximada_parto():
         # Toma el peso del animal en este caso es el campo 2
         peso = i[3]
         # Toma el estado del animal en este caso es el campo 3
-        estado = i[3]
+        estado = i[4]
         #calculo de la fecha aproximada de parto
         if estado=="Vivo":
           fecha_estimada_parto = fecha_estimada_prenez + timedelta(285)
@@ -1763,13 +1984,16 @@ def vientres_aptos():
         edad = i[2]
         # Toma el peso del animal en este caso es el campo 5
         peso = i[5]
+        print(id,edad,peso)
         #actualizacion de campos
-        ingreso_datos= modelo_vientres_aptos.insert().values(id_bovino=id,edad=edad,
-                                                      peso=peso)
-        logger.info(f'Funcion vientres_aptos {id} ')
+        session.execute(modelo_vientres_aptos.insert().values(id_bovino=id,edad=edad,
+                                                      peso=peso))
+
         session.commit()
+
   except Exception as e:
       logger.error(f'Error Funcion vientres_aptos: {e}')
       raise
   finally:
       session.close()
+
