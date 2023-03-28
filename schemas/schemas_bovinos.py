@@ -119,7 +119,7 @@ class esquema_indicadores(BaseModel):
     total_unidades_animales:str
     calculadora_hectareas:str
     calculadora_consumo_agua:str
-    temperatura:int
+    temperatura_ambiente :float
     class Config:
         orm_mode = True
         env_file = ".env"
