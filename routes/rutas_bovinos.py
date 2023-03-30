@@ -1736,9 +1736,9 @@ def relacion_macho_reproductor_vientres_aptos():
     if relacion < 4:
           interpretacion = f'no Tienes suficientes machos reproductores, debes tener {cantidad_recomendada} machos reproductores para tus {cantidad_vientres_aptos} hembras aptas '
     elif relacion > 4:
-        if cantidad_reproductores==1 and cantidad_vientres_aptos < 25:
+        if cantidad_reproductores==1 and cantidad_vientres_aptos <= 25:
           interpretacion = f'Tienes la cantidad correcta de reproductores, tienes {cantidad_reproductores} macho reproductor para tus {cantidad_vientres_aptos} hembras aptas'
-        elif cantidad_reproductores > 1 and cantidad_vientres_aptos < 25:
+        elif cantidad_reproductores > 1 and cantidad_vientres_aptos <= 25:
           interpretacion = f'Tienes demasiados machos reproductores, debes tener solamente un macho reproductor para tus {cantidad_vientres_aptos} hembras aptas '
         else:
           interpretacion = f'Tienes demasiados machos reproductores, debes tener {cantidad_recomendada} machos reproductores para tus {cantidad_vientres_aptos} hembras aptas '
@@ -1758,7 +1758,6 @@ def relacion_macho_reproductor_vientres_aptos():
   finally:
       session.close()
   return (relacion, interpretacion, cantidad_vientres_aptos)
-
 """la siguiente funcion determina el consumo de forraje vivo y agua por cada animal"""
 def carga_animal():
   global temperatura, consumo_agua
@@ -1873,7 +1872,7 @@ def capacidad_carga():
         produccion_materia_seca=0.003*metros
         #determinacion de la cantidad de unidades animales que esta produccion puede mantener al dia
         #una unidad animal puede consumir hasta 16 kilos de materia seca al dia
-        capacidad_unidades_animales_dia=produccion_materia_seca/16
+        capacidad_unidades_animales_dia=round((produccion_materia_seca/16),2)
         interpertacion_capacidad=f'con tus hectareas de pasto, puedes mantener hasta {capacidad_unidades_animales_dia} unidades animales'
         #actualizacion de campos
         session.execute(modelo_capacidad_carga.update().values(produccion_materia_seca=produccion_materia_seca,
@@ -1909,7 +1908,7 @@ def consumo_global_agua_y_totalidad_unidades_animales():
         consumo_agua_bebederos= round((consumo_agua_litros/500),0)
         if consumo_agua_bebederos <1:
             consumo_agua_bebederos=1
-        total_consumo_agua =f'Tus animales necesitan {consumo_agua_litros} litros de agua al dia (equivalente a {consumo_agua_bebederos} bebederos de 500 litros)'
+        total_consumo_agua =f'Tus animales necesitan {consumo_agua_litros} litros de agua al dia (equivalente a {consumo_agua_bebederos} bebedero(s) de 500 litros)'
         session.execute(modelo_indicadores.update().values(consumo_global_agua=total_consumo_agua,
                                                                total_unidades_animales=interpretacion). \
                         where(modelo_indicadores.columns.id_indicadores == 1))
@@ -2017,10 +2016,24 @@ def fecha_aproximada_parto():
       raise
   finally:
       session.close()
+"""la siguiente funcion elimina todos los vientres aptos de la 
+tabla, esto se realiza para evitar la duplicidad de datos"""
+def Eliminacion_total_vientres_aptos():
+  try:
+      #llamada de funcion que elimina todos los datos
+        session.execute(modelo_vientres_aptos.delete().where(modelo_vientres_aptos.c.id_bovino))
+        session.commit()
+  except Exception as e:
+      logger.error(f'Error Funcion Eliminacion_total_vientres_aptos: {e}')
+      raise
+  finally:
+      session.close()
 """la siguiente funcion muestra los vientres aptos, es decir,
-animales hembras vivos con una edade igual o mayor a 16 meses"""
+animales hembras vivos con una edad igual o mayor a 16 meses"""
 def vientres_aptos():
   try:
+    #llamada de funcion que elimina registro anterior
+    Eliminacion_total_vientres_aptos()
     # consulta de vacas que cumplen con la condicion
     consulta_vientres = session.query(modelo_bovinos_inventario). \
         where(between(modelo_bovinos_inventario.columns.edad, 16, 500)). \
@@ -2028,17 +2041,15 @@ def vientres_aptos():
                modelo_bovinos_inventario.c.sexo == "Hembra").all()
     for i in consulta_vientres:
         # Toma el ID del bovino en este caso es el campo 0
-        id = i[0]
+        id1 = i[0]
         # Toma la edad del animal en este caso es el campo 2
         edad = i[2]
         # Toma el peso del animal en este caso es el campo 5
         peso = i[5]
         #actualizacion de campos
-        session.execute(modelo_vientres_aptos.insert().values(id_bovino=id,edad=edad,
+        session.execute(modelo_vientres_aptos.insert().values(id_bovino=id1,edad=edad,
                                                       peso=peso))
-
         session.commit()
-
   except Exception as e:
       logger.error(f'Error Funcion vientres_aptos: {e}')
       raise
