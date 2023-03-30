@@ -197,6 +197,24 @@ async def listar_carga_animales():
     return itemscargaAnimales
 
 
+"""
+Listar  Fecha aproximada de parto
+"""
+
+@rutas_bovinos.get("/listar_fecha_parto" )
+async def listar_fecha_parto():
+
+    try:
+        fecha_aproximada_parto()
+
+        listar_fecha_estimada_parto = session.execute(modelo_partos.select()).all()
+
+    except Exception as e:
+        logger.error(f'Error al obtener inventario de LISTAR CARGA ANIMALES: {e}')
+        raise
+    finally:
+        session.close()
+    return listar_fecha_estimada_parto
 
 
 """
@@ -568,6 +586,27 @@ async def CrearCargaAnimal(id_bovino: str):
     return Response(status_code=HTTP_204_NO_CONTENT)
 
 
+"""
+Crear en la tabla de partos para calcular la fecha aproximada
+"""
+@rutas_bovinos.post(
+    "/crear_fecha_apoximada_parto/{id_bovino}/{fecha_estimada_prenez}",
+    status_code=HTTP_204_NO_CONTENT)
+async def CrearFechaAproximadaParto(id_bovino: str,fecha_estimada_prenez:date):
+    try:
+        ingresocalcularFechaParto= modelo_partos.insert().values(id_bovino=id_bovino,fecha_estimada_prenez=fecha_estimada_prenez)
+        condb.execute(ingresocalcularFechaParto)
+        condb.commit()
+
+    except Exception as e:
+        logger.error(f'Error al Crear ingresocalcularFechaParto: {e}')
+        raise
+    finally:
+        condb.close()
+
+    return Response(status_code=HTTP_204_NO_CONTENT)
+
+
 
 
 
@@ -621,8 +660,6 @@ async def hectareas_forraje(hectareas_forraje: float):
         condb.close()
 
     return Response(status_code=HTTP_204_NO_CONTENT)
-
-
 
 
 
@@ -1973,7 +2010,7 @@ def fecha_aproximada_parto():
         session.execute(modelo_partos.update().values(fecha_estimada_parto=fecha_estimada_parto,edad=edad,
                                                       peso=peso). \
                         where(modelo_partos.columns.id_bovino == id))
-        logger.info(f'Funcion fecha_aproximada_parto {fecha_estimada_parto} ')
+
         session.commit()
   except Exception as e:
       logger.error(f'Error Funcion fecha_aproximada_parto: {e}')
