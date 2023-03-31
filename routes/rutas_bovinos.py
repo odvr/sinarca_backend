@@ -56,6 +56,7 @@ async def inventario_bovino():
     # Se llama la funcion con el fin que esta realice el calculo pertinete a la edad del animal ingresado
     calculoEdad()
     eliminarduplicados()
+    EliminarDuplicadosLeche()
     vida_util_macho_reproductor()
 
 
@@ -102,6 +103,7 @@ async def inventario_prod_leche():
     Dias_Abiertos()
     animales_no_ordeno()
     eliminarduplicados()
+    EliminarDuplicadosLeche()
 
     try:
 
@@ -114,6 +116,61 @@ async def inventario_prod_leche():
         session.close()
     return itemsLeche
 
+
+
+
+
+@rutas_bovinos.get("/listar_animales_descarte" )
+async def listarAnimalesDescarte():
+
+    try:
+
+        itemsAnimalesDescarte = session.execute(modelo_descarte.select()).all()
+
+    except Exception as e:
+        logger.error(f'Error al obtener inventario de Anamales de Descarte: {e}')
+        raise
+    finally:
+        session.close()
+    return itemsAnimalesDescarte
+
+@rutas_bovinos.get("/listar_contar_animales_descarte" )
+async def listar_contar_AnimalesDescarte():
+
+    try:
+
+        #itemsAnimalesDescarte = session.execute(modelo_descarte).count()
+        itemsAnimalesDescarte = session.query(modelo_descarte). \
+            where(modelo_descarte.columns.id_bovino).count()
+
+    except Exception as e:
+        logger.error(f'Error al obtener inventario de Anamales de Descarte: {e}')
+        raise
+    finally:
+        session.close()
+    return itemsAnimalesDescarte
+
+"""
+Listar animales con vientre apto
+"""
+@rutas_bovinos.get("/listar_contar_listar_vientres_aptos" )
+async def listar_contar_AnimalesDescarte():
+
+    try:
+        itemsAnimalesVientresAptos = session.query(modelo_vientres_aptos). \
+            where(modelo_vientres_aptos.columns.id_vientre).count()
+
+    except Exception as e:
+        logger.error(f'Error al obtener CONTAR VIENTRES APTOS: {e}')
+        raise
+    finally:
+        session.close()
+    return itemsAnimalesVientresAptos
+
+
+
+
+
 """
 Lista los animales en Levante
 
@@ -123,6 +180,7 @@ Lista los animales en Levante
 async def inventario_levante():
     Estado_Optimo_Levante()
     eliminarduplicados()
+    EliminarDuplicadosLeche()
 
     try:
         itemsLevante = session.execute(modelo_levante.select()).all()
@@ -144,6 +202,7 @@ async def inventario_ceba():
     #llamdo de la funcion para calcular
     Estado_Optimo_Ceba()
     eliminarduplicados()
+    EliminarDuplicadosLeche()
 
 
     try:
@@ -233,6 +292,25 @@ async def listar_vientres_aptos():
     finally:
         session.close()
     return vientres_aptoss
+
+
+"""
+Listado de vientres aptos Para el modulo de Vientres Aptos
+"""
+@rutas_bovinos.get("/listar_vientres_aptos_modulos" )
+async def listar_vientres_aptos_modulo():
+    try:
+        vientres_aptos()
+        Eliminacion_total_vientres_aptos()
+        tabla_vientres_aptos = session.query(modelo_vientres_aptos).all()
+
+    except Exception as e:
+        logger.error(f'Error al obtener inventario de TABLA VIENTRES APTOS: {e}')
+        raise
+    finally:
+        session.close()
+    return tabla_vientres_aptos
+
 
 
 
@@ -387,6 +465,7 @@ Lista los datos de la tabla prod levante para la opcion de editar bovino
 @rutas_bovinos.get("/listar_bovino_proceba/{id_bovino}")
 async def id_inventario_bovino_ceba(id_bovino: str):
     eliminarduplicados()
+    EliminarDuplicadosLeche()
     try:
         consulta = session.execute(
             modelo_ceba.select().where(modelo_ceba.columns.id_bovino == id_bovino)).first()
@@ -410,6 +489,7 @@ Lista los datos de la tabla prod leche inventario
 @rutas_bovinos.get("/listar_bovino_prodLeche/{id_bovino}")
 async def id_inventario_bovino_leche(id_bovino: str):
     eliminarduplicados()
+    EliminarDuplicadosLeche()
     try:
         consulta = session.execute(
             modelo_leche.select().where(modelo_leche.columns.id_bovino == id_bovino)).first()
@@ -478,6 +558,7 @@ la clase Esquema_bovinos  recibira como base para crear el animal esto con fin d
 @rutas_bovinos.post("/crear_bovino", status_code=HTTP_204_NO_CONTENT)
 async def crear_bovinos(esquemaBovinos: Esquema_bovinos):
     eliminarduplicados()
+    EliminarDuplicadosLeche()
     try:
         bovinos_dic = esquemaBovinos.dict()
         ingreso = modelo_bovinos_inventario.insert().values(bovinos_dic)
@@ -505,6 +586,7 @@ async def CrearProdLeche(fecha_primer_parto: date, id_bovino: str, fecha_inicial
                    fecha_ultimo_parto: date, fecha_ultima_prenez: date, num_partos: int, tipo_parto: str,
                    datos_prenez: str, ordeno: str,proposito:str):
     eliminarduplicados()
+    EliminarDuplicadosLeche()
     try:
         ingresopleche = modelo_leche.insert().values(fecha_primer_parto=fecha_primer_parto, id_bovino=id_bovino,
                                                      fecha_inicial_ordeno=fecha_inicial_ordeno,
@@ -542,6 +624,7 @@ Funcion crear Levante
     status_code=HTTP_204_NO_CONTENT)
 async def CrearProdLevante(id_bovino: str,proposito:str):
     eliminarduplicados()
+    EliminarDuplicadosLeche()
     try:
         ingresoplevante = modelo_levante.insert().values(id_bovino=id_bovino, proposito = proposito)
         logger.info(f'Se creo el siguiente Bovino en la tabla de produccion de leche {ingresoplevante} ')
@@ -570,6 +653,7 @@ Funcion Caga Animal
     status_code=HTTP_204_NO_CONTENT)
 async def CrearCargaAnimal(id_bovino: str):
     eliminarduplicados()
+    EliminarDuplicadosLeche()
     try:
         ingresoCargaAnimal = modelo_carga_animal_y_consumo_agua.insert().values(id_bovino=id_bovino)
 
@@ -594,6 +678,8 @@ Crear en la tabla de partos para calcular la fecha aproximada
     status_code=HTTP_204_NO_CONTENT)
 async def CrearFechaAproximadaParto(id_bovino: str,fecha_estimada_prenez:date):
     try:
+        fecha_aproximada_parto()
+        listar_fecha_parto()
         ingresocalcularFechaParto= modelo_partos.insert().values(id_bovino=id_bovino,fecha_estimada_prenez=fecha_estimada_prenez)
         condb.execute(ingresocalcularFechaParto)
         condb.commit()
@@ -618,6 +704,7 @@ Funcion crear La temperatura
     status_code=HTTP_204_NO_CONTENT)
 async def crear_temperatura(temperatura_ambiente: float):
     eliminarduplicados()
+    EliminarDuplicadosLeche()
     try:
         #temperatura_ambiente_indicadores = modelo_indicadores.insert().values(temperatura_ambiente=temperatura_ambiente).where(modelo_indicadores.c.id_indicadores == 1)
 
@@ -853,11 +940,12 @@ def eliminarduplicados():
         if proposito == 'Ceba':
             condb.execute(modelo_levante.delete().where(modelo_levante.c.id_levante == idle))
             condb.commit()
+def EliminarDuplicadosLeche():
     itemsLeche = session.execute(modelo_leche.select()).all()
     for ileche in itemsLeche:
         propositoleche = ileche[16]
         idleche = ileche[0]
-        print(propositoleche,idleche)
+        print(propositoleche, idleche)
         if propositoleche == 'Levante':
             eliminarlevanteleche = condb.execute(modelo_leche.delete().where(modelo_leche.c.id_leche == idleche))
             logger.info(f'Se ELIMINA EL DATO REPETIDO DE LECHE LEVANTE =  {eliminarlevanteleche} ')
@@ -868,7 +956,7 @@ def eliminarduplicados():
             condb.commit(eliminarcebaleche)
 
 
-eliminarduplicados()
+
 
 
 
@@ -1912,6 +2000,7 @@ def consumo_global_agua_y_totalidad_unidades_animales():
         session.execute(modelo_indicadores.update().values(consumo_global_agua=total_consumo_agua,
                                                                total_unidades_animales=interpretacion). \
                         where(modelo_indicadores.columns.id_indicadores == 1))
+        logger.info(f'Funcion consumo_global_agua_y_totalidad_unidades_animales {consulta_consumo_agua} ')
         logger.info(f'Funcion consumo_global_agua_y_totalidad_unidades_animales {consulta_consumo_agua} ')
         session.commit()
   except Exception as e:
