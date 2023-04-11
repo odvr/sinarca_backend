@@ -7,6 +7,25 @@ El siguiente codigo permitira realizar el esquema de bases de datos para el meto
 #,
 from pydantic import BaseModel
 from datetime import date
+from sqlalchemy import create_engine, Column, Integer, String
+from sqlalchemy.orm import sessionmaker
+from passlib.context import CryptContext
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+class User(BaseModel):
+    id = str
+    username = str
+    hashed_password = str
+
+
+
+
+
+
+class TokenSchema(BaseModel):
+    access_token: str
+    refresh_token: str
 
 class Esquema_bovinos(BaseModel):
     id_bovino : str

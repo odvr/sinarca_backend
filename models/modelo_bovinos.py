@@ -13,6 +13,19 @@ from config.db  import meta,engine
 from sqlalchemy import ForeignKey
 from sqlalchemy.types import Integer, Text, String, DateTime
 
+
+""" id = Column(Integer, primary_key=True, index=True)
+    username = Column(String, unique=True, index=True)
+    email = Column(String, unique=True, index=True)
+    hashed_password = Column(String)"""
+
+
+modelo_users = Table("users", meta, Column("id", String(300), primary_key=True, unique=True,index=True),
+                        Column("username", String(300), unique=True, index=True),Column("hashed_password", String(300)))
+
+
+
+
 """
  Modelo para la tabla de Bovinos
  cuenta una relacion de uno a muchos para las siguientes tablas: 
@@ -189,5 +202,4 @@ modelo_vientres_aptos = Table("vientres_aptos", meta, Column("id_vientre", Integ
                                  Column("peso", Float))
 
 meta.create_all(engine)
-
 

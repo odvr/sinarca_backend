@@ -9,19 +9,32 @@ import logging
 from http.client import HTTPException
 
 from fastapi import APIRouter, Response
-from pydantic.types import Decimal
+
 
 # importa la conexion de la base de datos
 from config.db import condb, session
 # importa el esquema de los bovinos
 from models.modelo_bovinos import modelo_bovinos_inventario, modelo_leche, modelo_levante, \
     modelo_indicadores, modelo_ceba, modelo_macho_reproductor, modelo_carga_animal_y_consumo_agua, \
-    modelo_capacidad_carga, modelo_calculadora_hectareas_pastoreo, modelo_partos, modelo_vientres_aptos,modelo_descarte
-from schemas.schemas_bovinos import Esquema_bovinos, esquema_produccion_leche, esquema_produccion_levante,esquema_descarte, \
+    modelo_capacidad_carga, modelo_calculadora_hectareas_pastoreo, modelo_partos, modelo_vientres_aptos,modelo_descarte,modelo_users
+from schemas.schemas_bovinos import Esquema_bovinos,User, esquema_produccion_leche, esquema_produccion_levante,TokenSchema,esquema_descarte, \
     esquema_produccion_ceba
 from sqlalchemy import select, insert, values, update, bindparam, between, join, func, null
 from starlette.status import HTTP_204_NO_CONTENT
 from datetime import date, datetime, timedelta
+
+
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+
+from fastapi import  status, HTTPException, Depends
+
+oauth2_scheme = OAuth2PasswordBearer("/token")
+
+
+
+
+
+
 
 
 # Configuracion de las rutas para fash api
@@ -42,7 +55,34 @@ file_handler.setFormatter(formatter)
 
 # Agrega el manejador de archivo al logger
 logger.addHandler(file_handler)
+from passlib.context import CryptContext
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
+
+
+
+""" 
+La siguiente linea de codigo permite realizar el Login de la aplicacion 
+"""
+
+@rutas_bovinos.post("/token")
+def login(form_data: OAuth2PasswordRequestForm = Depends()):
+    # Consulta a la base de datos para obtener el usuario con el nombre de usuario proporcionado
+    user = session.query(modelo_users).filter(modelo_users.c.username == form_data.username).first()
+    print(user)
+    if not user:
+        raise HTTPException(
+            status_code=400, detail="Contraseña o Usuario invalido")
+
+    if not form_data.password == user["hashed_password"]:
+     raise HTTPException(
+         status_code=400, detail="Contraseña o Usuario invalido")
+
+
+    return {
+        "access_token": form_data.username,
+        "token_type": "bearer"
+    }
 
 """
 La siguiente funcion retorna un diccionario con la consulta general del la tabla bovinos,
@@ -62,7 +102,7 @@ async def inventario_bovino():
 
     try:
         items = condb.execute(modelo_bovinos_inventario.select()).fetchall()
-        logger.info(f'Se obtuvieron {len(items)} registros de inventario de bovinos.')
+
 
     except Exception as e:
         logger.error(f'Error al obtener inventario de bovinos: {e}')
@@ -72,7 +112,7 @@ async def inventario_bovino():
 
     return items
 
-@rutas_bovinos.get("/listar_bovino_v/{id_bovino}", response_model=Esquema_bovinos)
+@rutas_bovinos.get("/listar_bovino_v/{id_bovino}",status_code=200)
 async def id_inventario_bovino_v(id_bovino: str):
     try:
 
@@ -80,7 +120,7 @@ async def id_inventario_bovino_v(id_bovino: str):
             modelo_bovinos_inventario.select().where(modelo_bovinos_inventario.columns.id_bovino == id_bovino)).first()
 
         if not consulta:
-            raise HTTPException(status_code=404, detail=f"El bovino con el ID {id_bovino} no existe en el inventario.")
+            raise HTTPException(status_code=404, detail="El bovino no se encontró en el inventario")
 
     except HTTPException:
         raise
@@ -89,9 +129,7 @@ async def id_inventario_bovino_v(id_bovino: str):
         logger.error(f'Error al obtener Listar Unico Bovino del Inventario : {e}')
         raise
 
-    # condb.commit()
     return consulta
-
 
 
 @rutas_bovinos.get("/listar_prod_leche" )
@@ -465,7 +503,7 @@ Lista los datos de la tabla prod levante para la opcion de editar bovino
 @rutas_bovinos.get("/listar_bovino_proceba/{id_bovino}")
 async def id_inventario_bovino_ceba(id_bovino: str):
     eliminarduplicados()
-    EliminarDuplicadosLeche()
+
     try:
         consulta = session.execute(
             modelo_ceba.select().where(modelo_ceba.columns.id_bovino == id_bovino)).first()
@@ -489,7 +527,7 @@ Lista los datos de la tabla prod leche inventario
 @rutas_bovinos.get("/listar_bovino_prodLeche/{id_bovino}")
 async def id_inventario_bovino_leche(id_bovino: str):
     eliminarduplicados()
-    EliminarDuplicadosLeche()
+
     try:
         consulta = session.execute(
             modelo_leche.select().where(modelo_leche.columns.id_bovino == id_bovino)).first()
@@ -555,10 +593,10 @@ la clase Esquema_bovinos  recibira como base para crear el animal esto con fin d
 """
 
 
-@rutas_bovinos.post("/crear_bovino", status_code=HTTP_204_NO_CONTENT)
+@rutas_bovinos.post("/crear_bovino", status_code=status.HTTP_201_CREATED)
 async def crear_bovinos(esquemaBovinos: Esquema_bovinos):
     eliminarduplicados()
-    EliminarDuplicadosLeche()
+
     try:
         bovinos_dic = esquemaBovinos.dict()
         ingreso = modelo_bovinos_inventario.insert().values(bovinos_dic)
@@ -571,7 +609,7 @@ async def crear_bovinos(esquemaBovinos: Esquema_bovinos):
     finally:
         condb.close()
 
-    return Response(status_code=HTTP_204_NO_CONTENT)
+    return Response(status_code=status.HTTP_201_CREATED)
 
 
 """
@@ -581,12 +619,12 @@ La siguiente api crea en la tabla de leche con la llave foranea de id_bovino est
 
 @rutas_bovinos.post(
     "/crear_prod_leche/{fecha_primer_parto}/{id_bovino}/{fecha_inicial_ordeno}/{fecha_fin_ordeno}/{fecha_ultimo_parto}/{fecha_ultima_prenez}/{num_partos}/{tipo_parto}/{datos_prenez}/{ordeno}/{proposito}",
-    status_code=HTTP_204_NO_CONTENT)
+    status_code=status.HTTP_201_CREATED)
 async def CrearProdLeche(fecha_primer_parto: date, id_bovino: str, fecha_inicial_ordeno: date, fecha_fin_ordeno: date,
                    fecha_ultimo_parto: date, fecha_ultima_prenez: date, num_partos: int, tipo_parto: str,
                    datos_prenez: str, ordeno: str,proposito:str):
     eliminarduplicados()
-    EliminarDuplicadosLeche()
+
     try:
         ingresopleche = modelo_leche.insert().values(fecha_primer_parto=fecha_primer_parto, id_bovino=id_bovino,
                                                      fecha_inicial_ordeno=fecha_inicial_ordeno,
@@ -605,7 +643,7 @@ async def CrearProdLeche(fecha_primer_parto: date, id_bovino: str, fecha_inicial
     finally:
         condb.close()
 
-    return Response(status_code=HTTP_204_NO_CONTENT)
+    return Response(status_code=status.HTTP_201_CREATED)
 
 
 
@@ -621,10 +659,10 @@ Funcion crear Levante
 """
 @rutas_bovinos.post(
     "/crear_prod_levante/{id_bovino}/{proposito}",
-    status_code=HTTP_204_NO_CONTENT)
+    status_code=status.HTTP_201_CREATED)
 async def CrearProdLevante(id_bovino: str,proposito:str):
     eliminarduplicados()
-    EliminarDuplicadosLeche()
+
     try:
         ingresoplevante = modelo_levante.insert().values(id_bovino=id_bovino, proposito = proposito)
         logger.info(f'Se creo el siguiente Bovino en la tabla de produccion de leche {ingresoplevante} ')
@@ -638,7 +676,7 @@ async def CrearProdLevante(id_bovino: str,proposito:str):
     finally:
         condb.close()
 
-    return Response(status_code=HTTP_204_NO_CONTENT)
+    return Response(status_code=status.HTTP_201_CREATED)
 
 
 
@@ -650,10 +688,10 @@ Funcion Caga Animal
 """
 @rutas_bovinos.post(
     "/crear_carga_animal/{id_bovino}",
-    status_code=HTTP_204_NO_CONTENT)
+    status_code=status.HTTP_201_CREATED)
 async def CrearCargaAnimal(id_bovino: str):
     eliminarduplicados()
-    EliminarDuplicadosLeche()
+
     try:
         ingresoCargaAnimal = modelo_carga_animal_y_consumo_agua.insert().values(id_bovino=id_bovino)
 
@@ -667,7 +705,7 @@ async def CrearCargaAnimal(id_bovino: str):
     finally:
         condb.close()
 
-    return Response(status_code=HTTP_204_NO_CONTENT)
+    return Response(status_code=status.HTTP_201_CREATED)
 
 
 """
@@ -675,12 +713,14 @@ Crear en la tabla de partos para calcular la fecha aproximada
 """
 @rutas_bovinos.post(
     "/crear_fecha_apoximada_parto/{id_bovino}/{fecha_estimada_prenez}",
-    status_code=HTTP_204_NO_CONTENT)
+    status_code=status.HTTP_201_CREATED)
 async def CrearFechaAproximadaParto(id_bovino: str,fecha_estimada_prenez:date):
     try:
         fecha_aproximada_parto()
-        listar_fecha_parto()
+        #listar_fecha_parto()
         ingresocalcularFechaParto= modelo_partos.insert().values(id_bovino=id_bovino,fecha_estimada_prenez=fecha_estimada_prenez)
+
+
         condb.execute(ingresocalcularFechaParto)
         condb.commit()
 
@@ -690,7 +730,7 @@ async def CrearFechaAproximadaParto(id_bovino: str,fecha_estimada_prenez:date):
     finally:
         condb.close()
 
-    return Response(status_code=HTTP_204_NO_CONTENT)
+    return Response(status_code=status.HTTP_201_CREATED)
 
 
 
@@ -701,10 +741,10 @@ Funcion crear La temperatura
 """
 @rutas_bovinos.post(
     "/crear_temperatura/{temperatura_ambiente}",
-    status_code=HTTP_204_NO_CONTENT)
+    status_code=status.HTTP_201_CREATED)
 async def crear_temperatura(temperatura_ambiente: float):
     eliminarduplicados()
-    EliminarDuplicadosLeche()
+
     try:
         #temperatura_ambiente_indicadores = modelo_indicadores.insert().values(temperatura_ambiente=temperatura_ambiente).where(modelo_indicadores.c.id_indicadores == 1)
 
@@ -718,7 +758,7 @@ async def crear_temperatura(temperatura_ambiente: float):
     finally:
         condb.close()
 
-    return Response(status_code=HTTP_204_NO_CONTENT)
+    return Response(status_code=status.HTTP_201_CREATED)
 
 
 
@@ -730,7 +770,7 @@ Funcion inserta las hectareas aproximadas para realizar el calculo para el modul
 """
 @rutas_bovinos.post(
     "/crear_hectareas_forraje/{hectareas_forraje}",
-    status_code=HTTP_204_NO_CONTENT)
+    status_code=status.HTTP_201_CREATED)
 async def hectareas_forraje(hectareas_forraje: float):
 
     try:
@@ -746,7 +786,7 @@ async def hectareas_forraje(hectareas_forraje: float):
     finally:
         condb.close()
 
-    return Response(status_code=HTTP_204_NO_CONTENT)
+    return Response(status_code=status.HTTP_201_CREATED)
 
 
 
@@ -755,7 +795,7 @@ Crear Ceba
 """
 @rutas_bovinos.post(
     "/crear_prod_ceba/{id_bovino}/{proposito}",
-    status_code=HTTP_204_NO_CONTENT)
+    status_code=status.HTTP_201_CREATED)
 async def CrearProdCeba(id_bovino: str,proposito:str):
 
     try:
@@ -771,7 +811,7 @@ async def CrearProdCeba(id_bovino: str,proposito:str):
     finally:
         condb.close()
 
-    return Response(status_code=HTTP_204_NO_CONTENT)
+    return Response( status_code=status.HTTP_201_CREATED)
 
 
 """
@@ -779,7 +819,7 @@ Crear Descarte
 """
 @rutas_bovinos.post(
     "/crear_descarte/{id_bovino}/{edad}/{peso}/{razon_descarte}",
-    status_code=HTTP_204_NO_CONTENT)
+    status_code=status.HTTP_201_CREATED)
 async def CrearDescarte(id_bovino: str,edad:int,peso:float,razon_descarte:str):
 
     try:
@@ -795,7 +835,7 @@ async def CrearDescarte(id_bovino: str,edad:int,peso:float,razon_descarte:str):
     finally:
         condb.close()
 
-    return Response(status_code=HTTP_204_NO_CONTENT)
+    return Response( status_code=status.HTTP_201_CREATED)
 
 
 """
@@ -803,7 +843,7 @@ Crear Macho Reproductor
 """
 @rutas_bovinos.post(
     "/crear_reproductor/{id_bovino}",
-    status_code=HTTP_204_NO_CONTENT)
+    status_code=status.HTTP_201_CREATED)
 async def CrearReproductor(id_bovino: str):
     try:
         CrearMacho = modelo_macho_reproductor.insert().values(id_bovino=id_bovino)
@@ -818,7 +858,7 @@ async def CrearReproductor(id_bovino: str):
     finally:
         condb.close()
 
-    return Response(status_code=HTTP_204_NO_CONTENT)
+    return Response( status_code=status.HTTP_201_CREATED)
 
 
 
@@ -853,7 +893,7 @@ async def cambiar_esta_bovino(data_update: Esquema_bovinos, id_bovino: str):
     finally:
         condb.close()
 
-    return Response(status_code=HTTP_204_NO_CONTENT)
+    return Response( status_code=status.HTTP_201_CREATED)
 
 
 
@@ -1282,7 +1322,7 @@ existen en el hato,para ello utiliza la cantidad de animales vivos,
 muertos y totales"""
 
 
-@rutas_bovinos.post("/Calcular_Tasa_Sobrevivencia")
+
 def Tasa_Sobrevivencia():
   try:
     # consulta y seleccion de los animales vivos
@@ -1454,7 +1494,7 @@ async def animales_levante():
     return prop_levante
 
 
-@rutas_bovinos.post("/Calcular_animales_leche")
+
 def animales_leche():
   try:
     # consulta de total de animales vivos con proposito de leche
@@ -1472,7 +1512,7 @@ def animales_leche():
       raise
   finally:
       session.close()
-    #return prop_leche
+
 
 
 @rutas_bovinos.get("/Calcular_animales_muertos")
