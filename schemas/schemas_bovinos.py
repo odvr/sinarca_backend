@@ -9,9 +9,9 @@ from pydantic import BaseModel
 from datetime import date
 from sqlalchemy import create_engine, Column, Integer, String
 from sqlalchemy.orm import sessionmaker
-from passlib.context import CryptContext
+#from passlib.context import CryptContext
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+#pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 class User(BaseModel):
     id = str
@@ -98,11 +98,20 @@ class esquema_datos_muerte(BaseModel):
     class Config:
         orm_mode = True
         env_file = ".env"
-class esquema_arbol_genialogico(BaseModel):
-    id_arbol_genialogico: int
+class esquema_arbol_genealogico(BaseModel):
+    id_arbol_genealogico: int
     id_bovino: str
     id_bovino_madre: str
     id_bovino_padre: str
+    abuelo_paterno:str
+    abuela_paterna:str
+    abuelo_materno:str
+    abuela_materna:str
+    bisabuelo_materno:str
+    bisabuelo_paterno:str
+    tipo_de_apareamiento:str
+    consanguinidad:float
+    notificacion:str
     class Config:
         orm_mode = True
         env_file = ".env"
