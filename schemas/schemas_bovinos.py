@@ -38,7 +38,7 @@ class Esquema_bovinos(BaseModel):
     proposito: str
     mansedumbre : str
     estado: str
-    descarte: str
+
     #Este Config La clase se utiliza para proporcionar configuraciones a Pydantic.
     class Config:
         orm_mode = True

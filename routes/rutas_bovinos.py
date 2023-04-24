@@ -10,13 +10,13 @@ from http.client import HTTPException
 
 from fastapi import APIRouter, Response
 
-
+from Lib.endogamia import endogamia
 # importa la conexion de la base de datos
 from config.db import condb, session
 # importa el esquema de los bovinos
-from models.modelo_bovinos import modelo_bovinos_inventario, modelo_leche, modelo_levante, \
+from models.modelo_bovinos import modelo_bovinos_inventario,modelo_veterinaria, modelo_leche, modelo_levante, \
     modelo_indicadores, modelo_ceba, modelo_macho_reproductor, modelo_carga_animal_y_consumo_agua, \
-    modelo_capacidad_carga, modelo_calculadora_hectareas_pastoreo, modelo_partos, modelo_vientres_aptos,modelo_descarte,modelo_users
+    modelo_capacidad_carga, modelo_calculadora_hectareas_pastoreo, modelo_partos, modelo_vientres_aptos,modelo_descarte,modelo_users,modelo_arbol_genealogico
 from schemas.schemas_bovinos import Esquema_bovinos,User, esquema_produccion_leche, esquema_produccion_levante,TokenSchema,esquema_descarte, \
     esquema_produccion_ceba
 from sqlalchemy import select, insert, values, update, bindparam, between, join, func, null
@@ -59,8 +59,28 @@ from passlib.context import CryptContext
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
+from twilio.rest import Client
 
 
+
+""" Enviar Notificaciones """
+
+def Notificaciones():
+    account_sid = 'AC99b97a77f43fd1f944485dbad0f960a0'
+    auth_token = '29f8eac6e4ad3b1369f05719fca07db3'
+    client = Client(account_sid, auth_token)
+
+    message = client.messages.create(
+        from_='+15075166814',
+        body='Hola Este es un Mensaje Para sinarca',
+        to='+573232825739'
+    )
+
+    print(message.sid)
+
+
+
+Notificaciones()
 """ 
 La siguiente linea de codigo permite realizar el Login de la aplicacion 
 """
@@ -95,6 +115,8 @@ La siguiente funcion retorna un diccionario con la consulta general del la tabla
 async def inventario_bovino():
     # Se llama la funcion con el fin que esta realice el calculo pertinete a la edad del animal ingresado
     calculoEdad()
+
+
     eliminarduplicados()
     EliminarDuplicadosLeche()
     vida_util_macho_reproductor()
@@ -171,6 +193,85 @@ async def listarAnimalesDescarte():
     finally:
         session.close()
     return itemsAnimalesDescarte
+
+@rutas_bovinos.get("/listar_contar_listar_vientres_aptos" )
+async def listar_contar_AnimalesDescarte():
+
+    try:
+        itemsAnimalesVientresAptos = session.query(modelo_vientres_aptos). \
+            where(modelo_vientres_aptos.columns.id_vientre).count()
+
+    except Exception as e:
+        logger.error(f'Error al obtener CONTAR VIENTRES APTOS: {e}')
+        raise
+    finally:
+        session.close()
+    return itemsAnimalesVientresAptos
+
+@rutas_bovinos.get("/listar_tabla_veterinaria" )
+async def listar_tabla_veterinaria():
+
+    try:
+        machos = session.query(modelo_bovinos_inventario). \
+            filter(modelo_bovinos_inventario.c.estado == "Vivo",
+                   modelo_bovinos_inventario.c.sexo == "Macho").count()
+        itemsAnimalesVeterinaria =  session.execute(modelo_veterinaria.select()).all()
+
+    except Exception as e:
+        logger.error(f'Error al obtener TABLA DE VETERINARIA: {e}')
+        raise
+    finally:
+        session.close()
+    return itemsAnimalesVeterinaria
+
+@rutas_bovinos.get("/listar_tabla_solo_machos" )
+async def listar_tabla_solo_machos():
+
+    try:
+        machos = session.query(modelo_bovinos_inventario). \
+            filter(
+                   modelo_bovinos_inventario.c.sexo == "Macho").all()
+
+
+    except Exception as e:
+        logger.error(f'Error al obtener TABLA DE SOLO MACHOS: {e}')
+        raise
+    finally:
+        session.close()
+    return machos
+@rutas_bovinos.get("/listar_tabla_solo_hembras" )
+async def listar_tabla_solo_hembras():
+
+    try:
+        hembras = session.query(modelo_bovinos_inventario). \
+            filter( modelo_bovinos_inventario.c.sexo == "Hembra").all()
+        #itemsAnimalesVeterinaria =  session.execute(modelo_veterinaria.select()).all()
+
+    except Exception as e:
+        logger.error(f'Error al obtener TABLA DE SOLO Hembra: {e}')
+        raise
+    finally:
+        session.close()
+    return hembras
+
+
+
+@rutas_bovinos.get("/listar_tabla_endogamia" )
+async def listar_tabla_endogamia():
+
+    try:
+        itemsAnimalesEndogamia =  session.execute(modelo_arbol_genealogico.select()).all()
+
+    except Exception as e:
+        logger.error(f'Error al obtener TABLA DE ENDOGAMIA: {e}')
+        raise
+    finally:
+        session.close()
+    return itemsAnimalesEndogamia
+
+
+
+
 
 @rutas_bovinos.get("/listar_contar_animales_descarte" )
 async def listar_contar_AnimalesDescarte():
@@ -596,7 +697,6 @@ la clase Esquema_bovinos  recibira como base para crear el animal esto con fin d
 @rutas_bovinos.post("/crear_bovino", status_code=status.HTTP_201_CREATED)
 async def crear_bovinos(esquemaBovinos: Esquema_bovinos):
     eliminarduplicados()
-
     try:
         bovinos_dic = esquemaBovinos.dict()
         ingreso = modelo_bovinos_inventario.insert().values(bovinos_dic)
@@ -610,6 +710,32 @@ async def crear_bovinos(esquemaBovinos: Esquema_bovinos):
         condb.close()
 
     return Response(status_code=status.HTTP_201_CREATED)
+
+
+"""
+Crear Indice de Endogamia
+"""
+@rutas_bovinos.post("/calcular_indice_endogamia/{id_bovino}/{id_bovino_madre}/{id_bovino_padre}",status_code=200)
+async def crear_endogamia(id_bovino:str,id_bovino_madre: str,id_bovino_padre:str ):
+
+    try:
+        ingresoEndogamia = modelo_arbol_genealogico.insert().values(id_bovino=id_bovino,
+                                                     id_bovino_madre=id_bovino_madre,
+                                                     id_bovino_padre=id_bovino_padre,
+                                                   )
+
+
+        condb.execute(ingresoEndogamia)
+        condb.commit()
+        endogamia()
+    except Exception as e:
+        logger.error(f'Error al Crear INDICE DE ENDOGAMIA: {e}')
+        raise
+    finally:
+        condb.close()
+
+    return Response(status_code=status.HTTP_201_CREATED)
+
 
 
 """
@@ -774,6 +900,7 @@ Funcion inserta las hectareas aproximadas para realizar el calculo para el modul
 async def hectareas_forraje(hectareas_forraje: float):
 
     try:
+
 
         capacidad_carga()
         hectareas_forraje = update(modelo_capacidad_carga).where(modelo_capacidad_carga.c.id_capacidad == 1).values(hectareas_forraje=hectareas_forraje)
@@ -986,14 +1113,12 @@ def EliminarDuplicadosLeche():
         propositoleche = ileche[16]
         idleche = ileche[0]
         print(propositoleche, idleche)
-        if propositoleche == 'Levante':
+        if propositoleche == 'Levante' or propositoleche == 'Ceba':
             eliminarlevanteleche = condb.execute(modelo_leche.delete().where(modelo_leche.c.id_leche == idleche))
             logger.info(f'Se ELIMINA EL DATO REPETIDO DE LECHE LEVANTE =  {eliminarlevanteleche} ')
             condb.commit(eliminarlevanteleche)
-        if propositoleche == 'Ceba':
-            eliminarcebaleche = condb.execute(modelo_leche.delete().where(modelo_leche.c.id_leche == idleche))
-            logger.info(f'Se ELIMINA EL DATO REPETIDO DE LECHE CEBA =  {eliminarcebaleche} ')
-            condb.commit(eliminarcebaleche)
+        else:
+            pass
 
 
 
