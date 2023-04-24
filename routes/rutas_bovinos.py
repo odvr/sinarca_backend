@@ -80,7 +80,7 @@ def Notificaciones():
 
 
 
-Notificaciones()
+#Notificaciones()
 """ 
 La siguiente linea de codigo permite realizar el Login de la aplicacion 
 """
@@ -315,7 +315,7 @@ Lista los animales en Levante
 
 """
 
-@rutas_bovinos.get("/listar_prod_levante",response_model=list[esquema_produccion_levante] )
+@rutas_bovinos.get("/listar_prod_levante" )
 async def inventario_levante():
     Estado_Optimo_Levante()
     eliminarduplicados()
