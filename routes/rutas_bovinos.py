@@ -315,7 +315,7 @@ Lista los animales en Levante
 
 """
 
-@rutas_bovinos.get("/listar_prod_levante" )
+@rutas_bovinos.get("/listar_prod_levante")
 async def inventario_levante():
     Estado_Optimo_Levante()
     eliminarduplicados()
@@ -697,6 +697,9 @@ la clase Esquema_bovinos  recibira como base para crear el animal esto con fin d
 @rutas_bovinos.post("/crear_bovino", status_code=status.HTTP_201_CREATED)
 async def crear_bovinos(esquemaBovinos: Esquema_bovinos):
     eliminarduplicados()
+    inventario_levante()
+    vientres_aptos()
+
     try:
         bovinos_dic = esquemaBovinos.dict()
         ingreso = modelo_bovinos_inventario.insert().values(bovinos_dic)
@@ -2286,27 +2289,67 @@ def Eliminacion_total_vientres_aptos():
 animales hembras vivos con una edad igual o mayor a 16 meses"""
 def vientres_aptos():
   try:
-    #llamada de funcion que elimina registro anterior
-    Eliminacion_total_vientres_aptos()
-    # consulta de vacas que cumplen con la condicion
-    consulta_vientres = session.query(modelo_bovinos_inventario). \
-        where(between(modelo_bovinos_inventario.columns.edad, 16, 500)). \
-        filter(modelo_bovinos_inventario.c.estado == "Vivo",
-               modelo_bovinos_inventario.c.sexo == "Hembra").all()
-    for i in consulta_vientres:
-        # Toma el ID del bovino en este caso es el campo 0
-        id1 = i[0]
-        # Toma la edad del animal en este caso es el campo 2
-        edad = i[2]
-        # Toma el peso del animal en este caso es el campo 5
-        peso = i[5]
-        #actualizacion de campos
-        session.execute(modelo_vientres_aptos.insert().values(id_bovino=id1,edad=edad,
-                                                      peso=peso))
-        session.commit()
+
+      # consulta de vacas que cumplen con la condicion
+      consulta_vientres = session.query(modelo_bovinos_inventario). \
+          where(between(modelo_bovinos_inventario.columns.edad, 16, 500)). \
+          filter(modelo_bovinos_inventario.c.estado == "Vivo",
+                 modelo_bovinos_inventario.c.sexo == "Hembra").all()
+
+
+      for i in consulta_vientres:
+
+          # Toma el ID del bovino en este caso es el campo 0
+          idBovinoConsultaVientresAptos = i[0]
+          # Toma la edad del animal en este caso es el campo 2
+          edadBovinoConsultaVientresAptos = i[2]
+          # Toma el peso del animal en este caso es el campo 5
+          pesoBovinoConsultaVientresAptos = i[5]
+
+          consulta = condb.execute(
+              modelo_vientres_aptos.select().where(
+                  modelo_vientres_aptos.columns.id_bovino == idBovinoConsultaVientresAptos)).first()
+
+          if consulta is None:
+              ingresoVientresAptos = modelo_vientres_aptos.insert().values(id_bovino=idBovinoConsultaVientresAptos,
+                                                                           edad=edadBovinoConsultaVientresAptos,
+                                                                           peso=pesoBovinoConsultaVientresAptos)
+
+              condb.execute(ingresoVientresAptos)
+
+              condb.commit()
+          else:
+
+              print(idBovinoConsultaVientresAptos)
+              tablaVientresAptos = update(modelo_vientres_aptos).where(
+                  modelo_vientres_aptos.c.id_bovino == idBovinoConsultaVientresAptos).values(
+                  edad=edadBovinoConsultaVientresAptos, peso=pesoBovinoConsultaVientresAptos)
+              condb.execute(tablaVientresAptos)
+              condb.commit()
+
+
+
+
+
+
+
+
+
+
+
+
+          # actualizacion de campos
+          #session.execute(modelo_vientres_aptos.insert().values(id_bovino=id1, edad=edad,peso=peso))
+
+
+
   except Exception as e:
+
+
       logger.error(f'Error Funcion vientres_aptos: {e}')
       raise
+
+
   finally:
       session.close()
 """la siguiente funcion trae los campos de edad y peso de cada animal

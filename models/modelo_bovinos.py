@@ -165,7 +165,7 @@ modelo_veterinaria = Table("veterinaria", meta, Column("id_veterinaria", Integer
                            Column("evolucion", String(300)))
 
 modelo_descarte = Table("descarte", meta, Column("id_descarte", Integer, primary_key=True),
-                        Column("id_bovino", String(300), ForeignKey("bovinos.id_bovino")),
+                        Column("id_bovino", String(300), ForeignKey("bovinos.id_bovino"),unique=True),
                         Column("edad", Integer),
                         Column("peso", Float),
                         Column("razon_descarte", String(300)))
@@ -197,7 +197,7 @@ modelo_calculadora_hectareas_pastoreo = Table("pastoreo", meta, Column("id_pasto
                                               Column("consumo_agua", String(300)))
 
 modelo_vientres_aptos = Table("vientres_aptos", meta, Column("id_vientre", Integer, primary_key=True),
-                              Column("id_bovino", String(300), ForeignKey("bovinos.id_bovino")),
+                              Column("id_bovino", String(300), ForeignKey("bovinos.id_bovino"),unique=True),
                               Column("edad", Integer),
                               Column("peso", Float))
 
