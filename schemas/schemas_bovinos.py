@@ -179,6 +179,14 @@ class esquema_modelo_ventas(BaseModel):
     class Config:
         orm_mode = True
         env_file = ".env"
+class esquema_modelo_Reporte_Pesaje(BaseModel):
+    id_pesaje: int
+    id_bovino: str
+    fecha_pesaje: date
+    peso:int
+    class Config:
+        orm_mode = True
+        env_file = ".env"
 
 class esquema_veterinaria(BaseModel):
     id_veterinaria: int

@@ -145,6 +145,11 @@ modelo_ventas = Table("ventas", meta, Column("id_venta", Integer, primary_key=Tr
                       Column("medio_pago", String(300)),
                       Column("comprador", String(300)))
 
+modelo_datos_pesaje  = Table("ReportesPesaje", meta, Column("id_pesaje", Integer, primary_key=True),
+                      Column("id_bovino", String(300), ForeignKey("bovinos.id_bovino")),
+                      Column("fecha_pesaje", Date),
+                      Column("peso", Integer))
+
 modelo_veterinaria = Table("veterinaria", meta, Column("id_veterinaria", Integer, primary_key=True),
                            Column("id_bovino", String(300), ForeignKey("bovinos.id_bovino")),
                            Column("edad", Integer),

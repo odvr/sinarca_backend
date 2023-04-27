@@ -14,8 +14,8 @@ from Lib.endogamia import endogamia
 # importa la conexion de la base de datos
 from config.db import condb, session
 # importa el esquema de los bovinos
-from models.modelo_bovinos import modelo_bovinos_inventario,modelo_veterinaria, modelo_leche, modelo_levante, \
-    modelo_indicadores, modelo_ceba, modelo_macho_reproductor, modelo_carga_animal_y_consumo_agua, \
+from models.modelo_bovinos import modelo_bovinos_inventario,modelo_veterinaria, modelo_leche, modelo_levante,modelo_ventas,modelo_datos_muerte, \
+    modelo_indicadores, modelo_ceba, modelo_macho_reproductor, modelo_carga_animal_y_consumo_agua,modelo_datos_pesaje, \
     modelo_capacidad_carga, modelo_calculadora_hectareas_pastoreo, modelo_partos, modelo_vientres_aptos,modelo_descarte,modelo_users,modelo_arbol_genealogico
 from schemas.schemas_bovinos import Esquema_bovinos,User, esquema_produccion_leche, esquema_produccion_levante,TokenSchema,esquema_descarte, \
     esquema_produccion_ceba
@@ -505,6 +505,39 @@ async def relacion_toros_vientres_aptos():
         session.close()
     return toro_Vientres
 
+
+
+
+@rutas_bovinos.get("/listar_tabla_pesaje" )
+async def listar_tabla_pesaje():
+    try:
+
+        tabla_pesaje = session.query(modelo_datos_pesaje).all()
+
+    except Exception as e:
+        logger.error(f'Error al obtener inventario de TABLA PESAJE: {e}')
+        raise
+    finally:
+        session.close()
+    return tabla_pesaje
+
+@rutas_bovinos.get("/listar_tabla_pesaje_por_animal/{id_bovino}" )
+async def listar_tabla_pesaje_Por_Animal(id_bovino:str):
+    try:
+
+        tabla_pesaje = session.query(modelo_datos_pesaje).where(modelo_datos_pesaje.columns.id_bovino == id_bovino).all()
+
+
+    except Exception as e:
+        logger.error(f'Error al obtener inventario de TABLA PESAJE POR ANIMAL: {e}')
+        raise
+    finally:
+        session.close()
+    return tabla_pesaje
+
+
+
+
 """
 
 
@@ -582,9 +615,6 @@ async def listarTemperatura():
         listarTempAmbiente = session.query(modelo_indicadores.c.temperatura_ambiente).where(modelo_indicadores.c.id_indicadores == 1).first()
         #listarTempAmbiente = session.execute(modelo_indicadores.c.temperatura_ambiente).first()
 
-
-
-
     except Exception as e:
 
         logger.error(f'Error al obtener la consulta de TEMPERATURA=  {e}')
@@ -608,7 +638,7 @@ async def id_inventario_bovino_ceba(id_bovino: str):
     try:
         consulta = session.execute(
             modelo_ceba.select().where(modelo_ceba.columns.id_bovino == id_bovino)).first()
-        logger.info(f'Se listo el siguiente Bovino de Ceba {consulta} ')
+
     except Exception as e:
         logger.error(f'Error al obtener Listar Produccion Ceba: {e}')
         raise
@@ -663,6 +693,27 @@ async def id_inventario_bovino_levante(id_bovino: str):
     # condb.commit()
     return consulta
 
+""""
+Listar Tabla de Animales con Regristro de Muerte
+
+"""
+
+@rutas_bovinos.get("/listar_bovino_muerte")
+async def id_inventario_bovinos_muertos():
+    try:
+        consulta =  session.query(modelo_datos_muerte).all()
+
+    except Exception as e:
+        logger.error(f'Error al obtener Listar REGISTRO DE MUERTE : {e}')
+        raise
+    finally:
+        session.close()
+    # condb.commit()
+    return consulta
+
+
+
+
 
 
 
@@ -704,7 +755,7 @@ async def crear_bovinos(esquemaBovinos: Esquema_bovinos):
         bovinos_dic = esquemaBovinos.dict()
         ingreso = modelo_bovinos_inventario.insert().values(bovinos_dic)
         condb.execute(ingreso)
-        logger.info(f'Se creo el siguiente Bovino  {ingreso} ')
+
         condb.commit()
     except Exception as e:
         logger.error(f'Error al Crear Bovino para la tabla de inventarios: {e}')
@@ -739,6 +790,82 @@ async def crear_endogamia(id_bovino:str,id_bovino_madre: str,id_bovino_padre:str
 
     return Response(status_code=status.HTTP_201_CREATED)
 
+
+"""
+Ingresa los datos para el reporte de pesaje del animal 
+"""
+@rutas_bovinos.post("/fecha_pesaje/{id_bovino}/{fecha_pesaje}/{peso}",status_code=200)
+async def crear_fecha_pesaje(id_bovino:str,fecha_pesaje:date,peso:int ):
+
+    try:
+        listar_tabla_pesaje()
+        ingresoFechaPesaje = modelo_datos_pesaje.insert().values(id_bovino=id_bovino,
+                                                     fecha_pesaje=fecha_pesaje,peso=peso
+
+                                                   )
+
+
+        condb.execute(ingresoFechaPesaje)
+        condb.commit()
+        endogamia()
+    except Exception as e:
+        logger.error(f'Error al Crear INGRESO DE PESAJE: {e}')
+        raise
+    finally:
+        condb.close()
+
+    return Response(status_code=status.HTTP_201_CREATED)
+
+
+
+
+
+"""
+Ingresa los datos para el reporte de VENTA para el animal
+
+
+
+
+
+"""
+@rutas_bovinos.post("/crear_venta/{id_bovino}/{numero_bono_venta}/{fecha_venta}/{precio_venta}/{razon_venta}/{medio_pago}/{comprador}",status_code=200)
+async def crear_reporte_ventas(id_bovino:str,numero_bono_venta:str,fecha_venta:date,precio_venta:int,razon_venta:str,medio_pago:str,comprador:str ):
+
+    try:
+        ingresoVentas = modelo_ventas.insert().values(id_bovino=id_bovino,numero_bono_venta=numero_bono_venta,fecha_venta=fecha_venta,precio_venta=precio_venta,razon_venta=razon_venta,medio_pago=medio_pago,comprador=comprador)
+        condb.execute(ingresoVentas)
+        condb.commit()
+        endogamia()
+    except Exception as e:
+        logger.error(f'Error al Crear INGRESO DE VENTA: {e}')
+        raise
+    finally:
+        condb.close()
+
+    return Response(status_code=status.HTTP_201_CREATED)
+
+
+
+
+"""
+Ingresa los datos para el reporte de Animales Muertos
+
+"""
+@rutas_bovinos.post("/crear_registro_muerte/{id_bovino}/{fecha_muerte}/{razon_muerte}",status_code=200)
+async def crear_registro_muerte(id_bovino:str,fecha_muerte:date,razon_muerte:str ):
+
+    try:
+        ingresoRegistroMuerte = modelo_datos_muerte.insert().values(id_bovino=id_bovino,fecha_muerte=fecha_muerte,razon_muerte=razon_muerte)
+        condb.execute(ingresoRegistroMuerte)
+        condb.commit()
+        endogamia()
+    except Exception as e:
+        logger.error(f'Error al Crear INGRESO DE VENTA: {e}')
+        raise
+    finally:
+        condb.close()
+
+    return Response(status_code=status.HTTP_201_CREATED)
 
 
 """
@@ -1115,7 +1242,7 @@ def EliminarDuplicadosLeche():
     for ileche in itemsLeche:
         propositoleche = ileche[16]
         idleche = ileche[0]
-        print(propositoleche, idleche)
+
         if propositoleche == 'Levante' or propositoleche == 'Ceba':
             eliminarlevanteleche = condb.execute(modelo_leche.delete().where(modelo_leche.c.id_leche == idleche))
             logger.info(f'Se ELIMINA EL DATO REPETIDO DE LECHE LEVANTE =  {eliminarlevanteleche} ')
@@ -2320,7 +2447,7 @@ def vientres_aptos():
               condb.commit()
           else:
 
-              print(idBovinoConsultaVientresAptos)
+
               tablaVientresAptos = update(modelo_vientres_aptos).where(
                   modelo_vientres_aptos.c.id_bovino == idBovinoConsultaVientresAptos).values(
                   edad=edadBovinoConsultaVientresAptos, peso=pesoBovinoConsultaVientresAptos)
