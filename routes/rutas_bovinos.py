@@ -10,7 +10,14 @@ from http.client import HTTPException
 
 from fastapi import APIRouter, Response
 
+from Lib.actualizacion_peso import actualizacion_peso
 from Lib.endogamia import endogamia
+from Lib.funcion_IEP_por_raza import IEP_por_raza
+from Lib.funcion_intervalo_partos import intervalo_partos, promedio_intervalo_partos
+from Lib.funcion_litros_leche import promedio_litros_leche
+from Lib.funcion_litros_por_raza import litros_por_raza
+from Lib.funcion_peso_por_raza import peso_segun_raza
+from Lib.funcion_vientres_aptos import vientres_aptos
 # importa la conexion de la base de datos
 from config.db import condb, session
 # importa el esquema de los bovinos
@@ -55,11 +62,11 @@ file_handler.setFormatter(formatter)
 
 # Agrega el manejador de archivo al logger
 logger.addHandler(file_handler)
-from passlib.context import CryptContext
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+#from passlib.context import CryptContext
+#pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
-from twilio.rest import Client
+#from twilio.rest import Client
 
 
 
@@ -1300,9 +1307,9 @@ def calculoEdad():
     for i in consulta_fecha_nacimiento:
         #Toma el ID del bovino para calcular la edad el campo numero 0
         id = i[0]
-        # Toma la fecha de nacimiento del animal en este caso es el campo 2
+        # Toma la fecha de nacimiento del animal en este caso es el campo 1
         fecha_nacimiento = i[1]
-        # realiza el calculo correspondiente para calcular entre meses
+        # realiza el calculo correspondiente para calcular los meses entre fechas (edad del animal)
         Edad_Animal = (datetime.today().year - fecha_nacimiento.year) * 12 + datetime.today().month - fecha_nacimiento.month
         # actualizacion del campo en la base de datos tomando la variable ID
         condb.execute(modelo_bovinos_inventario.update().values(edad=Edad_Animal).where(
@@ -1557,7 +1564,7 @@ def Dias_Abiertos():
         # Toma la fecha de ultima prenez del animal en este caso es el campo 12
         fecha_ultima_prenez = i[12]
     # calculo de los dias entre las dos fechas (dias abiertos)
-        Dias_A = (fecha_ultima_prenez.year - fecha_ultimo_p.year) * 360 + (
+        Dias_A = (fecha_ultima_prenez.year - fecha_ultimo_p.year) * 365 + (
                 fecha_ultima_prenez.month - fecha_ultimo_p.month) * 30 + \
              (fecha_ultima_prenez.day - fecha_ultimo_p.day)
     # actualizacion del campo
@@ -2384,9 +2391,9 @@ def fecha_aproximada_parto():
         peso = i[3]
         # Toma el estado del animal en este caso es el campo 3
         estado = i[4]
-        #calculo de la fecha aproximada de parto
+        #calculo de la fecha aproximada de parto (la gestacion dura paorximadamente 280 dias)
         if estado=="Vivo":
-          fecha_estimada_parto = fecha_estimada_prenez + timedelta(285)
+          fecha_estimada_parto = fecha_estimada_prenez + timedelta(280)
         else:
           fecha_estimada_parto = None
         #actualizacion de campos
@@ -2412,73 +2419,7 @@ def Eliminacion_total_vientres_aptos():
       raise
   finally:
       session.close()
-"""la siguiente funcion muestra los vientres aptos, es decir,
-animales hembras vivos con una edad igual o mayor a 16 meses"""
-def vientres_aptos():
-  try:
 
-      # consulta de vacas que cumplen con la condicion
-      consulta_vientres = session.query(modelo_bovinos_inventario). \
-          where(between(modelo_bovinos_inventario.columns.edad, 16, 500)). \
-          filter(modelo_bovinos_inventario.c.estado == "Vivo",
-                 modelo_bovinos_inventario.c.sexo == "Hembra").all()
-
-
-      for i in consulta_vientres:
-
-          # Toma el ID del bovino en este caso es el campo 0
-          idBovinoConsultaVientresAptos = i[0]
-          # Toma la edad del animal en este caso es el campo 2
-          edadBovinoConsultaVientresAptos = i[2]
-          # Toma el peso del animal en este caso es el campo 5
-          pesoBovinoConsultaVientresAptos = i[5]
-
-          consulta = condb.execute(
-              modelo_vientres_aptos.select().where(
-                  modelo_vientres_aptos.columns.id_bovino == idBovinoConsultaVientresAptos)).first()
-
-          if consulta is None:
-              ingresoVientresAptos = modelo_vientres_aptos.insert().values(id_bovino=idBovinoConsultaVientresAptos,
-                                                                           edad=edadBovinoConsultaVientresAptos,
-                                                                           peso=pesoBovinoConsultaVientresAptos)
-
-              condb.execute(ingresoVientresAptos)
-
-              condb.commit()
-          else:
-
-
-              tablaVientresAptos = update(modelo_vientres_aptos).where(
-                  modelo_vientres_aptos.c.id_bovino == idBovinoConsultaVientresAptos).values(
-                  edad=edadBovinoConsultaVientresAptos, peso=pesoBovinoConsultaVientresAptos)
-              condb.execute(tablaVientresAptos)
-              condb.commit()
-
-
-
-
-
-
-
-
-
-
-
-
-          # actualizacion de campos
-          #session.execute(modelo_vientres_aptos.insert().values(id_bovino=id1, edad=edad,peso=peso))
-
-
-
-  except Exception as e:
-
-
-      logger.error(f'Error Funcion vientres_aptos: {e}')
-      raise
-
-
-  finally:
-      session.close()
 """la siguiente funcion trae los campos de edad y peso de cada animal
 a los animales de descarte"""
 def descarte():
@@ -2505,3 +2446,12 @@ def descarte():
      raise
   finally:
      session.close()
+
+#actualizacion_peso()
+#vientres_aptos()
+#intervalo_partos()
+#promedio_intervalo_partos()
+#promedio_litros_leche()
+#IEP_por_raza()
+#litros_por_raza()
+#peso_segun_raza()

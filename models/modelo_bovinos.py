@@ -73,7 +73,7 @@ modelo_leche = Table("produccion_leche", meta, Column("id_leche", Integer, prima
                      Column("ordeno", String(300)),
                      Column("proposito", String(300)),
                      Column("promedio_litros", Float),
-                     Column("litros_diarios", Float))
+                     Column("intervalo_entre_partos", Float))
 
 modelo_datos_muerte = Table("datos_muerte", meta, Column("id_datos_muerte", Integer, primary_key=True),
                             Column("id_bovino", String(300), ForeignKey("bovinos.id_bovino")),
@@ -148,7 +148,7 @@ modelo_ventas = Table("ventas", meta, Column("id_venta", Integer, primary_key=Tr
 modelo_datos_pesaje  = Table("ReportesPesaje", meta, Column("id_pesaje", Integer, primary_key=True),
                       Column("id_bovino", String(300), ForeignKey("bovinos.id_bovino")),
                       Column("fecha_pesaje", Date),
-                      Column("peso", Integer))
+                      Column("peso", Float))
 
 modelo_veterinaria = Table("veterinaria", meta, Column("id_veterinaria", Integer, primary_key=True),
                            Column("id_bovino", String(300), ForeignKey("bovinos.id_bovino")),
@@ -204,6 +204,45 @@ modelo_calculadora_hectareas_pastoreo = Table("pastoreo", meta, Column("id_pasto
 modelo_vientres_aptos = Table("vientres_aptos", meta, Column("id_vientre", Integer, primary_key=True),
                               Column("id_bovino", String(300), ForeignKey("bovinos.id_bovino"),unique=True),
                               Column("edad", Integer),
-                              Column("peso", Float))
+                              Column("peso", Float),
+                              Column("raza", String(300)))
+
+modelo_historial_partos = Table("historial_partos", meta, Column("id_parto", Integer, primary_key=True),
+                              Column("id_bovino", String(300)),
+                              Column("fecha_parto", Date),
+                              Column("tipo_parto", String(300)),
+                              Column("id_bovino_hijo", String(300)))
+
+modelo_historial_intervalo_partos = Table("intervalo_partos", meta, Column("id_intervalo", Integer, primary_key=True),
+                              Column("id_bovino", String(300)),
+                              Column("fecha_parto1", Date),
+                              Column("fecha_parto2", Date),
+                              Column("intervalo", Float))
+
+modelo_litros_leche = Table("litros_leche", meta, Column("id_litros", Integer, primary_key=True),
+                              Column("id_bovino", String(300)),
+                              Column("fecha_medicion", Date),
+                              Column("litros_leche", Float))
+
+modelo_orden_IEP = Table("orden_por_IEP", meta, Column("id_IEP", Integer, primary_key=True),
+                              Column("id_bovino", String(300), ForeignKey("bovinos.id_bovino"),unique=True),
+                              Column("raza", String(300)),
+                              Column("intervalo_promedio_raza", Float),
+                              Column("intervalo_promedio_animal", Float),
+                              Column("diferencia", Float))
+
+modelo_orden_litros = Table("orden_por_litros", meta, Column("id_litros_leche", Integer, primary_key=True),
+                              Column("id_bovino", String(300), ForeignKey("bovinos.id_bovino"),unique=True),
+                              Column("raza", String(300)),
+                              Column("litros_promedio_raza", Float),
+                              Column("litros_promedio_animal", Float),
+                              Column("diferencia", Float))
+
+modelo_orden_peso = Table("orden_por_peso", meta, Column("id_peso", Integer, primary_key=True),
+                              Column("id_bovino", String(300), ForeignKey("bovinos.id_bovino"),unique=True),
+                              Column("raza", String(300)),
+                              Column("peso_promedio_raza", Float),
+                              Column("peso_promedio_animal", Float),
+                              Column("diferencia", Float))
 
 meta.create_all(engine)

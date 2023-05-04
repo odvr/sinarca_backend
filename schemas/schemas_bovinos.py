@@ -268,6 +268,69 @@ class esquema_vientres_aptos(BaseModel):
     id_bovino: str
     edad: int
     peso: int
+    raza:str
+    class Config:
+        orm_mode = True
+        env_file = ".env"
+
+class modelo_historial_partos(BaseModel):
+    id_parto: int
+    id_bovino: str
+    fecha_parto: date
+    tipo_parto: str
+    id_bovino_hijo:str
+    class Config:
+        orm_mode = True
+        env_file = ".env"
+
+class modelo_historial_intervalo_partos(BaseModel):
+    id_intervalo: int
+    id_bovino: str
+    fecha_parto1: date
+    fecha_parto2: date
+    intervalo:float
+    class Config:
+        orm_mode = True
+        env_file = ".env"
+
+class modelo_litros_leche(BaseModel):
+    id_litros: int
+    id_bovino: str
+    fecha_medicion: date
+    litros_leche:float
+    class Config:
+        orm_mode = True
+        env_file = ".env"
+
+class modelo_orden_IEP(BaseModel):
+    id_IEP: int
+    id_bovino: str
+    raza: str
+    intervalo_promedio_raza: float
+    intervalo_promedio_animal: float
+    diferencia: float
+    class Config:
+        orm_mode = True
+        env_file = ".env"
+
+class modelo_orden_litros(BaseModel):
+    id_IEP: int
+    id_bovino: str
+    raza: str
+    litros_promedio_raza: float
+    litros_promedio_animal: float
+    diferencia: float
+    class Config:
+        orm_mode = True
+        env_file = ".env"
+
+class modelo_orden_peso(BaseModel):
+    id_peso: int
+    id_bovino: str
+    raza: str
+    peso_promedio_raza: float
+    peso_promedio_animal: float
+    diferencia: float
     class Config:
         orm_mode = True
         env_file = ".env"
