@@ -24,8 +24,9 @@ from config.db import condb, session
 from models.modelo_bovinos import modelo_bovinos_inventario,modelo_veterinaria, modelo_leche, modelo_levante,modelo_ventas,modelo_datos_muerte, \
     modelo_indicadores, modelo_ceba, modelo_macho_reproductor, modelo_carga_animal_y_consumo_agua,modelo_datos_pesaje, \
     modelo_capacidad_carga, modelo_calculadora_hectareas_pastoreo, modelo_partos, modelo_vientres_aptos,modelo_descarte,modelo_users,modelo_arbol_genealogico
-from schemas.schemas_bovinos import Esquema_bovinos,User, esquema_produccion_leche, esquema_produccion_levante,TokenSchema,esquema_descarte, \
-    esquema_produccion_ceba
+from schemas.schemas_bovinos import Esquema_bovinos, User, esquema_produccion_leche, esquema_produccion_levante, \
+    TokenSchema, esquema_descarte, \
+    esquema_produccion_ceba, esquema_datos_muerte, esquema_modelo_ventas, esquema_arbol_genealogico
 from sqlalchemy import select, insert, values, update, bindparam, between, join, func, null
 from starlette.status import HTTP_204_NO_CONTENT
 from datetime import date, datetime, timedelta
@@ -70,13 +71,14 @@ logger.addHandler(file_handler)
 
 
 
-""" Enviar Notificaciones """
+""" Enviar Notificaciones 
 
 def Notificaciones():
     account_sid = 'AC99b97a77f43fd1f944485dbad0f960a0'
     auth_token = '29f8eac6e4ad3b1369f05719fca07db3'
-    client = Client(account_sid, auth_token)
-
+    #client = Client(account_sid, auth_token)
+"""
+"""
     message = client.messages.create(
         from_='+15075166814',
         body='Hola Este es un Mensaje Para sinarca',
@@ -85,7 +87,7 @@ def Notificaciones():
 
     print(message.sid)
 
-
+"""
 
 #Notificaciones()
 """ 
@@ -231,7 +233,7 @@ async def listar_tabla_veterinaria():
         session.close()
     return itemsAnimalesVeterinaria
 
-@rutas_bovinos.get("/listar_tabla_solo_machos" )
+@rutas_bovinos.get("/listar_tabla_solo_machos",response_model=list[Esquema_bovinos] )
 async def listar_tabla_solo_machos():
 
     try:
@@ -246,7 +248,7 @@ async def listar_tabla_solo_machos():
     finally:
         session.close()
     return machos
-@rutas_bovinos.get("/listar_tabla_solo_hembras" )
+@rutas_bovinos.get("/listar_tabla_solo_hembras",response_model=list[Esquema_bovinos] )
 async def listar_tabla_solo_hembras():
 
     try:
@@ -263,7 +265,7 @@ async def listar_tabla_solo_hembras():
 
 
 
-@rutas_bovinos.get("/listar_tabla_endogamia" )
+@rutas_bovinos.get("/listar_tabla_endogamia",response_model=list[esquema_arbol_genealogico] )
 async def listar_tabla_endogamia():
 
     try:
@@ -322,7 +324,7 @@ Lista los animales en Levante
 
 """
 
-@rutas_bovinos.get("/listar_prod_levante")
+@rutas_bovinos.get("/listar_prod_levante",response_model=list[esquema_produccion_levante])
 async def inventario_levante():
     Estado_Optimo_Levante()
     eliminarduplicados()
@@ -343,7 +345,7 @@ async def inventario_levante():
 '''Listar animales en Ceba'''
 
 
-@rutas_bovinos.get("/listar_prod_ceba" )
+@rutas_bovinos.get("/listar_prod_ceba",response_model=list[esquema_produccion_ceba] )
 async def inventario_ceba():
     #llamdo de la funcion para calcular
     Estado_Optimo_Ceba()
@@ -528,6 +530,209 @@ async def listar_tabla_pesaje():
         session.close()
     return tabla_pesaje
 
+@rutas_bovinos.get("/listar_reporte_pesaje/Enero")
+async def listar_reporte_pesaje_enero():
+    try:
+
+        resultadosEnero = session.query(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje),
+                                        func.sum(modelo_datos_pesaje.c.peso).label('Peso')) \
+            .filter(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje) == 1) \
+            .group_by(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje)) \
+            .all()
+
+
+    except Exception as e:
+        logger.error(f'Error al obtener inventario de De Promedios Por MEs Enero {e}')
+        raise
+    finally:
+        session.close()
+    return resultadosEnero
+
+
+@rutas_bovinos.get("/listar_reporte_pesaje/Febrero")
+async def listar_reporte_pesaje_febrero():
+    try:
+
+        resultadosFebrero = session.query(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje),
+                                        func.sum(modelo_datos_pesaje.c.peso).label('Peso')) \
+            .filter(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje) == 2) \
+            .group_by(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje)) \
+            .all()
+
+
+    except Exception as e:
+        logger.error(f'Error al obtener inventario de De Promedios Por MEs Enero {e}')
+        raise
+    finally:
+        session.close()
+    return resultadosFebrero
+'''
+
+'''
+@rutas_bovinos.get("/listar_reporte_pesaje/Marzo" )
+async def listar_reporte_pesaje_Marzo():
+    try:
+
+
+
+        resultadosMarzo = session.query(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje),
+                                   func.sum(modelo_datos_pesaje.c.peso).label('Peso')) \
+            .filter(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje) == 3) \
+            .group_by(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje)) \
+            .all()
+
+
+    except Exception as e:
+        logger.error(f'Error al obtener inventario de De Promedios Por MEs MArzo {e}')
+        raise
+    finally:
+        session.close()
+    return resultadosMarzo
+
+@rutas_bovinos.get("/listar_reporte_pesaje/Abril" )
+async def listar_reporte_pesaje_Abril():
+    try:
+
+        resultadosAbril = session.query(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje),
+                                   func.sum(modelo_datos_pesaje.c.peso).label('Peso')) \
+            .filter(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje) == 4) \
+            .group_by(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje)) \
+            .all()
+    except Exception as e:
+        logger.error(f'Error al obtener inventario de De Promedios Por MEs Abril {e}')
+        raise
+    finally:
+        session.close()
+    return resultadosAbril
+@rutas_bovinos.get("/listar_reporte_pesaje/Mayo" )
+async def listar_reporte_pesaje_Mayo():
+    try:
+
+        resultadosMayo = session.query(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje),
+                                   func.sum(modelo_datos_pesaje.c.peso).label('Peso')) \
+            .filter(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje) == 5) \
+            .group_by(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje)) \
+            .all()
+    except Exception as e:
+        logger.error(f'Error al obtener inventario de De Promedios Por MEs MAyo {e}')
+        raise
+    finally:
+        session.close()
+    return resultadosMayo
+
+@rutas_bovinos.get("/listar_reporte_pesaje/Junio" )
+async def listar_reporte_pesaje_Junio():
+    try:
+
+        resultadosJunio = session.query(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje),
+                                   func.sum(modelo_datos_pesaje.c.peso).label('Peso')) \
+            .filter(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje) == 6) \
+            .group_by(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje)) \
+            .all()
+    except Exception as e:
+        logger.error(f'Error al obtener inventario de De Promedios Por MEs Junio {e}')
+        raise
+    finally:
+        session.close()
+    return resultadosJunio
+@rutas_bovinos.get("/listar_reporte_pesaje/Julio" )
+async def listar_reporte_pesaje_Julio():
+    try:
+
+        resultadosJulio = session.query(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje),
+                                   func.sum(modelo_datos_pesaje.c.peso).label('Peso')) \
+            .filter(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje) == 7) \
+            .group_by(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje)) \
+            .all()
+    except Exception as e:
+        logger.error(f'Error al obtener inventario de De Promedios Por MEs Julio {e}')
+        raise
+    finally:
+        session.close()
+    return resultadosJulio
+
+@rutas_bovinos.get("/listar_reporte_pesaje/Agosto" )
+async def listar_reporte_pesaje_Agosto():
+    try:
+
+        resultadosAgosto = session.query(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje),
+                                   func.sum(modelo_datos_pesaje.c.peso).label('Peso')) \
+            .filter(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje) == 8) \
+            .group_by(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje)) \
+            .all()
+    except Exception as e:
+        logger.error(f'Error al obtener inventario de De Promedios Por MEs Agosto {e}')
+        raise
+    finally:
+        session.close()
+    return resultadosAgosto
+
+@rutas_bovinos.get("/listar_reporte_pesaje/Septiembre" )
+async def listar_reporte_pesaje_Septiembre():
+    try:
+
+        resultadosSeptiembre = session.query(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje),
+                                   func.sum(modelo_datos_pesaje.c.peso).label('Peso')) \
+            .filter(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje) == 9) \
+            .group_by(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje)) \
+            .all()
+    except Exception as e:
+        logger.error(f'Error al obtener inventario de De Promedios Por MEs Septiembre {e}')
+        raise
+    finally:
+        session.close()
+    return resultadosSeptiembre
+
+
+@rutas_bovinos.get("/listar_reporte_pesaje/Octubre" )
+async def listar_reporte_pesaje_Octubre():
+    try:
+
+        resultadosOctubre = session.query(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje),
+                                   func.sum(modelo_datos_pesaje.c.peso).label('Peso')) \
+            .filter(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje) == 10) \
+            .group_by(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje)) \
+            .all()
+    except Exception as e:
+        logger.error(f'Error al obtener inventario de De Promedios Por MEs Octubre {e}')
+        raise
+    finally:
+        session.close()
+    return resultadosOctubre
+@rutas_bovinos.get("/listar_reporte_pesaje/Noviembre" )
+async def listar_reporte_pesaje_Noviembre():
+    try:
+
+        resultadosNoviembre = session.query(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje),
+                                   func.sum(modelo_datos_pesaje.c.peso).label('Peso')) \
+            .filter(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje) == 11) \
+            .group_by(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje)) \
+            .all()
+    except Exception as e:
+        logger.error(f'Error al obtener inventario de De Promedios Por MEs Noviembre {e}')
+        raise
+    finally:
+        session.close()
+    return resultadosNoviembre
+@rutas_bovinos.get("/listar_reporte_pesaje/Diciembre" )
+async def listar_reporte_pesaje_Diciembre():
+    try:
+
+        resultadosDiciembre = session.query(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje),
+                                   func.sum(modelo_datos_pesaje.c.peso).label('Peso')) \
+            .filter(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje) == 12) \
+            .group_by(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje)) \
+            .all()
+    except Exception as e:
+        logger.error(f'Error al obtener inventario de De Promedios Por MEs Diciembre {e}')
+        raise
+    finally:
+        session.close()
+    return resultadosDiciembre
+
+
+
+
 @rutas_bovinos.get("/listar_tabla_pesaje_por_animal/{id_bovino}" )
 async def listar_tabla_pesaje_Por_Animal(id_bovino:str):
     try:
@@ -655,6 +860,23 @@ async def id_inventario_bovino_ceba(id_bovino: str):
     return consulta
 
 
+"""
+Utilizada para listar el Arbol Genialogico de un solo Bovino
+"""
+@rutas_bovinos.get("/listar_bovino_Arbol_genialoco/{id_bovino}")
+async def id_arbolgenialogico(id_bovino: str):
+
+    try:
+        consulta = session.execute(
+            modelo_arbol_genealogico.select().where(modelo_arbol_genealogico.columns.id_bovino == id_bovino)).first()
+
+    except Exception as e:
+        logger.error(f'Error al obtener Listar ID De arbol genialogico: {e}')
+        raise
+    finally:
+        session.close()
+
+    return consulta
 
 
 
@@ -705,10 +927,12 @@ Listar Tabla de Animales con Regristro de Muerte
 
 """
 
-@rutas_bovinos.get("/listar_bovino_muerte")
+@rutas_bovinos.get("/listar_bovino_muerte",response_model=list[esquema_datos_muerte])
 async def id_inventario_bovinos_muertos():
     try:
-        consulta =  session.query(modelo_datos_muerte).all()
+        # consulta y seleccion de los animales muertos
+        consulta = session.query(modelo_datos_muerte). \
+            filter(modelo_datos_muerte.c.estado == "Muerto").all()
 
     except Exception as e:
         logger.error(f'Error al obtener Listar REGISTRO DE MUERTE : {e}')
@@ -721,6 +945,24 @@ async def id_inventario_bovinos_muertos():
 
 
 
+"""
+Listar tabla de ventas
+"""
+
+@rutas_bovinos.get("/listar_tabla_ventas",response_model=list[esquema_modelo_ventas])
+async def listar_tabla_ventas():
+    try:
+
+        consultaVentas = session.query(modelo_ventas). \
+            filter(modelo_ventas.c.estado == "Vendido").all()
+
+    except Exception as e:
+        logger.error(f'Error al obtener Listar REGISTRO DE VENTAS : {e}')
+        raise
+    finally:
+        session.close()
+
+    return consultaVentas
 
 
 
@@ -835,11 +1077,14 @@ Ingresa los datos para el reporte de VENTA para el animal
 
 
 """
-@rutas_bovinos.post("/crear_venta/{id_bovino}/{numero_bono_venta}/{fecha_venta}/{precio_venta}/{razon_venta}/{medio_pago}/{comprador}",status_code=200)
-async def crear_reporte_ventas(id_bovino:str,numero_bono_venta:str,fecha_venta:date,precio_venta:int,razon_venta:str,medio_pago:str,comprador:str ):
+@rutas_bovinos.post("/crear_venta/{id_bovino}/{estado}/{numero_bono_venta}/{fecha_venta}/{precio_venta}/{razon_venta}/{medio_pago}/{comprador}",status_code=200)
+async def crear_reporte_ventas(id_bovino:str,estado:str,numero_bono_venta:str,fecha_venta:date,precio_venta:int,razon_venta:str,medio_pago:str,comprador:str ):
 
     try:
-        ingresoVentas = modelo_ventas.insert().values(id_bovino=id_bovino,numero_bono_venta=numero_bono_venta,fecha_venta=fecha_venta,precio_venta=precio_venta,razon_venta=razon_venta,medio_pago=medio_pago,comprador=comprador)
+        ingresoVentas = modelo_ventas.insert().values(id_bovino=id_bovino, estado=estado,
+                                                      numero_bono_venta=numero_bono_venta, fecha_venta=fecha_venta,
+                                                      precio_venta=precio_venta, razon_venta=razon_venta,
+                                                      medio_pago=medio_pago, comprador=comprador)
         condb.execute(ingresoVentas)
         condb.commit()
         endogamia()
@@ -858,11 +1103,11 @@ async def crear_reporte_ventas(id_bovino:str,numero_bono_venta:str,fecha_venta:d
 Ingresa los datos para el reporte de Animales Muertos
 
 """
-@rutas_bovinos.post("/crear_registro_muerte/{id_bovino}/{fecha_muerte}/{razon_muerte}",status_code=200)
-async def crear_registro_muerte(id_bovino:str,fecha_muerte:date,razon_muerte:str ):
+@rutas_bovinos.post("/crear_registro_muerte/{id_bovino}/{estado}/{fecha_muerte}/{razon_muerte}",status_code=200)
+async def crear_registro_muerte(id_bovino:str,estado:str,fecha_muerte:date,razon_muerte:str ):
 
     try:
-        ingresoRegistroMuerte = modelo_datos_muerte.insert().values(id_bovino=id_bovino,fecha_muerte=fecha_muerte,razon_muerte=razon_muerte)
+        ingresoRegistroMuerte = modelo_datos_muerte.insert().values(id_bovino=id_bovino,estado=estado,fecha_muerte=fecha_muerte,razon_muerte=razon_muerte)
         condb.execute(ingresoRegistroMuerte)
         condb.commit()
         endogamia()
@@ -1161,7 +1406,50 @@ async def cambiar_esta_bovino(data_update: Esquema_bovinos, id_bovino: str):
 
 
 
+"""
+Actualiza los campos de los animales En la tabla de registro de muertes
+"""
+@rutas_bovinos.put("/actualizar_estado_muerte/{id_bovino}/{estado}", status_code=HTTP_204_NO_CONTENT)
+async def cambiar_esta_bovino_datos_muerte( id_bovino: str,estado:str):
+    try:
 
+        # Ejecutar la consulta SQL utilizando el método update() de SQLAlchemy
+        condb.execute(modelo_datos_muerte.update().where(modelo_datos_muerte.c.id_bovino == id_bovino).values(
+            estado= estado))
+
+        condb.commit()
+
+
+    except Exception as e:
+        logger.error(f'Error al Editar Bovino En datos Muerte: {e}')
+        raise
+
+    finally:
+        condb.close()
+
+    return Response(status_code=HTTP_204_NO_CONTENT)
+
+
+"""
+Realiza el cambio del estado en la tabla de ventas
+"""
+@rutas_bovinos.put("/actualizar_estado_venta/{id_bovino}/{estado}", status_code=HTTP_204_NO_CONTENT)
+async def cambiar_esta_bovino_datos_venta( id_bovino: str,estado:str):
+    try:
+
+        condb.execute(modelo_ventas.update().where(modelo_ventas.c.id_bovino == id_bovino).values(
+            estado=estado))
+        condb.commit()
+
+
+    except Exception as e:
+        logger.error(f'Error al Editar Bovino En datos Venta: {e}')
+        raise
+
+    finally:
+        condb.close()
+
+    return Response(status_code=HTTP_204_NO_CONTENT)
 
 
 
@@ -1633,7 +1921,7 @@ async def perdida_Terneros():
     session.execute(update(modelo_indicadores).
                     where(modelo_indicadores.c.id_indicadores == 1).
                     values(perdida_de_terneros=tasa_perd))
-    logger.info(f'Funcion perdida_Terneros {tasa_perd} ')
+
     session.commit()
  except Exception as e:
      logger.error(f'Error Funcion perdida_Terneros: {e}')

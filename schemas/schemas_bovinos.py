@@ -93,6 +93,7 @@ class esquema_produccion_leche(BaseModel):
 class esquema_datos_muerte(BaseModel):
     id_datos_muerte: int
     id_bovino: str
+    estado: str
     razon_muerte:str
     fecha_muerte:date
     class Config:
@@ -168,9 +169,8 @@ class esquema_macho_reproductor(BaseModel):
 class esquema_modelo_ventas(BaseModel):
     id_venta: int
     id_bovino: str
-    edad: int
-    peso: int
     numero_bono_venta: str
+    estado: str
     fecha_venta: date
     precio_venta:int
     razon_venta:str

@@ -78,6 +78,7 @@ modelo_leche = Table("produccion_leche", meta, Column("id_leche", Integer, prima
 modelo_datos_muerte = Table("datos_muerte", meta, Column("id_datos_muerte", Integer, primary_key=True),
                             Column("id_bovino", String(300), ForeignKey("bovinos.id_bovino")),
                             Column("razon_muerte", String(300)),
+                            Column("estado", String(300)),
                             Column("fecha_muerte", Date))
 
 modelo_arbol_genealogico = Table("arbol_genealogico", meta, Column("id_arbol_genealogico", Integer, primary_key=True),
@@ -136,9 +137,9 @@ modelo_macho_reproductor = Table("macho_reproductor", meta, Column("id_macho", I
 
 modelo_ventas = Table("ventas", meta, Column("id_venta", Integer, primary_key=True),
                       Column("id_bovino", String(300), ForeignKey("bovinos.id_bovino")),
-                      Column("edad", Integer),
-                      Column("peso", Float),
+
                       Column("numero_bono_venta", String(300)),
+                      Column("estado", String(300)),
                       Column("fecha_venta", Date),
                       Column("precio_venta", Integer),
                       Column("razon_venta", String(300)),
