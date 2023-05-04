@@ -137,7 +137,6 @@ modelo_macho_reproductor = Table("macho_reproductor", meta, Column("id_macho", I
 
 modelo_ventas = Table("ventas", meta, Column("id_venta", Integer, primary_key=True),
                       Column("id_bovino", String(300), ForeignKey("bovinos.id_bovino")),
-
                       Column("numero_bono_venta", String(300)),
                       Column("estado", String(300)),
                       Column("fecha_venta", Date),

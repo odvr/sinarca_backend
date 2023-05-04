@@ -1081,13 +1081,35 @@ Ingresa los datos para el reporte de VENTA para el animal
 async def crear_reporte_ventas(id_bovino:str,estado:str,numero_bono_venta:str,fecha_venta:date,precio_venta:int,razon_venta:str,medio_pago:str,comprador:str ):
 
     try:
-        ingresoVentas = modelo_ventas.insert().values(id_bovino=id_bovino, estado=estado,
-                                                      numero_bono_venta=numero_bono_venta, fecha_venta=fecha_venta,
-                                                      precio_venta=precio_venta, razon_venta=razon_venta,
-                                                      medio_pago=medio_pago, comprador=comprador)
-        condb.execute(ingresoVentas)
-        condb.commit()
-        endogamia()
+
+        consulta = condb.execute(
+            modelo_ventas.select().where(
+                modelo_ventas.columns.id_bovino == id_bovino)).first()
+
+        if consulta is None:
+            ingresoVentas = modelo_ventas.insert().values(id_bovino=id_bovino, estado=estado,
+                                                          numero_bono_venta=numero_bono_venta, fecha_venta=fecha_venta,
+                                                          precio_venta=precio_venta, razon_venta=razon_venta,
+                                                          medio_pago=medio_pago, comprador=comprador)
+            condb.execute(ingresoVentas)
+            condb.commit()
+
+
+        else:
+
+            condb.execute(modelo_ventas.update().where(modelo_ventas.c.id_bovino == id_bovino).values(
+                estado=estado,numero_bono_venta=numero_bono_venta, fecha_venta=fecha_venta,
+                                                          precio_venta=precio_venta, razon_venta=razon_venta,
+                                                          medio_pago=medio_pago, comprador=comprador))
+            condb.commit()
+
+            condb.commit()
+
+
+
+
+
+
     except Exception as e:
         logger.error(f'Error al Crear INGRESO DE VENTA: {e}')
         raise
@@ -1107,12 +1129,28 @@ Ingresa los datos para el reporte de Animales Muertos
 async def crear_registro_muerte(id_bovino:str,estado:str,fecha_muerte:date,razon_muerte:str ):
 
     try:
-        ingresoRegistroMuerte = modelo_datos_muerte.insert().values(id_bovino=id_bovino,estado=estado,fecha_muerte=fecha_muerte,razon_muerte=razon_muerte)
-        condb.execute(ingresoRegistroMuerte)
-        condb.commit()
-        endogamia()
+        consulta = condb.execute(
+            modelo_datos_muerte.select().where(
+                modelo_datos_muerte.columns.id_bovino == id_bovino)).first()
+
+        if consulta is None:
+            ingresoRegistroMuerte = modelo_datos_muerte.insert().values(id_bovino=id_bovino, estado=estado,
+                                                                        fecha_muerte=fecha_muerte,
+                                                                        razon_muerte=razon_muerte)
+            condb.execute(ingresoRegistroMuerte)
+            condb.commit()
+
+
+        else:
+
+            condb.execute(modelo_datos_muerte.update().where(modelo_datos_muerte.c.id_bovino == id_bovino).values(
+                estado=estado,razon_muerte=razon_muerte, fecha_muerte=fecha_muerte))
+
+            condb.commit()
+
+
     except Exception as e:
-        logger.error(f'Error al Crear INGRESO DE VENTA: {e}')
+        logger.error(f'Error al Crear INGRESO DE MUERTE: {e}')
         raise
     finally:
         condb.close()
@@ -1406,50 +1444,10 @@ async def cambiar_esta_bovino(data_update: Esquema_bovinos, id_bovino: str):
 
 
 
-"""
-Actualiza los campos de los animales En la tabla de registro de muertes
-"""
-@rutas_bovinos.put("/actualizar_estado_muerte/{id_bovino}/{estado}", status_code=HTTP_204_NO_CONTENT)
-async def cambiar_esta_bovino_datos_muerte( id_bovino: str,estado:str):
-    try:
-
-        # Ejecutar la consulta SQL utilizando el método update() de SQLAlchemy
-        condb.execute(modelo_datos_muerte.update().where(modelo_datos_muerte.c.id_bovino == id_bovino).values(
-            estado= estado))
-
-        condb.commit()
 
 
-    except Exception as e:
-        logger.error(f'Error al Editar Bovino En datos Muerte: {e}')
-        raise
-
-    finally:
-        condb.close()
-
-    return Response(status_code=HTTP_204_NO_CONTENT)
 
 
-"""
-Realiza el cambio del estado en la tabla de ventas
-"""
-@rutas_bovinos.put("/actualizar_estado_venta/{id_bovino}/{estado}", status_code=HTTP_204_NO_CONTENT)
-async def cambiar_esta_bovino_datos_venta( id_bovino: str,estado:str):
-    try:
-
-        condb.execute(modelo_ventas.update().where(modelo_ventas.c.id_bovino == id_bovino).values(
-            estado=estado))
-        condb.commit()
-
-
-    except Exception as e:
-        logger.error(f'Error al Editar Bovino En datos Venta: {e}')
-        raise
-
-    finally:
-        condb.close()
-
-    return Response(status_code=HTTP_204_NO_CONTENT)
 
 
 
