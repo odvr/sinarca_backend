@@ -78,7 +78,8 @@ def IEP_por_raza():
        #consulta de animales listados en el modulo de leche
        animales_leche = session.query(modelo_bovinos_inventario.c.raza, modelo_leche.c.id_bovino,
                                               modelo_leche.c.intervalo_entre_partos). \
-           join(modelo_leche,modelo_bovinos_inventario.c.id_bovino == modelo_leche.c.id_bovino).all()
+           join(modelo_leche,modelo_bovinos_inventario.c.id_bovino == modelo_leche.c.id_bovino).\
+           filter(modelo_leche.c.intervalo_entre_partos!=None).all()
        #recorre el bucle
        for i in animales_leche:
            # Toma el ID del bovino, este es el campo numero 1
@@ -146,7 +147,6 @@ def IEP_por_raza():
                #consulta para saber si el bovino existe
                consulta_existencia_bovino = session.query(modelo_orden_IEP). \
                    filter(modelo_orden_IEP.columns.id_bovino == id_bovino_leche).all()
-               print(consulta_existencia_bovino)
                #si la consulta es vacia significa que no existe ese animal en la tabla,
                # entonces ese animal sera insertado
                if consulta_existencia_bovino==[]:
@@ -173,7 +173,6 @@ def IEP_por_raza():
                #consulta para saber si el bovino existe
                consulta_existencia_bovino = session.query(modelo_orden_IEP). \
                    filter(modelo_orden_IEP.columns.id_bovino == id_bovino_leche).all()
-               print(consulta_existencia_bovino)
                #si la consulta es vacia significa que no existe ese animal en la tabla,
                # entonces ese animal sera insertado
                if consulta_existencia_bovino==[]:
@@ -200,7 +199,6 @@ def IEP_por_raza():
                #consulta para saber si el bovino existe
                consulta_existencia_bovino = session.query(modelo_orden_IEP). \
                    filter(modelo_orden_IEP.columns.id_bovino == id_bovino_leche).all()
-               print(consulta_existencia_bovino)
                #si la consulta es vacia significa que no existe ese animal en la tabla,
                # entonces ese animal sera insertado
                if consulta_existencia_bovino==[]:
@@ -227,7 +225,6 @@ def IEP_por_raza():
                #consulta para saber si el bovino existe
                consulta_existencia_bovino = session.query(modelo_orden_IEP). \
                    filter(modelo_orden_IEP.columns.id_bovino == id_bovino_leche).all()
-               print(consulta_existencia_bovino)
                #si la consulta es vacia significa que no existe ese animal en la tabla,
                # entonces ese animal sera insertado
                if consulta_existencia_bovino==[]:
@@ -254,7 +251,6 @@ def IEP_por_raza():
                #consulta para saber si el bovino existe
                consulta_existencia_bovino = session.query(modelo_orden_IEP). \
                    filter(modelo_orden_IEP.columns.id_bovino == id_bovino_leche).all()
-               print(consulta_existencia_bovino)
                #si la consulta es vacia significa que no existe ese animal en la tabla,
                # entonces ese animal sera insertado
                if consulta_existencia_bovino==[]:
@@ -281,7 +277,6 @@ def IEP_por_raza():
                #consulta para saber si el bovino existe
                consulta_existencia_bovino = session.query(modelo_orden_IEP). \
                    filter(modelo_orden_IEP.columns.id_bovino == id_bovino_leche).all()
-               print(consulta_existencia_bovino)
                #si la consulta es vacia significa que no existe ese animal en la tabla,
                # entonces ese animal sera insertado
                if consulta_existencia_bovino==[]:
@@ -308,7 +303,6 @@ def IEP_por_raza():
                #consulta para saber si el bovino existe
                consulta_existencia_bovino = session.query(modelo_orden_IEP). \
                    filter(modelo_orden_IEP.columns.id_bovino == id_bovino_leche).all()
-               print(consulta_existencia_bovino)
                #si la consulta es vacia significa que no existe ese animal en la tabla,
                # entonces ese animal sera insertado
                if consulta_existencia_bovino==[]:
@@ -335,7 +329,6 @@ def IEP_por_raza():
                #consulta para saber si el bovino existe
                consulta_existencia_bovino = session.query(modelo_orden_IEP). \
                    filter(modelo_orden_IEP.columns.id_bovino == id_bovino_leche).all()
-               print(consulta_existencia_bovino)
                #si la consulta es vacia significa que no existe ese animal en la tabla,
                # entonces ese animal sera insertado
                if consulta_existencia_bovino==[]:
@@ -362,7 +355,6 @@ def IEP_por_raza():
                #consulta para saber si el bovino existe
                consulta_existencia_bovino = session.query(modelo_orden_IEP). \
                    filter(modelo_orden_IEP.columns.id_bovino == id_bovino_leche).all()
-               print(consulta_existencia_bovino)
                #si la consulta es vacia significa que no existe ese animal en la tabla,
                # entonces ese animal sera insertado
                if consulta_existencia_bovino==[]:
@@ -389,7 +381,6 @@ def IEP_por_raza():
                #consulta para saber si el bovino existe
                consulta_existencia_bovino = session.query(modelo_orden_IEP). \
                    filter(modelo_orden_IEP.columns.id_bovino == id_bovino_leche).all()
-               print(consulta_existencia_bovino)
                #si la consulta es vacia significa que no existe ese animal en la tabla,
                # entonces ese animal sera insertado
                if consulta_existencia_bovino==[]:
@@ -416,7 +407,6 @@ def IEP_por_raza():
                #consulta para saber si el bovino existe
                consulta_existencia_bovino = session.query(modelo_orden_IEP). \
                    filter(modelo_orden_IEP.columns.id_bovino == id_bovino_leche).all()
-               print(consulta_existencia_bovino)
                #si la consulta es vacia significa que no existe ese animal en la tabla,
                # entonces ese animal sera insertado
                if consulta_existencia_bovino==[]:
@@ -443,7 +433,6 @@ def IEP_por_raza():
                #consulta para saber si el bovino existe
                consulta_existencia_bovino = session.query(modelo_orden_IEP). \
                    filter(modelo_orden_IEP.columns.id_bovino == id_bovino_leche).all()
-               print(consulta_existencia_bovino)
                #si la consulta es vacia significa que no existe ese animal en la tabla,
                # entonces ese animal sera insertado
                if consulta_existencia_bovino==[]:
@@ -471,7 +460,6 @@ def IEP_por_raza():
                #consulta para saber si el bovino existe
                consulta_existencia_bovino = session.query(modelo_orden_IEP). \
                    filter(modelo_orden_IEP.columns.id_bovino == id_bovino_leche).all()
-               print(consulta_existencia_bovino)
                #si la consulta es vacia significa que no existe ese animal en la tabla,
                # entonces ese animal sera insertado
                if consulta_existencia_bovino==[]:
@@ -498,7 +486,6 @@ def IEP_por_raza():
                #consulta para saber si el bovino existe
                consulta_existencia_bovino = session.query(modelo_orden_IEP). \
                    filter(modelo_orden_IEP.columns.id_bovino == id_bovino_leche).all()
-               print(consulta_existencia_bovino)
                #si la consulta es vacia significa que no existe ese animal en la tabla,
                # entonces ese animal sera insertado
                if consulta_existencia_bovino==[]:
@@ -525,7 +512,6 @@ def IEP_por_raza():
                #consulta para saber si el bovino existe
                consulta_existencia_bovino = session.query(modelo_orden_IEP). \
                    filter(modelo_orden_IEP.columns.id_bovino == id_bovino_leche).all()
-               print(consulta_existencia_bovino)
                #si la consulta es vacia significa que no existe ese animal en la tabla,
                # entonces ese animal sera insertado
                if consulta_existencia_bovino==[]:
@@ -552,7 +538,6 @@ def IEP_por_raza():
                #consulta para saber si el bovino existe
                consulta_existencia_bovino = session.query(modelo_orden_IEP). \
                    filter(modelo_orden_IEP.columns.id_bovino == id_bovino_leche).all()
-               print(consulta_existencia_bovino)
                #si la consulta es vacia significa que no existe ese animal en la tabla,
                # entonces ese animal sera insertado
                if consulta_existencia_bovino==[]:
@@ -579,7 +564,6 @@ def IEP_por_raza():
                #consulta para saber si el bovino existe
                consulta_existencia_bovino = session.query(modelo_orden_IEP). \
                    filter(modelo_orden_IEP.columns.id_bovino == id_bovino_leche).all()
-               print(consulta_existencia_bovino)
                #si la consulta es vacia significa que no existe ese animal en la tabla,
                # entonces ese animal sera insertado
                if consulta_existencia_bovino==[]:
@@ -606,7 +590,6 @@ def IEP_por_raza():
                #consulta para saber si el bovino existe
                consulta_existencia_bovino = session.query(modelo_orden_IEP). \
                    filter(modelo_orden_IEP.columns.id_bovino == id_bovino_leche).all()
-               print(consulta_existencia_bovino)
                #si la consulta es vacia significa que no existe ese animal en la tabla,
                # entonces ese animal sera insertado
                if consulta_existencia_bovino==[]:
@@ -633,7 +616,6 @@ def IEP_por_raza():
                #consulta para saber si el bovino existe
                consulta_existencia_bovino = session.query(modelo_orden_IEP). \
                    filter(modelo_orden_IEP.columns.id_bovino == id_bovino_leche).all()
-               print(consulta_existencia_bovino)
                #si la consulta es vacia significa que no existe ese animal en la tabla,
                # entonces ese animal sera insertado
                if consulta_existencia_bovino==[]:
@@ -660,7 +642,6 @@ def IEP_por_raza():
                #consulta para saber si el bovino existe
                consulta_existencia_bovino = session.query(modelo_orden_IEP). \
                    filter(modelo_orden_IEP.columns.id_bovino == id_bovino_leche).all()
-               print(consulta_existencia_bovino)
                #si la consulta es vacia significa que no existe ese animal en la tabla,
                # entonces ese animal sera insertado
                if consulta_existencia_bovino==[]:
@@ -687,7 +668,6 @@ def IEP_por_raza():
                #consulta para saber si el bovino existe
                consulta_existencia_bovino = session.query(modelo_orden_IEP). \
                    filter(modelo_orden_IEP.columns.id_bovino == id_bovino_leche).all()
-               print(consulta_existencia_bovino)
                #si la consulta es vacia significa que no existe ese animal en la tabla,
                # entonces ese animal sera insertado
                if consulta_existencia_bovino==[]:
@@ -715,7 +695,6 @@ def IEP_por_raza():
                #consulta para saber si el bovino existe
                consulta_existencia_bovino = session.query(modelo_orden_IEP). \
                    filter(modelo_orden_IEP.columns.id_bovino == id_bovino_leche).all()
-               print(consulta_existencia_bovino)
                #si la consulta es vacia significa que no existe ese animal en la tabla,
                # entonces ese animal sera insertado
                if consulta_existencia_bovino==[]:
@@ -742,7 +721,6 @@ def IEP_por_raza():
                #consulta para saber si el bovino existe
                consulta_existencia_bovino = session.query(modelo_orden_IEP). \
                    filter(modelo_orden_IEP.columns.id_bovino == id_bovino_leche).all()
-               print(consulta_existencia_bovino)
                #si la consulta es vacia significa que no existe ese animal en la tabla,
                # entonces ese animal sera insertado
                if consulta_existencia_bovino==[]:
@@ -769,7 +747,6 @@ def IEP_por_raza():
                #consulta para saber si el bovino existe
                consulta_existencia_bovino = session.query(modelo_orden_IEP). \
                    filter(modelo_orden_IEP.columns.id_bovino == id_bovino_leche).all()
-               print(consulta_existencia_bovino)
                #si la consulta es vacia significa que no existe ese animal en la tabla,
                # entonces ese animal sera insertado
                if consulta_existencia_bovino==[]:
@@ -796,7 +773,6 @@ def IEP_por_raza():
                #consulta para saber si el bovino existe
                consulta_existencia_bovino = session.query(modelo_orden_IEP). \
                    filter(modelo_orden_IEP.columns.id_bovino == id_bovino_leche).all()
-               print(consulta_existencia_bovino)
                #si la consulta es vacia significa que no existe ese animal en la tabla,
                # entonces ese animal sera insertado
                if consulta_existencia_bovino==[]:
