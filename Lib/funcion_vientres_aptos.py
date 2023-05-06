@@ -759,7 +759,7 @@ def vientres_aptos():
               elif pesoBovino != pesoenVientresAptos:
                   session.execute(modelo_vientres_aptos.delete().where(modelo_vientres_aptos.c.id_bovino == idBovino))
                   session.commit()
-      logger.info(f'Funcion vientres_aptos {consulta_vientres} ')
+
       session.commit()
 
   except Exception as e:

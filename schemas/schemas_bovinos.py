@@ -273,7 +273,7 @@ class esquema_vientres_aptos(BaseModel):
         orm_mode = True
         env_file = ".env"
 
-class modelo_historial_partos(BaseModel):
+class esquema_historial_partos(BaseModel):
     id_parto: int
     id_bovino: str
     fecha_parto: date
