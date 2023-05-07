@@ -144,11 +144,7 @@ class esquema_indicadores(BaseModel):
     vientres_aptos:int
     relacion_toros_vientres_aptos:int
     interpretacion_relacion_toros_vientres_aptos:str
-    consumo_global_agua:str
     total_unidades_animales:str
-    calculadora_hectareas:str
-    calculadora_consumo_agua:str
-    temperatura_ambiente :float
     class Config:
         orm_mode = True
         env_file = ".env"
@@ -240,16 +236,19 @@ class esquema_carga_animal_y_consumo_agua(BaseModel):
     estado: str
     valor_unidad_animal: int
     consumo_forraje_vivo:int
-    consumo_agua:int
+    raza:str
     class Config:
         orm_mode = True
         env_file = ".env"
 
 class esquema_capacidad_carga(BaseModel):
     id_capacidad: int
-    hectareas_forraje: int
-    produccion_forraje: int
-    capacidad_animales: str
+    medicion_aforo: float
+    hectareas_predio: float
+    tipo_de_muestra: str
+    carga_animal_recomendada: float
+    capacidad_carga: str
+    carga_animal_usuario: float
     class Config:
         orm_mode = True
         env_file = ".env"

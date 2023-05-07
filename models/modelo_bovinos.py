@@ -122,11 +122,7 @@ modelo_indicadores = Table("indicadores", meta, Column("id_indicadores", Integer
                            Column("vientres_aptos", Integer),
                            Column("relacion_toros_vientres_aptos", Integer),
                            Column("interpretacion_relacion_toros_vientres_aptos", String(300)),
-                           Column("consumo_global_agua", String(300)),
-                           Column("total_unidades_animales", String(300)),
-                           Column("calculadora_hectareas", String(300)),
-                           Column("calculadora_consumo_agua", String(300)),
-                           Column("temperatura_ambiente", Float))
+                           Column("total_unidades_animales", String(300)))
 
 modelo_macho_reproductor = Table("macho_reproductor", meta, Column("id_macho", Integer, primary_key=True),
                                  Column("id_bovino", String(300), ForeignKey("bovinos.id_bovino")),
@@ -186,15 +182,17 @@ modelo_carga_animal_y_consumo_agua = Table("carga_animal", meta, Column("id_carg
                                            Column("id_bovino", String(300), ForeignKey("bovinos.id_bovino")),
                                            Column("edad", Integer),
                                            Column("peso", Float),
-                                           Column("estado", String(300)),
                                            Column("valor_unidad_animal", Float),
                                            Column("consumo_forraje_vivo", Float),
-                                           Column("consumo_agua", Float))
+                                           Column("raza", String(300)))
 
 modelo_capacidad_carga = Table("capacidad_carga", meta, Column("id_capacidad", Integer, primary_key=True),
-                               Column("hectareas_forraje", Float),
-                               Column("produccion_materia_seca", Float),
-                               Column("capacidad_animales", String(300)))
+                               Column("medicion_aforo", Float),
+                               Column("hectareas_predio", Float),
+                               Column("tipo_de_muestra", String(300)),
+                               Column("carga_animal_recomendada", Float),
+                               Column("capacidad_carga", String(300)),
+                               Column("carga_animal_usuario", Float))
 
 modelo_calculadora_hectareas_pastoreo = Table("pastoreo", meta, Column("id_pastoreo", Integer, primary_key=True),
                                               Column("id_bovino", String(300), ForeignKey("bovinos.id_bovino")),
