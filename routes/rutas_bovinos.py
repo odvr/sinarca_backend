@@ -121,7 +121,7 @@ async def inventario_bovino():
 
 
     eliminarduplicados()
-    EliminarDuplicadosLeche()
+
     vida_util_macho_reproductor()
 
 
@@ -302,7 +302,7 @@ Lista los animales en Levante
 async def inventario_levante():
     Estado_Optimo_Levante()
     eliminarduplicados()
-    EliminarDuplicadosLeche()
+
 
     try:
         itemsLevante = session.execute(modelo_levante.select()).all()
@@ -324,7 +324,7 @@ async def inventario_ceba():
     #llamdo de la funcion para calcular
     Estado_Optimo_Ceba()
     eliminarduplicados()
-    EliminarDuplicadosLeche()
+
 
 
     try:
@@ -1762,53 +1762,9 @@ async def perdida_Terneros():
 esto con el  fin de mostrar cuantos vientres estan produciendo en el hato"""
 
 
-@rutas_bovinos.get("/Calcular_vacas_prenadas")
-async def vacas_prenadas():
-  try:
-    # join de tabla bovinos y tabla leche mediante id_bovino \
-    # filtrado y conteo animales con datos prenez Prenada que se encuentren vivos
-    consulta_prenadas = session.query(modelo_bovinos_inventario.c.estado, modelo_leche.c.datos_prenez). \
-        join(modelo_leche, modelo_bovinos_inventario.c.id_bovino == modelo_leche.c.id_bovino). \
-        filter(modelo_bovinos_inventario.c.estado == 'Vivo', modelo_leche.c.datos_prenez == 'Prenada').count()
-    # actualizacion del campo
-    session.execute(update(modelo_indicadores).
-                    where(modelo_indicadores.c.id_indicadores == 1).
-                    values(vacas_prenadas=consulta_prenadas))
-    logger.info(f'Funcion vacas_prenadas {consulta_prenadas} ')
-    session.commit()
-  except Exception as e:
-      logger.error(f'Error Funcion vacas_prenadas: {e}')
-      raise
-  finally:
-      session.close()
-  return consulta_prenadas
 
 
-"""esta funcion calcula el porcentaje de vacas que se encuentran preñadas"""
 
-
-@rutas_bovinos.get("/Calcular_vacas_prenadas_porcentaje")
-async def vacas_prenadas_porcentaje():
-  try:
-    # consulta de vacas prenadas y vacas vacias en la base de datos
-    prenadas, vacias = session.query \
-        (modelo_indicadores.c.vacas_prenadas, modelo_indicadores.c.vacas_vacias).first()
-    # calculo del total de animales
-    totales = prenadas + vacias
-    # calculo procentaje de vacas prenadas
-    vacas_estado_pren = (prenadas / totales) * 100
-    # actualizacion de campos
-    session.execute(update(modelo_indicadores).
-                    where(modelo_indicadores.c.id_indicadores == 1).
-                    values(vacas_prenadas_porcentaje=vacas_estado_pren))
-
-    session.commit()
-  except Exception as e:
-      logger.error(f'Error Funcion vacas_prenadas_porcentaje: {e}')
-      raise
-  finally:
-      session.close()
-  return vacas_estado_pren
 
 
 """estas funciones muestra la cantidad de animales totales, tambien segun su

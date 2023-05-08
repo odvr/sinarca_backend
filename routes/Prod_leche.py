@@ -37,7 +37,7 @@ async def inventario_prod_leche():
     Edad_Primer_Parto()
     #Duracion_Lactancia()
     Edad_Sacrificio_Lecheras()
-    Dias_Abiertos()
+    #Dias_Abiertos()
     animales_no_ordeno()
     eliminarduplicados()
     EliminarDuplicadosLeche()
@@ -75,6 +75,52 @@ async def animales_no_ordeno():
       session.close()
   return vacas_no_ordeno
 
+
+@Produccion_Leche.get("/Calcular_vacas_prenadas_porcentaje")
+async def vacas_prenadas_porcentaje():
+  try:
+    # consulta de vacas prenadas y vacas vacias en la base de datos
+    prenadas, vacias = session.query \
+        (modelo_indicadores.c.vacas_prenadas, modelo_indicadores.c.vacas_vacias).first()
+    # calculo del total de animales
+    totales = prenadas + vacias
+    # calculo procentaje de vacas prenadas
+    vacas_estado_pren = (prenadas / totales) * 100
+    # actualizacion de campos
+    session.execute(update(modelo_indicadores).
+                    where(modelo_indicadores.c.id_indicadores == 1).
+                    values(vacas_prenadas_porcentaje=vacas_estado_pren))
+
+    session.commit()
+  except Exception as e:
+      logger.error(f'Error Funcion vacas_prenadas_porcentaje: {e}')
+      raise
+  finally:
+      session.close()
+  return vacas_estado_pren
+
+
+
+@Produccion_Leche.get("/Calcular_vacas_prenadas")
+async def vacas_prenadas():
+  try:
+    # join de tabla bovinos y tabla leche mediante id_bovino \
+    # filtrado y conteo animales con datos prenez Prenada que se encuentren vivos
+    consulta_prenadas = session.query(modelo_bovinos_inventario.c.estado, modelo_leche.c.datos_prenez). \
+        join(modelo_leche, modelo_bovinos_inventario.c.id_bovino == modelo_leche.c.id_bovino). \
+        filter(modelo_bovinos_inventario.c.estado == 'Vivo', modelo_leche.c.datos_prenez == 'Prenada').count()
+    # actualizacion del campo
+    session.execute(update(modelo_indicadores).
+                    where(modelo_indicadores.c.id_indicadores == 1).
+                    values(vacas_prenadas=consulta_prenadas))
+
+    session.commit()
+  except Exception as e:
+      logger.error(f'Error Funcion vacas_prenadas: {e}')
+      raise
+  finally:
+      session.close()
+  return consulta_prenadas
 
 
 
@@ -257,3 +303,8 @@ def EliminarDuplicadosLeche():
             condb.commit(eliminarlevanteleche)
         else:
             pass
+
+
+"""esta funcion calcula el porcentaje de vacas que se encuentran preñadas"""
+
+
