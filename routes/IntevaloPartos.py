@@ -1,20 +1,14 @@
 '''
 Librerias requeridas
 '''
-
 import logging
-
 from Lib.Lib_Intervalo_Partos import intervalo_partos
 # # importa la conexion de la base de datos
 from config.db import condb, session
 # # importa el esquema de los bovinos
 from models.modelo_bovinos import  modelo_historial_intervalo_partos
-
 from fastapi import APIRouter
-
-
 from schemas.schemas_bovinos import esquema_historial_partos, esquema_intervalo_partos
-
 # Configuracion de la libreria para los logs de sinarca
 # Crea un objeto logger
 logger = logging.getLogger(__name__)
@@ -27,7 +21,6 @@ formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(messag
 file_handler.setFormatter(formatter)
 # Agrega el manejador de archivo al logger
 logger.addHandler(file_handler)
-
 
 IntevaloPartos = APIRouter()
 
