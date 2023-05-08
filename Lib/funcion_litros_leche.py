@@ -12,7 +12,7 @@ from fastapi import APIRouter, Response
 
 from Lib.actualizacion_peso import actualizacion_peso
 from Lib.endogamia import endogamia
-from Lib.funcion_intervalo_partos import intervalo_partos, promedio_intervalo_partos
+from Lib.Lib_Intervalo_Partos import intervalo_partos, promedio_intervalo_partos
 from Lib.funcion_vientres_aptos import vientres_aptos
 # importa la conexion de la base de datos
 from config.db import condb, session

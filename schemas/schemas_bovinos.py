@@ -282,7 +282,7 @@ class esquema_historial_partos(BaseModel):
         orm_mode = True
         env_file = ".env"
 
-class modelo_historial_intervalo_partos(BaseModel):
+class esquema_intervalo_partos(BaseModel):
     id_intervalo: int
     id_bovino: str
     fecha_parto1: date
@@ -301,7 +301,7 @@ class modelo_litros_leche(BaseModel):
         orm_mode = True
         env_file = ".env"
 
-class modelo_orden_IEP(BaseModel):
+class esquema_orden_IEP(BaseModel):
     id_IEP: int
     id_bovino: str
     raza: str

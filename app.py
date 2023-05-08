@@ -1,5 +1,9 @@
 from fastapi import FastAPI
+
+
 from routes.rutas_bovinos import rutas_bovinos
+from routes.PartosAnimales import partos_bovinos
+from routes.IEP_Razas import IEP_Razas
 
 
 
@@ -25,3 +29,5 @@ app.add_middleware(
 
 
 app.include_router(rutas_bovinos)
+app.include_router(partos_bovinos)
+app.include_router(IEP_Razas)

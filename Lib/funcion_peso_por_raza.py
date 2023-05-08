@@ -13,7 +13,7 @@ from fastapi import APIRouter, Response
 from Lib.actualizacion_peso import actualizacion_peso
 from Lib.endogamia import endogamia
 from Lib.funcion_IEP_por_raza import IEP_por_raza
-from Lib.funcion_intervalo_partos import intervalo_partos, promedio_intervalo_partos
+from Lib.Lib_Intervalo_Partos import intervalo_partos, promedio_intervalo_partos
 from Lib.funcion_litros_leche import promedio_litros_leche
 from Lib.funcion_litros_por_raza import litros_por_raza
 from Lib.funcion_vientres_aptos import vientres_aptos
