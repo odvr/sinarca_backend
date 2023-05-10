@@ -266,7 +266,7 @@ class esquema_vientres_aptos(BaseModel):
     id_vientre: int
     id_bovino: str
     edad: int
-    peso: int
+    peso: float
     raza:str
     class Config:
         orm_mode = True
