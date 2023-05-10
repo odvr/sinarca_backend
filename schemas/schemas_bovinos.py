@@ -71,16 +71,7 @@ class esquema_produccion_leche(BaseModel):
     id_bovino: str
     fecha_primer_parto:date
     edad_primer_parto: int
-    prod_lactancia: float
-    dura_lactancia: float
-    fecha_inicial_ordeno:date
-    fecha_fin_ordeno:date
-    num_partos: int
-    tipo_parto: str
     datos_prenez: str
-    fecha_ultimo_parto:date
-    fecha_ultima_prenez: date
-    dias_abiertos: int
     fecha_vida_util: date
     ordeno: str
     proposito: str

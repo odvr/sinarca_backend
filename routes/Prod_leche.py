@@ -3,6 +3,7 @@ Librerias requeridas
 '''
 import logging
 from Lib.Lib_Intervalo_Partos import intervalo_partos
+from Lib.funcion_litros_leche import promedio_litros_leche
 # # importa la conexion de la base de datos
 from config.db import condb, session
 # # importa el esquema de los bovinos
@@ -31,14 +32,16 @@ Produccion_Leche = APIRouter()
 
 
 
-@Produccion_Leche.get("/listar_prod_leche" )
+@Produccion_Leche.get("/listar_prod_leche" , response_model=list[esquema_produccion_leche])
 async def inventario_prod_leche():
 
     try:
+        Edad_Primer_Parto()
+        Edad_Sacrificio_Lecheras()
+        promedio_litros_leche()
+        intervalo_partos()
 
-        itemsLeche = session.execute(modelo_leche.select()).all()
-
-
+        itemsLeche = session.query(modelo_leche).all()
 
     except Exception as e:
         logger.error(f'Error al obtener inventario de Produccion Leche: {e}')
@@ -46,7 +49,6 @@ async def inventario_prod_leche():
     finally:
         session.close()
     return itemsLeche
-
 
 
 @Produccion_Leche.get("/Calcular_animales_no_ordeno")

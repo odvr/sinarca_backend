@@ -3,6 +3,8 @@ Librerias requeridas
 '''
 
 import logging
+
+from Lib.Lib_Intervalo_Partos import intervalo_partos
 # # importa la conexion de la base de datos
 from config.db import condb, session
 # # importa el esquema de los bovinos
@@ -55,6 +57,7 @@ async def crear_Registro_Partos(id_bovino:str,fecha_parto: date,tipo_parto:str,i
 @partos_bovinos.get("/listar_tabla_Historial_Partos",response_model=list[esquema_historial_partos] )
 async def listar_tabla_Partos_Animales():
     try:
+        intervalo_partos()
         itemsListarPartos = session.execute(modelo_historial_partos.select()).all()
 
     except Exception as e:

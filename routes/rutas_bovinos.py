@@ -1,8 +1,6 @@
 '''
 Librerias requeridas
-
 @autor : odvr
-
 '''
 
 import logging
@@ -20,7 +18,7 @@ from models.modelo_bovinos import modelo_bovinos_inventario,modelo_veterinaria, 
     modelo_capacidad_carga, modelo_calculadora_hectareas_pastoreo, modelo_partos, modelo_vientres_aptos,modelo_descarte,modelo_users,modelo_arbol_genealogico
 from schemas.schemas_bovinos import Esquema_bovinos, esquema_produccion_levante, \
     esquema_produccion_ceba, esquema_datos_muerte, esquema_modelo_ventas, esquema_arbol_genealogico, \
-    esquema_modelo_Reporte_Pesaje
+    esquema_modelo_Reporte_Pesaje, esquema_produccion_leche
 from sqlalchemy import update, between, func
 from starlette.status import HTTP_204_NO_CONTENT
 from datetime import date, datetime, timedelta
@@ -31,13 +29,6 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi import  status, HTTPException, Depends
 
 oauth2_scheme = OAuth2PasswordBearer("/token")
-
-
-
-
-
-
-
 
 # Configuracion de las rutas para fash api
 rutas_bovinos = APIRouter()
@@ -54,14 +45,12 @@ file_handler = logging.FileHandler(log_file)
 # Define el formato del log
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 file_handler.setFormatter(formatter)
-
 # Agrega el manejador de archivo al logger
 logger.addHandler(file_handler)
-#from passlib.context import CryptContext
-#pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
-#from twilio.rest import Client
+
+
 
 
 
@@ -106,6 +95,38 @@ def login(form_data: OAuth2PasswordRequestForm = Depends()):
         "access_token": form_data.username,
         "token_type": "bearer"
     }
+
+
+
+
+
+@rutas_bovinos.get("/listar_vientres_aptos" )
+async def listar_vientres_aptos_modulo():
+    try:
+        vientres_aptos()
+
+        tabla_vientres_aptos = session.query(modelo_vientres_aptos).all()
+
+    except Exception as e:
+        logger.error(f'Error al obtener inventario de TABLA VIENTRES APTOS: {e}')
+        raise
+    finally:
+        session.close()
+    return tabla_vientres_aptos
+
+@rutas_bovinos.get("/listar_vientres_aptos_Rutas" )
+async def listar_vientres_aptos_modulo():
+    try:
+        #vientres_aptos()
+        #Eliminacion_total_vientres_aptos()
+        tabla_vientres_aptos = session.query(modelo_vientres_aptos).all()
+
+    except Exception as e:
+        logger.error(f'Error al obtener inventario de TABLA VIENTRES APTOS: {e}')
+        raise
+    finally:
+        session.close()
+    return tabla_vientres_aptos
 
 """
 La siguiente funcion retorna un diccionario con la consulta general del la tabla bovinos,

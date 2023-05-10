@@ -7,11 +7,10 @@ from Lib.Lib_Intervalo_Partos import intervalo_partos
 # # importa la conexion de la base de datos
 from config.db import condb, session
 # # importa el esquema de los bovinos
-from models.modelo_bovinos import modelo_vientres_aptos, modelo_bovinos_inventario
+
 from fastapi import    APIRouter
-from datetime import date
-from starlette.status import HTTP_204_NO_CONTENT
-from schemas.schemas_bovinos import esquema_litros_leche, esquema_vientres_aptos
+
+from models.modelo_bovinos import modelo_vientres_aptos
 
 # Configuracion de la libreria para los logs de sinarca
 # Crea un objeto logger
@@ -31,24 +30,22 @@ Vientres_Aptos = APIRouter()
 
 
 
-@Vientres_Aptos.get("/listar_vientres_aptos",response_model=list[esquema_vientres_aptos] )
-async def listar_tabla_vientres_Aptos():
 
+
+
+@Vientres_Aptos.get("/listar_vientres_aptos" )
+async def listar_vientres_aptos_modulo():
     try:
-
-
-        itemsAnimales = session.execute(modelo_vientres_aptos.select()).all()
-
+        #vientres_aptos()
+        #Eliminacion_total_vientres_aptos()
+        tabla_vientres_aptos = session.query(modelo_vientres_aptos).all()
 
     except Exception as e:
-        logger.error(f'Error al obtener Vientres Aptos: {e}')
+        logger.error(f'Error al obtener inventario de TABLA VIENTRES APTOS: {e}')
         raise
     finally:
         session.close()
-    return itemsAnimales
-
-
-
+    return tabla_vientres_aptos
 
 @Vientres_Aptos.get("/listar_contar_listar_vientres_aptos" )
 async def listar_contar_AnimalesDescarte():

@@ -59,16 +59,11 @@ modelo_leche = Table("produccion_leche", meta, Column("id_leche", Integer, prima
                      Column("id_bovino", String(300), ForeignKey("bovinos.id_bovino")),
                      Column("fecha_primer_parto", Date),
                      Column("edad_primer_parto", Integer),
-                     Column("prod_lactancia", Float),
-                     Column("dura_lactancia", Integer),
-                     Column("fecha_inicial_ordeno", Date),
-                     Column("fecha_fin_ordeno", Date),
-                     Column("num_partos", Integer),
-                     Column("tipo_parto", String(300)),
+
+
+
                      Column("datos_prenez", String(300)),
-                     Column("fecha_ultimo_parto", Date),
-                     Column("fecha_ultima_prenez", Date),
-                     Column("dias_abiertos", Integer),
+
                      Column("fecha_vida_util", Date),
                      Column("ordeno", String(300)),
                      Column("proposito", String(300)),
