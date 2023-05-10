@@ -89,12 +89,39 @@ def promedio_litros_leche():
                 cantidad_de_mediciones = session.query(modelo_litros_leche). \
                     filter(modelo_litros_leche.columns.id_bovino == id_bovino_litros).count()
                 # calculo del promedo de litros de leche del animal
-                promedio_litros = round((suma_litros / cantidad_de_mediciones),2)
+                promedio_litros = round((suma_litros / cantidad_de_mediciones), 2)
                 # actualizacion del campo
                 session.execute(modelo_leche.update().values(promedio_litros=promedio_litros). \
                                 where(modelo_leche.columns.id_bovino == id_bovino_litros))
                 session.commit()
-        logger.info(f'Funcion promedio_litros_leche {consulta_animal_litros} ')
+        # consulta para evaluar aquellos animales que no tengan medidas de leche
+        consulta_litros_promedio = session.query(modelo_leche).all()
+        for i in consulta_litros_promedio:
+            # Toma el id del bovino en este caso es el campo 1
+            id_bovino_consulta_litros_promedio = i[1]
+            # toma el pormedio de litros del animal
+            promedio_litros_bovino = i[8]
+            # se define un valor por defecto en caso de que un animal no tenga medidas
+            valor_por_defecto = 0
+            # Si el valor no existe entonces sera insertado u  0 por defecto
+            if promedio_litros_bovino == None:
+                session.execute(modelo_leche.update().values(promedio_litros=valor_por_defecto). \
+                                where(modelo_leche.columns.id_bovino == id_bovino_consulta_litros_promedio))
+                session.commit()
+            # caso contrario no se realizaran cambios
+            else:
+                pass
+            # esta consulta Actualiza los dato en caso de que se borren todos los registros de medicion de leche de un animal
+            consulta_animal_en_historial_litros = session.query(modelo_litros_leche). \
+                filter(modelo_litros_leche.columns.id_bovino == id_bovino_consulta_litros_promedio).all()
+            # si la consulta es vacia significa que el animal no tienen mediciones de leche
+            if consulta_animal_en_historial_litros == []:
+                # entonces su promedio de litros pasara a ser 0
+                session.execute(modelo_leche.update().values(promedio_litros=valor_por_defecto). \
+                                where(modelo_leche.columns.id_bovino == id_bovino_consulta_litros_promedio))
+                session.commit()
+            else:
+                pass
         session.commit()
     except Exception as e:
         logger.error(f'Error Funcion promedio_litros_leche: {e}')

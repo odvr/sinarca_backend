@@ -79,7 +79,7 @@ def IEP_por_raza():
        animales_leche = session.query(modelo_bovinos_inventario.c.raza, modelo_leche.c.id_bovino,
                                               modelo_leche.c.intervalo_entre_partos). \
            join(modelo_leche,modelo_bovinos_inventario.c.id_bovino == modelo_leche.c.id_bovino).\
-           filter(modelo_leche.c.intervalo_entre_partos!=None).all()
+           filter(modelo_leche.c.intervalo_entre_partos!=0).all()
        #recorre el bucle
        for i in animales_leche:
            # Toma el ID del bovino, este es el campo numero 1
@@ -792,6 +792,20 @@ def IEP_por_raza():
                                                                    diferencia=diferencia). \
                                    where(modelo_orden_IEP.columns.id_bovino == id_bovino_leche))
                    session.commit()
+       # el siguiente codigo permite emilinar cualquier animal con intervalos entre partos de 0
+       consulta_id_bovinos_leche = session.query(modelo_leche).all()
+       for i in consulta_id_bovinos_leche:
+           # Toma el ID del bovino, este es el campo numero
+           id_bovinos_leche = i[1]
+           # Toma el intervalo entre partos, este es el campo numero 10
+           intervalo_p_promedio = i[10]
+           # en caso de tener valor 0 sera eliminado
+           if intervalo_p_promedio == 0:
+               session.execute(modelo_orden_IEP.delete(). \
+                               where(modelo_orden_IEP.c.id_bovino == id_bovinos_leche))
+               session.commit()
+           else:
+               pass
        logger.info(f'Funcion IEP_por_raza {animales_leche} ')
        session.commit()
     except Exception as e:

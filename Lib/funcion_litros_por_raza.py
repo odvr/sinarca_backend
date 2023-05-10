@@ -787,6 +787,20 @@ def litros_por_raza():
                                                                         diferencia=diferencia). \
                                     where(modelo_orden_litros.columns.id_bovino == id_bovino_litros))
                     session.commit()
+        # el siguiente codigo permite emilinar cualquier animal con promedio de litros de 0
+        consulta_id_bovinos_leche = session.query(modelo_leche).all()
+        for i in consulta_id_bovinos_leche:
+            # Toma el ID del bovino, este es el campo numero 1
+            id_bovinos_leche = i[1]
+            # Toma el promedio de leche, este es el campo numero 8
+            promedio_litraje = i[8]
+            # en caso de tener valor 0 sera eliminado
+            if promedio_litraje == 0:
+                session.execute(modelo_orden_litros.delete(). \
+                                where(modelo_orden_litros.c.id_bovino == id_bovinos_leche))
+                session.commit()
+            else:
+                pass
         logger.info(f'Funcion intervalo_partos {"p"} ')
         session.commit()
     except Exception as e:

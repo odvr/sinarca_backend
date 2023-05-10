@@ -68,9 +68,6 @@ logger.addHandler(file_handler)
 en la base de datos"""
 def intervalo_partos():
     try:
-        # se borra el registro anterior para evitar duplicidad de id y generar nuevos datos actualizados
-        #session.execute(modelo_historial_intervalo_partos.delete().where(modelo_historial_intervalo_partos.c.id_bovino))
-        #session.commit()
         # Realiza el join co la tabla de bovinos (solo se veran los id de los bovinos)
         #como la tabla de historial de partos puede tener un id repetido mas de una vez, se utiliza el conjunto o set
         #el set no permite elementos repetidos, por lo tanto solo nos dara un listado de id unicos
@@ -87,6 +84,14 @@ def intervalo_partos():
             session.execute(modelo_leche.update().values(num_partos=cantidad_partos). \
                             where(modelo_leche.columns.id_bovino == id_bovino_partos))
             session.commit()
+            #si la cantidad de partos es menor a 1 entonces no existe intervalo entre partos
+            if cantidad_partos==1:
+                intervalo_entre_partos_defecto=0
+                session.execute(modelo_leche.update().values(intervalo_entre_partos=intervalo_entre_partos_defecto). \
+                                where(modelo_leche.columns.id_bovino == id_bovino_partos))
+                session.commit()
+            else:
+                pass
             #esta consulta trae en orden segun fecha de parto los partos del animal
             consulta_partos = session.query(modelo_historial_partos).\
                 filter(modelo_historial_partos.columns.id_bovino==id_bovino_partos).\
@@ -158,7 +163,22 @@ def intervalo_partos():
                     session.commit()
                 else:
                     pass
-
+        #el siguiente codigo permite establecer si un animal tiene o no registros de parto
+        consulta_id_bovinos_leche = session.query(modelo_leche).all()
+        for i in consulta_id_bovinos_leche:
+            # Toma el ID del bovino, este es el campo numero 0
+            id_bovino_partos_consulta_id_bovinos_leche = i[1]
+            #consulta que determina si el animal tiene algun registro de parto
+            consulta_bovinos_en_modulo_partos = session.query(modelo_historial_partos). \
+                filter(modelo_historial_partos.columns.id_bovino == id_bovino_partos_consulta_id_bovinos_leche).all()
+            #en caso de no tener regisros de parto sera actualizado al valor a 0
+            if consulta_bovinos_en_modulo_partos == []:
+                valor_defecto_cantidad_partos = 0
+                session.execute(modelo_leche.update().values(num_partos=valor_defecto_cantidad_partos). \
+                                where(modelo_leche.columns.id_bovino == id_bovino_partos_consulta_id_bovinos_leche))
+                session.commit()
+            else:
+                pass
         session.commit()
     except Exception as e:
         logger.error(f'Error Funcion intervalo_partos: {e}')
@@ -194,8 +214,22 @@ def promedio_intervalo_partos():
                 session.execute(modelo_leche.update().values(intervalo_entre_partos=promedio_intervalo). \
                                 where(modelo_leche.columns.id_bovino == id_bovino_intervalos))
                 session.commit()
-
-        logger.info(f'Funcion promedio_intervalo_partos {consulta_animal_intervalos} ')
+        #el siguiente codigo permite establecer si un animal tiene o no registros de parto
+        consulta_id_bovinos_leche = session.query(modelo_leche).all()
+        for i in consulta_id_bovinos_leche:
+            # Toma el ID del bovino, este es el campo numero 0
+            id_bovinos_leche = i[1]
+            #consulta que determina si el animal tiene algun registro de parto
+            consulta_bovinos_en_modulo_partos = session.query(modelo_historial_partos). \
+                filter(modelo_historial_partos.columns.id_bovino == id_bovinos_leche).all()
+            #en caso de no tener regisros de parto sera actualizado el valor a 0
+            if consulta_bovinos_en_modulo_partos == []:
+                valor_defecto_intervalo_partos = 0
+                session.execute(modelo_leche.update().values(intervalo_entre_partos=valor_defecto_intervalo_partos). \
+                                where(modelo_leche.columns.id_bovino == id_bovinos_leche))
+                session.commit()
+            else:
+                pass
         session.commit()
     except Exception as e:
         logger.error(f'Error Funcion promedio_intervalo_partos: {e}')
