@@ -67,25 +67,25 @@ class esquema_produccion_levante(BaseModel):
         orm_mode = True
         env_file = ".env"
 class esquema_produccion_leche(BaseModel):
-    id_leche:int
-    id_bovino:str
-    prod_lactancia : int
-    dura_lactancia :int
-    fecha_primer_parto: date
+    id_leche: int
+    id_bovino: str
+    fecha_primer_parto:date
     edad_primer_parto: int
-    fecha_inicial_ordeno : date
-    fecha_fin_ordeno: date
-    num_partos:int
-    tipo_parto:str
-    datos_prenez:str
-    fecha_ultimo_parto: date
+    prod_lactancia: float
+    dura_lactancia: float
+    fecha_inicial_ordeno:date
+    fecha_fin_ordeno:date
+    num_partos: int
+    tipo_parto: str
+    datos_prenez: str
+    fecha_ultimo_parto:date
     fecha_ultima_prenez: date
     dias_abiertos: int
-    fecha_vida_util:date
-    ordeno:str
+    fecha_vida_util: date
+    ordeno: str
     proposito: str
-    promedio_litros:int
-    litros_diarios:int
+    promedio_litros : float
+    intervalo_entre_partos : float
     class Config:
         orm_mode = True
         env_file = ".env"
@@ -292,7 +292,7 @@ class esquema_intervalo_partos(BaseModel):
         orm_mode = True
         env_file = ".env"
 
-class modelo_litros_leche(BaseModel):
+class esquema_litros_leche(BaseModel):
     id_litros: int
     id_bovino: str
     fecha_medicion: date

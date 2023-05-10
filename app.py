@@ -1,9 +1,14 @@
 from fastapi import FastAPI
 
 from routes.Prod_leche import Produccion_Leche
+from routes.Registro_Litros_Diarios import Produccion_Leche_Litros_Diarios
+from routes.Vientres_Aptos_Routes import Vientres_Aptos
 from routes.rutas_bovinos import rutas_bovinos
 from routes.PartosAnimales import partos_bovinos
 from routes.IEP_Razas import IEP_Razas
+
+
+
 
 
 
@@ -32,3 +37,6 @@ app.include_router(rutas_bovinos)
 app.include_router(partos_bovinos)
 app.include_router(IEP_Razas)
 app.include_router(Produccion_Leche)
+app.include_router(Produccion_Leche_Litros_Diarios)
+app.include_router(Vientres_Aptos)
+

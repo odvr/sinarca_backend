@@ -31,20 +31,14 @@ Produccion_Leche = APIRouter()
 
 
 
-@Produccion_Leche.get("/listar_prod_leche" ,response_model=list[esquema_produccion_leche])
+@Produccion_Leche.get("/listar_prod_leche" )
 async def inventario_prod_leche():
-    # llamado de funciones
-    Edad_Primer_Parto()
-    #Duracion_Lactancia()
-    Edad_Sacrificio_Lecheras()
-    #Dias_Abiertos()
-    animales_no_ordeno()
-    eliminarduplicados()
-    EliminarDuplicadosLeche()
 
     try:
 
         itemsLeche = session.execute(modelo_leche.select()).all()
+
+
 
     except Exception as e:
         logger.error(f'Error al obtener inventario de Produccion Leche: {e}')

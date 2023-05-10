@@ -177,19 +177,7 @@ async def listarAnimalesDescarte():
         session.close()
     return itemsAnimalesDescarte
 
-@rutas_bovinos.get("/listar_contar_listar_vientres_aptos" )
-async def listar_contar_AnimalesDescarte():
 
-    try:
-        itemsAnimalesVientresAptos = session.query(modelo_vientres_aptos). \
-            where(modelo_vientres_aptos.columns.id_vientre).count()
-
-    except Exception as e:
-        logger.error(f'Error al obtener CONTAR VIENTRES APTOS: {e}')
-        raise
-    finally:
-        session.close()
-    return itemsAnimalesVientresAptos
 
 @rutas_bovinos.get("/listar_tabla_veterinaria" )
 async def listar_tabla_veterinaria():
@@ -271,23 +259,6 @@ async def listar_contar_AnimalesDescarte():
     finally:
         session.close()
     return itemsAnimalesDescarte
-
-"""
-Listar animales con vientre apto
-"""
-@rutas_bovinos.get("/listar_contar_listar_vientres_aptos" )
-async def listar_contar_AnimalesDescarte():
-
-    try:
-        itemsAnimalesVientresAptos = session.query(modelo_vientres_aptos). \
-            where(modelo_vientres_aptos.columns.id_vientre).count()
-
-    except Exception as e:
-        logger.error(f'Error al obtener CONTAR VIENTRES APTOS: {e}')
-        raise
-    finally:
-        session.close()
-    return itemsAnimalesVientresAptos
 
 
 
@@ -416,22 +387,6 @@ async def listar_vientres_aptos():
     return vientres_aptoss
 
 
-"""
-Listado de vientres aptos Para el modulo de Vientres Aptos
-"""
-@rutas_bovinos.get("/listar_vientres_aptos_modulos" )
-async def listar_vientres_aptos_modulo():
-    try:
-        vientres_aptos()
-        Eliminacion_total_vientres_aptos()
-        tabla_vientres_aptos = session.query(modelo_vientres_aptos).all()
-
-    except Exception as e:
-        logger.error(f'Error al obtener inventario de TABLA VIENTRES APTOS: {e}')
-        raise
-    finally:
-        session.close()
-    return tabla_vientres_aptos
 
 
 
@@ -2460,18 +2415,7 @@ def fecha_aproximada_parto():
       raise
   finally:
       session.close()
-"""la siguiente funcion elimina todos los vientres aptos de la 
-tabla, esto se realiza para evitar la duplicidad de datos"""
-def Eliminacion_total_vientres_aptos():
-  try:
-      #llamada de funcion que elimina todos los datos
-        session.execute(modelo_vientres_aptos.delete().where(modelo_vientres_aptos.c.id_bovino))
-        session.commit()
-  except Exception as e:
-      logger.error(f'Error Funcion Eliminacion_total_vientres_aptos: {e}')
-      raise
-  finally:
-      session.close()
+
 
 """la siguiente funcion trae los campos de edad y peso de cada animal
 a los animales de descarte"""
