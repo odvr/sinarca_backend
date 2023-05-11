@@ -32,7 +32,7 @@ logger.addHandler(file_handler)
 
 IEP_Razas = APIRouter()
 
-@IEP_Razas.get("/“Tabla_iep_por_raza",response_model=list[esquema_orden_IEP] )
+@IEP_Razas.get("/Tabla_iep_por_raza",response_model=list[esquema_orden_IEP] )
 async def listar_tabla_IEP_Razas():
     try:
         IEP_por_raza()

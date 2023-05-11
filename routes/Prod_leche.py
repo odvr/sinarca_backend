@@ -32,6 +32,26 @@ Produccion_Leche = APIRouter()
 
 
 
+
+@Produccion_Leche.get("/listar_bovino_prodLeche/{id_bovino}", response_model=esquema_produccion_leche )
+async def id_inventario_bovino_leche(id_bovino: str):
+
+    try:
+        # Consultar los datos de producción de leche del bovino especificado
+        consulta = condb.execute(
+            modelo_leche.select().where(modelo_leche.columns.id_bovino == id_bovino)).first()
+        # Cerrar la sesión
+        session.close()
+
+    except Exception as e:
+        logger.error(f'Error al obtener Listar Produccion Leche: {e}')
+        raise
+    finally:
+        session.close()
+    # condb.commit()
+    return consulta
+
+
 @Produccion_Leche.get("/listar_prod_leche" , response_model=list[esquema_produccion_leche])
 async def inventario_prod_leche():
 
@@ -40,6 +60,7 @@ async def inventario_prod_leche():
         Edad_Sacrificio_Lecheras()
         promedio_litros_leche()
         intervalo_partos()
+
 
         itemsLeche = session.query(modelo_leche).all()
 
@@ -128,10 +149,10 @@ La siguiente api crea en la tabla de leche con la llave foranea de id_bovino est
 
 
 @Produccion_Leche.post(
-    "/crear_prod_leche/{fecha_primer_parto}/{id_bovino}/{datos_prenez}/{ordeno}/{proposito}",
+    "/crear_prod_leche/{fecha_primer_parto}/{id_bovino}/{datos_prenez}/{ordeno}/{proposito}/{intervalo_entre_partos}",
     status_code=status.HTTP_201_CREATED)
 async def CrearProdLeche(fecha_primer_parto: date, id_bovino: str,
-                   datos_prenez: str, ordeno: str,proposito:str):
+                   datos_prenez: str, ordeno: str,proposito:str, intervalo_entre_partos : float):
     eliminarduplicados()
 
     try:
@@ -143,7 +164,7 @@ async def CrearProdLeche(fecha_primer_parto: date, id_bovino: str,
         if consulta is None:
             ingresopleche = modelo_leche.insert().values(fecha_primer_parto=fecha_primer_parto, id_bovino=id_bovino,
                                                           datos_prenez=datos_prenez,
-                                                         ordeno=ordeno, proposito=proposito)
+                                                         ordeno=ordeno, proposito=proposito,intervalo_entre_partos=intervalo_entre_partos)
 
             condb.execute(ingresopleche)
             condb.commit()

@@ -46,6 +46,8 @@ logger.addHandler(file_handler)
 animales hembras vivos con un peso igual o superior al 75% de su peso adulto"""
 def vientres_aptos():
   try:
+
+
       # consulta de vacas que cumplen con la condicion
       consulta_vientres = session.query(modelo_bovinos_inventario). \
           where(modelo_bovinos_inventario.c.estado == "Vivo").\

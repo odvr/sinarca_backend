@@ -76,6 +76,7 @@ class esquema_produccion_leche(BaseModel):
     ordeno: str
     proposito: str
     promedio_litros : float
+    num_partos: int
     intervalo_entre_partos : float
     class Config:
         orm_mode = True
@@ -224,7 +225,7 @@ class esquema_carga_animal_y_consumo_agua(BaseModel):
     id_bovino: str
     edad: int
     peso: int
-    estado: str
+
     valor_unidad_animal: int
     consumo_forraje_vivo:int
     raza:str

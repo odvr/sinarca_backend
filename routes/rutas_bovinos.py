@@ -354,20 +354,6 @@ async def listar_reproductor():
 Lista la tabla de carga de animales
 """
 
-@rutas_bovinos.get("/listar_carga_animales" )
-async def listar_carga_animales():
-
-    try:
-        consumo_global_agua_y_totalidad_unidades_animales()
-        carga_animal()
-        itemscargaAnimales = session.execute(modelo_carga_animal_y_consumo_agua.select()).all()
-
-    except Exception as e:
-        logger.error(f'Error al obtener inventario de LISTAR CARGA ANIMALES: {e}')
-        raise
-    finally:
-        session.close()
-    return itemscargaAnimales
 
 
 """
@@ -467,236 +453,8 @@ async def relacion_toros_vientres_aptos():
 
 
 
-@rutas_bovinos.get("/listar_tabla_pesaje", response_model=list[esquema_modelo_Reporte_Pesaje] )
-async def listar_tabla_pesaje():
-    try:
-
-        tabla_pesaje = session.query(modelo_datos_pesaje).all()
-
-    except Exception as e:
-        logger.error(f'Error al obtener inventario de TABLA PESAJE: {e}')
-        raise
-    finally:
-        session.close()
-    return tabla_pesaje
-
-@rutas_bovinos.get("/listar_reporte_pesaje/Enero")
-async def listar_reporte_pesaje_enero():
-    try:
-
-        resultadosEnero = session.query(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje),
-                                        func.sum(modelo_datos_pesaje.c.peso).label('Peso')) \
-            .filter(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje) == 1) \
-            .group_by(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje)) \
-            .all()
 
 
-    except Exception as e:
-        logger.error(f'Error al obtener inventario de De Promedios Por MEs Enero {e}')
-        raise
-    finally:
-        session.close()
-    return resultadosEnero
-
-
-@rutas_bovinos.get("/listar_reporte_pesaje/Febrero")
-async def listar_reporte_pesaje_febrero():
-    try:
-
-        resultadosFebrero = session.query(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje),
-                                        func.sum(modelo_datos_pesaje.c.peso).label('Peso')) \
-            .filter(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje) == 2) \
-            .group_by(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje)) \
-            .all()
-
-
-    except Exception as e:
-        logger.error(f'Error al obtener inventario de De Promedios Por MEs Enero {e}')
-        raise
-    finally:
-        session.close()
-    return resultadosFebrero
-'''
-
-'''
-@rutas_bovinos.get("/listar_reporte_pesaje/Marzo" )
-async def listar_reporte_pesaje_Marzo():
-    try:
-
-
-
-        resultadosMarzo = session.query(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje),
-                                   func.sum(modelo_datos_pesaje.c.peso).label('Peso')) \
-            .filter(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje) == 3) \
-            .group_by(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje)) \
-            .all()
-
-
-    except Exception as e:
-        logger.error(f'Error al obtener inventario de De Promedios Por MEs MArzo {e}')
-        raise
-    finally:
-        session.close()
-    return resultadosMarzo
-
-@rutas_bovinos.get("/listar_reporte_pesaje/Abril" )
-async def listar_reporte_pesaje_Abril():
-    try:
-
-        resultadosAbril = session.query(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje),
-                                   func.sum(modelo_datos_pesaje.c.peso).label('Peso')) \
-            .filter(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje) == 4) \
-            .group_by(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje)) \
-            .all()
-    except Exception as e:
-        logger.error(f'Error al obtener inventario de De Promedios Por MEs Abril {e}')
-        raise
-    finally:
-        session.close()
-    return resultadosAbril
-@rutas_bovinos.get("/listar_reporte_pesaje/Mayo" )
-async def listar_reporte_pesaje_Mayo():
-    try:
-
-        resultadosMayo = session.query(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje),
-                                   func.sum(modelo_datos_pesaje.c.peso).label('Peso')) \
-            .filter(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje) == 5) \
-            .group_by(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje)) \
-            .all()
-
-    except Exception as e:
-        logger.error(f'Error al obtener inventario de De Promedios Por MEs MAyo {e}')
-        raise
-    finally:
-        session.close()
-    return resultadosMayo
-
-@rutas_bovinos.get("/listar_reporte_pesaje/Junio" )
-async def listar_reporte_pesaje_Junio():
-    try:
-
-        resultadosJunio = session.query(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje),
-                                   func.sum(modelo_datos_pesaje.c.peso).label('Peso')) \
-            .filter(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje) == 6) \
-            .group_by(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje)) \
-            .all()
-    except Exception as e:
-        logger.error(f'Error al obtener inventario de De Promedios Por MEs Junio {e}')
-        raise
-    finally:
-        session.close()
-    return resultadosJunio
-@rutas_bovinos.get("/listar_reporte_pesaje/Julio" )
-async def listar_reporte_pesaje_Julio():
-    try:
-
-        resultadosJulio = session.query(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje),
-                                   func.sum(modelo_datos_pesaje.c.peso).label('Peso')) \
-            .filter(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje) == 7) \
-            .group_by(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje)) \
-            .all()
-    except Exception as e:
-        logger.error(f'Error al obtener inventario de De Promedios Por MEs Julio {e}')
-        raise
-    finally:
-        session.close()
-    return resultadosJulio
-
-@rutas_bovinos.get("/listar_reporte_pesaje/Agosto" )
-async def listar_reporte_pesaje_Agosto():
-    try:
-
-        resultadosAgosto = session.query(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje),
-                                   func.sum(modelo_datos_pesaje.c.peso).label('Peso')) \
-            .filter(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje) == 8) \
-            .group_by(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje)) \
-            .all()
-    except Exception as e:
-        logger.error(f'Error al obtener inventario de De Promedios Por MEs Agosto {e}')
-        raise
-    finally:
-        session.close()
-    return resultadosAgosto
-
-@rutas_bovinos.get("/listar_reporte_pesaje/Septiembre" )
-async def listar_reporte_pesaje_Septiembre():
-    try:
-
-        resultadosSeptiembre = session.query(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje),
-                                   func.sum(modelo_datos_pesaje.c.peso).label('Peso')) \
-            .filter(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje) == 9) \
-            .group_by(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje)) \
-            .all()
-    except Exception as e:
-        logger.error(f'Error al obtener inventario de De Promedios Por MEs Septiembre {e}')
-        raise
-    finally:
-        session.close()
-    return resultadosSeptiembre
-
-
-@rutas_bovinos.get("/listar_reporte_pesaje/Octubre" )
-async def listar_reporte_pesaje_Octubre():
-    try:
-
-        resultadosOctubre = session.query(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje),
-                                   func.sum(modelo_datos_pesaje.c.peso).label('Peso')) \
-            .filter(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje) == 10) \
-            .group_by(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje)) \
-            .all()
-    except Exception as e:
-        logger.error(f'Error al obtener inventario de De Promedios Por MEs Octubre {e}')
-        raise
-    finally:
-        session.close()
-    return resultadosOctubre
-@rutas_bovinos.get("/listar_reporte_pesaje/Noviembre" )
-async def listar_reporte_pesaje_Noviembre():
-    try:
-
-        resultadosNoviembre = session.query(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje),
-                                   func.sum(modelo_datos_pesaje.c.peso).label('Peso')) \
-            .filter(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje) == 11) \
-            .group_by(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje)) \
-            .all()
-    except Exception as e:
-        logger.error(f'Error al obtener inventario de De Promedios Por MEs Noviembre {e}')
-        raise
-    finally:
-        session.close()
-    return resultadosNoviembre
-@rutas_bovinos.get("/listar_reporte_pesaje/Diciembre" )
-async def listar_reporte_pesaje_Diciembre():
-    try:
-
-        resultadosDiciembre = session.query(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje),
-                                   func.sum(modelo_datos_pesaje.c.peso).label('Peso')) \
-            .filter(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje) == 12) \
-            .group_by(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje)) \
-            .all()
-    except Exception as e:
-        logger.error(f'Error al obtener inventario de De Promedios Por MEs Diciembre {e}')
-        raise
-    finally:
-        session.close()
-    return resultadosDiciembre
-
-
-
-
-@rutas_bovinos.get("/listar_tabla_pesaje_por_animal/{id_bovino}" )
-async def listar_tabla_pesaje_Por_Animal(id_bovino:str):
-    try:
-
-        tabla_pesaje = session.query(modelo_datos_pesaje).where(modelo_datos_pesaje.columns.id_bovino == id_bovino).all()
-
-
-    except Exception as e:
-        logger.error(f'Error al obtener inventario de TABLA PESAJE POR ANIMAL: {e}')
-        raise
-    finally:
-        session.close()
-    return tabla_pesaje
 
 
 
@@ -830,26 +588,12 @@ async def id_arbolgenialogico(id_bovino: str):
     return consulta
 
 
-
 """
 Lista los datos de la tabla prod leche inventario
 """
 
-@rutas_bovinos.get("/listar_bovino_prodLeche/{id_bovino}")
-async def id_inventario_bovino_leche(id_bovino: str):
-    eliminarduplicados()
 
-    try:
-        consulta = session.execute(
-            modelo_leche.select().where(modelo_leche.columns.id_bovino == id_bovino)).first()
-        logger.info(f'Se listo el siguiente Bovino {consulta} ')
-    except Exception as e:
-        logger.error(f'Error al obtener Listar Produccion Leche: {e}')
-        raise
-    finally:
-        session.close()
-    # condb.commit()
-    return consulta
+
 
 
 
@@ -997,30 +741,7 @@ async def crear_endogamia(id_bovino:str,id_bovino_madre: str,id_bovino_padre:str
     return Response(status_code=status.HTTP_201_CREATED)
 
 
-"""
-Ingresa los datos para el reporte de pesaje del animal 
-"""
-@rutas_bovinos.post("/fecha_pesaje/{id_bovino}/{fecha_pesaje}/{peso}",status_code=200)
-async def crear_fecha_pesaje(id_bovino:str,fecha_pesaje:date,peso:int ):
 
-    try:
-
-        ingresoFechaPesaje = modelo_datos_pesaje.insert().values(id_bovino=id_bovino,
-                                                     fecha_pesaje=fecha_pesaje,peso=peso
-
-                                                   )
-
-
-        condb.execute(ingresoFechaPesaje)
-        condb.commit()
-        endogamia()
-    except Exception as e:
-        logger.error(f'Error al Crear INGRESO DE PESAJE: {e}')
-        raise
-    finally:
-        condb.close()
-
-    return Response(status_code=status.HTTP_201_CREATED)
 
 
 
@@ -1125,29 +846,7 @@ async def crear_registro_muerte(id_bovino:str,estado:str,fecha_muerte:date,razon
 La siguiente api crea en la tabla de leche con la llave foranea de id_bovino esto es habilitado en el formulario en la opcion de porposito leche
 """
 
-"""
-Funcion crear Levante
-"""
-@rutas_bovinos.post(
-    "/crear_prod_levante/{id_bovino}/{proposito}",
-    status_code=status.HTTP_201_CREATED)
-async def CrearProdLevante(id_bovino: str,proposito:str):
-    eliminarduplicados()
 
-    try:
-        ingresoplevante = modelo_levante.insert().values(id_bovino=id_bovino, proposito = proposito)
-        logger.info(f'Se creo el siguiente Bovino en la tabla de produccion de leche {ingresoplevante} ')
-
-        condb.execute(ingresoplevante)
-        condb.commit()
-
-    except Exception as e:
-        logger.error(f'Error al Crear Bovino para la tabla de Produccion de Levante: {e}')
-        raise
-    finally:
-        condb.close()
-
-    return Response(status_code=status.HTTP_201_CREATED)
 
 
 
@@ -1235,30 +934,6 @@ async def crear_temperatura(temperatura_ambiente: float):
 
 
 
-
-"""
-Funcion inserta las hectareas aproximadas para realizar el calculo para el modulo de capacidad de carga  hectareas_forraje
-"""
-@rutas_bovinos.post(
-    "/crear_hectareas_forraje/{hectareas_forraje}",
-    status_code=status.HTTP_201_CREATED)
-async def hectareas_forraje(hectareas_forraje: float):
-
-    try:
-
-
-        capacidad_carga()
-        hectareas_forraje = update(modelo_capacidad_carga).where(modelo_capacidad_carga.c.id_capacidad == 1).values(hectareas_forraje=hectareas_forraje)
-        condb.execute(hectareas_forraje)
-        condb.commit()
-        capacidad_carga()
-    except Exception as e:
-        logger.error(f'Error al Crear Bovino para la tabla de CAPACIDAD DE CARGA hectareas_forraje : {e}')
-        raise
-    finally:
-        condb.close()
-
-    return Response(status_code=status.HTTP_201_CREATED)
 
 
 

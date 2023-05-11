@@ -1,11 +1,15 @@
 from fastapi import FastAPI
 
+from routes.Pesaje import pesaje
 from routes.Prod_leche import Produccion_Leche
 from routes.Registro_Litros_Diarios import Produccion_Leche_Litros_Diarios
 from routes.Vientres_Aptos_Routes import Vientres_Aptos
 from routes.rutas_bovinos import rutas_bovinos
 from routes.PartosAnimales import partos_bovinos
 from routes.IEP_Razas import IEP_Razas
+from routes.Capacidad_Carga import capacidad_carga_rutas
+from routes.levante import levante
+from routes.IntevaloPartos import IntevaloPartos
 
 
 
@@ -39,4 +43,9 @@ app.include_router(IEP_Razas)
 app.include_router(Produccion_Leche)
 app.include_router(Produccion_Leche_Litros_Diarios)
 app.include_router(Vientres_Aptos)
+app.include_router(capacidad_carga_rutas)
+app.include_router(pesaje)
+app.include_router(levante)
+app.include_router(IntevaloPartos)
+
 

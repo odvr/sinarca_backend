@@ -59,15 +59,12 @@ modelo_leche = Table("produccion_leche", meta, Column("id_leche", Integer, prima
                      Column("id_bovino", String(300), ForeignKey("bovinos.id_bovino")),
                      Column("fecha_primer_parto", Date),
                      Column("edad_primer_parto", Integer),
-
-
-
                      Column("datos_prenez", String(300)),
-
                      Column("fecha_vida_util", Date),
                      Column("ordeno", String(300)),
                      Column("proposito", String(300)),
                      Column("promedio_litros", Float),
+                     Column("num_partos", Integer),
                      Column("intervalo_entre_partos", Float))
 
 modelo_datos_muerte = Table("datos_muerte", meta, Column("id_datos_muerte", Integer, primary_key=True),
