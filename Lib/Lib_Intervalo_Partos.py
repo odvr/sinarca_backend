@@ -23,7 +23,7 @@ from models.modelo_bovinos import modelo_bovinos_inventario, modelo_veterinaria,
     modelo_descarte, modelo_users, modelo_arbol_genealogico, modelo_historial_partos, modelo_historial_intervalo_partos
 from schemas.schemas_bovinos import Esquema_bovinos,User, esquema_produccion_leche, esquema_produccion_levante,TokenSchema,esquema_descarte, \
     esquema_produccion_ceba
-from sqlalchemy import select, insert, values, update, bindparam, between, join, func, null, desc
+from sqlalchemy import select, insert, values, update, bindparam, between, join, func, null, desc, asc
 from starlette.status import HTTP_204_NO_CONTENT
 from datetime import date, datetime, timedelta
 
@@ -88,7 +88,7 @@ def intervalo_partos():
             #para ello ordena las fechas de registro de partos desde las mas antiguas y toma la fecha mas antigua
             consulta_fecha_primer_parto = list(condb.execute(modelo_historial_partos.select(). \
                                            where(modelo_historial_partos.columns.id_bovino == id_bovino_partos). \
-                                           order_by(desc(modelo_historial_partos.columns.fecha_parto))).first())
+                                           order_by(asc(modelo_historial_partos.columns.fecha_parto))).first())
             #actualizacion del campo
             session.execute(modelo_leche.update().values(fecha_primer_parto=consulta_fecha_primer_parto[2]). \
                             where(modelo_leche.columns.id_bovino == id_bovino_partos))
