@@ -179,11 +179,6 @@ class esquema_modelo_Reporte_Pesaje(BaseModel):
 class esquema_veterinaria(BaseModel):
     id_veterinaria: int
     id_bovino: str
-    edad: int
-    peso: int
-    estado: str
-    sexo: str
-    proposito: str
     sintomas: str
     fecha_sintomas: date
     comportamiento:str
@@ -195,9 +190,25 @@ class esquema_veterinaria(BaseModel):
     mucosa_vulvar_prepusial: str
     tratamiento: str
     evolucion: str
+    piel_pelaje:str
     class Config:
         orm_mode = True
         env_file = ".env"
+
+
+
+
+
+class esquema_veterinaria_evoluciones(BaseModel):
+    id_evolucion: int
+    id_bovino: str
+    tratamiento_evolucion: str
+    fecha_evolucion: date
+    class Config:
+        orm_mode = True
+        env_file = ".env"
+
+
 
 class esquema_descarte(BaseModel):
     id_descarte: int

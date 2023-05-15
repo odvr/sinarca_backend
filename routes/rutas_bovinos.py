@@ -8,17 +8,20 @@ from http.client import HTTPException
 
 from fastapi import APIRouter, Response
 
+from Lib.actualizacion_peso import actualizacion_peso
 from Lib.endogamia import endogamia
 from Lib.funcion_vientres_aptos import vientres_aptos
 # importa la conexion de la base de datos
 from config.db import condb, session
 # importa el esquema de los bovinos
-from models.modelo_bovinos import modelo_bovinos_inventario,modelo_veterinaria, modelo_leche, modelo_levante,modelo_ventas,modelo_datos_muerte, \
-    modelo_indicadores, modelo_ceba, modelo_macho_reproductor, modelo_carga_animal_y_consumo_agua,modelo_datos_pesaje, \
-    modelo_capacidad_carga, modelo_calculadora_hectareas_pastoreo, modelo_partos, modelo_vientres_aptos,modelo_descarte,modelo_users,modelo_arbol_genealogico
+from models.modelo_bovinos import modelo_bovinos_inventario, modelo_veterinaria, modelo_leche, modelo_levante, \
+    modelo_ventas, modelo_datos_muerte, \
+    modelo_indicadores, modelo_ceba, modelo_macho_reproductor, modelo_carga_animal_y_consumo_agua, modelo_datos_pesaje, \
+    modelo_capacidad_carga, modelo_calculadora_hectareas_pastoreo, modelo_partos, modelo_vientres_aptos, \
+    modelo_descarte, modelo_users, modelo_arbol_genealogico, modelo_veterinaria_evoluciones
 from schemas.schemas_bovinos import Esquema_bovinos, esquema_produccion_levante, \
     esquema_produccion_ceba, esquema_datos_muerte, esquema_modelo_ventas, esquema_arbol_genealogico, \
-    esquema_modelo_Reporte_Pesaje, esquema_produccion_leche
+    esquema_modelo_Reporte_Pesaje, esquema_produccion_leche, esquema_veterinaria, esquema_veterinaria_evoluciones
 from sqlalchemy import update, between, func
 from starlette.status import HTTP_204_NO_CONTENT
 from datetime import date, datetime, timedelta
@@ -99,6 +102,122 @@ def login(form_data: OAuth2PasswordRequestForm = Depends()):
 
 
 
+''''
++++++++++++++++++++++++++++++++
+Modulo de Veterinaria
++++++++++++++++++++++++++++++++
+'''
+
+@rutas_bovinos.post("/CrearRegistroVeterinaria/{id_bovino}/{sintomas}/{fecha_sintomas}/{comportamiento}/{condicion_corporal}/{postura}/{mucosa_ocular}/{mucosa_bucal}/{mucosa_rectal}/{mucosa_vulvar_prepusial}/{evolucion}/{tratamiento}/{piel_pelaje}",status_code=200)
+async def CrearRegistroVeterinaria(id_bovino:str,sintomas:str,fecha_sintomas:date,comportamiento:str,condicion_corporal:str,postura:str,mucosa_bucal :str, mucosa_ocular:str,mucosa_rectal:str,mucosa_vulvar_prepusial:str,evolucion:str,tratamiento:str,piel_pelaje:str ):
+
+    try:
+
+
+        ingresoVeterinaria = modelo_veterinaria.insert().values(id_bovino=id_bovino,sintomas=sintomas,fecha_sintomas=fecha_sintomas,comportamiento=comportamiento,condicion_corporal=condicion_corporal,postura=postura,mucosa_bucal= mucosa_bucal,mucosa_ocular=mucosa_ocular,mucosa_rectal=mucosa_rectal,mucosa_vulvar_prepusial=mucosa_vulvar_prepusial, evolucion=evolucion,tratamiento=tratamiento,piel_pelaje=piel_pelaje)
+
+
+        condb.execute(ingresoVeterinaria)
+        condb.commit()
+
+    except Exception as e:
+        logger.error(f'Error al Crear INGRESO DE PESAJE: {e}')
+        raise
+    finally:
+        condb.close()
+
+    return Response(status_code=status.HTTP_201_CREATED)
+
+@rutas_bovinos.get("/listar_tabla_veterinaria",response_model=list[esquema_veterinaria])
+async def listar_tabla_Veterinaria():
+    try:
+
+
+        itemsVeterinaria = session.execute(modelo_veterinaria.select()).all()
+
+
+
+
+    except Exception as e:
+        logger.error(f'Error al obtener TABLA DE VETERINARIA: {e}')
+        raise
+    return itemsVeterinaria
+
+@rutas_bovinos.get("/listar_bovino_Veterinaria/{id_bovino}",response_model=esquema_veterinaria)
+async def id_inventario_bovino_Veterinaria(id_bovino: str):
+
+    try:
+        # Consultar los datos de producción de leche del bovino especificado
+        consulta = condb.execute(
+            modelo_veterinaria.select().where(modelo_veterinaria.columns.id_bovino == id_bovino)).first()
+        # Cerrar la sesión
+        session.close()
+
+    except Exception as e:
+        logger.error(f'Error al obtener Listar Veterinaria: {e}')
+        raise
+    finally:
+        session.close()
+    # condb.commit()
+    return consulta
+
+
+
+
+@rutas_bovinos.get("/listar_bovino_Veterinaria_Evoluciones/{id_bovino}",  response_model=list[esquema_veterinaria_evoluciones] )
+async def id_inventario_bovino_Veterinaria_Evoluciones(id_bovino: str):
+
+    try:
+
+        tabla_pesaje = session.query(modelo_veterinaria_evoluciones).where(
+            modelo_veterinaria_evoluciones.columns.id_bovino == id_bovino).all()
+
+        consulta = condb.execute(
+            modelo_veterinaria_evoluciones.select().where(modelo_veterinaria_evoluciones.columns.id_bovino == id_bovino)).first()
+        # Cerrar la sesión
+        session.close()
+
+    except Exception as e:
+        logger.error(f'Error al obtener Listar Veterinaria: {e}')
+        raise
+    finally:
+        session.close()
+    # condb.commit()
+    return tabla_pesaje
+
+'''
+POST /QA1/ALGUN%20TRATAMIENTO%20EN%20ESTE%20MUNDO/2023-05-10 HTTP/1.1
+POST /QA1/ALGUN%20TRATAMIENTO%20EN%20ESTE%20MUNDO/2023-05-10 HTTP/1.1
+
+'''
+@rutas_bovinos.post("/Crear_Evolucion/{id_bovino}/{tratamiento_evolucion}/{fecha_evolucion}",status_code=200)
+async def crear_evolucion(id_bovino:str,tratamiento_evolucion:str,fecha_evolucion:date ):
+
+    try:
+
+
+        ingresoEvolucion = modelo_veterinaria_evoluciones.insert().values(id_bovino=id_bovino,tratamiento_evolucion=tratamiento_evolucion,fecha_evolucion=fecha_evolucion)
+
+
+        condb.execute(ingresoEvolucion)
+        condb.commit()
+
+    except Exception as e:
+        logger.error(f'Error al Crear INGRESO DE EVOLUCION: {e}')
+        raise
+    finally:
+        condb.close()
+
+    return Response(status_code=status.HTTP_201_CREATED)
+
+
+
+
+
+
+""""
++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+"""
 
 @rutas_bovinos.get("/listar_vientres_aptos" )
 async def listar_vientres_aptos_modulo():
@@ -139,6 +258,7 @@ La siguiente funcion retorna un diccionario con la consulta general del la tabla
 async def inventario_bovino():
     # Se llama la funcion con el fin que esta realice el calculo pertinete a la edad del animal ingresado
     calculoEdad()
+    actualizacion_peso()
 
 
     eliminarduplicados()
@@ -176,7 +296,6 @@ async def id_inventario_bovino_v(id_bovino: str):
         raise
 
     return consulta
-
 
 
 

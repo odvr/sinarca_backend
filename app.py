@@ -10,12 +10,7 @@ from routes.IEP_Razas import IEP_Razas
 from routes.Capacidad_Carga import capacidad_carga_rutas
 from routes.levante import levante
 from routes.IntevaloPartos import IntevaloPartos
-
-
-
-
-
-
+from routes.Veterinaria import Veterinaria
 from fastapi.middleware.cors import CORSMiddleware
 
 '''
@@ -47,5 +42,6 @@ app.include_router(capacidad_carga_rutas)
 app.include_router(pesaje)
 app.include_router(levante)
 app.include_router(IntevaloPartos)
+app.include_router(Veterinaria)
 
 

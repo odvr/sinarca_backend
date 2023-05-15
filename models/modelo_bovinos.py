@@ -140,11 +140,6 @@ modelo_datos_pesaje  = Table("ReportesPesaje", meta, Column("id_pesaje", Integer
 
 modelo_veterinaria = Table("veterinaria", meta, Column("id_veterinaria", Integer, primary_key=True),
                            Column("id_bovino", String(300), ForeignKey("bovinos.id_bovino")),
-                           Column("edad", Integer),
-                           Column("peso", Float),
-                           Column("estado", String(300)),
-                           Column("sexo", String(300)),
-                           Column("proposito", String(300)),
                            Column("sintomas", String(300)),
                            Column("fecha_sintomas", Date),
                            Column("comportamiento", String(300)),
@@ -155,7 +150,14 @@ modelo_veterinaria = Table("veterinaria", meta, Column("id_veterinaria", Integer
                            Column("mucosa_rectal", String(300)),
                            Column("mucosa_vulvar_prepusial", String(300)),
                            Column("tratamiento", String(300)),
-                           Column("evolucion", String(300)))
+                           Column("evolucion", String(300)),
+                           Column("piel_pelaje", String(255)))
+
+modelo_veterinaria_evoluciones = Table("Evoluciones_Bovinos", meta, Column("id_evolucion", Integer, primary_key=True),
+                           Column("id_bovino", String(300), ForeignKey("bovinos.id_bovino")),
+                           Column("tratamiento_evolucion", String(300)),
+                           Column("fecha_evolucion", Date))
+
 
 modelo_descarte = Table("descarte", meta, Column("id_descarte", Integer, primary_key=True),
                         Column("id_bovino", String(300), ForeignKey("bovinos.id_bovino"),unique=True),
