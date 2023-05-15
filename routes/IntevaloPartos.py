@@ -2,7 +2,7 @@
 Librerias requeridas
 '''
 import logging
-from Lib.Lib_Intervalo_Partos import intervalo_partos
+from Lib.Lib_Intervalo_Partos import intervalo_partos, promedio_intervalo_partos
 # # importa la conexion de la base de datos
 from config.db import condb, session
 # # importa el esquema de los bovinos
@@ -28,6 +28,7 @@ IntevaloPartos = APIRouter()
 async def listar_tabla_Intervalo_Partos():
     try:
         intervalo_partos()
+        promedio_intervalo_partos()
         itemsListarIntevaloPartos = session.execute(modelo_historial_intervalo_partos.select()).all()
 
     except Exception as e:
