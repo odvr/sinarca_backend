@@ -19,9 +19,11 @@ from models.modelo_bovinos import modelo_bovinos_inventario, modelo_veterinaria,
     modelo_indicadores, modelo_ceba, modelo_macho_reproductor, modelo_carga_animal_y_consumo_agua, modelo_datos_pesaje, \
     modelo_capacidad_carga, modelo_calculadora_hectareas_pastoreo, modelo_partos, modelo_vientres_aptos, \
     modelo_descarte, modelo_users, modelo_arbol_genealogico, modelo_veterinaria_evoluciones
+from routes.Reproductor import vida_util_macho_reproductor
 from schemas.schemas_bovinos import Esquema_bovinos, esquema_produccion_levante, \
     esquema_produccion_ceba, esquema_datos_muerte, esquema_modelo_ventas, esquema_arbol_genealogico, \
-    esquema_modelo_Reporte_Pesaje, esquema_produccion_leche, esquema_veterinaria, esquema_veterinaria_evoluciones
+    esquema_modelo_Reporte_Pesaje, esquema_produccion_leche, esquema_veterinaria, esquema_veterinaria_evoluciones, \
+    esquema_partos, esquema_macho_reproductor, esquema_indicadores
 from sqlalchemy import update, between, func
 from starlette.status import HTTP_204_NO_CONTENT
 from datetime import date, datetime, timedelta
@@ -452,21 +454,7 @@ async def inventario_ceba():
 
 
 
-@rutas_bovinos.get("/listar_reproductor" )
-async def listar_reproductor():
-    #llamdo de la funcion para calcular
-    vida_util_macho_reproductor()
 
-    try:
-        vida_util_macho_reproductor()
-        itemsreproductor = session.execute(modelo_macho_reproductor.select()).all()
-        logger.info(f'Se obtuvieron {len(itemsreproductor)} registros de inventario de REPRODUCTOR.')
-    except Exception as e:
-        logger.error(f'Error al obtener inventario de REPRODUCTOR: {e}')
-        raise
-    finally:
-        session.close()
-    return itemsreproductor
 
 
 """
@@ -479,7 +467,7 @@ Lista la tabla de carga de animales
 Listar  Fecha aproximada de parto
 """
 
-@rutas_bovinos.get("/listar_fecha_parto" )
+@rutas_bovinos.get("/listar_fecha_parto",response_model=list[esquema_partos] )
 async def listar_fecha_parto():
 
     try:
@@ -488,7 +476,7 @@ async def listar_fecha_parto():
         listar_fecha_estimada_parto = session.execute(modelo_partos.select()).all()
 
     except Exception as e:
-        logger.error(f'Error al obtener inventario de LISTAR CARGA ANIMALES: {e}')
+        logger.error(f'Error al obtener inventario de Fecha de Parto: {e}')
         raise
     finally:
         session.close()
@@ -556,11 +544,12 @@ async def consumo_global_agua():
 
 " relacion_toros_vientres_aptos Lista la relacion entre el toro y los vientres aptos"
 
-@rutas_bovinos.get("/relacion_toros_vientres_aptos" )
+@rutas_bovinos.get("/relacion_toros_vientres_aptos")
 async def relacion_toros_vientres_aptos():
     try:
         vida_util_macho_reproductor()
         toro_Vientres = session.query(modelo_indicadores.c.relacion_toros_vientres_aptos).first()
+        print(toro_Vientres)
 
     except Exception as e:
         logger.error(f'Error al obtener la consulta de RELACION Y VIENTRES APTOS=  {e}')
@@ -1103,28 +1092,6 @@ async def CrearDescarte(id_bovino: str,edad:int,peso:float,razon_descarte:str):
 
     return Response( status_code=status.HTTP_201_CREATED)
 
-
-"""
-Crear Macho Reproductor
-"""
-@rutas_bovinos.post(
-    "/crear_reproductor/{id_bovino}",
-    status_code=status.HTTP_201_CREATED)
-async def CrearReproductor(id_bovino: str):
-    try:
-        CrearMacho = modelo_macho_reproductor.insert().values(id_bovino=id_bovino)
-        logger.info(f'Se creo el siguiente Bovino en la tabla MACHO REPRODUCTOR {CrearMacho} ')
-
-        condb.execute(CrearMacho)
-        condb.commit()
-
-    except Exception as e:
-        logger.error(f'Error al Crear Bovino para la tabla de MACHO REPRODUCTOR: {e}')
-        raise
-    finally:
-        condb.close()
-
-    return Response( status_code=status.HTTP_201_CREATED)
 
 
 
@@ -1893,39 +1860,7 @@ async def Animales_Optimo_Ceba():
       session.close()
   return ceba_optimo
 
-"""la siguiente funncion la fecha en que un macho empezara a bajar fertilidad, para ello
- suma los dias de vida util con la edad del animal para determinar este campo"""
-def vida_util_macho_reproductor():
- try:
-     #join con tabla de bovinos y consulta
-    consulta_machos_r = session.query(modelo_macho_reproductor.c.id_bovino,modelo_bovinos_inventario.c.edad,modelo_bovinos_inventario.c.peso,
-                          modelo_bovinos_inventario.c.estado,modelo_bovinos_inventario.c.fecha_nacimiento).\
-        join(modelo_macho_reproductor,modelo_bovinos_inventario.c.id_bovino == modelo_macho_reproductor.c.id_bovino).all()
-    # Recorre los campos de la consulta
-    for i in consulta_machos_r:
-        # Toma el ID del bovino para calcular su estado optimo en este caso es el campo 0
-        id = i[0]
-        # Toma la edad del animal en este caso es el campo 1
-        edad = i[1]
-        # Toma el peso del animal en este caso es el campo 2
-        peso = i[2]
-        # Toma el estado del animal en este caso es el campo 3
-        estado = i[3]
-        # Toma la fecha de nacimiento en este caso es el campo 4
-        fecha_nacimiento = i[4]
-        # calculo de la vida util mediante la suma del promedio de vida util con la fecha de nacimiento
-        fecha_vida_util = fecha_nacimiento + timedelta(2555)
-        # actualizacion del campo
-        condb.execute(modelo_macho_reproductor.update().values(edad=edad, peso=peso, estado=estado,
-                                                     fecha_vida_util=fecha_vida_util). \
-                      where(modelo_macho_reproductor.columns.id_bovino == id))
-        logger.info(f'Funcion vida_util_macho_reproductor {fecha_vida_util} ')
-        condb.commit()
- except Exception as e:
-   logger.error(f'Error Funcion vida_util_macho_reproductor: {e}')
-   raise
- finally:
-  condb.close()
+
 
 """la siguiente funncion determina si la cantidad de machos reproductores es suficciente
 o demasiada para las hembras que se pueden preñar """
@@ -2199,6 +2134,8 @@ de un animal en base a su fecha de preñez"""
 def fecha_aproximada_parto():
   try:
     # join de tablas
+
+
     consulta_vacas = session.query(modelo_partos.c.id_bovino,modelo_partos.c.fecha_estimada_prenez, modelo_bovinos_inventario.c.edad,
                                      modelo_bovinos_inventario.c.peso, modelo_bovinos_inventario.c.estado). \
         join(modelo_partos,modelo_partos.c.id_bovino == modelo_bovinos_inventario.c.id_bovino).all()

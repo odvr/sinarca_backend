@@ -7,6 +7,7 @@ El siguiente codigo permitira realizar el esquema de bases de datos para el meto
 #,
 from pydantic import BaseModel
 from datetime import date
+from typing import Optional
 from sqlalchemy import create_engine, Column, Integer, String
 from sqlalchemy.orm import sessionmaker
 #from passlib.context import CryptContext
@@ -110,33 +111,33 @@ class esquema_arbol_genealogico(BaseModel):
         env_file = ".env"
 class esquema_indicadores(BaseModel):
     id_indicadores: int
-    perdida_de_terneros: int
-    tasa_supervivencia: int
-    total_animales:int
-    vacas_prenadas_porcentaje:int
-    animales_levante:int
-    animales_ceba:int
-    animales_leche:int
-    vacas_prenadas:int
-    vacas_vacias:int
-    animales_fallecidos:int
-    animales_vendidos:int
-    machos:int
-    hembras:int
-    vacas_en_ordeno:int
-    vacas_no_ordeno:int
-    porcentaje_ordeno:int
-    animales_rango_edades_0_9:int
-    animales_rango_edades_9_12:int
-    animales_rango_edades_12_24:int
-    animales_rango_edades_24_36:int
-    animales_rango_edades_mayor_36:int
-    animales_optimos_levante:int
-    animales_optimos_ceba:int
-    vientres_aptos:int
-    relacion_toros_vientres_aptos:int
-    interpretacion_relacion_toros_vientres_aptos:str
-    total_unidades_animales:str
+    perdida_de_terneros: Optional[float] = None
+    tasa_supervivencia: Optional[float] = None
+    total_animales:Optional[int] = None
+    vacas_prenadas_porcentaje:Optional[float] = None
+    animales_levante:Optional[int] = None
+    animales_ceba:Optional[int] = None
+    animales_leche:Optional[int] = None
+    vacas_prenadas:Optional[int] = None
+    vacas_vacias:Optional[int] = None
+    animales_fallecidos:Optional[int] = None
+    animales_vendidos:Optional[int] = None
+    machos:Optional[int] = None
+    hembras:Optional[int] = None
+    vacas_en_ordeno:Optional[int] = None
+    vacas_no_ordeno:Optional[int] = None
+    porcentaje_ordeno:Optional[float] = None
+    animales_rango_edades_0_9:Optional[int] = None
+    animales_rango_edades_9_12:Optional[int] = None
+    animales_rango_edades_12_24:Optional[int] = None
+    animales_rango_edades_24_36:Optional[int] = None
+    animales_rango_edades_mayor_36:Optional[int] = None
+    animales_optimos_levante:Optional[int] = None
+    animales_optimos_ceba:Optional[int] = None
+    vientres_aptos:Optional[int] = None
+    relacion_toros_vientres_aptos:Optional[int] = None
+    interpretacion_relacion_toros_vientres_aptos:Optional[str] = None
+    total_unidades_animales:Optional[str] = None
     class Config:
         orm_mode = True
         env_file = ".env"
@@ -144,8 +145,6 @@ class esquema_indicadores(BaseModel):
 class esquema_macho_reproductor(BaseModel):
     id_macho: int
     id_bovino: str
-    id_bovino_madre: str
-    id_bovino_padre: str
     edad: int
     peso: int
     estado: str
@@ -225,8 +224,10 @@ class esquema_partos(BaseModel):
     id_bovino: str
     edad: int
     peso: int
-    fecha_estimada_prenez: date
-    fecha_estimada_parto: date
+    fecha_estimada_prenez: Optional[date] = None
+    fecha_estimada_parto: Optional[date] = None
+
+
     class Config:
         orm_mode = True
         env_file = ".env"
