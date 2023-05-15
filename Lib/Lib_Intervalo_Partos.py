@@ -84,6 +84,15 @@ def intervalo_partos():
             session.execute(modelo_leche.update().values(num_partos=cantidad_partos). \
                             where(modelo_leche.columns.id_bovino == id_bovino_partos))
             session.commit()
+            #esta consulta determina cual es el primer parto del bbovino
+            #para ello ordena las fechas de registro de partos desde las mas antiguas y toma la fecha mas antigua
+            consulta_fecha_primer_parto = list(condb.execute(modelo_historial_partos.select(). \
+                                           where(modelo_historial_partos.columns.id_bovino == id_bovino_partos). \
+                                           order_by(desc(modelo_historial_partos.columns.fecha_parto))).first())
+            #actualizacion del campo
+            session.execute(modelo_leche.update().values(fecha_primer_parto=consulta_fecha_primer_parto[2]). \
+                            where(modelo_leche.columns.id_bovino == id_bovino_partos))
+            session.commit()
             #si la cantidad de partos es menor a 1 entonces no existe intervalo entre partos
             if cantidad_partos==1:
                 intervalo_entre_partos_defecto=0
