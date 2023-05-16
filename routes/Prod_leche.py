@@ -60,6 +60,7 @@ async def inventario_prod_leche():
         Edad_Sacrificio_Lecheras()
         promedio_litros_leche()
         intervalo_partos()
+        EliminarDuplicadosLeche()
 
 
         itemsLeche = session.query(modelo_leche).all()
@@ -310,16 +311,22 @@ def Dias_Abiertos():
 
 def EliminarDuplicadosLeche():
     itemsLeche = session.execute(modelo_leche.select()).all()
+
+    print(itemsLeche)
+
     for ileche in itemsLeche:
-        propositoleche = ileche[16]
+        propositoleche = ileche[7]
+
         idleche = ileche[0]
 
-        if propositoleche == 'Levante' or propositoleche == 'Ceba':
+        if propositoleche == 'Levante':
             eliminarlevanteleche = condb.execute(modelo_leche.delete().where(modelo_leche.c.id_leche == idleche))
-            logger.info(f'Se ELIMINA EL DATO REPETIDO DE LECHE LEVANTE =  {eliminarlevanteleche} ')
+
             condb.commit(eliminarlevanteleche)
-        else:
-            pass
+
+        elif propositoleche == 'Ceba':
+            eliminarCebaleche = condb.execute(modelo_leche.delete().where(modelo_leche.c.id_leche == idleche))
+            condb.commit(eliminarCebaleche)
 
 
 """esta funcion calcula el porcentaje de vacas que se encuentran preñadas"""

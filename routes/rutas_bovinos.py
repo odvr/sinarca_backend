@@ -995,12 +995,26 @@ Crear en la tabla de partos para calcular la fecha aproximada
 async def CrearFechaAproximadaParto(id_bovino: str,fecha_estimada_prenez:date):
     try:
         fecha_aproximada_parto()
-        #listar_fecha_parto()
-        ingresocalcularFechaParto= modelo_partos.insert().values(id_bovino=id_bovino,fecha_estimada_prenez=fecha_estimada_prenez)
+
+        consulta = condb.execute(
+            modelo_partos.select().where(
+                modelo_partos.columns.id_bovino == id_bovino)).first()
+
+        if consulta is None:
+            ingresocalcularFechaParto = modelo_partos.insert().values(id_bovino=id_bovino,
+                                                                      fecha_estimada_prenez=fecha_estimada_prenez)
+
+            condb.execute(ingresocalcularFechaParto)
+            condb.commit()
+
+        else:
+            condb.execute(modelo_partos.update().where(modelo_partos.c.id_bovino == id_bovino).values(
+                            fecha_estimada_prenez=fecha_estimada_prenez))
+            condb.commit()
 
 
-        condb.execute(ingresocalcularFechaParto)
-        condb.commit()
+
+
 
     except Exception as e:
         logger.error(f'Error al Crear ingresocalcularFechaParto: {e}')
@@ -1054,11 +1068,25 @@ Crear Ceba
 async def CrearProdCeba(id_bovino: str,proposito:str):
 
     try:
-        ingresopceba = modelo_ceba.insert().values(id_bovino=id_bovino,proposito=proposito)
-        logger.info(f'Se creo el siguiente Bovino en la tabla de produccion de leche {ingresopceba} ')
 
-        condb.execute(ingresopceba)
-        condb.commit()
+        consulta = condb.execute(
+            modelo_ceba.select().where(
+                modelo_ceba.columns.id_bovino == id_bovino)).first()
+
+        if consulta is None:
+            ingresopceba = modelo_ceba.insert().values(id_bovino=id_bovino, proposito=proposito)
+            condb.execute(ingresopceba)
+            condb.commit()
+        else:
+
+            condb.execute(modelo_ceba.update().where(modelo_ceba.c.id_bovino == id_bovino).values(
+                proposito=proposito))
+            condb.commit()
+
+
+
+
+
 
     except Exception as e:
         logger.error(f'Error al Crear Bovino para la tabla de Produccion de Ceba: {e}')
