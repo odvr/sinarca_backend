@@ -28,6 +28,8 @@ class TokenSchema(BaseModel):
     access_token: str
     refresh_token: str
 
+
+
 class Esquema_bovinos(BaseModel):
     id_bovino : str
     fecha_nacimiento: date
@@ -70,15 +72,15 @@ class esquema_produccion_levante(BaseModel):
 class esquema_produccion_leche(BaseModel):
     id_leche: int
     id_bovino: str
-    fecha_primer_parto:date
-    edad_primer_parto: int
-    datos_prenez: str
-    fecha_vida_util: date
-    ordeno: str
-    proposito: str
-    promedio_litros : float
-    num_partos: int
-    intervalo_entre_partos : float
+    fecha_primer_parto: Optional[date] = None
+    edad_primer_parto: Optional[int] = None
+    datos_prenez: Optional[str] = None
+    fecha_vida_util: Optional[date] = None
+    ordeno: Optional[str] = None
+    proposito: Optional[str] = None
+    promedio_litros : Optional[float] = None
+    num_partos: Optional[int] = None
+    intervalo_entre_partos : Optional[float] = None
     class Config:
         orm_mode = True
         env_file = ".env"

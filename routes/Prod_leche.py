@@ -150,10 +150,10 @@ La siguiente api crea en la tabla de leche con la llave foranea de id_bovino est
 
 
 @Produccion_Leche.post(
-    "/crear_prod_leche/{fecha_primer_parto}/{id_bovino}/{datos_prenez}/{ordeno}/{proposito}/{intervalo_entre_partos}",
+    "/crear_prod_leche/{id_bovino}/{datos_prenez}/{ordeno}/{proposito}",
     status_code=status.HTTP_201_CREATED)
-async def CrearProdLeche(fecha_primer_parto: date, id_bovino: str,
-                   datos_prenez: str, ordeno: str,proposito:str, intervalo_entre_partos : float):
+async def CrearProdLeche( id_bovino: str,
+                   datos_prenez: str, ordeno: str,proposito:str):
     eliminarduplicados()
 
     try:
@@ -163,16 +163,16 @@ async def CrearProdLeche(fecha_primer_parto: date, id_bovino: str,
                 modelo_leche.columns.id_bovino == id_bovino)).first()
 
         if consulta is None:
-            ingresopleche = modelo_leche.insert().values(fecha_primer_parto=fecha_primer_parto, id_bovino=id_bovino,
+            ingresopleche = modelo_leche.insert().values(id_bovino=id_bovino,
                                                           datos_prenez=datos_prenez,
-                                                         ordeno=ordeno, proposito=proposito,intervalo_entre_partos=intervalo_entre_partos)
+                                                         ordeno=ordeno, proposito=proposito)
 
             condb.execute(ingresopleche)
             condb.commit()
         else:
 
             condb.execute(modelo_leche.update().where(modelo_leche.c.id_bovino == id_bovino).values(
-                fecha_primer_parto=fecha_primer_parto, id_bovino=id_bovino,
+                id_bovino=id_bovino,
                  datos_prenez=datos_prenez,
                 ordeno=ordeno, proposito=proposito))
             condb.commit()

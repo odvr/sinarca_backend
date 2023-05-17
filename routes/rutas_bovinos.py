@@ -18,12 +18,12 @@ from models.modelo_bovinos import modelo_bovinos_inventario, modelo_veterinaria,
     modelo_ventas, modelo_datos_muerte, \
     modelo_indicadores, modelo_ceba, modelo_macho_reproductor, modelo_carga_animal_y_consumo_agua, modelo_datos_pesaje, \
     modelo_capacidad_carga, modelo_calculadora_hectareas_pastoreo, modelo_partos, modelo_vientres_aptos, \
-    modelo_descarte, modelo_users, modelo_arbol_genealogico, modelo_veterinaria_evoluciones
+    modelo_descarte, modelo_users, modelo_arbol_genealogico, modelo_veterinaria_evoluciones, modelo_razas
 from routes.Reproductor import vida_util_macho_reproductor
 from schemas.schemas_bovinos import Esquema_bovinos, esquema_produccion_levante, \
     esquema_produccion_ceba, esquema_datos_muerte, esquema_modelo_ventas, esquema_arbol_genealogico, \
     esquema_modelo_Reporte_Pesaje, esquema_produccion_leche, esquema_veterinaria, esquema_veterinaria_evoluciones, \
-    esquema_partos, esquema_macho_reproductor, esquema_indicadores
+    esquema_partos, esquema_macho_reproductor, esquema_indicadores, esquema_razas
 from sqlalchemy import update, between, func
 from starlette.status import HTTP_204_NO_CONTENT
 from datetime import date, datetime, timedelta
@@ -336,6 +336,12 @@ async def listar_tabla_veterinaria():
     finally:
         session.close()
     return itemsAnimalesVeterinaria
+
+
+
+
+
+
 
 @rutas_bovinos.get("/listar_tabla_solo_machos",response_model=list[Esquema_bovinos] )
 async def listar_tabla_solo_machos():
@@ -797,15 +803,24 @@ la clase Esquema_bovinos  recibira como base para crear el animal esto con fin d
 """
 
 
-@rutas_bovinos.post("/crear_bovino", status_code=status.HTTP_201_CREATED)
-async def crear_bovinos(esquemaBovinos: Esquema_bovinos):
+@rutas_bovinos.post("/crear_bovino/{id_bovino}/{fecha_nacimiento}/{edad}/{raza}/{sexo}/{peso}/{marca}/{proposito}/{mansedumbre}/{estado}", status_code=status.HTTP_201_CREATED)
+async def crear_bovinos(id_bovino:str,fecha_nacimiento:date,edad:int,raza:str,sexo:str,peso:float,marca:str,proposito:str,mansedumbre:str,estado:str):
     eliminarduplicados()
 
     vientres_aptos()
 
     try:
-        bovinos_dic = esquemaBovinos.dict()
-        ingreso = modelo_bovinos_inventario.insert().values(bovinos_dic)
+        #bovinos_dic = esquemaBovinos.dict()
+        ingreso = modelo_bovinos_inventario.insert().values(  id_bovino=id_bovino,
+        fecha_nacimiento=fecha_nacimiento,
+        edad=edad,
+        raza=raza,
+        sexo=sexo,
+        peso=peso,
+        marca=marca,
+        proposito=proposito,
+        mansedumbre=mansedumbre,
+        estado=estado)
         condb.execute(ingreso)
 
         condb.commit()
@@ -1168,13 +1183,23 @@ async def cambiar_esta_bovino(data_update: Esquema_bovinos, id_bovino: str):
 '''
 La siguiente funcion realiza la actualizacion completa de la tabla de bovinos para cambiar los registros
 '''
-@rutas_bovinos.put("/cambiar_datos_bovino/{id_bovino}", status_code=HTTP_204_NO_CONTENT)
-async def cambiar_esta_bovino(data_update: Esquema_bovinos, id_bovino: str):
+@rutas_bovinos.put("/cambiar_datos_bovino/{id_bovino}/{fecha_nacimiento}/{edad}/{raza}/{sexo}/{peso}/{marca}/{proposito}/{mansedumbre}/{estado}", status_code=status.HTTP_201_CREATED)
+async def cambiar_esta_bovino(id_bovino:str,fecha_nacimiento:date,edad:int,raza:str,sexo:str,peso:float,marca:str,proposito:str,mansedumbre:str,estado:str):
     try:
         condb.execute(modelo_bovinos_inventario.update().values(
-            fecha_nacimiento=data_update.fecha_nacimiento, sexo=data_update.sexo, raza=data_update.raza,
-            peso=data_update.peso, marca=data_update.marca, proposito=data_update.proposito,
-            mansedumbre=data_update.mansedumbre, estado=data_update.estado).where(
+
+
+            fecha_nacimiento=fecha_nacimiento,
+            edad=edad,
+            raza=raza,
+            sexo=sexo,
+            peso=peso,
+            marca=marca,
+            proposito=proposito,
+            mansedumbre=mansedumbre,
+            estado=estado
+
+            ).where(
             modelo_bovinos_inventario.columns.id_bovino == id_bovino))
         condb.commit()
 
