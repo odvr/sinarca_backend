@@ -222,14 +222,17 @@ def Edad_Primer_Parto():
         fecha_nacimiento = i[1]
         # Toma la fecha de primer parto del animal en este caso es el campo 2
         fecha_primer_parto = i[2]
-        # calculo de la edad al primer parto
-        Edad_primer_parto = (fecha_primer_parto.year - fecha_nacimiento.year) * 12 +\
-                        fecha_primer_parto.month - fecha_nacimiento.month
-    # actualizacion del campo
-        condb.execute(modelo_leche.update().values(edad_primer_parto=Edad_primer_parto).where(
-          modelo_leche.columns.id_bovino == id))
+        if fecha_primer_parto is None:
+            pass
+        else:
+            # calculo de la edad al primer parto
+            Edad_primer_parto = (fecha_primer_parto.year - fecha_nacimiento.year) * 12 + \
+                                fecha_primer_parto.month - fecha_nacimiento.month
+            # actualizacion del campo
+            condb.execute(modelo_leche.update().values(edad_primer_parto=Edad_primer_parto).where(
+                modelo_leche.columns.id_bovino == id))
 
-        condb.commit()
+            condb.commit()
   except Exception as e:
     logger.error(f'Error Funcion Edad_Primer_Parto: {e}')
     raise
@@ -330,5 +333,4 @@ def EliminarDuplicadosLeche():
 
 
 """esta funcion calcula el porcentaje de vacas que se encuentran preñadas"""
-
 

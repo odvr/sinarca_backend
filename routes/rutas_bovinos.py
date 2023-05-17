@@ -1516,7 +1516,7 @@ def Tasa_Sobrevivencia():
     #return tasa
 
 """esta funcion calcula en terminos de porcentaje, cuantos terneros
-(animales de 0 a 6 meses) han fallecido, para ello consulta la cantidad 
+(animales de 0 a 12 meses) han fallecido, para ello consulta la cantidad 
 de animales muertos y el total para mediante una regla de 3 obtener
 el porcentaje
 """
@@ -1527,25 +1527,35 @@ async def perdida_Terneros():
  try:
     # consulta, seleccion y conteo de animales con edad de 0 a 6 meses que se encuentren muertos
     muertos = session.query(modelo_bovinos_inventario). \
-        where(between(modelo_bovinos_inventario.columns.edad, 0, 6)). \
+        where(between(modelo_bovinos_inventario.columns.edad, 0, 12)). \
         filter(modelo_bovinos_inventario.c.estado == "Muerto").count()
-    # consulta, seleccion y conteo de animales con edad de 0 a 6 meses
+    # consulta, seleccion y conteo de animales con edad de 0 a 12 meses
     totales = session.query(modelo_bovinos_inventario). \
-        where(between(modelo_bovinos_inventario.columns.edad, 0, 6)).count()
-    # calculo de la tasa
-    tasa_perd = (muertos / totales) * 100
-    # actualizacion del campo
-    session.execute(update(modelo_indicadores).
-                    where(modelo_indicadores.c.id_indicadores == 1).
-                    values(perdida_de_terneros=tasa_perd))
+        where(between(modelo_bovinos_inventario.columns.edad, 0, 12)).count()
+    if muertos==0 or totales==0:
+        tasa_perd=0
+        # actualizacion del campo
+        session.execute(update(modelo_indicadores).
+                        where(modelo_indicadores.c.id_indicadores == 1).
+                        values(perdida_de_terneros=tasa_perd))
 
-    session.commit()
+        session.commit()
+    else:
+        # calculo de la tasa
+        tasa_perd = (muertos / totales) * 100
+        # actualizacion del campo
+        session.execute(update(modelo_indicadores).
+                        where(modelo_indicadores.c.id_indicadores == 1).
+                        values(perdida_de_terneros=tasa_perd))
+
+        session.commit()
  except Exception as e:
      logger.error(f'Error Funcion perdida_Terneros: {e}')
      raise
  finally:
      session.close()
- return tasa_perd
+     return tasa_perd
+
 
 
 """esta funcion determina la cantidad de vacas no prenadas
