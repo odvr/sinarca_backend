@@ -101,13 +101,27 @@ async def vacas_prenadas_porcentaje():
     prenadas, vacias = session.query \
         (modelo_indicadores.c.vacas_prenadas, modelo_indicadores.c.vacas_vacias).first()
     # calculo del total de animales
-    totales = prenadas + vacias
-    # calculo procentaje de vacas prenadas
-    vacas_estado_pren = (prenadas / totales) * 100
-    # actualizacion de campos
-    session.execute(update(modelo_indicadores).
-                    where(modelo_indicadores.c.id_indicadores == 1).
-                    values(vacas_prenadas_porcentaje=vacas_estado_pren))
+    if prenadas is None or vacias is None:
+        vacas_estado_pren =0
+        # actualizacion de campos
+        session.execute(update(modelo_indicadores).
+                        where(modelo_indicadores.c.id_indicadores == 1).
+                        values(vacas_prenadas_porcentaje=vacas_estado_pren))
+    elif prenadas==0:
+        vacas_estado_pren = 0
+        # actualizacion de campos
+        session.execute(update(modelo_indicadores).
+                        where(modelo_indicadores.c.id_indicadores == 1).
+                        values(vacas_prenadas_porcentaje=vacas_estado_pren))
+    else:
+        # calculo procentaje de vacas prenadas
+        totales = prenadas + vacias
+        vacas_estado_pren = (prenadas / totales) * 100
+        # actualizacion de campos
+        session.execute(update(modelo_indicadores).
+                        where(modelo_indicadores.c.id_indicadores == 1).
+                        values(vacas_prenadas_porcentaje=vacas_estado_pren))
+
 
     session.commit()
   except Exception as e:
@@ -261,13 +275,16 @@ def Edad_Sacrificio_Lecheras():
         id = i[1]
         # Toma la fecha de primer parto del animal en este caso es el campo 2
         fecha_Parto_1 = i[2]
-     # calculo de la vida util mediante la suma del promedio de vida util con la fecha de parto
-        fecha_Vida_Util = fecha_Parto_1 + timedelta(2555)
-        # actualizacion del campo
-        condb.execute(modelo_leche.update().values(fecha_vida_util=fecha_Vida_Util).where(
-          modelo_leche.columns.id_bovino == id))
-        logger.info(f'Funcion Edad_Sacrificio_Lecheras {fecha_Vida_Util} ')
-        condb.commit()
+        if fecha_Parto_1 is None:
+            pass
+        else:
+            # calculo de la vida util mediante la suma del promedio de vida util con la fecha de parto
+            fecha_Vida_Util = fecha_Parto_1 + timedelta(2555)
+            # actualizacion del campo
+            condb.execute(modelo_leche.update().values(fecha_vida_util=fecha_Vida_Util).where(
+                modelo_leche.columns.id_bovino == id))
+            logger.info(f'Funcion Edad_Sacrificio_Lecheras {fecha_Vida_Util} ')
+            condb.commit()
   except Exception as e:
     logger.error(f'Error Funcion Edad_Sacrificio_Lecheras: {e}')
     raise
