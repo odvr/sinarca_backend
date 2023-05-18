@@ -18,12 +18,12 @@ from models.modelo_bovinos import modelo_bovinos_inventario, modelo_veterinaria,
     modelo_ventas, modelo_datos_muerte, \
     modelo_indicadores, modelo_ceba, modelo_macho_reproductor, modelo_carga_animal_y_consumo_agua, modelo_datos_pesaje, \
     modelo_capacidad_carga, modelo_calculadora_hectareas_pastoreo, modelo_partos, modelo_vientres_aptos, \
-    modelo_descarte, modelo_users, modelo_arbol_genealogico, modelo_veterinaria_evoluciones, modelo_razas
+    modelo_descarte, modelo_users, modelo_arbol_genealogico, modelo_veterinaria_evoluciones
 from routes.Reproductor import vida_util_macho_reproductor
 from schemas.schemas_bovinos import Esquema_bovinos, esquema_produccion_levante, \
     esquema_produccion_ceba, esquema_datos_muerte, esquema_modelo_ventas, esquema_arbol_genealogico, \
     esquema_modelo_Reporte_Pesaje, esquema_produccion_leche, esquema_veterinaria, esquema_veterinaria_evoluciones, \
-    esquema_partos, esquema_macho_reproductor, esquema_indicadores, esquema_razas
+    esquema_partos, esquema_macho_reproductor, esquema_indicadores
 from sqlalchemy import update, between, func
 from starlette.status import HTTP_204_NO_CONTENT
 from datetime import date, datetime, timedelta
@@ -166,16 +166,16 @@ async def id_inventario_bovino_Veterinaria(id_bovino: str):
 
 
 
-@rutas_bovinos.get("/listar_bovino_Veterinaria_Evoluciones/{id_bovino}",  response_model=list[esquema_veterinaria_evoluciones] )
-async def id_inventario_bovino_Veterinaria_Evoluciones(id_bovino: str):
+@rutas_bovinos.get("/listar_bovino_Veterinaria_Evoluciones",  response_model=list[esquema_veterinaria_evoluciones] )
+async def id_inventario_bovino_Veterinaria_Evoluciones():
 
     try:
 
         tabla_pesaje = session.query(modelo_veterinaria_evoluciones).where(
-            modelo_veterinaria_evoluciones.columns.id_bovino == id_bovino).all()
+            modelo_veterinaria_evoluciones.columns.id_bovino).all()
 
         consulta = condb.execute(
-            modelo_veterinaria_evoluciones.select().where(modelo_veterinaria_evoluciones.columns.id_bovino == id_bovino)).first()
+            modelo_veterinaria_evoluciones.select()).all()
         # Cerrar la sesión
         session.close()
 
@@ -185,7 +185,7 @@ async def id_inventario_bovino_Veterinaria_Evoluciones(id_bovino: str):
     finally:
         session.close()
     # condb.commit()
-    return tabla_pesaje
+    return consulta
 
 '''
 POST /QA1/ALGUN%20TRATAMIENTO%20EN%20ESTE%20MUNDO/2023-05-10 HTTP/1.1
@@ -550,19 +550,25 @@ async def consumo_global_agua():
 
 " relacion_toros_vientres_aptos Lista la relacion entre el toro y los vientres aptos"
 
-@rutas_bovinos.get("/relacion_toros_vientres_aptos")
+
+@rutas_bovinos.get("/Indicadores", response_model=list[esquema_indicadores])
 async def relacion_toros_vientres_aptos():
     try:
         vida_util_macho_reproductor()
-        toro_Vientres = session.query(modelo_indicadores.c.relacion_toros_vientres_aptos).first()
-        print(toro_Vientres)
+        vientres_aptos()
+        relacion_macho_reproductor_vientres_aptos()
+
+        response = session.query(modelo_indicadores).all()
+
+
+        return response
+
 
     except Exception as e:
-        logger.error(f'Error al obtener la consulta de RELACION Y VIENTRES APTOS=  {e}')
+        logger.error(f'Error al obtener la consulta de RELACION Y VIENTRES APTOS: {e}')
         raise
     finally:
         session.close()
-    return toro_Vientres
 
 
 
@@ -573,25 +579,8 @@ async def relacion_toros_vientres_aptos():
 
 
 
-"""
 
 
-
-"""
-
-@rutas_bovinos.get("/interpretacion_relacion_toros_vientres_aptos" )
-async def interpretacion_relacion_toros_vientres_aptos():
-    try:
-
-
-        interpretacion_relacion_toros_vientres_aptos = session.query(modelo_indicadores.c.interpretacion_relacion_toros_vientres_aptos).first()
-
-    except Exception as e:
-        logger.error(f'Error al obtener la consulta de interpretacion_relacion_toros_vientres_aptos=  {e}')
-        raise
-    finally:
-        session.close()
-    return interpretacion_relacion_toros_vientres_aptos
 
 
 """
@@ -1583,7 +1572,7 @@ async def animales_totales():
     session.execute(update(modelo_indicadores).
                     where(modelo_indicadores.columns.id_indicadores == 1).
                     values(total_animales=total_animales))
-    logger.info(f'Funcion animales_totales {total_animales} ')
+
     session.commit()
   except Exception as e:
       logger.error(f'Error Funcion animales_totales: {e}')
@@ -1934,35 +1923,43 @@ def relacion_macho_reproductor_vientres_aptos():
     # consulta y conteo de toros reproductores vivos
     cantidad_reproductores = session.query(modelo_macho_reproductor). \
         where(modelo_macho_reproductor.columns.estado == "Vivo").count()
-    # consulta y conteo de vientres aptos vivos (edad de 16 meses la cual es el periodo de celo de una novilla)
-    cantidad_vientres_aptos = session.query(modelo_bovinos_inventario). \
-        where(between(modelo_bovinos_inventario.columns.edad, 16, 500)). \
-        filter(modelo_bovinos_inventario.c.estado == "Vivo",
-               modelo_bovinos_inventario.c.sexo == "Hembra").count()
-    #calculo de la relacion toros-vientres
-    relacion= (cantidad_reproductores/cantidad_vientres_aptos)*100
-    #caclulo de cantidad recomendada de reproductores para la cantidad de vientres aptos
-    cantidad_recomendada = cantidad_vientres_aptos/25
-    #interpretacion del calculo de la relacion toros-vientres
-    if relacion < 4:
-          interpretacion = f'no Tienes suficientes machos reproductores, debes tener {cantidad_recomendada} machos reproductores para tus {cantidad_vientres_aptos} hembras aptas '
-    elif relacion > 4:
-        if cantidad_reproductores==1 and cantidad_vientres_aptos <= 25:
-          interpretacion = f'Tienes la cantidad correcta de reproductores, tienes {cantidad_reproductores} macho reproductor para tus {cantidad_vientres_aptos} hembras aptas'
-        elif cantidad_reproductores > 1 and cantidad_vientres_aptos <= 25:
-          interpretacion = f'Tienes demasiados machos reproductores, debes tener solamente un macho reproductor para tus {cantidad_vientres_aptos} hembras aptas '
-        else:
-          interpretacion = f'Tienes demasiados machos reproductores, debes tener {cantidad_recomendada} machos reproductores para tus {cantidad_vientres_aptos} hembras aptas '
-    elif relacion==4:
-          interpretacion = f'Tienes la cantidad correcta de reproductores, tienes {cantidad_reproductores} machos reproductores para tus {cantidad_vientres_aptos} hembras aptas'
-    # actualizacion de campo de cantidad de vientres aptos
-    session.execute(update(modelo_indicadores).
-                    where(modelo_indicadores.c.id_indicadores == 1).
-                    values(vientres_aptos=cantidad_vientres_aptos,
-                           relacion_toros_vientres_aptos=relacion,
-                           interpretacion_relacion_toros_vientres_aptos=interpretacion))
-    logger.info(f'Funcion relacion_macho_reproductor_vientres_aptos {cantidad_vientres_aptos,relacion,interpretacion} ')
-    session.commit()
+    # consulta y conteo de vientres aptos vivos
+    cantidad_vientres_aptos = session.query(modelo_vientres_aptos).\
+        where(modelo_vientres_aptos.columns.id_bovino).count()
+    if cantidad_vientres_aptos==0 or cantidad_vientres_aptos is None:
+        relacion =0
+        interpretacion= f'No posees ninguna hembra apta para reproducirse'
+        # actualizacion de campo de cantidad de vientres aptos
+        session.execute(update(modelo_indicadores).
+                        where(modelo_indicadores.c.id_indicadores == 1).
+                        values(vientres_aptos=cantidad_vientres_aptos,
+                               relacion_toros_vientres_aptos=relacion,
+                               interpretacion_relacion_toros_vientres_aptos=interpretacion))
+    else:
+        # calculo de la relacion toros-vientres
+        relacion = (cantidad_reproductores / cantidad_vientres_aptos) * 100
+        # caclulo de cantidad recomendada de reproductores para la cantidad de vientres aptos
+        cantidad_recomendada = cantidad_vientres_aptos / 25
+        # interpretacion del calculo de la relacion toros-vientres
+        if relacion < 4:
+            interpretacion = f'no Tienes suficientes machos reproductores, debes tener {cantidad_recomendada} machos reproductores para tus {cantidad_vientres_aptos} hembras aptas '
+        elif relacion > 4:
+            if cantidad_reproductores == 1 and cantidad_vientres_aptos <= 25:
+                interpretacion = f'Tienes la cantidad correcta de reproductores, tienes {cantidad_reproductores} macho reproductor para tus {cantidad_vientres_aptos} hembras aptas'
+            elif cantidad_reproductores > 1 and cantidad_vientres_aptos <= 25:
+                interpretacion = f'Tienes demasiados machos reproductores, debes tener solamente un macho reproductor para tus {cantidad_vientres_aptos} hembras aptas '
+            else:
+                interpretacion = f'Tienes demasiados machos reproductores, debes tener {cantidad_recomendada} machos reproductores para tus {cantidad_vientres_aptos} hembras aptas '
+        elif relacion == 4:
+            interpretacion = f'Tienes la cantidad correcta de reproductores, tienes {cantidad_reproductores} machos reproductores para tus {cantidad_vientres_aptos} hembras aptas'
+        # actualizacion de campo de cantidad de vientres aptos
+        session.execute(update(modelo_indicadores).
+                        where(modelo_indicadores.c.id_indicadores == 1).
+                        values(vientres_aptos=cantidad_vientres_aptos,
+                               relacion_toros_vientres_aptos=relacion,
+                               interpretacion_relacion_toros_vientres_aptos=interpretacion))
+        logger.info(f'Funcion relacion_macho_reproductor_vientres_aptos {cantidad_vientres_aptos, relacion, interpretacion} ')
+        session.commit()
   except Exception as e:
       logger.error(f'Error Funcion relacion_macho_reproductor_vientres_aptos: {e}')
       raise

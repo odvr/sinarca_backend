@@ -137,8 +137,8 @@ class esquema_indicadores(BaseModel):
     animales_optimos_levante:Optional[int] = None
     animales_optimos_ceba:Optional[int] = None
     vientres_aptos:Optional[int] = None
-    relacion_toros_vientres_aptos:Optional[int] = None
-    interpretacion_relacion_toros_vientres_aptos:Optional[str] = None
+    relacion_toros_vientres_aptos:Optional[int]
+    interpretacion_relacion_toros_vientres_aptos:Optional[str]
     total_unidades_animales:Optional[str] = None
     class Config:
         orm_mode = True
