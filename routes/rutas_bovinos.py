@@ -4,11 +4,13 @@ Librerias requeridas
 '''
 
 import logging
+import math
 from http.client import HTTPException
 
 from fastapi import APIRouter, Response
 
 from Lib.actualizacion_peso import actualizacion_peso
+from Lib.carga_animal_capacidad_carga import capacidad_carga
 from Lib.endogamia import endogamia
 from Lib.funcion_vientres_aptos import vientres_aptos
 # importa la conexion de la base de datos
@@ -1748,14 +1750,31 @@ async def porcentaje_ordeno():
     # consulta de animales ordenados y no ordenados
     ordeno, no_ordeno = session.query \
         (modelo_indicadores.c.vacas_en_ordeno, modelo_indicadores.c.vacas_no_ordeno).first()
-    # porcentaje de vacas en ordeno
-    vacas_ordeno_porcentaje = (ordeno / (no_ordeno + ordeno)) * 100
-    # actualizacion de campos
-    session.execute(update(modelo_indicadores).
-                    where(modelo_indicadores.c.id_indicadores == 1).
-                    values(porcentaje_ordeno=vacas_ordeno_porcentaje))
-    logger.info(f'Funcion porcentaje_ordeno {vacas_ordeno_porcentaje} ')
-    session.commit()
+    if ordeno==0 and no_ordeno==0 or ordeno is None and no_ordeno is None:
+        vacas_ordeno_porcentaje=0
+        # actualizacion de campos
+        session.execute(update(modelo_indicadores).
+                        where(modelo_indicadores.c.id_indicadores == 1).
+                        values(porcentaje_ordeno=vacas_ordeno_porcentaje))
+        logger.info(f'Funcion porcentaje_ordeno {vacas_ordeno_porcentaje} ')
+        session.commit()
+    elif ordeno is None or no_ordeno is None:
+        vacas_ordeno_porcentaje=0
+        # actualizacion de campos
+        session.execute(update(modelo_indicadores).
+                        where(modelo_indicadores.c.id_indicadores == 1).
+                        values(porcentaje_ordeno=vacas_ordeno_porcentaje))
+        logger.info(f'Funcion porcentaje_ordeno {vacas_ordeno_porcentaje} ')
+        session.commit()
+    else:
+        # porcentaje de vacas en ordeno
+        vacas_ordeno_porcentaje = (ordeno / (no_ordeno + ordeno)) * 100
+        # actualizacion de campos
+        session.execute(update(modelo_indicadores).
+                        where(modelo_indicadores.c.id_indicadores == 1).
+                        values(porcentaje_ordeno=vacas_ordeno_porcentaje))
+        logger.info(f'Funcion porcentaje_ordeno {vacas_ordeno_porcentaje} ')
+        session.commit()
   except Exception as e:
       logger.error(f'Error Funcion porcentaje_ordeno: {e}')
       raise
@@ -1939,7 +1958,7 @@ def relacion_macho_reproductor_vientres_aptos():
         # calculo de la relacion toros-vientres
         relacion = (cantidad_reproductores / cantidad_vientres_aptos) * 100
         # caclulo de cantidad recomendada de reproductores para la cantidad de vientres aptos
-        cantidad_recomendada = cantidad_vientres_aptos / 25
+        cantidad_recomendada = math.ceil(cantidad_vientres_aptos / 25)
         # interpretacion del calculo de la relacion toros-vientres
         if relacion < 4:
             interpretacion = f'no Tienes suficientes machos reproductores, debes tener {cantidad_recomendada} machos reproductores para tus {cantidad_vientres_aptos} hembras aptas '
@@ -2065,7 +2084,7 @@ def carga_animal():
   finally:
       session.close()
 """funcion de capacidad de carga"""
-def capacidad_carga():
+def capacidad_carga0():
   try:
     # consulta hectareas de forraje vivo disponible en el predio
     consulta_hectareas = session.query(modelo_capacidad_carga.columns.hectareas_forraje). \
@@ -2264,3 +2283,4 @@ def descarte():
 #IEP_por_raza()
 #litros_por_raza()
 #peso_segun_raza()
+#capacidad_carga()
