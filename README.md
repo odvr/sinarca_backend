@@ -21,6 +21,8 @@ pip3 install mariadb  --->  recibe los pasos de como instalar [mariadb](https://
 pip install fastapi  --->  recibe los pasos de como instalar [fastapi](https://pypi.org/project/fastapi/).
 
 
+pip install python-multipart
+
 ## Crea la Base de datos :
 
 CREATE DATABASE `sinarca` /*!40100 COLLATE 'latin1_bin' */;

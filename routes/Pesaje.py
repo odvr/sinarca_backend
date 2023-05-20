@@ -33,7 +33,7 @@ pesaje = APIRouter()
 Ingresa los datos para el reporte de pesaje del animal 
 """
 @pesaje.post("/fecha_pesaje/{id_bovino}/{fecha_pesaje}/{peso}",status_code=200)
-async def crear_fecha_pesaje(id_bovino:str,fecha_pesaje:date,peso:int ):
+async def crear_fecha_pesaje(id_bovino:str,fecha_pesaje:date,peso:float ):
 
     try:
 

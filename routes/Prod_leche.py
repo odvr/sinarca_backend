@@ -33,6 +33,29 @@ Produccion_Leche = APIRouter()
 
 
 
+
+
+@Produccion_Leche.get("/Animales_leche")
+async def animales_leche():
+  try:
+    # consulta de total de animales vivos con proposito de leche
+    prop_leche = session.query(modelo_bovinos_inventario). \
+        filter(modelo_bovinos_inventario.c.estado == "Vivo",
+               modelo_bovinos_inventario.c.proposito == "Leche").count()
+    # actualizacion de campos
+    session.execute(update(modelo_indicadores).
+                    where(modelo_indicadores.c.id_indicadores == 1).
+                    values(animales_leche=prop_leche))
+
+    session.commit()
+  except Exception as e:
+      logger.error(f'Error Funcion animales_leche: {e}')
+      raise
+  finally:
+      session.close()
+  return prop_leche
+
+
 @Produccion_Leche.get("/listar_bovino_prodLeche/{id_bovino}", response_model=esquema_produccion_leche )
 async def id_inventario_bovino_leche(id_bovino: str):
 
@@ -73,8 +96,8 @@ async def inventario_prod_leche():
     return itemsLeche
 
 
-@Produccion_Leche.get("/Calcular_animales_no_ordeno")
-async def animales_no_ordeno():
+
+def animales_no_ordeno():
   try:
     # join, consulta y conteo de animales vivos que no son ordenados
     vacas_no_ordeno = session.query(modelo_bovinos_inventario.c.estado, modelo_leche.c.ordeno). \
@@ -92,6 +115,46 @@ async def animales_no_ordeno():
   finally:
       session.close()
   return vacas_no_ordeno
+
+
+@Produccion_Leche.get("/Calcular_porcentaje_ordeno")
+async def porcentaje_ordeno():
+    try:
+        animales_no_ordeno()
+        # consulta de animales ordenados y no ordenados
+        ordeno, no_ordeno = session.query \
+            (modelo_indicadores.c.vacas_en_ordeno, modelo_indicadores.c.vacas_no_ordeno).first()
+        if ordeno == 0 and no_ordeno == 0 or ordeno is None and no_ordeno is None:
+            vacas_ordeno_porcentaje = 0
+            # actualizacion de campos
+            session.execute(update(modelo_indicadores).
+                            where(modelo_indicadores.c.id_indicadores == 1).
+                            values(porcentaje_ordeno=vacas_ordeno_porcentaje))
+            logger.info(f'Funcion porcentaje_ordeno {vacas_ordeno_porcentaje} ')
+            session.commit()
+        elif ordeno is None or no_ordeno is None:
+            vacas_ordeno_porcentaje = 0
+            # actualizacion de campos
+            session.execute(update(modelo_indicadores).
+                            where(modelo_indicadores.c.id_indicadores == 1).
+                            values(porcentaje_ordeno=vacas_ordeno_porcentaje))
+            logger.info(f'Funcion porcentaje_ordeno {vacas_ordeno_porcentaje} ')
+            session.commit()
+        else:
+            # porcentaje de vacas en ordeno
+            vacas_ordeno_porcentaje = (ordeno / (no_ordeno + ordeno)) * 100
+            # actualizacion de campos
+            session.execute(update(modelo_indicadores).
+                            where(modelo_indicadores.c.id_indicadores == 1).
+                            values(porcentaje_ordeno=vacas_ordeno_porcentaje))
+            logger.info(f'Funcion porcentaje_ordeno {vacas_ordeno_porcentaje} ')
+            session.commit()
+    except Exception as e:
+        logger.error(f'Error Funcion porcentaje_ordeno: {e}')
+        raise
+    finally:
+        session.close()
+    return vacas_ordeno_porcentaje
 
 
 @Produccion_Leche.get("/Calcular_vacas_prenadas_porcentaje")
@@ -191,7 +254,7 @@ async def CrearProdLeche( id_bovino: str,
                 ordeno=ordeno, proposito=proposito))
             condb.commit()
 
-            condb.commit()
+
 
 
 

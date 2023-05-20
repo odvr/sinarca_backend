@@ -161,6 +161,11 @@ modelo_veterinaria_evoluciones = Table("Evoluciones_Bovinos", meta, Column("id_e
                            Column("tratamiento_evolucion", String(300)),
                            Column("fecha_evolucion", Date))
 
+modelo_veterinaria_comentarios = Table("Comentarios_Veterinaria", meta, Column("id_comentario", Integer, primary_key=True),
+                           Column("id_veterinaria", Integer, ForeignKey("veterinaria.id_veterinaria")),
+                           Column("comentarios", String(300)),
+                           Column("fecha_comentario", Date))
+
 
 modelo_descarte = Table("descarte", meta, Column("id_descarte", Integer, primary_key=True),
                         Column("id_bovino", String(300), ForeignKey("bovinos.id_bovino"),unique=True),

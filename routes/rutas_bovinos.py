@@ -21,6 +21,7 @@ from models.modelo_bovinos import modelo_bovinos_inventario, modelo_veterinaria,
     modelo_indicadores, modelo_ceba, modelo_macho_reproductor, modelo_carga_animal_y_consumo_agua, modelo_datos_pesaje, \
     modelo_capacidad_carga, modelo_calculadora_hectareas_pastoreo, modelo_partos, modelo_vientres_aptos, \
     modelo_descarte, modelo_users, modelo_arbol_genealogico, modelo_veterinaria_evoluciones
+
 from routes.Reproductor import vida_util_macho_reproductor
 from schemas.schemas_bovinos import Esquema_bovinos, esquema_produccion_levante, \
     esquema_produccion_ceba, esquema_datos_muerte, esquema_modelo_ventas, esquema_arbol_genealogico, \
@@ -106,122 +107,7 @@ def login(form_data: OAuth2PasswordRequestForm = Depends()):
 
 
 
-''''
-+++++++++++++++++++++++++++++++
-Modulo de Veterinaria
-+++++++++++++++++++++++++++++++
-'''
 
-@rutas_bovinos.post("/CrearRegistroVeterinaria/{id_bovino}/{sintomas}/{fecha_sintomas}/{comportamiento}/{condicion_corporal}/{postura}/{mucosa_ocular}/{mucosa_bucal}/{mucosa_rectal}/{mucosa_vulvar_prepusial}/{evolucion}/{tratamiento}/{piel_pelaje}",status_code=200)
-async def CrearRegistroVeterinaria(id_bovino:str,sintomas:str,fecha_sintomas:date,comportamiento:str,condicion_corporal:str,postura:str,mucosa_bucal :str, mucosa_ocular:str,mucosa_rectal:str,mucosa_vulvar_prepusial:str,evolucion:str,tratamiento:str,piel_pelaje:str ):
-
-    try:
-
-
-        ingresoVeterinaria = modelo_veterinaria.insert().values(id_bovino=id_bovino,sintomas=sintomas,fecha_sintomas=fecha_sintomas,comportamiento=comportamiento,condicion_corporal=condicion_corporal,postura=postura,mucosa_bucal= mucosa_bucal,mucosa_ocular=mucosa_ocular,mucosa_rectal=mucosa_rectal,mucosa_vulvar_prepusial=mucosa_vulvar_prepusial, evolucion=evolucion,tratamiento=tratamiento,piel_pelaje=piel_pelaje)
-
-
-        condb.execute(ingresoVeterinaria)
-        condb.commit()
-
-    except Exception as e:
-        logger.error(f'Error al Crear INGRESO DE PESAJE: {e}')
-        raise
-    finally:
-        condb.close()
-
-    return Response(status_code=status.HTTP_201_CREATED)
-
-@rutas_bovinos.get("/listar_tabla_veterinaria",response_model=list[esquema_veterinaria])
-async def listar_tabla_Veterinaria():
-    try:
-
-
-        itemsVeterinaria = session.execute(modelo_veterinaria.select()).all()
-
-
-
-
-    except Exception as e:
-        logger.error(f'Error al obtener TABLA DE VETERINARIA: {e}')
-        raise
-    return itemsVeterinaria
-
-@rutas_bovinos.get("/listar_bovino_Veterinaria/{id_bovino}",response_model=esquema_veterinaria)
-async def id_inventario_bovino_Veterinaria(id_bovino: str):
-
-    try:
-        # Consultar los datos de producción de leche del bovino especificado
-        consulta = condb.execute(
-            modelo_veterinaria.select().where(modelo_veterinaria.columns.id_bovino == id_bovino)).first()
-        # Cerrar la sesión
-        session.close()
-
-    except Exception as e:
-        logger.error(f'Error al obtener Listar Veterinaria: {e}')
-        raise
-    finally:
-        session.close()
-    # condb.commit()
-    return consulta
-
-
-
-
-@rutas_bovinos.get("/listar_bovino_Veterinaria_Evoluciones",  response_model=list[esquema_veterinaria_evoluciones] )
-async def id_inventario_bovino_Veterinaria_Evoluciones():
-
-    try:
-
-        tabla_pesaje = session.query(modelo_veterinaria_evoluciones).where(
-            modelo_veterinaria_evoluciones.columns.id_bovino).all()
-
-        consulta = condb.execute(
-            modelo_veterinaria_evoluciones.select()).all()
-        # Cerrar la sesión
-        session.close()
-
-    except Exception as e:
-        logger.error(f'Error al obtener Listar Veterinaria: {e}')
-        raise
-    finally:
-        session.close()
-    # condb.commit()
-    return consulta
-
-'''
-POST /QA1/ALGUN%20TRATAMIENTO%20EN%20ESTE%20MUNDO/2023-05-10 HTTP/1.1
-POST /QA1/ALGUN%20TRATAMIENTO%20EN%20ESTE%20MUNDO/2023-05-10 HTTP/1.1
-
-'''
-@rutas_bovinos.post("/Crear_Evolucion/{id_bovino}/{tratamiento_evolucion}/{fecha_evolucion}",status_code=200)
-async def crear_evolucion(id_bovino:str,tratamiento_evolucion:str,fecha_evolucion:date ):
-
-    try:
-
-
-        ingresoEvolucion = modelo_veterinaria_evoluciones.insert().values(id_bovino=id_bovino,tratamiento_evolucion=tratamiento_evolucion,fecha_evolucion=fecha_evolucion)
-
-
-        condb.execute(ingresoEvolucion)
-        condb.commit()
-
-    except Exception as e:
-        logger.error(f'Error al Crear INGRESO DE EVOLUCION: {e}')
-        raise
-    finally:
-        condb.close()
-
-    return Response(status_code=status.HTTP_201_CREATED)
-
-
-
-
-
-
-""""
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++
-"""
 
 @rutas_bovinos.get("/listar_vientres_aptos" )
 async def listar_vientres_aptos_modulo():
@@ -323,14 +209,14 @@ async def listarAnimalesDescarte():
 
 
 
-@rutas_bovinos.get("/listar_tabla_veterinaria" )
-async def listar_tabla_veterinaria():
+@rutas_bovinos.get("/listar_tabla_veterinaria/{id_bovino}", response_model=list[esquema_veterinaria] )
+async def listar_tabla_veterinaria(id_bovino:str):
 
     try:
-        machos = session.query(modelo_bovinos_inventario). \
-            filter(modelo_bovinos_inventario.c.estado == "Vivo",
-                   modelo_bovinos_inventario.c.sexo == "Macho").count()
-        itemsAnimalesVeterinaria =  session.execute(modelo_veterinaria.select()).all()
+
+        #itemsAnimalesVeterinaria =  session.execute(modelo_veterinaria.select()).all()
+        itemsAnimalesVeterinaria = session.execute(
+            modelo_veterinaria.select().where(modelo_veterinaria.columns.id_bovino == id_bovino)).all()
 
     except Exception as e:
         logger.error(f'Error al obtener TABLA DE VETERINARIA: {e}')
@@ -1619,23 +1505,7 @@ async def animales_levante():
 
 
 
-def animales_leche():
-  try:
-    # consulta de total de animales vivos con proposito de leche
-    prop_leche = session.query(modelo_bovinos_inventario). \
-        filter(modelo_bovinos_inventario.c.estado == "Vivo",
-               modelo_bovinos_inventario.c.proposito == "Leche").count()
-    # actualizacion de campos
-    session.execute(update(modelo_indicadores).
-                    where(modelo_indicadores.c.id_indicadores == 1).
-                    values(animales_leche=prop_leche))
-    logger.info(f'Funcion animales_leche {prop_leche} ')
-    session.commit()
-  except Exception as e:
-      logger.error(f'Error Funcion animales_leche: {e}')
-      raise
-  finally:
-      session.close()
+
 
 
 
@@ -1732,7 +1602,7 @@ async def animales_en_ordeno():
     session.execute(update(modelo_indicadores).
                     where(modelo_indicadores.c.id_indicadores == 1).
                     values(vacas_en_ordeno=vacas_ordeno))
-    logger.info(f'Funcion animales_en_ordeno {vacas_ordeno} ')
+
     session.commit()
  except Exception as e:
      logger.error(f'Error Funcion animales_en_ordeno: {e}')
@@ -1744,43 +1614,6 @@ async def animales_en_ordeno():
 
 
 
-@rutas_bovinos.get("/Calcular_porcentaje_ordeno")
-async def porcentaje_ordeno():
-  try:
-    # consulta de animales ordenados y no ordenados
-    ordeno, no_ordeno = session.query \
-        (modelo_indicadores.c.vacas_en_ordeno, modelo_indicadores.c.vacas_no_ordeno).first()
-    if ordeno==0 and no_ordeno==0 or ordeno is None and no_ordeno is None:
-        vacas_ordeno_porcentaje=0
-        # actualizacion de campos
-        session.execute(update(modelo_indicadores).
-                        where(modelo_indicadores.c.id_indicadores == 1).
-                        values(porcentaje_ordeno=vacas_ordeno_porcentaje))
-        logger.info(f'Funcion porcentaje_ordeno {vacas_ordeno_porcentaje} ')
-        session.commit()
-    elif ordeno is None or no_ordeno is None:
-        vacas_ordeno_porcentaje=0
-        # actualizacion de campos
-        session.execute(update(modelo_indicadores).
-                        where(modelo_indicadores.c.id_indicadores == 1).
-                        values(porcentaje_ordeno=vacas_ordeno_porcentaje))
-        logger.info(f'Funcion porcentaje_ordeno {vacas_ordeno_porcentaje} ')
-        session.commit()
-    else:
-        # porcentaje de vacas en ordeno
-        vacas_ordeno_porcentaje = (ordeno / (no_ordeno + ordeno)) * 100
-        # actualizacion de campos
-        session.execute(update(modelo_indicadores).
-                        where(modelo_indicadores.c.id_indicadores == 1).
-                        values(porcentaje_ordeno=vacas_ordeno_porcentaje))
-        logger.info(f'Funcion porcentaje_ordeno {vacas_ordeno_porcentaje} ')
-        session.commit()
-  except Exception as e:
-      logger.error(f'Error Funcion porcentaje_ordeno: {e}')
-      raise
-  finally:
-      session.close()
-  return vacas_ordeno_porcentaje
 
 
 @rutas_bovinos.get("/Calcular_animales_edad_0_9")

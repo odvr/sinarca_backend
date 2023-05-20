@@ -172,7 +172,7 @@ class esquema_modelo_Reporte_Pesaje(BaseModel):
     id_pesaje: int
     id_bovino: str
     fecha_pesaje: date
-    peso:int
+    peso:float
     class Config:
         orm_mode = True
         env_file = ".env"
@@ -205,6 +205,16 @@ class esquema_veterinaria_evoluciones(BaseModel):
     id_bovino: str
     tratamiento_evolucion: str
     fecha_evolucion: date
+    class Config:
+        orm_mode = True
+        env_file = ".env"
+
+
+class esquema_veterinaria_comentarios(BaseModel):
+    id_comentario: int
+    id_veterinaria: int
+    comentarios: str
+    fecha_comentario: date
     class Config:
         orm_mode = True
         env_file = ".env"
