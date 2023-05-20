@@ -12,7 +12,7 @@ from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy import desc
 
 # importa la conexion de la base de datos
-from config.db import condb
+from config.db import condb,session
 # importa el esquema de los bovinos
 from models.modelo_bovinos import modelo_datos_pesaje, modelo_bovinos_inventario
 
@@ -51,9 +51,14 @@ segun fecha y lo actualiza en el campo peso de la tabla de bovinos"""
 
 def actualizacion_peso():
     try:
+
+
         # Realiza la consulta general de la tabla de registro de pesos
-        consulta_id = condb.execute(modelo_bovinos_inventario.select().
-                            where(modelo_bovinos_inventario.columns.id_bovino)).fetchall()
+
+
+        consulta_id = session.query(modelo_bovinos_inventario).all()
+
+
         # Recorre los campos de la consulta
         for i in consulta_id:
             # Toma el ID del bovino, este es el campo numero 0

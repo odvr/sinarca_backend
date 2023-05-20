@@ -150,7 +150,6 @@ async def inventario_bovino():
     calculoEdad()
     actualizacion_peso()
 
-
     eliminarduplicados()
 
     vida_util_macho_reproductor()
