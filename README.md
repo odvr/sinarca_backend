@@ -23,6 +23,10 @@ pip install fastapi  --->  recibe los pasos de como instalar [fastapi](https://p
 
 pip install python-multipart
 
+pip install python-jose
+pip install passlib
+bcrypt
+
 ## Crea la Base de datos :
 
 CREATE DATABASE `sinarca` /*!40100 COLLATE 'latin1_bin' */;

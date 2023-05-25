@@ -52,6 +52,7 @@ def vientres_aptos():
       consulta_vientres = session.query(modelo_bovinos_inventario). \
           where(modelo_bovinos_inventario.c.estado == "Vivo").\
           filter(modelo_bovinos_inventario.c.sexo == "Hembra").all()
+
       for i in consulta_vientres:   
           # Toma el ID del bovino en este caso es el campo 0
           idBovinoConsultaVientresAptos = i[0]

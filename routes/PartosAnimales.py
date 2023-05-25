@@ -8,11 +8,11 @@ from Lib.Lib_Intervalo_Partos import intervalo_partos
 # # importa la conexion de la base de datos
 from config.db import condb, session
 # # importa el esquema de los bovinos
-from models.modelo_bovinos import modelo_historial_partos
+from models.modelo_bovinos import modelo_historial_partos, modelo_partos
 from datetime import date
 from fastapi import APIRouter, Response
 from fastapi import  status
-
+from starlette.status import HTTP_204_NO_CONTENT
 from schemas.schemas_bovinos import esquema_historial_partos
 
 # Configuracion de la libreria para los logs de sinarca
@@ -66,3 +66,20 @@ async def listar_tabla_Partos_Animales():
     finally:
         session.close()
     return itemsListarPartos
+
+
+@partos_bovinos.delete("/eliminar_bovino_partos/{id_bovino}", status_code=HTTP_204_NO_CONTENT)
+async def eliminar_bovino_fecha_partos(id_bovino: str):
+
+    try:
+        condb.execute(modelo_partos.delete().where(modelo_partos.c.id_bovino == id_bovino))
+        condb.commit()
+
+    except Exception as e:
+        logger.error(f'Error al Intentar Eliminar Bovino: {e}')
+        raise
+    finally:
+        condb.close()
+
+    # retorna un estado de no contenido
+    return Response(status_code=HTTP_204_NO_CONTENT)

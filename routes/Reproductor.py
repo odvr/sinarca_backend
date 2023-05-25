@@ -36,6 +36,24 @@ from fastapi import  status, HTTPException, Depends
 ReproductorRutas = APIRouter()
 
 
+# Configuracion de la libreria para los logs de sinarca
+# Crea un objeto logger
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+# Crea un manejador de archivo para guardar el log
+log_file = 'Log_Sinarca.log'
+file_handler = logging.FileHandler(log_file)
+
+# Define el formato del log
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+file_handler.setFormatter(formatter)
+# Agrega el manejador de archivo al logger
+logger.addHandler(file_handler)
+
+
+
+
 @ReproductorRutas.get("/listar_reproductor",response_model=list[esquema_macho_reproductor] )
 async def listar_reproductor():
     #llamdo de la funcion para calcular
@@ -100,9 +118,12 @@ async def CrearReproductor(id_bovino: str):
 def vida_util_macho_reproductor():
  try:
      #join con tabla de bovinos y consulta
+
     consulta_machos_r = session.query(modelo_macho_reproductor.c.id_bovino,modelo_bovinos_inventario.c.edad,modelo_bovinos_inventario.c.peso,
                           modelo_bovinos_inventario.c.estado,modelo_bovinos_inventario.c.fecha_nacimiento).\
         join(modelo_macho_reproductor,modelo_bovinos_inventario.c.id_bovino == modelo_macho_reproductor.c.id_bovino).all()
+
+
     # Recorre los campos de la consulta
     for i in consulta_machos_r:
         # Toma el ID del bovino para calcular su estado optimo en este caso es el campo 0
@@ -128,3 +149,19 @@ def vida_util_macho_reproductor():
    raise
  finally:
   condb.close()
+
+@ReproductorRutas.delete("/eliminar_bovino_reproductor/{id_bovino}", status_code=HTTP_204_NO_CONTENT)
+async def eliminar_bovino_reproductor(id_bovino: str):
+
+    try:
+        condb.execute(modelo_macho_reproductor.delete().where(modelo_macho_reproductor.c.id_bovino == id_bovino))
+        condb.commit()
+
+    except Exception as e:
+        logger.error(f'Error al Intentar Eliminar Bovino REPRODUCTOR: {e}')
+        raise
+    finally:
+        condb.close()
+
+    # retorna un estado de no contenido
+    return Response(status_code=HTTP_204_NO_CONTENT)

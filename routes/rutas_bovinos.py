@@ -10,7 +10,7 @@ from http.client import HTTPException
 from fastapi import APIRouter, Response
 
 from Lib.actualizacion_peso import actualizacion_peso
-from Lib.carga_animal_capacidad_carga import capacidad_carga
+
 from Lib.endogamia import endogamia
 from Lib.funcion_vientres_aptos import vientres_aptos
 # importa la conexion de la base de datos
@@ -20,23 +20,42 @@ from models.modelo_bovinos import modelo_bovinos_inventario, modelo_veterinaria,
     modelo_ventas, modelo_datos_muerte, \
     modelo_indicadores, modelo_ceba, modelo_macho_reproductor, modelo_carga_animal_y_consumo_agua, modelo_datos_pesaje, \
     modelo_capacidad_carga, modelo_calculadora_hectareas_pastoreo, modelo_partos, modelo_vientres_aptos, \
-    modelo_descarte, modelo_users, modelo_arbol_genealogico, modelo_veterinaria_evoluciones
+    modelo_descarte, modelo_users, modelo_arbol_genealogico, modelo_veterinaria_evoluciones, modelo_usuarios
 
 from routes.Reproductor import vida_util_macho_reproductor
 from schemas.schemas_bovinos import Esquema_bovinos, esquema_produccion_levante, \
     esquema_produccion_ceba, esquema_datos_muerte, esquema_modelo_ventas, esquema_arbol_genealogico, \
     esquema_modelo_Reporte_Pesaje, esquema_produccion_leche, esquema_veterinaria, esquema_veterinaria_evoluciones, \
-    esquema_partos, esquema_macho_reproductor, esquema_indicadores
+    esquema_partos, esquema_macho_reproductor, esquema_indicadores, esquema_vientres_aptos, UserOut, UserAuth, Usuarios, \
+    UsuariosInDB
 from sqlalchemy import update, between, func
 from starlette.status import HTTP_204_NO_CONTENT
 from datetime import date, datetime, timedelta
-
+from sqlalchemy.exc import IntegrityError
 
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
 from fastapi import  status, HTTPException, Depends
 
+
+
+'''***********'''
+from passlib.context import CryptContext
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+import os
+from datetime import datetime, timedelta
+from typing import Union, Any
+from jose import jwt
+
+from fastapi import FastAPI, status, HTTPException, Depends
+from fastapi.security import OAuth2PasswordRequestForm,OAuth2PasswordBearer
+from fastapi.responses import RedirectResponse
+from uuid import uuid4
+
+
 oauth2_scheme = OAuth2PasswordBearer("/token")
+'''***********'''
+
 
 # Configuracion de las rutas para fash api
 rutas_bovinos = APIRouter()
@@ -56,9 +75,89 @@ file_handler.setFormatter(formatter)
 # Agrega el manejador de archivo al logger
 logger.addHandler(file_handler)
 
+# trae el usuario
+"""def obtener_usurio(modelo_usuarios,username):
 
 
+    if username in modelo_usuarios:
+        datos_usuario = modelo_usuarios[username]
+        return UsuariosInDB(**datos_usuario)
+    return []
 
+"""
+
+def obtener_usurio(username: str):
+    """
+    cursor = condb.cursor(dictionary=True)
+    query = "SELECT * FROM users WHERE username = %s"
+    cursor.execute(query, (username,))
+    user_dict = cursor.fetchone()
+    cursor.close()
+    :param username:
+    :return:
+    """
+
+    consulta = condb.execute(
+        modelo_leche.select().where(
+            modelo_leche.columns.id_bovino == username)).first()
+    if consulta:
+        return UsuariosInDB(**consulta)
+
+def verificar_pwd(pwd_plano, hashed_password):
+    return pwd_context.verify(pwd_plano, hashed_password)
+
+"""
+def autenticacion_usuarios(modelo_usuarios, username, password):
+    user = obtener_usurio(modelo_usuarios, username)
+    if not user:
+        raise HTTPException(status_code=401)
+    if not verificar_pwd(password, user.hashed_password):
+        raise HTTPException(status_code=401)
+    return user
+"""
+def verify_password(plain_password, hashed_password):
+    return pwd_context.verify(plain_password, hashed_password)
+
+def authenticate_user(username: str, password: str):
+    user = obtener_usurio(username)
+    if not user:
+        return False
+    if not verify_password(password, user.hashed_password):
+        return False
+    return user
+def get_password_hash(password):
+    return pwd_context.hash(password)
+@rutas_bovinos.post("/token")
+async def login(form_data: OAuth2PasswordRequestForm = Depends()):
+    user = authenticate_user(form_data.username, form_data.password)
+
+    return {
+        "access_token": form_data.username,
+        "token_type": "bearer"
+    }
+
+
+@rutas_bovinos.post("/users/", response_model=Usuarios)
+async def crear_usuario(usuario: Usuarios):
+    try:
+        nuevo_usuario = modelo_usuarios(
+            id_usuario=usuario.id_usuario,
+            full_name=usuario.full_name,
+            hashed_password=usuario.hashed_password
+        )
+        session.add(nuevo_usuario)
+        session.commit()
+
+        # Consultar el usuario recién creado
+        usuario_creado = session.query(modelo_usuarios).filter_by(id_usuario=modelo_usuarios.id_usuario).first()
+
+        if usuario_creado:
+            return {"mensaje": "Usuario creado exitosamente", "usuario": usuario_creado}
+        else:
+            raise HTTPException(status_code=404, detail="No se pudo encontrar el usuario recién creado")
+    except IntegrityError:
+        session.rollback()
+        raise HTTPException(status_code=400, detail="Error: El ID de usuario o el nombre completo ya existen")
 
 
 
@@ -83,33 +182,23 @@ def Notificaciones():
 #Notificaciones()
 """ 
 La siguiente linea de codigo permite realizar el Login de la aplicacion 
+
+Toma el flujo el token para pasar como parametro para cada una de las rutas 
 """
 
-@rutas_bovinos.post("/token")
-def login(form_data: OAuth2PasswordRequestForm = Depends()):
-    # Consulta a la base de datos para obtener el usuario con el nombre de usuario proporcionado
-    user = session.query(modelo_users).filter(modelo_users.c.username == form_data.username).first()
-    print(user)
-    if not user:
-        raise HTTPException(
-            status_code=400, detail="Contraseña o Usuario invalido")
-
-    if not form_data.password == user["hashed_password"]:
-     raise HTTPException(
-         status_code=400, detail="Contraseña o Usuario invalido")
-
-
-    return {
-        "access_token": form_data.username,
-        "token_type": "bearer"
-    }
 
 
 
 
 
 
-@rutas_bovinos.get("/listar_vientres_aptos" )
+
+""""
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+"""
+
+@rutas_bovinos.get("/listar_vientres_aptos", response_model=list[esquema_vientres_aptos])
 async def listar_vientres_aptos_modulo():
     try:
         vientres_aptos()
@@ -127,7 +216,7 @@ async def listar_vientres_aptos_modulo():
 async def listar_vientres_aptos_modulo():
     try:
         #vientres_aptos()
-        #Eliminacion_total_vientres_aptos()
+
         tabla_vientres_aptos = session.query(modelo_vientres_aptos).all()
 
     except Exception as e:
@@ -143,7 +232,7 @@ La siguiente funcion retorna un diccionario con la consulta general del la tabla
 """
 
 
-@rutas_bovinos.get("/listar_inventarios", response_model=list[Esquema_bovinos], tags=["listar_inventarios"]
+@rutas_bovinos.get("/listar_inventarios", response_model=list[Esquema_bovinos],tags=["listar_inventarios"]
                    )
 async def inventario_bovino():
     # Se llama la funcion con el fin que esta realice el calculo pertinete a la edad del animal ingresado
@@ -1817,104 +1906,7 @@ def relacion_macho_reproductor_vientres_aptos():
   finally:
       session.close()
   return (relacion, interpretacion, cantidad_vientres_aptos)
-"""la siguiente funcion determina el consumo de forraje vivo y agua por cada animal"""
-def carga_animal():
-  global temperatura, consumo_agua
-  try:
-    # consulta temperatura ambiente del lugar donde esta el ganado
-    consulta_temperatura = session.query(modelo_indicadores). \
-          where(modelo_indicadores.c.id_indicadores == 1).all()
-    for i in consulta_temperatura:
-        # Toma la temperatura, el campo 31
-        temperatura = i[31]
-    #join con tabla de bovinos y consulta
-    consulta_bovinos = session.query(modelo_carga_animal_y_consumo_agua.c.id_bovino, modelo_bovinos_inventario.c.edad,
-                        modelo_bovinos_inventario.c.peso,modelo_bovinos_inventario.c.estado). \
-        join(modelo_carga_animal_y_consumo_agua,
-             modelo_bovinos_inventario.c.id_bovino == modelo_carga_animal_y_consumo_agua.c.id_bovino).all()
-    # Recorre los campos de la consulta
-    for i in consulta_bovinos:
-        # Toma el ID del bovino en este caso es el campo 0
-        id = i[0]
-        # Toma la edad del animal en este caso es el campo 1
-        edad = i[1]
-        # Toma el peso del animal en este caso es el campo 2
-        peso = i[2]
-        # Toma el estado del animal en este caso es el campo 3
-        estado = i[3]
-        # determinacion de la unidad animal (una unidad animal equivale a 400 kg de peso vivo)
-        #si un animal esta muerto o vendido su consumo forraje y agua sera 0
-        if estado == "Vivo":
-            unidad_animal = peso / 400
-            # determinacion del consumo de forraje vivo por animal (cada animal consume un 10% de su peso vivo al dia)
-            consumo_forraje = peso * 0.1
-            #una unidad animal puede consimir hasta 16 kg de materia seca al dia
-            consumo_materia_seca=unidad_animal*16
-            # determinacion del consumo de agua por animal(por cada kg de materia seca consumida se necesita 3 o mas litros de agua)
-            # el consumo de agua puede variar segun la temperatura
-            if temperatura in range(-10, 6):
-                consumo_agua = (consumo_materia_seca) * 3
-                # actualizacion de campos
-                session.execute(modelo_carga_animal_y_consumo_agua.update().values(edad=edad, peso=peso, estado=estado,
-                                                                                   valor_unidad_animal=unidad_animal,
-                                                                                   consumo_forraje_vivo=consumo_forraje,
-                                                                                   consumo_agua=consumo_agua). \
-                                where(modelo_carga_animal_y_consumo_agua.columns.id_bovino == id))
-                session.commit()
-            if temperatura in range(6, 16):
-                # actualizacion de campos
-                consumo_agua = (consumo_materia_seca) * 4
-                session.execute(modelo_carga_animal_y_consumo_agua.update().values(edad=edad, peso=peso, estado=estado,
-                                                                                   valor_unidad_animal=unidad_animal,
-                                                                                   consumo_forraje_vivo=consumo_forraje,
-                                                                                   consumo_agua=consumo_agua). \
-                                where(modelo_carga_animal_y_consumo_agua.columns.id_bovino == id))
-                session.commit()
-            if temperatura in range(16, 26):
-                # actualizacion de campos
-                consumo_agua = (consumo_materia_seca) * 5
-                session.execute(modelo_carga_animal_y_consumo_agua.update().values(edad=edad, peso=peso, estado=estado,
-                                                                                   valor_unidad_animal=unidad_animal,
-                                                                                   consumo_forraje_vivo=consumo_forraje,
-                                                                                   consumo_agua=consumo_agua). \
-                                where(modelo_carga_animal_y_consumo_agua.columns.id_bovino == id))
-                session.commit()
-            if temperatura in range(26, 32):
-                # actualizacion de campos
-                consumo_agua = (consumo_materia_seca) * 6
-                session.execute(modelo_carga_animal_y_consumo_agua.update().values(edad=edad, peso=peso, estado=estado,
-                                                                                   valor_unidad_animal=unidad_animal,
-                                                                                   consumo_forraje_vivo=consumo_forraje,
-                                                                                   consumo_agua=consumo_agua). \
-                                where(modelo_carga_animal_y_consumo_agua.columns.id_bovino == id))
-                session.commit()
-            if temperatura >= 32:
-                # actualizacion de campos
-                consumo_agua = (consumo_materia_seca) * 8
-                session.execute(modelo_carga_animal_y_consumo_agua.update().values(edad=edad, peso=peso, estado=estado,
-                                                                                   valor_unidad_animal=unidad_animal,
-                                                                                   consumo_forraje_vivo=consumo_forraje,
-                                                                                   consumo_agua=consumo_agua). \
-                                where(modelo_carga_animal_y_consumo_agua.columns.id_bovino == id))
-                session.commit()
-        else:
-            unidad_animal = 0
-            consumo_forraje = 0
-            consumo_agua = 0
-            # actualizacion de campos
-            session.execute(modelo_carga_animal_y_consumo_agua.update().values(edad=edad, peso=peso, estado=estado,
-                                                                               valor_unidad_animal=unidad_animal,
-                                                                               consumo_forraje_vivo=consumo_forraje,
-                                                                               consumo_agua=consumo_agua). \
-                            where(modelo_carga_animal_y_consumo_agua.columns.id_bovino == id))
-            session.commit()
-        logger.info(f'Funcion carga_animal {unidad_animal} ')
-        session.commit()
-  except Exception as e:
-      logger.error(f'Error Funcion carga_animal: {e}')
-      raise
-  finally:
-      session.close()
+
 """funcion de capacidad de carga"""
 def capacidad_carga0():
   try:
@@ -1944,102 +1936,8 @@ def capacidad_carga0():
       raise
   finally:
       session.close()
-"""la siguiente funcion es suma todas las unidades animales existentes"""
-def consumo_global_agua_y_totalidad_unidades_animales():
-    #la siguiente variable requiere ser global debido a que esta en un bucle for
-  global interpretacion
-  try:
-    # consulta de sumatoria de las unidades animales y su consumo de agua
-    consulta_unidades_animales = session.query(func.sum(modelo_carga_animal_y_consumo_agua.columns.valor_unidad_animal)).all()
-    consulta_consumo_agua= session.query(func.sum(modelo_carga_animal_y_consumo_agua.columns.consumo_agua)).all()
-    for i in consulta_unidades_animales:
-        # Toma la totalidad de unidades animales en este caso es el campo 0
-        total_unidades_animales =i[0]
-        #para determinar el consumo de materia seca total hay que considerar que una unidad animal consume hasta 16000 gramos de materia seca al dia
-        consumo_unidades= total_unidades_animales*16000
-        #un metro cuadrado de pasto produce hasta 3 gramos de materia seca al dia
-        metros_de_forraje_requerido= consumo_unidades/3
-        hectareas_requeridas=metros_de_forraje_requerido/10000
-        interpretacion=f'Tienes un total de {round(total_unidades_animales,2)} unidades animales, que requieren de {round(hectareas_requeridas,3)} hectareas de o {round(metros_de_forraje_requerido,3)} metros cuadrados forraje para mantenerse'
-    for i in consulta_consumo_agua:
-        # Toma la totalidad del consumo de agua en este caso es el campo 0
-        consumo_agua_litros = round(i[0],2)
-        consumo_agua_bebederos= round((consumo_agua_litros/500),0)
-        if consumo_agua_bebederos <1:
-            consumo_agua_bebederos=1
-        total_consumo_agua =f'Tus animales necesitan {consumo_agua_litros} litros de agua al dia (equivalente a {consumo_agua_bebederos} bebedero(s) de 500 litros)'
-        session.execute(modelo_indicadores.update().values(consumo_global_agua=total_consumo_agua,
-                                                               total_unidades_animales=interpretacion). \
-                        where(modelo_indicadores.columns.id_indicadores == 1))
-        logger.info(f'Funcion consumo_global_agua_y_totalidad_unidades_animales {consulta_consumo_agua} ')
-        logger.info(f'Funcion consumo_global_agua_y_totalidad_unidades_animales {consulta_consumo_agua} ')
-        session.commit()
-  except Exception as e:
-      logger.error(f'Error Funcion consumo_global_agua_y_totalidad_unidades_animales: {e}')
-      raise
-  finally:
-      session.close()
-"""la siguiente es una funcion que calcula las hectareas de forraje requeridas asi
-como la cantidad de agua necesaria para un lote de animales que el usuario desee conocer
-cuanto alimento y debida necesita"""
-def calculadora_pastoreo():
-  try:
-    # join de tabla de carga animal y pastoreo
-    consulta_bovinos = session.query(modelo_calculadora_hectareas_pastoreo.c.id_bovino, modelo_carga_animal_y_consumo_agua.c.valor_unidad_animal,
-                                     modelo_carga_animal_y_consumo_agua.c.consumo_agua). \
-        join(modelo_calculadora_hectareas_pastoreo,
-             modelo_calculadora_hectareas_pastoreo.c.id_bovino == modelo_carga_animal_y_consumo_agua.c.id_bovino).all()
-    for i in consulta_bovinos:
-        # Toma el id bovino en este caso es el campo 0
-        id =i[0]
-        # Toma las unidades animales en este caso es el campo 1
-        valor_unidad_animal = i[1]
-        # Toma el consumo de agua en este caso es el campo 2
-        consumo_agua = i[2]
-        #determinacion de las hectareas necesarias por cada animal
-        consumo_unidades = valor_unidad_animal * 16000
-        metros_de_forraje_requerido = (consumo_unidades / 3)
-        hectareas_requeridas = round((metros_de_forraje_requerido / 10000),2)
-        session.execute(modelo_calculadora_hectareas_pastoreo.update().values(hectareas_necesarias=hectareas_requeridas,
-                                                               consumo_agua=consumo_agua). \
-                        where(modelo_calculadora_hectareas_pastoreo.columns.id_bovino == id))
-        logger.info(f'Funcion calculadora_pastoreo {hectareas_requeridas} ')
-        session.commit()
-  except Exception as e:
-      logger.error(f'Error Funcion calculadora_pastoreo: {e}')
-      raise
-  finally:
-      session.close()
-"la siguiente funcion determina los consumos globales para el lote " \
-"creado en la calculadora"
-def consumo_agua_y_hectareas_por_lote():
-  global total_hectareas
-  try:
-    # consulta de varibles y sumatoria
-    consulta_suma_hectareas = session.query(func.sum(modelo_calculadora_hectareas_pastoreo.columns.hectareas_necesarias)).all()
-    consulta_suma_consumo_agua = session.query(func.sum(modelo_calculadora_hectareas_pastoreo.columns.consumo_agua)).all()
-    #recorre el bucle para cada consulta
-    for i in consulta_suma_hectareas:
-        # Toma la totalidad de hectareas requeridas por animal en este caso es el campo 0
-        total_hectareas =round((i[0]),2)
-    for i in consulta_suma_consumo_agua:
-        # Toma la totalidad de consumos de agua requeridos al dia por animal en este caso es el campo 0
-        consumo_agua_litros = round(i[0], 2)
-        consumo_agua_bebederos = round((consumo_agua_litros / 500), 2)
-        if consumo_agua_bebederos < 1:
-            consumo_agua_bebederos = 1
-        total_consumo_agua =f'Tus animales necesitan {consumo_agua_litros} litros de agua al dia (equivalente a {consumo_agua_bebederos} bebederos de 500 litros)'
-        #actualizacion de campos
-        session.execute(modelo_indicadores.update().values(calculadora_hectareas=total_hectareas,
-                                                               calculadora_consumo_agua=total_consumo_agua). \
-                        where(modelo_indicadores.columns.id_indicadores == 1))
-        logger.info(f'Funcion consumo_agua_y_hectareas_por_lote {total_hectareas} ')
-        session.commit()
-  except Exception as e:
-      logger.error(f'Error Funcion consumo_agua_y_hectareas_por_lote: {e}')
-      raise
-  finally:
-      session.close()
+
+
 """la siguiente funcion es una calculadora que determina la fecha aproximada de parto
 de un animal en base a su fecha de preñez"""
 def fecha_aproximada_parto():
@@ -2115,4 +2013,3 @@ def descarte():
 #IEP_por_raza()
 #litros_por_raza()
 #peso_segun_raza()
-#capacidad_carga()

@@ -19,7 +19,10 @@ from sqlalchemy.types import Integer, Text, String, DateTime
     hashed_password = Column(String)"""
 
 modelo_users = Table("users", meta, Column("id", String(300), primary_key=True, unique=True, index=True),
-                     Column("username", String(300), unique=True, index=True), Column("hashed_password", String(300)))
+                     Column("email", String(300), unique=True, index=True), Column("password", String(300)))
+
+modelo_usuarios = Table("usuarios", meta, Column("id_usuario", String(300), primary_key=True, unique=True, index=True),
+                     Column("full_name", String(300), unique=True, index=True), Column("hashed_password", String(300)))
 
 """
  Modelo para la tabla de Bovinos

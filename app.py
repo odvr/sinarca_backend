@@ -1,5 +1,7 @@
 from fastapi import FastAPI
 
+
+from routes.Archivos import appArchivos
 from routes.Pesaje import pesaje
 from routes.Prod_leche import Produccion_Leche
 from routes.Registro_Litros_Diarios import Produccion_Leche_Litros_Diarios
@@ -45,6 +47,7 @@ app.include_router(levante)
 app.include_router(IntevaloPartos)
 app.include_router(Veterinaria)
 app.include_router(ReproductorRutas)
+app.include_router(appArchivos)
 
 
 
