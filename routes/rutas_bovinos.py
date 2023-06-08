@@ -20,17 +20,19 @@ from models.modelo_bovinos import modelo_bovinos_inventario, modelo_veterinaria,
     modelo_ventas, modelo_datos_muerte, \
     modelo_indicadores, modelo_ceba, modelo_macho_reproductor, modelo_carga_animal_y_consumo_agua, modelo_datos_pesaje, \
     modelo_capacidad_carga, modelo_calculadora_hectareas_pastoreo, modelo_partos, modelo_vientres_aptos, \
-    modelo_descarte, modelo_users, modelo_arbol_genealogico, modelo_veterinaria_evoluciones, modelo_usuarios
+    modelo_descarte, modelo_users, modelo_arbol_genealogico, modelo_veterinaria_evoluciones, modelo_usuarios, MUserOut, \
+    MUserAuth
 
 from routes.Reproductor import vida_util_macho_reproductor
 from schemas.schemas_bovinos import Esquema_bovinos, esquema_produccion_levante, \
     esquema_produccion_ceba, esquema_datos_muerte, esquema_modelo_ventas, esquema_arbol_genealogico, \
     esquema_modelo_Reporte_Pesaje, esquema_produccion_leche, esquema_veterinaria, esquema_veterinaria_evoluciones, \
     esquema_partos, esquema_macho_reproductor, esquema_indicadores, esquema_vientres_aptos, UserOut, UserAuth, Usuarios, \
-    UsuariosInDB
+    UsuariosInDB, TokenSchema, TokenPayload
 from sqlalchemy import update, between, func
 from starlette.status import HTTP_204_NO_CONTENT
 from datetime import date, datetime, timedelta
+from pydantic import ValidationError
 from sqlalchemy.exc import IntegrityError
 
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
@@ -75,89 +77,160 @@ file_handler.setFormatter(formatter)
 # Agrega el manejador de archivo al logger
 logger.addHandler(file_handler)
 
-# trae el usuario
-"""def obtener_usurio(modelo_usuarios,username):
+'''+++++++++++++++++++++++++++++++++++++++++++++++++++++++++'''
+from passlib.context import CryptContext
+import os
+from datetime import datetime, timedelta
+from typing import Union, Any
+from jose import jwt
+
+from fastapi import FastAPI, status, HTTPException
+from fastapi.responses import RedirectResponse
+#from app.schemas import UserOut, UserAuth
+from uuid import uuid4
 
 
-    if username in modelo_usuarios:
-        datos_usuario = modelo_usuarios[username]
-        return UsuariosInDB(**datos_usuario)
-    return []
 
-"""
+ACCESS_TOKEN_EXPIRE_MINUTES = 30  # 30 minutes
+REFRESH_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
+ALGORITHM = "HS256"
+JWT_SECRET_KEY = "1q2w3e4r"
+JWT_REFRESH_SECRET_KEY = "1q2w3e4r"
 
-def obtener_usurio(username: str):
-    """
-    cursor = condb.cursor(dictionary=True)
-    query = "SELECT * FROM users WHERE username = %s"
-    cursor.execute(query, (username,))
-    user_dict = cursor.fetchone()
-    cursor.close()
-    :param username:
-    :return:
-    """
+password_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-    consulta = condb.execute(
-        modelo_leche.select().where(
-            modelo_leche.columns.id_bovino == username)).first()
-    if consulta:
-        return UsuariosInDB(**consulta)
 
-def verificar_pwd(pwd_plano, hashed_password):
-    return pwd_context.verify(pwd_plano, hashed_password)
+def get_hashed_password(password: str) -> str:
+    return password_context.hash(password)
 
-"""
-def autenticacion_usuarios(modelo_usuarios, username, password):
-    user = obtener_usurio(modelo_usuarios, username)
-    if not user:
-        raise HTTPException(status_code=401)
-    if not verificar_pwd(password, user.hashed_password):
-        raise HTTPException(status_code=401)
+
+def verify_password(password: str, hashed_pass: str) -> bool:
+    return password_context.verify(password, hashed_pass)
+
+
+def create_access_token(subject: Union[str, Any], expires_delta: int = None) -> str:
+    if expires_delta is not None:
+        expires_delta = datetime.utcnow() + expires_delta
+    else:
+        expires_delta = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+
+    to_encode = {"exp": expires_delta, "sub": str(subject)}
+    encoded_jwt = jwt.encode(to_encode, JWT_SECRET_KEY, ALGORITHM)
+    return encoded_jwt
+
+
+def create_refresh_token(subject: Union[str, Any], expires_delta: int = None) -> str:
+    if expires_delta is not None:
+        expires_delta = datetime.utcnow() + expires_delta
+    else:
+        expires_delta = datetime.utcnow() + timedelta(minutes=REFRESH_TOKEN_EXPIRE_MINUTES)
+
+    to_encode = {"exp": expires_delta, "sub": str(subject)}
+    encoded_jwt = jwt.encode(to_encode, JWT_REFRESH_SECRET_KEY, ALGORITHM)
+    return encoded_jwt
+
+
+
+
+
+@rutas_bovinos.post('/signup', summary="Create new user")
+async def create_user(data: UserAuth):
+    # querying database to check if user already exist
+    #user = session.query(MUserOut).filter_by(email=data.email).first()
+
+    user = condb.execute(MUserOut.select().where(MUserOut.columns.email == data.email)).first()
+
+
+    if user is not None:
+            raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="User with this email already exist"
+        )
+
+    ingreso = MUserAuth.insert().values(email=data.email,
+        password=get_hashed_password(data.password)
+        )
+
+    condb.execute(ingreso)
+    condb.commit()
+
     return user
-"""
-def verify_password(plain_password, hashed_password):
-    return pwd_context.verify(plain_password, hashed_password)
 
-def authenticate_user(username: str, password: str):
-    user = obtener_usurio(username)
-    if not user:
-        return False
-    if not verify_password(password, user.hashed_password):
-        return False
-    return user
-def get_password_hash(password):
-    return pwd_context.hash(password)
-@rutas_bovinos.post("/token")
+
+
+
+@rutas_bovinos.post('/login', summary="Create access and refresh tokens for user",response_model=TokenSchema)
 async def login(form_data: OAuth2PasswordRequestForm = Depends()):
-    user = authenticate_user(form_data.username, form_data.password)
+
+    user = condb.execute(MUserAuth.select().where(MUserAuth.c.email == form_data.username)).first()
+
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Incorrect email or password"
+        )
+
+    hashed_pass = user[2]
+    if not verify_password(form_data.password, hashed_pass):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="I"
+        )
 
     return {
-        "access_token": form_data.username,
-        "token_type": "bearer"
+        "access_token": create_access_token(user[0]),
+        "refresh_token": create_refresh_token(user[0]),
     }
 
 
-@rutas_bovinos.post("/users/", response_model=Usuarios)
-async def crear_usuario(usuario: Usuarios):
+reuseable_oauth = OAuth2PasswordBearer(
+    tokenUrl="/login",
+    scheme_name="JWT"
+)
+
+
+async def get_current_user(token: str = Depends(reuseable_oauth)) -> MUserAuth:
     try:
-        nuevo_usuario = modelo_usuarios(
-            id_usuario=usuario.id_usuario,
-            full_name=usuario.full_name,
-            hashed_password=usuario.hashed_password
+        payload = jwt.decode(
+            token, JWT_SECRET_KEY, algorithms=[ALGORITHM]
         )
-        session.add(nuevo_usuario)
-        session.commit()
+        token_data = TokenPayload(**payload)
 
-        # Consultar el usuario recién creado
-        usuario_creado = session.query(modelo_usuarios).filter_by(id_usuario=modelo_usuarios.id_usuario).first()
+        if datetime.fromtimestamp(token_data.exp) < datetime.now():
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Token expired",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+    except(jwt.JWTError, ValidationError):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Could not validate credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 
-        if usuario_creado:
-            return {"mensaje": "Usuario creado exitosamente", "usuario": usuario_creado}
-        else:
-            raise HTTPException(status_code=404, detail="No se pudo encontrar el usuario recién creado")
-    except IntegrityError:
-        session.rollback()
-        raise HTTPException(status_code=400, detail="Error: El ID de usuario o el nombre completo ya existen")
+    user: Union[dict[str, Any], None] = condb.get(token_data.sub, None)
+
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Could not find user",
+        )
+
+    return MUserAuth(**user)
+
+
+
+
+
+
+'''+++++++++++++++++++++++++++++++++++++++++++++++++++++++++'''
+
+
+
+
+
+
 
 
 
@@ -199,7 +272,7 @@ Toma el flujo el token para pasar como parametro para cada una de las rutas
 """
 
 @rutas_bovinos.get("/listar_vientres_aptos", response_model=list[esquema_vientres_aptos])
-async def listar_vientres_aptos_modulo():
+async def listar_vientres_aptos_modulo(user: MUserAuth = Depends(get_current_user)):
     try:
         vientres_aptos()
 
