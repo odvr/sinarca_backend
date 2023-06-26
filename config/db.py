@@ -14,8 +14,9 @@ Registra tu base de datos siguiendo los parametros en el ejemplo:
 mariadb+mariadbconnector://usuario:password@IPbasededatos:puerto/nombreBasededatos"
 """
 try:
-    engine = sqlalchemy.create_engine("mariadb+mariadbconnector://root:1q2w3e4r@localhost:3306/sinarcas")
+    engine = sqlalchemy.create_engine("mariadb+mariadbconnector://root:1q2w3e4r@sinarcadb.cc3ho0ocanpp.us-east-1.rds.amazonaws.com:3306/sinarca")
     #Session = sessionmaker(engine)
+
     meta = MetaData()
     # llama esta variable cuando quieras interactuar con la base de datos
     Session = sessionmaker(bind=engine)

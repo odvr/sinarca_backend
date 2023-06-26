@@ -35,4 +35,9 @@ CREATE DATABASE `sinarca` /*!40100 COLLATE 'latin1_bin' */;
 uvicorn app:app –reload permite reinicar con cada cambio en el código 
 
 
+## Realiza la instalacion del Docker
+
+docker build -t sinarca .
+
+
 

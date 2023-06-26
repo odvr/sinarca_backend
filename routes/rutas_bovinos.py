@@ -6,7 +6,7 @@ Librerias requeridas
 import logging
 import math
 from http.client import HTTPException
-
+from typing import Annotated
 from fastapi import APIRouter, Response
 
 from Lib.actualizacion_peso import actualizacion_peso
@@ -28,7 +28,7 @@ from schemas.schemas_bovinos import Esquema_bovinos, esquema_produccion_levante,
     esquema_produccion_ceba, esquema_datos_muerte, esquema_modelo_ventas, esquema_arbol_genealogico, \
     esquema_modelo_Reporte_Pesaje, esquema_produccion_leche, esquema_veterinaria, esquema_veterinaria_evoluciones, \
     esquema_partos, esquema_macho_reproductor, esquema_indicadores, esquema_vientres_aptos, UserOut, UserAuth, Usuarios, \
-    UsuariosInDB, TokenSchema, TokenPayload
+    UsuariosInDB, TokenSchema, TokenPayload, TokenData
 from sqlalchemy import update, between, func
 from starlette.status import HTTP_204_NO_CONTENT
 from datetime import date, datetime, timedelta
@@ -47,7 +47,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 import os
 from datetime import datetime, timedelta
 from typing import Union, Any
-from jose import jwt
+from jose import jwt, JWTError
 
 from fastapi import FastAPI, status, HTTPException, Depends
 from fastapi.security import OAuth2PasswordRequestForm,OAuth2PasswordBearer
@@ -209,18 +209,17 @@ async def get_current_user(token: str = Depends(reuseable_oauth)) -> MUserAuth:
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    user: Union[dict[str, Any], None] = condb.get(token_data.sub, None)
+    #user = await UserService.get_user_by_id(token_data.sub)
+    user = condb.execute(MUserAuth.select().where(MUserAuth.c.email == token_data.username)).first()
+    print(user)
 
-    if user is None:
+    if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Could not find user",
         )
 
-    return MUserAuth(**user)
-
-
-
+    return user
 
 
 
@@ -249,6 +248,36 @@ def Notificaciones():
     )
 
     print(message.sid)
+    
+    
+    oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
+
+def get_current_user(token: str = Depends(oauth2_scheme), db: session = Depends(condb)):
+    try:
+        payload = jwt.decode(token, "SECRET_KEY", algorithms=["HS256"])
+        email: str = payload.get("sub")
+        if email is None:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid authentication credentials",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        token_data = TokenData(email=email)
+        user = condb.execute(MUserAuth.select().where(MUserAuth.c.email == token_data.username)).first()
+
+        if user is None:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid authentication credentials",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        return UserModel(id=user[0], email=user[1])
+    except JWTError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authentication credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 
 """
 
@@ -272,7 +301,7 @@ Toma el flujo el token para pasar como parametro para cada una de las rutas
 """
 
 @rutas_bovinos.get("/listar_vientres_aptos", response_model=list[esquema_vientres_aptos])
-async def listar_vientres_aptos_modulo(user: MUserAuth = Depends(get_current_user)):
+async def listar_vientres_aptos_modulo(current_user: Annotated[UserAuth, Depends(get_current_user)]):
     try:
         vientres_aptos()
 
@@ -283,7 +312,8 @@ async def listar_vientres_aptos_modulo(user: MUserAuth = Depends(get_current_use
         raise
     finally:
         session.close()
-    return tabla_vientres_aptos
+    return tabla_vientres_aptos,current_user
+
 
 @rutas_bovinos.get("/listar_vientres_aptos_Rutas" )
 async def listar_vientres_aptos_modulo():

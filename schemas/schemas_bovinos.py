@@ -31,6 +31,12 @@ class UsuariosInDB(Usuarios):
      hashed_password:str
 
 
+class TokenData(BaseModel):
+    email:str
+
+    class Config:
+        orm_mode = True
+        env_file = ".env"
 class UserAuth(BaseModel):
     email:str
     username: str
