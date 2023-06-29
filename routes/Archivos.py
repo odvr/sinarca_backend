@@ -16,7 +16,7 @@ appArchivos = APIRouter()
 #static_folder = os.path.join(os.path.dirname(__file__), "static")
 
 print(os.getcwd())
-appArchivos.mount("/static", StaticFiles(directory=r"C:\Users\ovega\Desktop\Gana\Ganaderia_Sinarca\sinarca_backend\routes\static"), name="static")
+appArchivos.mount("/static", StaticFiles(directory=r"./static"), name="static")
 
 
 
