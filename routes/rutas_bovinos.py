@@ -301,7 +301,7 @@ Toma el flujo el token para pasar como parametro para cada una de las rutas
 """
 
 @rutas_bovinos.get("/listar_vientres_aptos", response_model=list[esquema_vientres_aptos])
-async def listar_vientres_aptos_modulo(current_user: Annotated[UserAuth, Depends(get_current_user)]):
+async def listar_vientres_aptos_modulo():
     try:
         vientres_aptos()
 
@@ -312,7 +312,7 @@ async def listar_vientres_aptos_modulo(current_user: Annotated[UserAuth, Depends
         raise
     finally:
         session.close()
-    return tabla_vientres_aptos,current_user
+    return tabla_vientres_aptos
 
 
 @rutas_bovinos.get("/listar_vientres_aptos_Rutas" )
@@ -820,6 +820,19 @@ async def id_inventario_bovinos_muertos():
     return consulta
 
 
+@rutas_bovinos.get("/id_listar_bovino_muerte/{id_bovino}",response_model=esquema_datos_muerte)
+async def inventario_bovinos_muertos_id(id_bovino:str):
+    try:
+        consulta = session.execute(
+            modelo_datos_muerte.select().where(modelo_datos_muerte.columns.id_bovino == id_bovino)).first()
+
+    except Exception as e:
+        logger.error(f'Error al obtener Listar ID de Bovino: {e}')
+        raise
+    finally:
+        session.close()
+
+    return consulta
 
 
 """
@@ -841,6 +854,21 @@ async def listar_tabla_ventas():
 
     return consultaVentas
 
+
+
+@rutas_bovinos.get("/id_listar_bovino_venta/{id_bovino}",response_model=esquema_modelo_ventas)
+async def inventario_bovinos_venta_id(id_bovino:str):
+    try:
+        consulta = session.execute(
+            modelo_ventas.select().where(modelo_ventas.columns.id_bovino == id_bovino)).first()
+
+    except Exception as e:
+        logger.error(f'Error al obtener Bovinos de venta: {e}')
+        raise
+    finally:
+        session.close()
+
+    return consulta
 
 
 """
@@ -1285,26 +1313,6 @@ async def cambiar_esta_bovino(id_bovino:str,fecha_nacimiento:date,edad:int,raza:
     return Response(status_code=HTTP_204_NO_CONTENT)
 
 
-"""
-Esta funcion elimina por ID los registros de la tabla de bovinos
-"""
-
-
-@rutas_bovinos.delete("/eliminar_bovino/{id_bovino}", status_code=HTTP_204_NO_CONTENT)
-async def eliminar_bovino(id_bovino: str):
-
-    try:
-        condb.execute(modelo_bovinos_inventario.delete().where(modelo_bovinos_inventario.c.id_bovino == id_bovino))
-        condb.commit()
-
-    except Exception as e:
-        logger.error(f'Error al Intentar Eliminar Bovino: {e}')
-        raise
-    finally:
-        condb.close()
-
-    # retorna un estado de no contenido
-    return Response(status_code=HTTP_204_NO_CONTENT)
 
 
 

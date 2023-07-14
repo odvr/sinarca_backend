@@ -16,7 +16,7 @@ appArchivos = APIRouter()
 #static_folder = os.path.join(os.path.dirname(__file__), "static")
 
 print(os.getcwd())
-appArchivos.mount("/static", StaticFiles(directory=r"./static"), name="static")
+#appArchivos.mount("/static", StaticFiles(directory=r"./static"), name="static")
 
 
 

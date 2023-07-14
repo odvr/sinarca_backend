@@ -3,6 +3,9 @@ Librerias requeridas
 @autor : odvr
 '''
 from sqlalchemy.testing.plugin.plugin_base import logging
+import logging
+
+
 
 # importa la conexion de la base de datos
 from config.db import session
