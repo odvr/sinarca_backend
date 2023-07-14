@@ -257,7 +257,7 @@ def eliminacionBovino(id_bov_eliminar):
           session.commit()
       session.commit()
   except Exception as e:
-      logger.error(f'Error Funcion eliminacionBovino: {e}')
+      logger.error(f'Error Funcion eliminacionBovino:{e}')
       raise
   finally:
       session.close()
