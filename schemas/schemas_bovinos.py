@@ -378,8 +378,8 @@ class esquema_orden_IEP(BaseModel):
         orm_mode = True
         env_file = ".env"
 
-class modelo_orden_litros(BaseModel):
-    id_IEP: int
+class esquema_orden_litros(BaseModel):
+    id_litros_leche: int
     id_bovino: str
     raza: str
     litros_promedio_raza: float

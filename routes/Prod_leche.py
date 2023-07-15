@@ -4,16 +4,17 @@ Librerias requeridas
 import logging
 from Lib.Lib_Intervalo_Partos import intervalo_partos
 from Lib.funcion_litros_leche import promedio_litros_leche
+from Lib.funcion_litros_por_raza import litros_por_raza
 # # importa la conexion de la base de datos
 from config.db import condb, session
 # # importa el esquema de los bovinos
-from models.modelo_bovinos import  modelo_leche, modelo_bovinos_inventario, \
-    modelo_indicadores
+from models.modelo_bovinos import modelo_leche, modelo_bovinos_inventario, \
+    modelo_indicadores, modelo_orden_litros
 from fastapi import  status,  APIRouter, Response
 from datetime import date,  timedelta
 from routes.rutas_bovinos import eliminarduplicados
 from sqlalchemy import update
-from schemas.schemas_bovinos import  esquema_produccion_leche
+from schemas.schemas_bovinos import esquema_produccion_leche, esquema_orden_litros
 
 # Configuracion de la libreria para los logs de sinarca
 # Crea un objeto logger
@@ -94,6 +95,31 @@ async def inventario_prod_leche():
     finally:
         session.close()
     return itemsLeche
+
+
+
+
+"""
+Promedio Por Razas
+"""
+
+
+@Produccion_Leche.get("/LitrosPorRaza" , response_model=list[esquema_orden_litros])
+async def inventario_prod_leche():
+
+    try:
+
+        litros_por_raza()
+
+        itemsLeche = session.query(modelo_orden_litros).all()
+
+    except Exception as e:
+        logger.error(f'Error al obtener inventario de Promedio Por Razas: {e}')
+        raise
+    finally:
+        session.close()
+    return itemsLeche
+
 
 
 
