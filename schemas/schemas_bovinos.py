@@ -389,7 +389,7 @@ class esquema_orden_litros(BaseModel):
         orm_mode = True
         env_file = ".env"
 
-class modelo_orden_peso(BaseModel):
+class esquema_orden_peso(BaseModel):
     id_peso: int
     id_bovino: str
     raza: str

@@ -4,16 +4,17 @@ Librerias requeridas
 import logging
 
 from Lib.actualizacion_peso import actualizacion_peso
+from Lib.funcion_peso_por_raza import peso_segun_raza
 # # importa la conexion de la base de datos
 from config.db import condb, session
 # # importa el esquema de los bovinos
-from models.modelo_bovinos import  modelo_datos_pesaje
+from models.modelo_bovinos import modelo_datos_pesaje, modelo_orden_peso
 from fastapi import APIRouter, Response
 from starlette.status import HTTP_204_NO_CONTENT
 from fastapi import  status, HTTPException, Depends
 from sqlalchemy import func
 from datetime import date, datetime, timedelta
-from schemas.schemas_bovinos import  esquema_modelo_Reporte_Pesaje
+from schemas.schemas_bovinos import esquema_modelo_Reporte_Pesaje, esquema_orden_peso
 
 # Configuracion de la libreria para los logs de sinarca
 # Crea un objeto logger
@@ -53,7 +54,38 @@ async def crear_fecha_pesaje(id_bovino:str,fecha_pesaje:date,peso:float ):
     return Response(status_code=status.HTTP_201_CREATED)
 
 
+@pesaje.delete("/Eliminar_Registro_Peso/{id_pesaje}", status_code=200)
+async def Eliminar_Re(id_pesaje: str):
+    try:
 
+        condb.execute(modelo_datos_pesaje.delete().where(modelo_datos_pesaje.c.id_pesaje == id_pesaje))
+        condb.commit()
+
+    except Exception as e:
+        logger.error(f'Error al intentar Eliminar Registro de Arbol Genialogico: {e}')
+        raise
+    finally:
+        session.close()
+
+    return
+
+
+@pesaje.get("/Promedio_Peso_Raza" , response_model=list[esquema_orden_peso])
+async def inventario_prod_leche():
+
+    try:
+
+
+        peso_segun_raza()
+
+        itemsPromedioRaza = session.query(modelo_orden_peso).all()
+
+    except Exception as e:
+        logger.error(f'Error al obtener inventario de Promedio Por Razas: {e}')
+        raise
+    finally:
+        session.close()
+    return itemsPromedioRaza
 
 
 

@@ -769,6 +769,23 @@ async def id_arbolgenialogico(id_bovino: str):
 
     return consulta
 
+@rutas_bovinos.delete("/eliminar_bovino_endogamia/{id_bovino}")
+async def Eliminar_endogamia(id_bovino: str):
+
+    try:
+
+
+        condb.execute(modelo_arbol_genealogico.delete().where(modelo_arbol_genealogico.c.id_bovino == id_bovino))
+        condb.commit()
+    except Exception as e:
+        logger.error(f'Error al intentar Eliminar Registro de Arbol Genialogico: {e}')
+        raise
+    finally:
+        session.close()
+
+    return
+
+
 
 """
 Lista los datos de la tabla prod leche inventario
