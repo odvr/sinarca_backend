@@ -299,9 +299,8 @@ class esquema_carga_animal_y_consumo_agua(BaseModel):
     id_bovino: str
     edad: int
     peso: int
-
-    valor_unidad_animal: int
-    consumo_forraje_vivo:int
+    valor_unidad_animal: float
+    consumo_forraje_vivo:float
     raza:str
     class Config:
         orm_mode = True

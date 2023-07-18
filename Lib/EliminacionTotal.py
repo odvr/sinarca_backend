@@ -15,7 +15,8 @@ from models.modelo_bovinos import modelo_bovinos_inventario, modelo_veterinaria,
     modelo_ceba, modelo_macho_reproductor, modelo_partos, modelo_vientres_aptos, \
     modelo_descarte, modelo_arbol_genealogico, modelo_historial_intervalo_partos, modelo_litros_leche, modelo_orden_IEP, \
     modelo_orden_litros, \
-    modelo_orden_peso, modelo_historial_partos
+    modelo_orden_peso, modelo_historial_partos, modelo_carga_animal_y_consumo_agua, modelo_veterinaria_evoluciones, \
+    modelo_datos_pesaje
 
 '''***********'''
 from passlib.context import CryptContext
@@ -73,7 +74,7 @@ def eliminacionBovino(id_bov_eliminar):
           session.execute(modelo_arbol_genealogico.delete().where(modelo_arbol_genealogico.c.id_bovino == id_bov_eliminar))
           session.commit()
 
-      # consulta de bovino en la tabla de carga animal
+      # consulta de bovino en la tabla de muertes
       consulta_bovino_muerte = session.query(modelo_datos_muerte). \
               filter(modelo_datos_muerte.c.id_bovino == id_bov_eliminar).all()
       # si el id ya no existe entonces no se hara cambios
@@ -257,6 +258,39 @@ def eliminacionBovino(id_bov_eliminar):
       #caso contrario se eliminara de la tabla
       else:
           session.execute(modelo_historial_partos.delete().where(modelo_historial_partos.c.id_bovino == id_bov_eliminar))
+          session.commit()
+
+      # consulta de bovino en la tabla de carga animal
+      consulta_bovino_carga = session.query(modelo_carga_animal_y_consumo_agua). \
+              filter(modelo_carga_animal_y_consumo_agua.c.id_bovino == id_bov_eliminar).all()
+      # si el id ya no existe entonces no se hara cambios
+      if consulta_bovino_carga == []:
+          pass
+      # caso contrario se eliminara de la tabla
+      else:
+          session.execute(modelo_carga_animal_y_consumo_agua.delete().where(modelo_carga_animal_y_consumo_agua.c.id_bovino == id_bov_eliminar))
+          session.commit()
+
+      # consulta de bovino en la tabla de evoluciones veterinarias
+      consulta_bovino_evolucion = session.query(modelo_veterinaria_evoluciones). \
+              filter(modelo_veterinaria_evoluciones.c.id_bovino == id_bov_eliminar).all()
+      # si el id ya no existe entonces no se hara cambios
+      if consulta_bovino_evolucion == []:
+          pass
+      # caso contrario se eliminara de la tabla
+      else:
+          session.execute(modelo_veterinaria_evoluciones.delete().where(modelo_veterinaria_evoluciones.c.id_bovino == id_bov_eliminar))
+          session.commit()
+
+      # consulta de bovino en la tabla de reportes de pesaje
+      consulta_bovino_pesaje = session.query(modelo_datos_pesaje). \
+              filter(modelo_datos_pesaje.c.id_bovino == id_bov_eliminar).all()
+      # si el id ya no existe entonces no se hara cambios
+      if consulta_bovino_pesaje == []:
+          pass
+      # caso contrario se eliminara de la tabla
+      else:
+          session.execute(modelo_datos_pesaje.delete().where(modelo_datos_pesaje.c.id_bovino == id_bov_eliminar))
           session.commit()
       session.commit()
   except Exception as e:
