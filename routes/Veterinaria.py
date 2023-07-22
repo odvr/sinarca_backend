@@ -117,7 +117,22 @@ async def id_inventario_bovino_Comentarios(id_veterinaria: int):
     # condb.commit()
     return consulta
 
+"Eliminar Comentarios de Veterinaria"
 
+@Veterinaria.delete("/eliminar_comentarios_evoluciones/{id_veterinaria}")
+async def Eliminar_Comentarios_Evoluciones(id_veterinaria: str):
+
+    try:
+
+        condb.execute(modelo_veterinaria_comentarios.delete().where(modelo_veterinaria_comentarios.c.id_veterinaria == id_veterinaria))
+        condb.commit()
+    except Exception as e:
+        logger.error(f'Error al intentar Eliminar Comentarios Y Evoluciones: {e}')
+        raise
+    finally:
+        session.close()
+
+    return
 
 
 

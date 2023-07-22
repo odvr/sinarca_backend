@@ -30,10 +30,11 @@ Eliminar_Bovino = APIRouter()
 @Eliminar_Bovino.delete("/Eliminar_Bovino/{id_bovino}", status_code=HTTP_204_NO_CONTENT)
 async def Eliminar_total(id_bovino: str):
     try:
-        eliminacionBovino(id_bovino)
+
+       eliminacionBovino(id_bovino)
 
     except Exception as e:
-        logger.error(f'Error al obtener inventario de LISTAR CApacidad Carga: {e}')
+        logger.error(f'al intentar eliminar General un animal: {e}')
         raise
     finally:
         session.close()

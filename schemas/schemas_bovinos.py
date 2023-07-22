@@ -82,7 +82,7 @@ class Esquema_bovinos(BaseModel):
     edad: int
     sexo :str
     raza : str
-    peso: int
+    peso: float
     marca :str
     proposito: str
     mansedumbre : str
@@ -274,8 +274,8 @@ class esquema_veterinaria_comentarios(BaseModel):
 class esquema_descarte(BaseModel):
     id_descarte: int
     id_bovino: str
-    edad: int
-    peso: float
+    edad:Optional[int] = None
+    peso:Optional[float] = None
     razon_descarte: str
     class Config:
         orm_mode = True

@@ -1229,13 +1229,14 @@ async def CrearProdCeba(id_bovino: str,proposito:str):
 Crear Descarte
 """
 @rutas_bovinos.post(
-    "/crear_descarte/{id_bovino}/{edad}/{peso}/{razon_descarte}",
+    "/crear_descarte/{id_bovino}/{razon_descarte}",
     status_code=status.HTTP_201_CREATED)
-async def CrearDescarte(id_bovino: str,edad:int,peso:float,razon_descarte:str):
+async def CrearDescarte(id_bovino: str,razon_descarte:str):
 
     try:
-        ingresodescarte = modelo_descarte.insert().values(id_bovino=id_bovino,edad=edad,peso=peso,razon_descarte=razon_descarte)
-        logger.info(f'Se creo el siguiente Bovino en la tabla de produccion de DESCARTE {ingresodescarte} ')
+
+        ingresodescarte = modelo_descarte.insert().values(id_bovino=id_bovino,razon_descarte=razon_descarte)
+        descarte()
 
         condb.execute(ingresodescarte)
         condb.commit()
