@@ -28,7 +28,7 @@ from schemas.schemas_bovinos import Esquema_bovinos, esquema_produccion_levante,
     esquema_produccion_ceba, esquema_datos_muerte, esquema_modelo_ventas, esquema_arbol_genealogico, \
     esquema_modelo_Reporte_Pesaje, esquema_produccion_leche, esquema_veterinaria, esquema_veterinaria_evoluciones, \
     esquema_partos, esquema_macho_reproductor, esquema_indicadores, esquema_vientres_aptos, UserOut, UserAuth, Usuarios, \
-    UsuariosInDB, TokenSchema, TokenPayload, TokenData
+    UsuariosInDB, TokenSchema, TokenPayload, TokenData, esquema_descarte
 from sqlalchemy import update, between, func
 from starlette.status import HTTP_204_NO_CONTENT
 from datetime import date, datetime, timedelta
@@ -384,7 +384,7 @@ async def id_inventario_bovino_v(id_bovino: str):
 
 
 
-@rutas_bovinos.get("/listar_animales_descarte" )
+@rutas_bovinos.get("/listar_animales_descarte",response_model=list[esquema_descarte] )
 async def listarAnimalesDescarte():
 
     try:
