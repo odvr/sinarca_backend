@@ -398,3 +398,11 @@ class esquema_orden_peso(BaseModel):
     class Config:
         orm_mode = True
         env_file = ".env"
+
+class esquema_historial_perdida_terneros(BaseModel):
+    id_perdida: int
+    periodo: int
+    perdida:float
+    class Config:
+        orm_mode = True
+        env_file = ".env"

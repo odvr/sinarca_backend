@@ -68,743 +68,81 @@ logger.addHandler(file_handler)
 
 #from twilio.rest import Client
 
-"""la siguiente funcion calcula los intervalos de partos de cada animal y los inserta
-en la base de datos"""
+
 def litros_por_raza():
     try:
-        # consulta de animales listados en el modulo de leche
-        animales_litros_leche = session.query(modelo_bovinos_inventario.c.raza, modelo_leche.c.id_bovino,
-                                       modelo_leche.c.promedio_litros). \
-            join(modelo_leche, modelo_bovinos_inventario.c.id_bovino == modelo_leche.c.id_bovino).all()
-        # recorre el bucle
-        for i in animales_litros_leche:
-            # Toma el ID del bovino, este es el campo numero 1
-            id_bovino_litros = i[1]
-            # Toma el promedio de litros de un animal, este es el campo numero 2
-            promedio_litros_bovino = i[2]
-            # Toma la raza del bovino, este es el campo numero 0
-            raza_bovino_litros = i[0]
-            # se realiza un bucle segun el promedio de litros por raza bovina
-            if raza_bovino_litros == "Holstein":
-                litros_promedio_dia_raza = 35
-                diferencia = litros_promedio_dia_raza - promedio_litros_bovino
-                # consulta para saber si el bovino ya existe en la tabla
-                consulta_existencia_bovino = session.query(modelo_orden_litros). \
-                    filter(modelo_orden_litros.columns.id_bovino == id_bovino_litros).all()
-                # si la consulta es vacia significa que no existe ese animal en la tabla,
-                # entonces ese animal sera insertado
-                if consulta_existencia_bovino == []:
-                    ingresoDatos = modelo_orden_litros.insert().values(id_bovino=id_bovino_litros,
+        """#la siguiente consulta trae eel listado de razas de los animales en el modulo de leche
+        razas_litros_leche = list(set(session.query(modelo_bovinos_inventario.c.raza). \
+            join(modelo_leche, modelo_bovinos_inventario.c.id_bovino == modelo_leche.c.id_bovino).all()))
+        #para calcular los litros y animales por raza se implementa un bucle
+        contador_raza= len(razas_litros_leche)
+        b=0
+        while(b<contador_raza):
+            raza_a_trabajar=razas_litros_leche[b][0]
+            #consulta de litros promedio por raza
+            consulta_litros_prom_raza = session.query(
+                func.avg(modelo_leche.columns.promedio_litros)).\
+                filter(modelo_leche.columns.raza==raza_a_trabajar).all()
+
+            animales_litros_leche = session.query(modelo_bovinos_inventario.c.raza, modelo_leche.c.id_bovino,
+                                                  modelo_leche.c.promedio_litros). \
+                join(modelo_leche, modelo_bovinos_inventario.c.id_bovino == modelo_leche.c.id_bovino).all()
+            # recorre el bucle
+            for i in animales_litros_leche:
+                # Toma el ID del bovino, este es el campo numero 1
+                id_bovino_litros = i[1]
+                # Toma el promedio de litros de un animal, este es el campo numero 2
+                promedio_litros_bovino = i[2]
+                # Toma la raza del bovino, este es el campo numero 0
+                raza_bovino_litros = i[0]
+                if consulta_litros_prom_raza[0][0] is None or consulta_litros_prom_raza[0][0] == 0:
+                    pass
+                else:
+                    diferencia = promedio_litros_bovino - consulta_litros_prom_raza[0][0]
+                    if raza_bovino_litros == raza_a_trabajar:
+                        # consulta para saber si el bovino existe
+                        consulta_existencia_bovino = session.query(modelo_orden_litros). \
+                            filter(modelo_orden_litros.columns.id_bovino == id_bovino_litros).all()
+                        # si la consulta es vacia significa que no existe ese animal en la tabla,
+                        # entonces ese animal sera insertado
+                        if consulta_existencia_bovino == []:
+                            ingresoDatos = modelo_orden_litros.insert().values(id_bovino=id_bovino_litros,
                                                                     raza=raza_bovino_litros,
-                                                                    litros_promedio_raza=litros_promedio_dia_raza,
+                                                                    litros_promedio_raza=consulta_litros_prom_raza[0][0],
                                                                     litros_promedio_animal=promedio_litros_bovino,
                                                                     diferencia=diferencia)
 
-                    session.execute(ingresoDatos)
-                    session.commit()
-                # si el animal existe entonces actualiza sus datos
-                else:
-                    session.execute(modelo_orden_litros.update().values(raza=raza_bovino_litros,
-                                                                    litros_promedio_raza=litros_promedio_dia_raza,
-                                                                    litros_promedio_animal=promedio_litros_bovino,
-                                                                    diferencia=diferencia). \
-                                    where(modelo_orden_litros.columns.id_bovino == id_bovino_litros))
-                    session.commit()
-
-            elif raza_bovino_litros == "Jersey":
-                litros_promedio_dia_raza = 20
-                diferencia = litros_promedio_dia_raza - promedio_litros_bovino
-                # consulta para saber si el bovino ya existe en la tabla
-                consulta_existencia_bovino = session.query(modelo_orden_litros). \
-                    filter(modelo_orden_litros.columns.id_bovino == id_bovino_litros).all()
-                # si la consulta es vacia significa que no existe ese animal en la tabla,
-                # entonces ese animal sera insertado
-                if consulta_existencia_bovino == []:
-                    ingresoDatos = modelo_orden_litros.insert().values(id_bovino=id_bovino_litros,
+                            session.execute(ingresoDatos)
+                            session.commit()
+                        # si el animal existe entonces actualiza sus datos
+                        else:
+                            session.execute(modelo_orden_litros.update().values(id_bovino=id_bovino_litros,
                                                                     raza=raza_bovino_litros,
-                                                                    litros_promedio_raza=litros_promedio_dia_raza,
-                                                                    litros_promedio_animal=promedio_litros_bovino,
-                                                                    diferencia=diferencia)
-
-                    session.execute(ingresoDatos)
-                    session.commit()
-                # si el animal existe entonces actualiza sus datos
-                else:
-                    session.execute(modelo_orden_litros.update().values(raza=raza_bovino_litros,
-                                                                    litros_promedio_raza=litros_promedio_dia_raza,
+                                                                    litros_promedio_raza=consulta_litros_prom_raza[0][0],
                                                                     litros_promedio_animal=promedio_litros_bovino,
                                                                     diferencia=diferencia). \
-                                    where(modelo_orden_litros.columns.id_bovino == id_bovino_litros))
-                    session.commit()
+                                            where(modelo_orden_litros.columns.id_bovino == id_bovino_litros))
+                            session.commit()
+            b=b+1
 
-            elif raza_bovino_litros == "Gyr":
-                litros_promedio_dia_raza = 12
-                diferencia = litros_promedio_dia_raza - promedio_litros_bovino
-                # consulta para saber si el bovino ya existe en la tabla
-                consulta_existencia_bovino = session.query(modelo_orden_litros). \
-                    filter(modelo_orden_litros.columns.id_bovino == id_bovino_litros).all()
-                # si la consulta es vacia significa que no existe ese animal en la tabla,
-                # entonces ese animal sera insertado
-                if consulta_existencia_bovino == []:
-                    ingresoDatos = modelo_orden_litros.insert().values(id_bovino=id_bovino_litros,
-                                                                    raza=raza_bovino_litros,
-                                                                    litros_promedio_raza=litros_promedio_dia_raza,
-                                                                    litros_promedio_animal=promedio_litros_bovino,
-                                                                    diferencia=diferencia)
-
-                    session.execute(ingresoDatos)
+            # el siguiente codigo elimina los bovinos cuyo estado sea cambiado
+            consulta_animales = session.query(modelo_bovinos_inventario.c.estado, modelo_orden_litros.c.id_bovino). \
+                join(modelo_orden_litros,
+                     modelo_bovinos_inventario.c.id_bovino == modelo_orden_litros.c.id_bovino).all()
+            for i in consulta_animales:
+                # Toma el ID del bovino en este caso es el campo 1
+                idBovino = i[1]
+                # Toma el estado del bovino en este caso es el campo 0
+                estadoBovino = i[0]
+                if estadoBovino == "Muerto" or estadoBovino == "Vendido":
+                    session.execute(modelo_orden_litros.delete().where(modelo_orden_litros.c.id_bovino == idBovino))
                     session.commit()
-                # si el animal existe entonces actualiza sus datos
                 else:
-                    session.execute(modelo_orden_litros.update().values(raza=raza_bovino_litros,
-                                                                    litros_promedio_raza=litros_promedio_dia_raza,
-                                                                    litros_promedio_animal=promedio_litros_bovino,
-                                                                    diferencia=diferencia). \
-                                    where(modelo_orden_litros.columns.id_bovino == id_bovino_litros))
-                    session.commit()
-
-            elif raza_bovino_litros == "Girolando":
-                litros_promedio_dia_raza = 15
-                diferencia = litros_promedio_dia_raza - promedio_litros_bovino
-                # consulta para saber si el bovino ya existe en la tabla
-                consulta_existencia_bovino = session.query(modelo_orden_litros). \
-                    filter(modelo_orden_litros.columns.id_bovino == id_bovino_litros).all()
-                # si la consulta es vacia significa que no existe ese animal en la tabla,
-                # entonces ese animal sera insertado
-                if consulta_existencia_bovino == []:
-                    ingresoDatos = modelo_orden_litros.insert().values(id_bovino=id_bovino_litros,
-                                                                    raza=raza_bovino_litros,
-                                                                    litros_promedio_raza=litros_promedio_dia_raza,
-                                                                    litros_promedio_animal=promedio_litros_bovino,
-                                                                    diferencia=diferencia)
-
-                    session.execute(ingresoDatos)
-                    session.commit()
-                # si el animal existe entonces actualiza sus datos
-                else:
-                    session.execute(modelo_orden_litros.update().values(raza=raza_bovino_litros,
-                                                                    litros_promedio_raza=litros_promedio_dia_raza,
-                                                                    litros_promedio_animal=promedio_litros_bovino,
-                                                                    diferencia=diferencia). \
-                                    where(modelo_orden_litros.columns.id_bovino == id_bovino_litros))
-                    session.commit()
-
-            elif raza_bovino_litros == "Red Sindhi":
-                litros_promedio_dia_raza = 10
-                diferencia = litros_promedio_dia_raza - promedio_litros_bovino
-                # consulta para saber si el bovino ya existe en la tabla
-                consulta_existencia_bovino = session.query(modelo_orden_litros). \
-                    filter(modelo_orden_litros.columns.id_bovino == id_bovino_litros).all()
-                # si la consulta es vacia significa que no existe ese animal en la tabla,
-                # entonces ese animal sera insertado
-                if consulta_existencia_bovino == []:
-                    ingresoDatos = modelo_orden_litros.insert().values(id_bovino=id_bovino_litros,
-                                                                    raza=raza_bovino_litros,
-                                                                    litros_promedio_raza=litros_promedio_dia_raza,
-                                                                    litros_promedio_animal=promedio_litros_bovino,
-                                                                    diferencia=diferencia)
-
-                    session.execute(ingresoDatos)
-                    session.commit()
-                # si el animal existe entonces actualiza sus datos
-                else:
-                    session.execute(modelo_orden_litros.update().values(raza=raza_bovino_litros,
-                                                                    litros_promedio_raza=litros_promedio_dia_raza,
-                                                                    litros_promedio_animal=promedio_litros_bovino,
-                                                                    diferencia=diferencia). \
-                                    where(modelo_orden_litros.columns.id_bovino == id_bovino_litros))
-                    session.commit()
-
-            elif raza_bovino_litros == "Limousin":
-                litros_promedio_dia_raza = 6
-                diferencia = litros_promedio_dia_raza - promedio_litros_bovino
-                # consulta para saber si el bovino ya existe en la tabla
-                consulta_existencia_bovino = session.query(modelo_orden_litros). \
-                    filter(modelo_orden_litros.columns.id_bovino == id_bovino_litros).all()
-                # si la consulta es vacia significa que no existe ese animal en la tabla,
-                # entonces ese animal sera insertado
-                if consulta_existencia_bovino == []:
-                    ingresoDatos = modelo_orden_litros.insert().values(id_bovino=id_bovino_litros,
-                                                                    raza=raza_bovino_litros,
-                                                                    litros_promedio_raza=litros_promedio_dia_raza,
-                                                                    litros_promedio_animal=promedio_litros_bovino,
-                                                                    diferencia=diferencia)
-
-                    session.execute(ingresoDatos)
-                    session.commit()
-                # si el animal existe entonces actualiza sus datos
-                else:
-                    session.execute(modelo_orden_litros.update().values(raza=raza_bovino_litros,
-                                                                    litros_promedio_raza=litros_promedio_dia_raza,
-                                                                    litros_promedio_animal=promedio_litros_bovino,
-                                                                    diferencia=diferencia). \
-                                    where(modelo_orden_litros.columns.id_bovino == id_bovino_litros))
-                    session.commit()
-
-            elif raza_bovino_litros == "Charolais":
-                litros_promedio_dia_raza = 5
-                diferencia = litros_promedio_dia_raza - promedio_litros_bovino
-                # consulta para saber si el bovino ya existe en la tabla
-                consulta_existencia_bovino = session.query(modelo_orden_litros). \
-                    filter(modelo_orden_litros.columns.id_bovino == id_bovino_litros).all()
-                # si la consulta es vacia significa que no existe ese animal en la tabla,
-                # entonces ese animal sera insertado
-                if consulta_existencia_bovino == []:
-                    ingresoDatos = modelo_orden_litros.insert().values(id_bovino=id_bovino_litros,
-                                                                    raza=raza_bovino_litros,
-                                                                    litros_promedio_raza=litros_promedio_dia_raza,
-                                                                    litros_promedio_animal=promedio_litros_bovino,
-                                                                    diferencia=diferencia)
-
-                    session.execute(ingresoDatos)
-                    session.commit()
-                # si el animal existe entonces actualiza sus datos
-                else:
-                    session.execute(modelo_orden_litros.update().values(raza=raza_bovino_litros,
-                                                                    litros_promedio_raza=litros_promedio_dia_raza,
-                                                                    litros_promedio_animal=promedio_litros_bovino,
-                                                                    diferencia=diferencia). \
-                                    where(modelo_orden_litros.columns.id_bovino == id_bovino_litros))
-                    session.commit()
-
-            elif raza_bovino_litros == "Hereford":
-                litros_promedio_dia_raza = 4.5
-                diferencia = litros_promedio_dia_raza - promedio_litros_bovino
-                # consulta para saber si el bovino ya existe en la tabla
-                consulta_existencia_bovino = session.query(modelo_orden_litros). \
-                    filter(modelo_orden_litros.columns.id_bovino == id_bovino_litros).all()
-                # si la consulta es vacia significa que no existe ese animal en la tabla,
-                # entonces ese animal sera insertado
-                if consulta_existencia_bovino == []:
-                    ingresoDatos = modelo_orden_litros.insert().values(id_bovino=id_bovino_litros,
-                                                                    raza=raza_bovino_litros,
-                                                                    litros_promedio_raza=litros_promedio_dia_raza,
-                                                                    litros_promedio_animal=promedio_litros_bovino,
-                                                                    diferencia=diferencia)
-
-                    session.execute(ingresoDatos)
-                    session.commit()
-                # si el animal existe entonces actualiza sus datos
-                else:
-                    session.execute(modelo_orden_litros.update().values(raza=raza_bovino_litros,
-                                                                    litros_promedio_raza=litros_promedio_dia_raza,
-                                                                    litros_promedio_animal=promedio_litros_bovino,
-                                                                    diferencia=diferencia). \
-                                    where(modelo_orden_litros.columns.id_bovino == id_bovino_litros))
-                    session.commit()
-
-            elif raza_bovino_litros == "Romagnola":
-                litros_promedio_dia_raza = 4
-                diferencia = litros_promedio_dia_raza - promedio_litros_bovino
-                # consulta para saber si el bovino ya existe en la tabla
-                consulta_existencia_bovino = session.query(modelo_orden_litros). \
-                    filter(modelo_orden_litros.columns.id_bovino == id_bovino_litros).all()
-                # si la consulta es vacia significa que no existe ese animal en la tabla,
-                # entonces ese animal sera insertado
-                if consulta_existencia_bovino == []:
-                    ingresoDatos = modelo_orden_litros.insert().values(id_bovino=id_bovino_litros,
-                                                                    raza=raza_bovino_litros,
-                                                                    litros_promedio_raza=litros_promedio_dia_raza,
-                                                                    litros_promedio_animal=promedio_litros_bovino,
-                                                                    diferencia=diferencia)
-
-                    session.execute(ingresoDatos)
-                    session.commit()
-                # si el animal existe entonces actualiza sus datos
-                else:
-                    session.execute(modelo_orden_litros.update().values(raza=raza_bovino_litros,
-                                                                    litros_promedio_raza=litros_promedio_dia_raza,
-                                                                    litros_promedio_animal=promedio_litros_bovino,
-                                                                    diferencia=diferencia). \
-                                    where(modelo_orden_litros.columns.id_bovino == id_bovino_litros))
-                    session.commit()
-
-            elif raza_bovino_litros == "Brahman":
-                litros_promedio_dia_raza = 6
-                diferencia = litros_promedio_dia_raza - promedio_litros_bovino
-                # consulta para saber si el bovino ya existe en la tabla
-                consulta_existencia_bovino = session.query(modelo_orden_litros). \
-                    filter(modelo_orden_litros.columns.id_bovino == id_bovino_litros).all()
-                # si la consulta es vacia significa que no existe ese animal en la tabla,
-                # entonces ese animal sera insertado
-                if consulta_existencia_bovino == []:
-                    ingresoDatos = modelo_orden_litros.insert().values(id_bovino=id_bovino_litros,
-                                                                    raza=raza_bovino_litros,
-                                                                    litros_promedio_raza=litros_promedio_dia_raza,
-                                                                    litros_promedio_animal=promedio_litros_bovino,
-                                                                    diferencia=diferencia)
-
-                    session.execute(ingresoDatos)
-                    session.commit()
-                # si el animal existe entonces actualiza sus datos
-                else:
-                    session.execute(modelo_orden_litros.update().values(raza=raza_bovino_litros,
-                                                                    litros_promedio_raza=litros_promedio_dia_raza,
-                                                                    litros_promedio_animal=promedio_litros_bovino,
-                                                                    diferencia=diferencia). \
-                                    where(modelo_orden_litros.columns.id_bovino == id_bovino_litros))
-                    session.commit()
-
-            elif raza_bovino_litros == "Guzerat":
-                litros_promedio_dia_raza = 8
-                diferencia = litros_promedio_dia_raza - promedio_litros_bovino
-                # consulta para saber si el bovino ya existe en la tabla
-                consulta_existencia_bovino = session.query(modelo_orden_litros). \
-                    filter(modelo_orden_litros.columns.id_bovino == id_bovino_litros).all()
-                # si la consulta es vacia significa que no existe ese animal en la tabla,
-                # entonces ese animal sera insertado
-                if consulta_existencia_bovino == []:
-                    ingresoDatos = modelo_orden_litros.insert().values(id_bovino=id_bovino_litros,
-                                                                    raza=raza_bovino_litros,
-                                                                    litros_promedio_raza=litros_promedio_dia_raza,
-                                                                    litros_promedio_animal=promedio_litros_bovino,
-                                                                    diferencia=diferencia)
-
-                    session.execute(ingresoDatos)
-                    session.commit()
-                # si el animal existe entonces actualiza sus datos
-                else:
-                    session.execute(modelo_orden_litros.update().values(raza=raza_bovino_litros,
-                                                                    litros_promedio_raza=litros_promedio_dia_raza,
-                                                                    litros_promedio_animal=promedio_litros_bovino,
-                                                                    diferencia=diferencia). \
-                                    where(modelo_orden_litros.columns.id_bovino == id_bovino_litros))
-                    session.commit()
-
-            elif raza_bovino_litros == "Nelore":
-                litros_promedio_dia_raza = 4.5
-                diferencia = litros_promedio_dia_raza - promedio_litros_bovino
-                # consulta para saber si el bovino ya existe en la tabla
-                consulta_existencia_bovino = session.query(modelo_orden_litros). \
-                    filter(modelo_orden_litros.columns.id_bovino == id_bovino_litros).all()
-                # si la consulta es vacia significa que no existe ese animal en la tabla,
-                # entonces ese animal sera insertado
-                if consulta_existencia_bovino == []:
-                    ingresoDatos = modelo_orden_litros.insert().values(id_bovino=id_bovino_litros,
-                                                                    raza=raza_bovino_litros,
-                                                                    litros_promedio_raza=litros_promedio_dia_raza,
-                                                                    litros_promedio_animal=promedio_litros_bovino,
-                                                                    diferencia=diferencia)
-
-                    session.execute(ingresoDatos)
-                    session.commit()
-                # si el animal existe entonces actualiza sus datos
-                else:
-                    session.execute(modelo_orden_litros.update().values(raza=raza_bovino_litros,
-                                                                    litros_promedio_raza=litros_promedio_dia_raza,
-                                                                    litros_promedio_animal=promedio_litros_bovino,
-                                                                    diferencia=diferencia). \
-                                    where(modelo_orden_litros.columns.id_bovino == id_bovino_litros))
-                    session.commit()
-
-            elif raza_bovino_litros == "Brangus":
-                litros_promedio_dia_raza = 3
-                diferencia = litros_promedio_dia_raza - promedio_litros_bovino
-                # consulta para saber si el bovino ya existe en la tabla
-                consulta_existencia_bovino = session.query(modelo_orden_litros). \
-                    filter(modelo_orden_litros.columns.id_bovino == id_bovino_litros).all()
-                # si la consulta es vacia significa que no existe ese animal en la tabla,
-                # entonces ese animal sera insertado
-                if consulta_existencia_bovino == []:
-                    ingresoDatos = modelo_orden_litros.insert().values(id_bovino=id_bovino_litros,
-                                                                       raza=raza_bovino_litros,
-                                                                       litros_promedio_raza=litros_promedio_dia_raza,
-                                                                       litros_promedio_animal=promedio_litros_bovino,
-                                                                       diferencia=diferencia)
-
-                    session.execute(ingresoDatos)
-                    session.commit()
-                # si el animal existe entonces actualiza sus datos
-                else:
-                    session.execute(modelo_orden_litros.update().values(raza=raza_bovino_litros,
-                                                                        litros_promedio_raza=litros_promedio_dia_raza,
-                                                                        litros_promedio_animal=promedio_litros_bovino,
-                                                                        diferencia=diferencia). \
-                                    where(modelo_orden_litros.columns.id_bovino == id_bovino_litros))
-                    session.commit()
-
-            elif raza_bovino_litros == "Simmental":
-                litros_promedio_dia_raza = 15
-                diferencia = litros_promedio_dia_raza - promedio_litros_bovino
-                # consulta para saber si el bovino ya existe en la tabla
-                consulta_existencia_bovino = session.query(modelo_orden_litros). \
-                    filter(modelo_orden_litros.columns.id_bovino == id_bovino_litros).all()
-                # si la consulta es vacia significa que no existe ese animal en la tabla,
-                # entonces ese animal sera insertado
-                if consulta_existencia_bovino == []:
-                    ingresoDatos = modelo_orden_litros.insert().values(id_bovino=id_bovino_litros,
-                                                                       raza=raza_bovino_litros,
-                                                                       litros_promedio_raza=litros_promedio_dia_raza,
-                                                                       litros_promedio_animal=promedio_litros_bovino,
-                                                                       diferencia=diferencia)
-
-                    session.execute(ingresoDatos)
-                    session.commit()
-                # si el animal existe entonces actualiza sus datos
-                else:
-                    session.execute(modelo_orden_litros.update().values(raza=raza_bovino_litros,
-                                                                        litros_promedio_raza=litros_promedio_dia_raza,
-                                                                        litros_promedio_animal=promedio_litros_bovino,
-                                                                        diferencia=diferencia). \
-                                    where(modelo_orden_litros.columns.id_bovino == id_bovino_litros))
-                    session.commit()
-
-            elif raza_bovino_litros == "Pardo suizo":
-                litros_promedio_dia_raza = 24
-                diferencia = litros_promedio_dia_raza - promedio_litros_bovino
-                # consulta para saber si el bovino ya existe en la tabla
-                consulta_existencia_bovino = session.query(modelo_orden_litros). \
-                    filter(modelo_orden_litros.columns.id_bovino == id_bovino_litros).all()
-                # si la consulta es vacia significa que no existe ese animal en la tabla,
-                # entonces ese animal sera insertado
-                if consulta_existencia_bovino == []:
-                    ingresoDatos = modelo_orden_litros.insert().values(id_bovino=id_bovino_litros,
-                                                                       raza=raza_bovino_litros,
-                                                                       litros_promedio_raza=litros_promedio_dia_raza,
-                                                                       litros_promedio_animal=promedio_litros_bovino,
-                                                                       diferencia=diferencia)
-
-                    session.execute(ingresoDatos)
-                    session.commit()
-                # si el animal existe entonces actualiza sus datos
-                else:
-                    session.execute(modelo_orden_litros.update().values(raza=raza_bovino_litros,
-                                                                        litros_promedio_raza=litros_promedio_dia_raza,
-                                                                        litros_promedio_animal=promedio_litros_bovino,
-                                                                        diferencia=diferencia). \
-                                    where(modelo_orden_litros.columns.id_bovino == id_bovino_litros))
-                    session.commit()
-
-            elif raza_bovino_litros == "Normando":
-                litros_promedio_dia_raza = 14.5
-                diferencia = litros_promedio_dia_raza - promedio_litros_bovino
-                # consulta para saber si el bovino ya existe en la tabla
-                consulta_existencia_bovino = session.query(modelo_orden_litros). \
-                    filter(modelo_orden_litros.columns.id_bovino == id_bovino_litros).all()
-                # si la consulta es vacia significa que no existe ese animal en la tabla,
-                # entonces ese animal sera insertado
-                if consulta_existencia_bovino == []:
-                    ingresoDatos = modelo_orden_litros.insert().values(id_bovino=id_bovino_litros,
-                                                                       raza=raza_bovino_litros,
-                                                                       litros_promedio_raza=litros_promedio_dia_raza,
-                                                                       litros_promedio_animal=promedio_litros_bovino,
-                                                                       diferencia=diferencia)
-
-                    session.execute(ingresoDatos)
-                    session.commit()
-                # si el animal existe entonces actualiza sus datos
-                else:
-                    session.execute(modelo_orden_litros.update().values(raza=raza_bovino_litros,
-                                                                        litros_promedio_raza=litros_promedio_dia_raza,
-                                                                        litros_promedio_animal=promedio_litros_bovino,
-                                                                        diferencia=diferencia). \
-                                    where(modelo_orden_litros.columns.id_bovino == id_bovino_litros))
-                    session.commit()
-
-            elif raza_bovino_litros == "Ayrshire":
-                litros_promedio_dia_raza = 20
-                diferencia = litros_promedio_dia_raza - promedio_litros_bovino
-                # consulta para saber si el bovino ya existe en la tabla
-                consulta_existencia_bovino = session.query(modelo_orden_litros). \
-                    filter(modelo_orden_litros.columns.id_bovino == id_bovino_litros).all()
-                # si la consulta es vacia significa que no existe ese animal en la tabla,
-                # entonces ese animal sera insertado
-                if consulta_existencia_bovino == []:
-                    ingresoDatos = modelo_orden_litros.insert().values(id_bovino=id_bovino_litros,
-                                                                       raza=raza_bovino_litros,
-                                                                       litros_promedio_raza=litros_promedio_dia_raza,
-                                                                       litros_promedio_animal=promedio_litros_bovino,
-                                                                       diferencia=diferencia)
-
-                    session.execute(ingresoDatos)
-                    session.commit()
-                # si el animal existe entonces actualiza sus datos
-                else:
-                    session.execute(modelo_orden_litros.update().values(raza=raza_bovino_litros,
-                                                                        litros_promedio_raza=litros_promedio_dia_raza,
-                                                                        litros_promedio_animal=promedio_litros_bovino,
-                                                                        diferencia=diferencia). \
-                                    where(modelo_orden_litros.columns.id_bovino == id_bovino_litros))
-                    session.commit()
-
-            elif raza_bovino_litros == "Indubrasil":
-                litros_promedio_dia_raza = 12
-                diferencia = litros_promedio_dia_raza - promedio_litros_bovino
-                # consulta para saber si el bovino ya existe en la tabla
-                consulta_existencia_bovino = session.query(modelo_orden_litros). \
-                    filter(modelo_orden_litros.columns.id_bovino == id_bovino_litros).all()
-                # si la consulta es vacia significa que no existe ese animal en la tabla,
-                # entonces ese animal sera insertado
-                if consulta_existencia_bovino == []:
-                    ingresoDatos = modelo_orden_litros.insert().values(id_bovino=id_bovino_litros,
-                                                                       raza=raza_bovino_litros,
-                                                                       litros_promedio_raza=litros_promedio_dia_raza,
-                                                                       litros_promedio_animal=promedio_litros_bovino,
-                                                                       diferencia=diferencia)
-
-                    session.execute(ingresoDatos)
-                    session.commit()
-                # si el animal existe entonces actualiza sus datos
-                else:
-                    session.execute(modelo_orden_litros.update().values(raza=raza_bovino_litros,
-                                                                        litros_promedio_raza=litros_promedio_dia_raza,
-                                                                        litros_promedio_animal=promedio_litros_bovino,
-                                                                        diferencia=diferencia). \
-                                    where(modelo_orden_litros.columns.id_bovino == id_bovino_litros))
-                    session.commit()
-
-            elif raza_bovino_litros == "Blanco orejinegro":
-                litros_promedio_dia_raza = 4.5
-                diferencia = litros_promedio_dia_raza - promedio_litros_bovino
-                # consulta para saber si el bovino ya existe en la tabla
-                consulta_existencia_bovino = session.query(modelo_orden_litros). \
-                    filter(modelo_orden_litros.columns.id_bovino == id_bovino_litros).all()
-                # si la consulta es vacia significa que no existe ese animal en la tabla,
-                # entonces ese animal sera insertado
-                if consulta_existencia_bovino == []:
-                    ingresoDatos = modelo_orden_litros.insert().values(id_bovino=id_bovino_litros,
-                                                                       raza=raza_bovino_litros,
-                                                                       litros_promedio_raza=litros_promedio_dia_raza,
-                                                                       litros_promedio_animal=promedio_litros_bovino,
-                                                                       diferencia=diferencia)
-
-                    session.execute(ingresoDatos)
-                    session.commit()
-                # si el animal existe entonces actualiza sus datos
-                else:
-                    session.execute(modelo_orden_litros.update().values(raza=raza_bovino_litros,
-                                                                        litros_promedio_raza=litros_promedio_dia_raza,
-                                                                        litros_promedio_animal=promedio_litros_bovino,
-                                                                        diferencia=diferencia). \
-                                    where(modelo_orden_litros.columns.id_bovino == id_bovino_litros))
-                    session.commit()
-
-
-            elif raza_bovino_litros == "Romosinuano":
-                litros_promedio_dia_raza = 5
-                diferencia = litros_promedio_dia_raza - promedio_litros_bovino
-                # consulta para saber si el bovino ya existe en la tabla
-                consulta_existencia_bovino = session.query(modelo_orden_litros). \
-                    filter(modelo_orden_litros.columns.id_bovino == id_bovino_litros).all()
-                # si la consulta es vacia significa que no existe ese animal en la tabla,
-                # entonces ese animal sera insertado
-                if consulta_existencia_bovino == []:
-                    ingresoDatos = modelo_orden_litros.insert().values(id_bovino=id_bovino_litros,
-                                                                       raza=raza_bovino_litros,
-                                                                       litros_promedio_raza=litros_promedio_dia_raza,
-                                                                       litros_promedio_animal=promedio_litros_bovino,
-                                                                       diferencia=diferencia)
-
-                    session.execute(ingresoDatos)
-                    session.commit()
-                # si el animal existe entonces actualiza sus datos
-                else:
-                    session.execute(modelo_orden_litros.update().values(raza=raza_bovino_litros,
-                                                                        litros_promedio_raza=litros_promedio_dia_raza,
-                                                                        litros_promedio_animal=promedio_litros_bovino,
-                                                                        diferencia=diferencia). \
-                                    where(modelo_orden_litros.columns.id_bovino == id_bovino_litros))
-                    session.commit()
-
-            elif raza_bovino_litros == "Sanmartinero":
-                litros_promedio_dia_raza = 5
-                diferencia = litros_promedio_dia_raza - promedio_litros_bovino
-                # consulta para saber si el bovino ya existe en la tabla
-                consulta_existencia_bovino = session.query(modelo_orden_litros). \
-                    filter(modelo_orden_litros.columns.id_bovino == id_bovino_litros).all()
-                # si la consulta es vacia significa que no existe ese animal en la tabla,
-                # entonces ese animal sera insertado
-                if consulta_existencia_bovino == []:
-                    ingresoDatos = modelo_orden_litros.insert().values(id_bovino=id_bovino_litros,
-                                                                       raza=raza_bovino_litros,
-                                                                       litros_promedio_raza=litros_promedio_dia_raza,
-                                                                       litros_promedio_animal=promedio_litros_bovino,
-                                                                       diferencia=diferencia)
-
-                    session.execute(ingresoDatos)
-                    session.commit()
-                # si el animal existe entonces actualiza sus datos
-                else:
-                    session.execute(modelo_orden_litros.update().values(raza=raza_bovino_litros,
-                                                                        litros_promedio_raza=litros_promedio_dia_raza,
-                                                                        litros_promedio_animal=promedio_litros_bovino,
-                                                                        diferencia=diferencia). \
-                                    where(modelo_orden_litros.columns.id_bovino == id_bovino_litros))
-                    session.commit()
-
-            elif raza_bovino_litros == "Costeño con cuernos":
-                litros_promedio_dia_raza = 5.5
-                diferencia = litros_promedio_dia_raza - promedio_litros_bovino
-                # consulta para saber si el bovino ya existe en la tabla
-                consulta_existencia_bovino = session.query(modelo_orden_litros). \
-                    filter(modelo_orden_litros.columns.id_bovino == id_bovino_litros).all()
-                # si la consulta es vacia significa que no existe ese animal en la tabla,
-                # entonces ese animal sera insertado
-                if consulta_existencia_bovino == []:
-                    ingresoDatos = modelo_orden_litros.insert().values(id_bovino=id_bovino_litros,
-                                                                       raza=raza_bovino_litros,
-                                                                       litros_promedio_raza=litros_promedio_dia_raza,
-                                                                       litros_promedio_animal=promedio_litros_bovino,
-                                                                       diferencia=diferencia)
-
-                    session.execute(ingresoDatos)
-                    session.commit()
-                # si el animal existe entonces actualiza sus datos
-                else:
-                    session.execute(modelo_orden_litros.update().values(raza=raza_bovino_litros,
-                                                                        litros_promedio_raza=litros_promedio_dia_raza,
-                                                                        litros_promedio_animal=promedio_litros_bovino,
-                                                                        diferencia=diferencia). \
-                                    where(modelo_orden_litros.columns.id_bovino == id_bovino_litros))
-                    session.commit()
-
-            elif raza_bovino_litros == "Chino santandereano":
-                litros_promedio_dia_raza = 7
-                diferencia = litros_promedio_dia_raza - promedio_litros_bovino
-                # consulta para saber si el bovino ya existe en la tabla
-                consulta_existencia_bovino = session.query(modelo_orden_litros). \
-                    filter(modelo_orden_litros.columns.id_bovino == id_bovino_litros).all()
-                # si la consulta es vacia significa que no existe ese animal en la tabla,
-                # entonces ese animal sera insertado
-                if consulta_existencia_bovino == []:
-                    ingresoDatos = modelo_orden_litros.insert().values(id_bovino=id_bovino_litros,
-                                                                       raza=raza_bovino_litros,
-                                                                       litros_promedio_raza=litros_promedio_dia_raza,
-                                                                       litros_promedio_animal=promedio_litros_bovino,
-                                                                       diferencia=diferencia)
-
-                    session.execute(ingresoDatos)
-                    session.commit()
-                # si el animal existe entonces actualiza sus datos
-                else:
-                    session.execute(modelo_orden_litros.update().values(raza=raza_bovino_litros,
-                                                                        litros_promedio_raza=litros_promedio_dia_raza,
-                                                                        litros_promedio_animal=promedio_litros_bovino,
-                                                                        diferencia=diferencia). \
-                                    where(modelo_orden_litros.columns.id_bovino == id_bovino_litros))
-                    session.commit()
-
-            elif raza_bovino_litros == "Harton del valle":
-                litros_promedio_dia_raza = 7
-                diferencia = litros_promedio_dia_raza - promedio_litros_bovino
-                # consulta para saber si el bovino ya existe en la tabla
-                consulta_existencia_bovino = session.query(modelo_orden_litros). \
-                    filter(modelo_orden_litros.columns.id_bovino == id_bovino_litros).all()
-                # si la consulta es vacia significa que no existe ese animal en la tabla,
-                # entonces ese animal sera insertado
-                if consulta_existencia_bovino == []:
-                    ingresoDatos = modelo_orden_litros.insert().values(id_bovino=id_bovino_litros,
-                                                                       raza=raza_bovino_litros,
-                                                                       litros_promedio_raza=litros_promedio_dia_raza,
-                                                                       litros_promedio_animal=promedio_litros_bovino,
-                                                                       diferencia=diferencia)
-
-                    session.execute(ingresoDatos)
-                    session.commit()
-                # si el animal existe entonces actualiza sus datos
-                else:
-                    session.execute(modelo_orden_litros.update().values(raza=raza_bovino_litros,
-                                                                        litros_promedio_raza=litros_promedio_dia_raza,
-                                                                        litros_promedio_animal=promedio_litros_bovino,
-                                                                        diferencia=diferencia). \
-                                    where(modelo_orden_litros.columns.id_bovino == id_bovino_litros))
-                    session.commit()
-
-            elif raza_bovino_litros == "Casanareño":
-                litros_promedio_dia_raza = 4
-                diferencia = litros_promedio_dia_raza - promedio_litros_bovino
-                # consulta para saber si el bovino ya existe en la tabla
-                consulta_existencia_bovino = session.query(modelo_orden_litros). \
-                    filter(modelo_orden_litros.columns.id_bovino == id_bovino_litros).all()
-                # si la consulta es vacia significa que no existe ese animal en la tabla,
-                # entonces ese animal sera insertado
-                if consulta_existencia_bovino == []:
-                    ingresoDatos = modelo_orden_litros.insert().values(id_bovino=id_bovino_litros,
-                                                                       raza=raza_bovino_litros,
-                                                                       litros_promedio_raza=litros_promedio_dia_raza,
-                                                                       litros_promedio_animal=promedio_litros_bovino,
-                                                                       diferencia=diferencia)
-
-                    session.execute(ingresoDatos)
-                    session.commit()
-                # si el animal existe entonces actualiza sus datos
-                else:
-                    session.execute(modelo_orden_litros.update().values(raza=raza_bovino_litros,
-                                                                        litros_promedio_raza=litros_promedio_dia_raza,
-                                                                        litros_promedio_animal=promedio_litros_bovino,
-                                                                        diferencia=diferencia). \
-                                    where(modelo_orden_litros.columns.id_bovino == id_bovino_litros))
-                    session.commit()
-
-            elif raza_bovino_litros == "Velasquez":
-                litros_promedio_dia_raza = 5
-                diferencia = litros_promedio_dia_raza - promedio_litros_bovino
-                # consulta para saber si el bovino ya existe en la tabla
-                consulta_existencia_bovino = session.query(modelo_orden_litros). \
-                    filter(modelo_orden_litros.columns.id_bovino == id_bovino_litros).all()
-                # si la consulta es vacia significa que no existe ese animal en la tabla,
-                # entonces ese animal sera insertado
-                if consulta_existencia_bovino == []:
-                    ingresoDatos = modelo_orden_litros.insert().values(id_bovino=id_bovino_litros,
-                                                                       raza=raza_bovino_litros,
-                                                                       litros_promedio_raza=litros_promedio_dia_raza,
-                                                                       litros_promedio_animal=promedio_litros_bovino,
-                                                                       diferencia=diferencia)
-
-                    session.execute(ingresoDatos)
-                    session.commit()
-                # si el animal existe entonces actualiza sus datos
-                else:
-                    session.execute(modelo_orden_litros.update().values(raza=raza_bovino_litros,
-                                                                        litros_promedio_raza=litros_promedio_dia_raza,
-                                                                        litros_promedio_animal=promedio_litros_bovino,
-                                                                        diferencia=diferencia). \
-                                    where(modelo_orden_litros.columns.id_bovino == id_bovino_litros))
-                    session.commit()
-
-            elif raza_bovino_litros == "7 colores (cruce indefinido)":
-                litros_promedio_dia_raza = 5
-                diferencia = litros_promedio_dia_raza - promedio_litros_bovino
-                # consulta para saber si el bovino ya existe en la tabla
-                consulta_existencia_bovino = session.query(modelo_orden_litros). \
-                    filter(modelo_orden_litros.columns.id_bovino == id_bovino_litros).all()
-                # si la consulta es vacia significa que no existe ese animal en la tabla,
-                # entonces ese animal sera insertado
-                if consulta_existencia_bovino == []:
-                    ingresoDatos = modelo_orden_litros.insert().values(id_bovino=id_bovino_litros,
-                                                                       raza=raza_bovino_litros,
-                                                                       litros_promedio_raza=litros_promedio_dia_raza,
-                                                                       litros_promedio_animal=promedio_litros_bovino,
-                                                                       diferencia=diferencia)
-
-                    session.execute(ingresoDatos)
-                    session.commit()
-                # si el animal existe entonces actualiza sus datos
-                else:
-                    session.execute(modelo_orden_litros.update().values(raza=raza_bovino_litros,
-                                                                        litros_promedio_raza=litros_promedio_dia_raza,
-                                                                        litros_promedio_animal=promedio_litros_bovino,
-                                                                        diferencia=diferencia). \
-                                    where(modelo_orden_litros.columns.id_bovino == id_bovino_litros))
-                    session.commit()
-        # el siguiente codigo permite emilinar cualquier animal con promedio de litros de 0
-        consulta_id_bovinos_leche = session.query(modelo_leche).all()
-        for i in consulta_id_bovinos_leche:
-            # Toma el ID del bovino, este es el campo numero 1
-            id_bovinos_leche = i[1]
-            # Toma el promedio de leche, este es el campo numero 8
-            promedio_litraje = i[8]
-            # en caso de tener valor 0 sera eliminado
-            if promedio_litraje == 0:
-                session.execute(modelo_orden_litros.delete(). \
-                                where(modelo_orden_litros.c.id_bovino == id_bovinos_leche))
-                session.commit()
-            else:
-                pass
-        logger.info(f'Funcion intervalo_partos {"p"} ')
+                    pass"""
+        logger.info(f'Funcion litros_por_raza {"p"} ')
         session.commit()
     except Exception as e:
-        logger.error(f'Error Funcion intervalo_partos: {e}')
+        logger.error(f'Error Funcion litros_por_raza: {e}')
         raise
     finally:
         session.close()

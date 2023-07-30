@@ -264,4 +264,9 @@ modelo_orden_peso = Table("orden_por_peso", meta, Column("id_peso", Integer, pri
                               Column("peso_promedio_animal", Float),
                               Column("diferencia", Float))
 
+modelo_historial_perdida_terneros = Table("historial_perdidas_terneros", meta, Column("id_perdida", Integer, primary_key=True),
+                              Column("periodo", Integer),
+                              Column("perdida", Float))
+
+
 meta.create_all(engine)
