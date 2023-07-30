@@ -12,7 +12,10 @@ from fastapi import APIRouter, Response
 from Lib.actualizacion_peso import actualizacion_peso
 
 from Lib.endogamia import endogamia
+from Lib.funcion_litros_por_raza import litros_por_raza
+from Lib.funcion_peso_por_raza import peso_segun_raza
 from Lib.funcion_vientres_aptos import vientres_aptos
+from Lib.perdida_Terneros import perdida_Terneros1
 # importa la conexion de la base de datos
 from config.db import condb, session
 # importa el esquema de los bovinos
@@ -2142,3 +2145,4 @@ def descarte():
 #IEP_por_raza()
 #litros_por_raza()
 #peso_segun_raza()
+#perdida_Terneros1()
