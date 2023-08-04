@@ -87,6 +87,7 @@ class Esquema_bovinos(BaseModel):
     proposito: str
     mansedumbre : str
     estado: str
+    compra_bovino: Optional[str] = None
 
 
 
@@ -214,6 +215,21 @@ class esquema_modelo_ventas(BaseModel):
     precio_venta:int
     razon_venta:str
     medio_pago: str
+    comprador: str
+    class Config:
+        orm_mode = True
+        env_file = ".env"
+
+
+class esquema_modelo_compra(BaseModel):
+    id_compra_bovino: int
+    id_bovino: str
+    numero_bono_compra: str
+    estado: str
+    fecha_compra: date
+    precio_compra:int
+    razon_compra:str
+    medio_pago_compra: str
     comprador: str
     class Config:
         orm_mode = True

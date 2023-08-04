@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-
+from routes.Datos_Compra import datos_compra
 #from routes.Archivos import appArchivos
 from routes.Pesaje import pesaje
 from routes.Prod_leche import Produccion_Leche
@@ -49,6 +49,7 @@ app.include_router(IntevaloPartos)
 app.include_router(Veterinaria)
 app.include_router(ReproductorRutas)
 app.include_router(Eliminar_Bovino)
+app.include_router(datos_compra)
 #app.include_router(appArchivos)
 
 

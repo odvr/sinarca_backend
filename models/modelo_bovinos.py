@@ -51,7 +51,7 @@ modelo_bovinos_inventario = Table("bovinos", meta,
                                   Column("proposito", String(300)),
                                   Column("mansedumbre", String(300)),
                                   Column("estado", String(300)),
-                                  Column("descarte", String(300))
+                                  Column("compra_bovino", String(300))
                                   )
 modelo_ceba = Table("produccion_ceba", meta,
                     Column("id_ceba", Integer, primary_key=True),
@@ -154,6 +154,18 @@ Column("id_bovino", String(300), ForeignKey("bovinos.id_bovino", ondelete="CASCA
                       Column("razon_venta", String(300)),
                       Column("medio_pago", String(300)),
                       Column("comprador", String(300)))
+
+
+modelo_compra = Table("compra_bovino", meta, Column("id_compra_bovino", Integer, primary_key=True),
+Column("id_bovino", String(300), ForeignKey("bovinos.id_bovino", ondelete="CASCADE")),
+                      Column("numero_bono_compra", String(300)),
+                      Column("estado", String(300)),
+                      Column("fecha_compra", Date),
+                      Column("precio_compra", Integer),
+                      Column("razon_compra", String(300)),
+                      Column("medio_pago_compra", String(300)),
+                      Column("comprador", String(300)))
+
 
 modelo_datos_pesaje  = Table("ReportesPesaje", meta, Column("id_pesaje", Integer, primary_key=True),
                       Column("id_bovino", String(300), ForeignKey("bovinos.id_bovino", ondelete="CASCADE")),

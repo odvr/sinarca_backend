@@ -919,8 +919,8 @@ la clase Esquema_bovinos  recibira como base para crear el animal esto con fin d
 """
 
 
-@rutas_bovinos.post("/crear_bovino/{id_bovino}/{fecha_nacimiento}/{edad}/{raza}/{sexo}/{peso}/{marca}/{proposito}/{mansedumbre}/{estado}", status_code=status.HTTP_201_CREATED)
-async def crear_bovinos(id_bovino:str,fecha_nacimiento:date,edad:int,raza:str,sexo:str,peso:float,marca:str,proposito:str,mansedumbre:str,estado:str):
+@rutas_bovinos.post("/crear_bovino/{id_bovino}/{fecha_nacimiento}/{edad}/{raza}/{sexo}/{peso}/{marca}/{proposito}/{mansedumbre}/{estado}/{compra_bovino}", status_code=status.HTTP_201_CREATED)
+async def crear_bovinos(id_bovino:str,fecha_nacimiento:date,edad:int,raza:str,sexo:str,peso:float,marca:str,proposito:str,mansedumbre:str,estado:str,compra_bovino:str):
     eliminarduplicados()
 
     vientres_aptos()
@@ -936,7 +936,9 @@ async def crear_bovinos(id_bovino:str,fecha_nacimiento:date,edad:int,raza:str,se
         marca=marca,
         proposito=proposito,
         mansedumbre=mansedumbre,
-        estado=estado)
+        estado=estado,
+        compra_bovino=compra_bovino
+                                                              )
         condb.execute(ingreso)
 
         condb.commit()
@@ -1300,8 +1302,8 @@ async def cambiar_esta_bovino(data_update: Esquema_bovinos, id_bovino: str):
 '''
 La siguiente funcion realiza la actualizacion completa de la tabla de bovinos para cambiar los registros
 '''
-@rutas_bovinos.put("/cambiar_datos_bovino/{id_bovino}/{fecha_nacimiento}/{edad}/{raza}/{sexo}/{peso}/{marca}/{proposito}/{mansedumbre}/{estado}", status_code=status.HTTP_201_CREATED)
-async def cambiar_esta_bovino(id_bovino:str,fecha_nacimiento:date,edad:int,raza:str,sexo:str,peso:float,marca:str,proposito:str,mansedumbre:str,estado:str):
+@rutas_bovinos.put("/cambiar_datos_bovino/{id_bovino}/{fecha_nacimiento}/{edad}/{raza}/{sexo}/{peso}/{marca}/{proposito}/{mansedumbre}/{estado}/{compra_bovino}", status_code=status.HTTP_201_CREATED)
+async def cambiar_esta_bovino(id_bovino:str,fecha_nacimiento:date,edad:int,raza:str,sexo:str,peso:float,marca:str,proposito:str,mansedumbre:str,estado:str,compra_bovino:str):
     try:
         condb.execute(modelo_bovinos_inventario.update().values(
 
@@ -1314,7 +1316,8 @@ async def cambiar_esta_bovino(id_bovino:str,fecha_nacimiento:date,edad:int,raza:
             marca=marca,
             proposito=proposito,
             mansedumbre=mansedumbre,
-            estado=estado
+            estado=estado,
+            compra_bovino=compra_bovino
 
             ).where(
             modelo_bovinos_inventario.columns.id_bovino == id_bovino))
@@ -1622,6 +1625,8 @@ el porcentaje
 @rutas_bovinos.get("/Calcular_perdida_Terneros")
 async def perdida_Terneros():
  try:
+
+
     # consulta, seleccion y conteo de animales con edad de 0 a 6 meses que se encuentren muertos
     muertos = session.query(modelo_bovinos_inventario). \
         where(between(modelo_bovinos_inventario.columns.edad, 0, 12)). \
