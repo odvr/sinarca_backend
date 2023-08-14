@@ -191,6 +191,7 @@ class esquema_indicadores(BaseModel):
     relacion_toros_vientres_aptos:Optional[int]
     interpretacion_relacion_toros_vientres_aptos:Optional[str]
     total_unidades_animales:Optional[str] = None
+    IEP_hato:Optional[float] = None
     class Config:
         orm_mode = True
         env_file = ".env"
@@ -419,6 +420,23 @@ class esquema_historial_perdida_terneros(BaseModel):
     id_perdida: int
     periodo: int
     perdida:float
+    class Config:
+        orm_mode = True
+        env_file = ".env"
+
+class esquema_historial_supervivencia(BaseModel):
+    id_supervivencia: int
+    periodo: int
+    supervivencia:float
+    class Config:
+        orm_mode = True
+        env_file = ".env"
+
+class esquema_registro_pajillas(BaseModel):
+    id_pajillas: int
+    pajilla: str
+    raza:str
+    productor:str
     class Config:
         orm_mode = True
         env_file = ".env"

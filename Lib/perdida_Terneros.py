@@ -25,7 +25,7 @@ from schemas.schemas_bovinos import Esquema_bovinos, esquema_produccion_levante,
     esquema_produccion_ceba, esquema_datos_muerte, esquema_modelo_ventas, esquema_arbol_genealogico, \
     esquema_modelo_Reporte_Pesaje, esquema_produccion_leche, esquema_veterinaria, esquema_veterinaria_evoluciones, \
     esquema_partos, esquema_macho_reproductor, esquema_indicadores
-from sqlalchemy import update, between, func
+from sqlalchemy import update, between, func, asc, desc
 from starlette.status import HTTP_204_NO_CONTENT
 from datetime import date, datetime, timedelta
 
@@ -63,13 +63,12 @@ el porcentaje
 
 def perdida_Terneros1():
  try:
-     #el siguiente join trae consigo los años en los que se han reportado muertes de terneros (animales de 0  a 12 meses de edad)
-     consulta_periodos_muertes = session.query(modelo_bovinos_inventario.c.id_bovino,modelo_datos_muerte.c.fecha_muerte). \
+     consulta_primer_muerte = session.query(modelo_bovinos_inventario.c.id_bovino,modelo_datos_muerte.c.fecha_muerte). \
          join(modelo_datos_muerte,modelo_bovinos_inventario.c.id_bovino == modelo_datos_muerte.c.id_bovino).\
          where(between(modelo_bovinos_inventario.columns.edad, 0, 12))\
-         .group_by(func.YEAR(modelo_datos_muerte.c.fecha_muerte)).all()
+         .group_by(asc(modelo_datos_muerte.c.fecha_muerte)).first()
      #si retorna una consulta vacia entonces indicara cero perdida de terneros
-     if consulta_periodos_muertes is None or consulta_periodos_muertes==[]:
+     if consulta_primer_muerte is None or consulta_primer_muerte==[]:
          periodo_actual= int(datetime.now().year)
          tasa_perd = 0
          consulta_existencia=session.query(modelo_historial_perdida_terneros). \
@@ -84,13 +83,13 @@ def perdida_Terneros1():
              session.execute(modelo_historial_perdida_terneros.update().values(perdida=tasa_perd). \
                              where(modelo_historial_perdida_terneros.columns.periodo==periodo_actual))
              session.commit()
+     #en caso de que exista uno o mas registros de muertes, se tomara la fecha mas antigua para el bucle
+     # a partir de ese año se realizara un listado de perdidas de tenero por cada periodo hasta el actual
      else:
-         # para determinar un contador por años es necesario un bucle
-         contador_periodos = len(consulta_periodos_muertes)
-         a = 0
-         while (a < contador_periodos):
-             # se determina periodo a evaluar
-             periodo = consulta_periodos_muertes[a][1].year
+         contador=(datetime.now().year-consulta_primer_muerte[1].year)+1
+         c=0
+         while (c < contador):
+             periodo = consulta_primer_muerte[1].year
              # se determinan las fechas del periodo (inicio y fin de año)
              fecha_inicio = datetime(periodo, 1, 1)
              fecha_fin = datetime(periodo, 12, 31)
@@ -119,8 +118,10 @@ def perdida_Terneros1():
                  # tenian edad de 0 a 12 meses duarante el periodo a evaluar
                  fecha_inicio_nacimiento = datetime((periodo-1), 2, 1)
                  fecha_fin_nacimiento = datetime(periodo, 12, 31)
+
                  totales_periodo= session.query(modelo_bovinos_inventario). \
                  where(between(modelo_bovinos_inventario.columns.fecha_nacimiento, fecha_inicio_nacimiento, fecha_fin_nacimiento)).count()
+
                  tasa_perd = (muertes_periodo / totales_periodo) * 100
              consulta_existencia = session.query(modelo_historial_perdida_terneros). \
                  where(modelo_historial_perdida_terneros.columns.periodo == periodo).all()
@@ -134,7 +135,31 @@ def perdida_Terneros1():
                  session.execute(modelo_historial_perdida_terneros.update().values(perdida=tasa_perd). \
                                  where(modelo_historial_perdida_terneros.columns.periodo == periodo))
                  session.commit()
-             a = a + 1
+             periodo = periodo + 1
+             c= c+1
+
+     # el siguiente codigo permite actualizar los periodos si se cambia la primer fecha de muerte
+     if consulta_primer_muerte is None or consulta_primer_muerte==[]:
+         session.execute(modelo_historial_perdida_terneros.delete().
+                         where(modelo_historial_perdida_terneros.c.periodo!=datetime.now().year))
+         session.commit()
+     else:
+         consulta_periodos = session.query(modelo_historial_perdida_terneros.c.periodo). \
+             filter(modelo_historial_perdida_terneros.c.periodo < consulta_primer_muerte[1].year).all()
+         if consulta_periodos is None or consulta_periodos == []:
+             pass
+         else:
+             session.execute(modelo_historial_perdida_terneros.delete().
+                             where(modelo_historial_perdida_terneros.c.periodo < consulta_primer_muerte[1].year))
+             session.commit()
+
+     #actualizacion del valor mas actual en ela tabla de indicadores
+     consulta_ultimo_periodo = session.query(modelo_historial_perdida_terneros.c.perdida).\
+         group_by(asc(modelo_historial_perdida_terneros.c.perdida)).all()
+     session.execute(update(modelo_indicadores).
+                     where(modelo_indicadores.c.id_indicadores == 1).
+                     values(perdida_de_terneros=consulta_ultimo_periodo[0][0]))
+     session.commit()
 
  except Exception as e:
      logger.error(f'Error Funcion perdida_Terneros1: {e}')

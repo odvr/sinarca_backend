@@ -16,7 +16,7 @@ from models.modelo_bovinos import modelo_bovinos_inventario, modelo_veterinaria,
     modelo_descarte, modelo_arbol_genealogico, modelo_historial_intervalo_partos, modelo_litros_leche, modelo_orden_IEP, \
     modelo_orden_litros, \
     modelo_orden_peso, modelo_historial_partos, modelo_carga_animal_y_consumo_agua, modelo_veterinaria_evoluciones, \
-    modelo_datos_pesaje
+    modelo_datos_pesaje, modelo_compra
 
 '''***********'''
 from passlib.context import CryptContext
@@ -291,6 +291,18 @@ def eliminacionBovino(id_bov_eliminar):
       # caso contrario se eliminara de la tabla
       else:
           session.execute(modelo_datos_pesaje.delete().where(modelo_datos_pesaje.c.id_bovino == id_bov_eliminar))
+          session.commit()
+      session.commit()
+
+      # consulta de bovino en la tabla de compras
+      consulta_bovino_compra = session.query(modelo_compra). \
+              filter(modelo_compra.c.id_bovino == id_bov_eliminar).all()
+      # si el id ya no existe entonces no se hara cambios
+      if consulta_bovino_compra == []:
+          pass
+      # caso contrario se eliminara de la tabla
+      else:
+          session.execute(modelo_compra.delete().where(modelo_compra.c.id_bovino == id_bov_eliminar))
           session.commit()
       session.commit()
   except Exception as e:

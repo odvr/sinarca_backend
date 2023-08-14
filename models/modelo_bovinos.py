@@ -135,7 +135,8 @@ modelo_indicadores = Table("indicadores", meta, Column("id_indicadores", Integer
                            Column("vientres_aptos", Integer),
                            Column("relacion_toros_vientres_aptos", Integer),
                            Column("interpretacion_relacion_toros_vientres_aptos", String(300)),
-                           Column("total_unidades_animales", String(300)))
+                           Column("total_unidades_animales", String(300)),
+                           Column("IEP_hato", Float))
 
 modelo_macho_reproductor = Table("macho_reproductor", meta, Column("id_macho", Integer, primary_key=True),
                                  Column("id_bovino", String(300), ForeignKey("bovinos.id_bovino", ondelete="CASCADE"),
@@ -280,5 +281,12 @@ modelo_historial_perdida_terneros = Table("historial_perdidas_terneros", meta, C
                               Column("periodo", Integer),
                               Column("perdida", Float))
 
+modelo_historial_supervivencia = Table("historial_supervivencia", meta, Column("id_supervivencia", Integer, primary_key=True),
+                              Column("periodo", Integer),
+                              Column("supervivencia", Float))
 
+modelo_registro_pajillas = Table("registro_pajillas", meta, Column("id_pajillas", Integer, primary_key=True),
+                              Column("pajilla", String(300)),
+                              Column("raza", Float),
+                              Column("productor", String(300)))
 meta.create_all(engine)
