@@ -321,8 +321,7 @@ async def listar_vientres_aptos_modulo():
 @rutas_bovinos.get("/listar_vientres_aptos_Rutas" )
 async def listar_vientres_aptos_modulo():
     try:
-        #vientres_aptos()
-
+        vientres_aptos()
         tabla_vientres_aptos = session.query(modelo_vientres_aptos).all()
 
     except Exception as e:
@@ -577,6 +576,7 @@ Listado de vientres aptos
 @rutas_bovinos.get("/listar_vientres_aptos" )
 async def listar_vientres_aptos():
     try:
+        vientres_aptos()
         vida_util_macho_reproductor()
         vientres_aptoss = session.query(modelo_indicadores.c.vientres_aptos).first()
 

@@ -97,7 +97,7 @@ Historial_Perdida_Compras = APIRouter()
 @Historial_Perdida_Compras.get("/listar_tabla_historial_perdida_compras",response_model=list[esquema_historial_perdida_terneros])
 async def listar_tabla_perdida_terneros():
     try:
-
+        perdida_Terneros1()
         items_Perdida_terneros = condb.execute(modelo_historial_perdida_terneros.select()).fetchall()
 
 

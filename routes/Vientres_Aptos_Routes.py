@@ -4,6 +4,7 @@ Librerias requeridas
 '''
 import logging
 from Lib.Lib_Intervalo_Partos import intervalo_partos
+from Lib.funcion_vientres_aptos import vientres_aptos
 # # importa la conexion de la base de datos
 from config.db import condb, session
 # # importa el esquema de los bovinos
@@ -36,7 +37,7 @@ Vientres_Aptos = APIRouter()
 @Vientres_Aptos.get("/listar_vientres_aptos" )
 async def listar_vientres_aptos_modulo():
     try:
-        #vientres_aptos()
+        vientres_aptos()
         #Eliminacion_total_vientres_aptos()
         tabla_vientres_aptos = session.query(modelo_vientres_aptos).all()
 
