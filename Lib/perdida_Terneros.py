@@ -89,7 +89,8 @@ def perdida_Terneros1():
          contador=(datetime.now().year-consulta_primer_muerte[1].year)+1
          c=0
          while (c < contador):
-             periodo = consulta_primer_muerte[1].year
+             periodo = consulta_primer_muerte[1].year + c
+             print(periodo)
              # se determinan las fechas del periodo (inicio y fin de año)
              fecha_inicio = datetime(periodo, 1, 1)
              fecha_fin = datetime(periodo, 12, 31)
@@ -135,7 +136,6 @@ def perdida_Terneros1():
                  session.execute(modelo_historial_perdida_terneros.update().values(perdida=tasa_perd). \
                                  where(modelo_historial_perdida_terneros.columns.periodo == periodo))
                  session.commit()
-             periodo = periodo + 1
              c= c+1
 
      # el siguiente codigo permite actualizar los periodos si se cambia la primer fecha de muerte
