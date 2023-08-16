@@ -15,7 +15,7 @@ from Lib.endogamia import endogamia
 from Lib.funcion_litros_por_raza import litros_por_raza
 from Lib.funcion_peso_por_raza import peso_segun_raza
 from Lib.funcion_vientres_aptos import vientres_aptos
-from Lib.perdida_Terneros import perdida_Terneros1
+from Lib.perdida_Terneros import  perdida_Terneros1
 # importa la conexion de la base de datos
 from config.db import condb, session
 # importa el esquema de los bovinos
@@ -1619,44 +1619,25 @@ def Tasa_Sobrevivencia():
 (animales de 0 a 12 meses) han fallecido, para ello consulta la cantidad 
 de animales muertos y el total para mediante una regla de 3 obtener
 el porcentaje
+
+response_model=list[esquema_indicadores]
 """
 
 
 @rutas_bovinos.get("/Calcular_perdida_Terneros")
-async def perdida_Terneros():
+async def perdida_TernerosAPI():
  try:
 
+    perdida_Terneros1()
+    response = session.query(modelo_indicadores).where(modelo_indicadores.c.IEP_hato).first()
+    perdida_terneros = response[1]
 
-    # consulta, seleccion y conteo de animales con edad de 0 a 6 meses que se encuentren muertos
-    muertos = session.query(modelo_bovinos_inventario). \
-        where(between(modelo_bovinos_inventario.columns.edad, 0, 12)). \
-        filter(modelo_bovinos_inventario.c.estado == "Muerto").count()
-    # consulta, seleccion y conteo de animales con edad de 0 a 12 meses
-    totales = session.query(modelo_bovinos_inventario). \
-        where(between(modelo_bovinos_inventario.columns.edad, 0, 12)).count()
-    if muertos==0 or totales==0:
-        tasa_perd=0
-        # actualizacion del campo
-        session.execute(update(modelo_indicadores).
-                        where(modelo_indicadores.c.id_indicadores == 1).
-                        values(perdida_de_terneros=tasa_perd))
-
-        session.commit()
-    else:
-        # calculo de la tasa
-        tasa_perd = (muertos / totales) * 100
-        # actualizacion del campo
-        session.execute(update(modelo_indicadores).
-                        where(modelo_indicadores.c.id_indicadores == 1).
-                        values(perdida_de_terneros=tasa_perd))
-
-        session.commit()
  except Exception as e:
      logger.error(f'Error Funcion perdida_Terneros: {e}')
      raise
  finally:
      session.close()
-     return tasa_perd
+ return perdida_terneros
 
 
 
@@ -1744,7 +1725,7 @@ async def animales_muertos():
     session.execute(update(modelo_indicadores).
                     where(modelo_indicadores.c.id_indicadores == 1).
                     values(animales_fallecidos=estado_muerto))
-    logger.info(f'Funcion animales_muertos {estado_muerto} ')
+
     session.commit()
   except Exception as e:
       logger.error(f'Error Funcion animales_muertos: {e}')
