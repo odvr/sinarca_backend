@@ -286,7 +286,8 @@ modelo_historial_supervivencia = Table("historial_supervivencia", meta, Column("
                               Column("supervivencia", Float))
 
 modelo_registro_pajillas = Table("registro_pajillas", meta, Column("id_pajillas", Integer, primary_key=True),
-                              Column("pajilla", String(300)),
-                              Column("raza", Float),
+                              Column("Codigo_toro_pajilla", String(300)),
+                              Column("raza", String(300)),
+                              Column("nombre_toro", String(300)),
                               Column("productor", String(300)))
 meta.create_all(engine)

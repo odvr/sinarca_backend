@@ -434,8 +434,9 @@ class esquema_historial_supervivencia(BaseModel):
 
 class esquema_registro_pajillas(BaseModel):
     id_pajillas: int
-    pajilla: str
+    Codigo_toro_pajilla: str
     raza:str
+    nombre_toro: str
     productor:str
     class Config:
         orm_mode = True
