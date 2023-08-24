@@ -256,6 +256,13 @@ modelo_litros_leche = Table("litros_leche", meta, Column("id_litros", Integer, p
                               Column("fecha_medicion", Date),
                               Column("litros_leche", Float))
 
+modelo_reporte_curva_lactancia_General = Table("reporte_curva_lactancia_general", meta, Column("id_curva_lactancia_general", Integer, primary_key=True),
+                              Column("id_bovino", String(300)),
+                              Column("anio", String(10)),
+                              Column("mes", String(10)),
+                              Column("promedio", Float),
+                              Column("Hora_Reporte", DateTime))
+
 modelo_orden_IEP = Table("orden_por_IEP", meta, Column("id_IEP", Integer, primary_key=True),
                               Column("id_bovino", String(300),ForeignKey("bovinos.id_bovino", ondelete="CASCADE"),unique=True),
                               Column("raza", String(300)),

@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 
+from routes.Curvas_Lactancia import Curvas_Lantacia
 from routes.Datos_Compra import datos_compra
 from routes.Historial_Perdida_Terneros import  Historial_Perdida_Compras
 #from routes.Archivos import appArchivos
@@ -54,6 +55,7 @@ app.include_router(Eliminar_Bovino)
 app.include_router(datos_compra)
 app.include_router(Historial_Perdida_Compras)
 app.include_router(Intervalo_Entre_Partos_Hato)
+app.include_router(Curvas_Lantacia)
 
 #app.include_router(appArchivos)
 

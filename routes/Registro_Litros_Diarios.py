@@ -3,6 +3,7 @@ Librerias requeridas
 '''
 import logging
 from Lib.Lib_Intervalo_Partos import intervalo_partos
+from Lib.cuvas_lactancias import Reporte_Curvas_lactancia_Mensuales_General
 # # importa la conexion de la base de datos
 from config.db import condb, session
 # # importa el esquema de los bovinos
@@ -55,6 +56,10 @@ la clase Esquema_bovinos  recibira como base para crear el animal esto con fin d
 async def crear_registro_listros_diarios(id_bovino:str,fecha_medicion:date,litros_leche:int ):
 
     try:
+        """
+        La siguiente funcion realiza el llamdo para actualizar la curva de lactancia de los animales En general
+        """
+        Reporte_Curvas_lactancia_Mensuales_General()
 
         ingresoFechaLitraje = modelo_litros_leche.insert().values(id_bovino=id_bovino,
                                                                  fecha_medicion=fecha_medicion, litros_leche=litros_leche

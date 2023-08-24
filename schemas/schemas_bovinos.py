@@ -383,6 +383,17 @@ class esquema_litros_leche(BaseModel):
         orm_mode = True
         env_file = ".env"
 
+class esquema_reporte_curva_lactancia_General(BaseModel):
+    id_curva_lactancia_general: int
+    id_bovino:str
+    anio: str
+    mes: str
+    promedio:float
+    Hora_Reporte:date
+    class Config:
+        orm_mode = True
+        env_file = ".env"
+
 class esquema_orden_IEP(BaseModel):
     id_IEP: int
     id_bovino: str
