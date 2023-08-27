@@ -84,7 +84,8 @@ modelo_leche = Table("produccion_leche", meta,
                      Column("proposito", String(300)),
                      Column("promedio_litros", Float),
                      Column("num_partos", Integer),
-                     Column("intervalo_entre_partos", Float))
+                     Column("intervalo_entre_partos", Float),
+                     Column("tipo_ganado", String(300)))
 
 modelo_datos_muerte = Table("datos_muerte", meta,
                             Column("id_datos_muerte", Integer, primary_key=True),

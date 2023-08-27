@@ -132,6 +132,7 @@ class esquema_produccion_leche(BaseModel):
     promedio_litros : Optional[float] = None
     num_partos: Optional[int] = None
     intervalo_entre_partos : Optional[float] = None
+    tipo_ganado: Optional[str] = None
     class Config:
         orm_mode = True
         env_file = ".env"
