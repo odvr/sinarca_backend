@@ -10,11 +10,10 @@ import logging
 from fastapi import APIRouter
 from fastapi.security import OAuth2PasswordBearer
 
-from Lib.clasificacion_ganado_leche import tipo_ganado_leche
 # importa la conexion de la base de datos
 from config.db import condb, session
 # importa el esquema de los bovinos
-from models.modelo_bovinos import modelo_bovinos_inventario, modelo_vientres_aptos, modelo_orden_peso, modelo_leche
+from models.modelo_bovinos import modelo_bovinos_inventario, modelo_vientres_aptos, modelo_leche
 
 oauth2_scheme = OAuth2PasswordBearer("/token")
 
@@ -51,7 +50,6 @@ que no tengan categoria de hembra de levante"""
 # tipo_ganado_leche()
 def vientres_aptos():
   try:
-      tipo_ganado_leche()
       #la siguiente consulta trae los animales hembras vacios
       consulta_vientres = session.query(modelo_leche.c.id_bovino,modelo_bovinos_inventario.c.edad,
                                         modelo_bovinos_inventario.c.peso, modelo_bovinos_inventario.c.raza). \
