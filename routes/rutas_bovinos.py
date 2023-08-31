@@ -15,9 +15,9 @@ from Lib.endogamia import endogamia
 from Lib.funcion_litros_por_raza import litros_por_raza
 from Lib.funcion_peso_por_raza import peso_segun_raza
 from Lib.funcion_vientres_aptos import vientres_aptos
-from Lib.perdida_Terneros import  perdida_Terneros1
+#from Lib.perdida_Terneros import  perdida_Terneros1
 # importa la conexion de la base de datos
-from config.db import condb, session
+from config.db import condb, session, get_session
 # importa el esquema de los bovinos
 from models.modelo_bovinos import modelo_bovinos_inventario, modelo_veterinaria, modelo_leche, modelo_levante, \
     modelo_ventas, modelo_datos_muerte, \
@@ -25,13 +25,13 @@ from models.modelo_bovinos import modelo_bovinos_inventario, modelo_veterinaria,
     modelo_capacidad_carga, modelo_calculadora_hectareas_pastoreo, modelo_partos, modelo_vientres_aptos, \
     modelo_descarte, modelo_users, modelo_arbol_genealogico, modelo_veterinaria_evoluciones, modelo_usuarios, MUserOut, \
     MUserAuth
-
+from sqlalchemy.orm import Session
 from routes.Reproductor import vida_util_macho_reproductor
 from schemas.schemas_bovinos import Esquema_bovinos, esquema_produccion_levante, \
     esquema_produccion_ceba, esquema_datos_muerte, esquema_modelo_ventas, esquema_arbol_genealogico, \
     esquema_modelo_Reporte_Pesaje, esquema_produccion_leche, esquema_veterinaria, esquema_veterinaria_evoluciones, \
     esquema_partos, esquema_macho_reproductor, esquema_indicadores, esquema_vientres_aptos, UserOut, UserAuth, Usuarios, \
-    UsuariosInDB, TokenSchema, TokenPayload, TokenData, esquema_descarte
+    UsuariosInDB, TokenSchema, TokenPayload, TokenData, esquema_descarte, Esquema_Token, Esquema_Usuario
 from sqlalchemy import update, between, func
 from starlette.status import HTTP_204_NO_CONTENT
 from datetime import date, datetime, timedelta
@@ -58,7 +58,7 @@ from fastapi.responses import RedirectResponse
 from uuid import uuid4
 
 
-oauth2_scheme = OAuth2PasswordBearer("/token")
+oauth2_scheme = OAuth2PasswordBearer("token")
 '''***********'''
 
 
@@ -93,65 +93,81 @@ from fastapi.responses import RedirectResponse
 from uuid import uuid4
 
 
+'''+++++++++++++++++++++++++++++++++++++++++++++++++++++++++'''
 
-ACCESS_TOKEN_EXPIRE_MINUTES = 30  # 30 minutes
-REFRESH_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
+# Configuración
+ACCESS_TOKEN_EXPIRE_MINUTES = 1333  # 30 minutes
 ALGORITHM = "HS256"
 JWT_SECRET_KEY = "1q2w3e4r"
-JWT_REFRESH_SECRET_KEY = "1q2w3e4r"
 
+# Crear un contexto de contraseña para hashing
 password_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# OAuth2PasswordBearer para obtener el token de autorización desde el encabezado
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+# Función para generar un token de acceso
+def create_access_token(data: dict, expires_delta: timedelta):
+    to_encode = data.copy()
+    expire = datetime.utcnow() + expires_delta
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, JWT_SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
 
+def verify_password(password: str, hashed_pass: str) -> bool:
+    return password_context.verify(password, hashed_pass)
+# Ruta para autenticación y emisión de tokens
+@rutas_bovinos.post('/token', summary="Create access and refresh tokens for user",response_model=Esquema_Token)
+async def login(form_data: OAuth2PasswordRequestForm = Depends()):
+    user = condb.execute(modelo_usuarios.select().where(modelo_usuarios.c.usuario_id == form_data.username)).first()
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Incorrect email or password"
+        )
+    hashed_pass = user[2]
+    if not verify_password(form_data.password, hashed_pass):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="I"
+        )
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": form_data.username}, expires_delta=access_token_expires
+    )
+    return {"access_token": access_token, "token_type": "bearer"}
+# Función para obtener el usuario actual desde el token de autorización
+def get_current_user(token: str = Depends(oauth2_scheme)):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        if username is None:
+            raise credentials_exception
+    except JWTError:
+        raise credentials_exception
+    user = condb.query(modelo_usuarios).filter_by(usuario_id=username).first()
+
+    if user is None:
+        raise credentials_exception
+    return user[1]
 
 def get_hashed_password(password: str) -> str:
     return password_context.hash(password)
 
-
-def verify_password(password: str, hashed_pass: str) -> bool:
-    return password_context.verify(password, hashed_pass)
-
-
-def create_access_token(subject: Union[str, Any], expires_delta: int = None) -> str:
-    if expires_delta is not None:
-        expires_delta = datetime.utcnow() + expires_delta
-    else:
-        expires_delta = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-
-    to_encode = {"exp": expires_delta, "sub": str(subject)}
-    encoded_jwt = jwt.encode(to_encode, JWT_SECRET_KEY, ALGORITHM)
-    return encoded_jwt
-
-
-def create_refresh_token(subject: Union[str, Any], expires_delta: int = None) -> str:
-    if expires_delta is not None:
-        expires_delta = datetime.utcnow() + expires_delta
-    else:
-        expires_delta = datetime.utcnow() + timedelta(minutes=REFRESH_TOKEN_EXPIRE_MINUTES)
-
-    to_encode = {"exp": expires_delta, "sub": str(subject)}
-    encoded_jwt = jwt.encode(to_encode, JWT_REFRESH_SECRET_KEY, ALGORITHM)
-    return encoded_jwt
-
-
-
-
-
-@rutas_bovinos.post('/signup', summary="Create new user")
-async def create_user(data: UserAuth):
-    # querying database to check if user already exist
-    #user = session.query(MUserOut).filter_by(email=data.email).first()
-
-    user = condb.execute(MUserOut.select().where(MUserOut.columns.email == data.email)).first()
-
-
+@rutas_bovinos.post('/Registrar', summary="Create new user")
+async def create_user(data: Esquema_Usuario):
+    user = condb.execute(modelo_usuarios.select().where(modelo_usuarios.columns.usuario_id == data.usuario_id)).first()
     if user is not None:
             raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="User with this email already exist"
         )
 
-    ingreso = MUserAuth.insert().values(email=data.email,
-        password=get_hashed_password(data.password)
+    ingreso = modelo_usuarios.insert().values(usuario_id=data.usuario_id,
+        hashed_password=get_hashed_password(data.hashed_password)
         )
 
     condb.execute(ingreso)
@@ -159,167 +175,28 @@ async def create_user(data: UserAuth):
 
     return user
 
-
-
-
-@rutas_bovinos.post('/login', summary="Create access and refresh tokens for user",response_model=TokenSchema)
-async def login(form_data: OAuth2PasswordRequestForm = Depends()):
-
-    user = condb.execute(MUserAuth.select().where(MUserAuth.c.email == form_data.username)).first()
-
-    if user is None:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Incorrect email or password"
-        )
-
-    hashed_pass = user[2]
-    if not verify_password(form_data.password, hashed_pass):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="I"
-        )
-
-    return {
-        "access_token": create_access_token(user[0]),
-        "refresh_token": create_refresh_token(user[0]),
-    }
-
-
-reuseable_oauth = OAuth2PasswordBearer(
-    tokenUrl="/login",
-    scheme_name="JWT"
-)
-
-
-async def get_current_user(token: str = Depends(reuseable_oauth)) -> MUserAuth:
-    try:
-        payload = jwt.decode(
-            token, JWT_SECRET_KEY, algorithms=[ALGORITHM]
-        )
-        token_data = TokenPayload(**payload)
-
-        if datetime.fromtimestamp(token_data.exp) < datetime.now():
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Token expired",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
-    except(jwt.JWTError, ValidationError):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Could not validate credentials",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-    #user = await UserService.get_user_by_id(token_data.sub)
-    user = condb.execute(MUserAuth.select().where(MUserAuth.c.email == token_data.username)).first()
-    print(user)
-
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Could not find user",
-        )
-
-    return user
-
-
-
 '''+++++++++++++++++++++++++++++++++++++++++++++++++++++++++'''
 
 
 
-
-
-
-
-
-
-""" Enviar Notificaciones 
-
-def Notificaciones():
-    account_sid = 'AC99b97a77f43fd1f944485dbad0f960a0'
-    auth_token = '29f8eac6e4ad3b1369f05719fca07db3'
-    #client = Client(account_sid, auth_token)
-"""
-"""
-    message = client.messages.create(
-        from_='+15075166814',
-        body='Hola Este es un Mensaje Para sinarca',
-        to='+573232825739'
-    )
-
-    print(message.sid)
-    
-    
-    oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
-
-def get_current_user(token: str = Depends(oauth2_scheme), db: session = Depends(condb)):
-    try:
-        payload = jwt.decode(token, "SECRET_KEY", algorithms=["HS256"])
-        email: str = payload.get("sub")
-        if email is None:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid authentication credentials",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
-        token_data = TokenData(email=email)
-        user = condb.execute(MUserAuth.select().where(MUserAuth.c.email == token_data.username)).first()
-
-        if user is None:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid authentication credentials",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
-        return UserModel(id=user[0], email=user[1])
-    except JWTError:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid authentication credentials",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-"""
-
-#Notificaciones()
-""" 
-La siguiente linea de codigo permite realizar el Login de la aplicacion 
-
-Toma el flujo el token para pasar como parametro para cada una de las rutas 
-"""
-
-
-
-
-
-
-
-
-""""
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-"""
+# Define una función para obtener la lista de vientres aptos
 
 @rutas_bovinos.get("/listar_vientres_aptos", response_model=list[esquema_vientres_aptos])
-async def listar_vientres_aptos_modulo():
+async def listar_vientres_aptos_modulo(current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
-        vientres_aptos()
-
-        tabla_vientres_aptos = session.query(modelo_vientres_aptos).all()
-
+        tabla_vientres_aptos = condb.query(modelo_vientres_aptos).all()
     except Exception as e:
         logger.error(f'Error al obtener inventario de TABLA VIENTRES APTOS: {e}')
-        raise
+        raise HTTPException(status_code=500, detail="Error interno del servidor")
     finally:
-        session.close()
+        condb.close()
     return tabla_vientres_aptos
 
-
+@rutas_bovinos.get("/secure")
+async def secure_route(current_user: Esquema_Usuario = Depends(get_current_user)):
+    return {"message": f"Hello,! This route is secure."}
 @rutas_bovinos.get("/listar_vientres_aptos_Rutas" )
-async def listar_vientres_aptos_modulo():
+async def listar_vientres_aptos_modulo(current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
         vientres_aptos()
         tabla_vientres_aptos = session.query(modelo_vientres_aptos).all()
@@ -339,7 +216,7 @@ La siguiente funcion retorna un diccionario con la consulta general del la tabla
 
 @rutas_bovinos.get("/listar_inventarios", response_model=list[Esquema_bovinos],tags=["listar_inventarios"]
                    )
-async def inventario_bovino():
+async def inventario_bovino(current_user: Esquema_Usuario = Depends(get_current_user)):
     # Se llama la funcion con el fin que esta realice el calculo pertinete a la edad del animal ingresado
     calculoEdad()
     actualizacion_peso()
@@ -362,7 +239,7 @@ async def inventario_bovino():
     return items
 
 @rutas_bovinos.get("/listar_bovino_v/{id_bovino}",status_code=200)
-async def id_inventario_bovino_v(id_bovino: str):
+async def id_inventario_bovino_v(id_bovino: str,current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
 
         consulta = condb.execute(
@@ -387,7 +264,7 @@ async def id_inventario_bovino_v(id_bovino: str):
 
 
 @rutas_bovinos.get("/listar_animales_descarte",response_model=list[esquema_descarte] )
-async def listarAnimalesDescarte():
+async def listarAnimalesDescarte(current_user: Esquema_Usuario = Depends(get_current_user)):
 
     try:
 
@@ -403,7 +280,7 @@ async def listarAnimalesDescarte():
 
 
 @rutas_bovinos.get("/listar_tabla_veterinaria/{id_bovino}", response_model=list[esquema_veterinaria] )
-async def listar_tabla_veterinaria(id_bovino:str):
+async def listar_tabla_veterinaria(id_bovino:str,current_user: Esquema_Usuario = Depends(get_current_user)):
 
     try:
 
@@ -425,7 +302,7 @@ async def listar_tabla_veterinaria(id_bovino:str):
 
 
 @rutas_bovinos.get("/listar_tabla_solo_machos",response_model=list[Esquema_bovinos] )
-async def listar_tabla_solo_machos():
+async def listar_tabla_solo_machos(current_user: Esquema_Usuario = Depends(get_current_user)):
 
     try:
         machos = session.query(modelo_bovinos_inventario). \
@@ -440,7 +317,7 @@ async def listar_tabla_solo_machos():
         session.close()
     return machos
 @rutas_bovinos.get("/listar_tabla_solo_hembras",response_model=list[Esquema_bovinos] )
-async def listar_tabla_solo_hembras():
+async def listar_tabla_solo_hembras(current_user: Esquema_Usuario = Depends(get_current_user)):
 
     try:
         hembras = session.query(modelo_bovinos_inventario). \
@@ -457,7 +334,7 @@ async def listar_tabla_solo_hembras():
 
 
 @rutas_bovinos.get("/listar_tabla_endogamia",response_model=list[esquema_arbol_genealogico] )
-async def listar_tabla_endogamia():
+async def listar_tabla_endogamia(current_user: Esquema_Usuario = Depends(get_current_user)):
 
     try:
         itemsAnimalesEndogamia =  session.execute(modelo_arbol_genealogico.select()).all()
@@ -474,7 +351,7 @@ async def listar_tabla_endogamia():
 
 
 @rutas_bovinos.get("/listar_contar_animales_descarte" )
-async def listar_contar_AnimalesDescarte():
+async def listar_contar_AnimalesDescarte(current_user: Esquema_Usuario = Depends(get_current_user)):
 
     try:
 
@@ -499,7 +376,7 @@ Lista los animales en Levante
 """
 
 @rutas_bovinos.get("/listar_prod_levante",response_model=list[esquema_produccion_levante])
-async def inventario_levante():
+async def inventario_levante(current_user: Esquema_Usuario = Depends(get_current_user)):
     Estado_Optimo_Levante()
     eliminarduplicados()
 
@@ -520,7 +397,7 @@ async def inventario_levante():
 
 
 @rutas_bovinos.get("/listar_prod_ceba",response_model=list[esquema_produccion_ceba] )
-async def inventario_ceba():
+async def inventario_ceba(current_user: Esquema_Usuario = Depends(get_current_user)):
     #llamdo de la funcion para calcular
     Estado_Optimo_Ceba()
     eliminarduplicados()
@@ -555,7 +432,7 @@ Listar  Fecha aproximada de parto
 """
 
 @rutas_bovinos.get("/listar_fecha_parto",response_model=list[esquema_partos] )
-async def listar_fecha_parto():
+async def listar_fecha_parto(current_user: Esquema_Usuario = Depends(get_current_user)):
 
     try:
         fecha_aproximada_parto()
@@ -574,7 +451,7 @@ async def listar_fecha_parto():
 Listado de vientres aptos
 """
 @rutas_bovinos.get("/listar_vientres_aptos" )
-async def listar_vientres_aptos():
+async def listar_vientres_aptos(current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
         vientres_aptos()
         vida_util_macho_reproductor()
@@ -598,7 +475,7 @@ async def listar_vientres_aptos():
 Listado de total_unidades_animales
 """
 @rutas_bovinos.get("/total_unidades_animales" )
-async def total_unidades_animales():
+async def total_unidades_animales(current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
         total_unidades_animales = session.query(modelo_indicadores.c.total_unidades_animales).first()
     except Exception as e:
@@ -614,7 +491,7 @@ async def total_unidades_animales():
 Listado de calculadora_hectareas
 """
 @rutas_bovinos.get("/consumo_global_agua" )
-async def consumo_global_agua():
+async def consumo_global_agua(current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
 
 
@@ -634,7 +511,7 @@ async def consumo_global_agua():
 
 
 @rutas_bovinos.get("/Indicadores", response_model=list[esquema_indicadores])
-async def relacion_toros_vientres_aptos():
+async def relacion_toros_vientres_aptos(current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
         vida_util_macho_reproductor()
         vientres_aptos()
@@ -673,7 +550,7 @@ Lista   hectareas_forrajeget
 
 
 @rutas_bovinos.get("/hectareas_forraje")
-async def hectareas_forraje():
+async def hectareas_forraje(current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
 
         hectareas_forraje_ = session.query(
@@ -695,7 +572,7 @@ Lista   hectareas_forrajeget
 
 
 @rutas_bovinos.get("/capacidad_animales")
-async def capacidad_animales():
+async def capacidad_animales(current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
 
         capacidad_animales = session.query(
@@ -716,7 +593,7 @@ Listar la temperatura
 """
 
 @rutas_bovinos.get("/listarTemperatura" )
-async def listarTemperatura():
+async def listarTemperatura(current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
         listarTempAmbiente = session.query(modelo_indicadores.c.temperatura_ambiente).where(modelo_indicadores.c.id_indicadores == 1).first()
         #listarTempAmbiente = session.execute(modelo_indicadores.c.temperatura_ambiente).first()
@@ -738,7 +615,7 @@ Lista los datos de la tabla prod levante para la opcion de editar bovino
 """
 
 @rutas_bovinos.get("/listar_bovino_proceba/{id_bovino}")
-async def id_inventario_bovino_ceba(id_bovino: str):
+async def id_inventario_bovino_ceba(id_bovino: str,current_user: Esquema_Usuario = Depends(get_current_user)):
     eliminarduplicados()
 
     try:
@@ -758,7 +635,7 @@ async def id_inventario_bovino_ceba(id_bovino: str):
 Utilizada para listar el Arbol Genialogico de un solo Bovino
 """
 @rutas_bovinos.get("/listar_bovino_Arbol_genialoco/{id_bovino}")
-async def id_arbolgenialogico(id_bovino: str):
+async def id_arbolgenialogico(id_bovino: str,current_user: Esquema_Usuario = Depends(get_current_user)):
 
     try:
         consulta = session.execute(
@@ -773,7 +650,7 @@ async def id_arbolgenialogico(id_bovino: str):
     return consulta
 
 @rutas_bovinos.delete("/eliminar_bovino_endogamia/{id_bovino}")
-async def Eliminar_endogamia(id_bovino: str):
+async def Eliminar_endogamia(id_bovino: str,current_user: Esquema_Usuario = Depends(get_current_user)):
 
     try:
 
@@ -806,7 +683,7 @@ Lista los datos de la tabla prod levante para la opcion de editar bovino
 """
 
 @rutas_bovinos.get("/listar_bovino_prolevante/{id_bovino}")
-async def id_inventario_bovino_levante(id_bovino: str):
+async def id_inventario_bovino_levante(id_bovino: str,current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
         consulta = session.execute(
             modelo_levante.select().where(modelo_levante.columns.id_bovino == id_bovino)).first()
@@ -825,7 +702,7 @@ Listar Tabla de Animales con Regristro de Muerte
 """
 
 @rutas_bovinos.get("/listar_bovino_muerte",response_model=list[esquema_datos_muerte])
-async def id_inventario_bovinos_muertos():
+async def id_inventario_bovinos_muertos(current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
         # consulta y seleccion de los animales muertos
         consulta = session.query(modelo_datos_muerte). \
@@ -841,7 +718,7 @@ async def id_inventario_bovinos_muertos():
 
 
 @rutas_bovinos.get("/id_listar_bovino_muerte/{id_bovino}",response_model=esquema_datos_muerte)
-async def inventario_bovinos_muertos_id(id_bovino:str):
+async def inventario_bovinos_muertos_id(id_bovino:str,current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
         consulta = session.execute(
             modelo_datos_muerte.select().where(modelo_datos_muerte.columns.id_bovino == id_bovino)).first()
@@ -860,7 +737,7 @@ Listar tabla de ventas
 """
 
 @rutas_bovinos.get("/listar_tabla_ventas",response_model=list[esquema_modelo_ventas])
-async def listar_tabla_ventas():
+async def listar_tabla_ventas(current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
 
         consultaVentas = session.query(modelo_ventas). \
@@ -877,7 +754,7 @@ async def listar_tabla_ventas():
 
 
 @rutas_bovinos.get("/id_listar_bovino_venta/{id_bovino}",response_model=esquema_modelo_ventas)
-async def inventario_bovinos_venta_id(id_bovino:str):
+async def inventario_bovinos_venta_id(id_bovino:str,current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
         consulta = session.execute(
             modelo_ventas.select().where(modelo_ventas.columns.id_bovino == id_bovino)).first()
@@ -897,7 +774,7 @@ La siguiente funcion retorna un diccionario con la consulta de un ID del la tabl
 
 
 @rutas_bovinos.get("/listar_bovino/{id_bovino}", response_model=Esquema_bovinos )
-async def id_inventario_bovino(id_bovino: str):
+async def id_inventario_bovino(id_bovino: str,current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
         consulta = condb.execute(
             modelo_bovinos_inventario.select().where(modelo_bovinos_inventario.columns.id_bovino == id_bovino)).first()
@@ -920,7 +797,7 @@ la clase Esquema_bovinos  recibira como base para crear el animal esto con fin d
 
 
 @rutas_bovinos.post("/crear_bovino/{id_bovino}/{fecha_nacimiento}/{edad}/{raza}/{sexo}/{peso}/{marca}/{proposito}/{mansedumbre}/{estado}/{compra_bovino}", status_code=status.HTTP_201_CREATED)
-async def crear_bovinos(id_bovino:str,fecha_nacimiento:date,edad:int,raza:str,sexo:str,peso:float,marca:str,proposito:str,mansedumbre:str,estado:str,compra_bovino:str):
+async def crear_bovinos(id_bovino:str,fecha_nacimiento:date,edad:int,raza:str,sexo:str,peso:float,marca:str,proposito:str,mansedumbre:str,estado:str,compra_bovino:str,current_user: Esquema_Usuario = Depends(get_current_user)):
     eliminarduplicados()
 
     vientres_aptos()
@@ -961,7 +838,7 @@ async def crear_bovinos(id_bovino:str,fecha_nacimiento:date,edad:int,raza:str,se
 Crear Indice de Endogamia
 """
 @rutas_bovinos.post("/calcular_indice_endogamia/{id_bovino}/{id_bovino_madre}/{id_bovino_padre}",status_code=200)
-async def crear_endogamia(id_bovino:str,id_bovino_madre: str,id_bovino_padre:str ):
+async def crear_endogamia(id_bovino:str,id_bovino_madre: str,id_bovino_padre:str,current_user: Esquema_Usuario = Depends(get_current_user) ):
 
     try:
         ingresoEndogamia = modelo_arbol_genealogico.insert().values(id_bovino=id_bovino,
@@ -997,7 +874,7 @@ Ingresa los datos para el reporte de VENTA para el animal
 
 """
 @rutas_bovinos.post("/crear_venta/{id_bovino}/{estado}/{numero_bono_venta}/{fecha_venta}/{precio_venta}/{razon_venta}/{medio_pago}/{comprador}",status_code=200)
-async def crear_reporte_ventas(id_bovino:str,estado:str,numero_bono_venta:str,fecha_venta:date,precio_venta:int,razon_venta:str,medio_pago:str,comprador:str ):
+async def crear_reporte_ventas(id_bovino:str,estado:str,numero_bono_venta:str,fecha_venta:date,precio_venta:int,razon_venta:str,medio_pago:str,comprador:str,current_user: Esquema_Usuario = Depends(get_current_user) ):
 
     try:
 
@@ -1045,7 +922,7 @@ Ingresa los datos para el reporte de Animales Muertos
 
 """
 @rutas_bovinos.post("/crear_registro_muerte/{id_bovino}/{estado}/{fecha_muerte}/{razon_muerte}",status_code=200)
-async def crear_registro_muerte(id_bovino:str,estado:str,fecha_muerte:date,razon_muerte:str ):
+async def crear_registro_muerte(id_bovino:str,estado:str,fecha_muerte:date,razon_muerte:str,current_user: Esquema_Usuario = Depends(get_current_user) ):
 
     try:
         consulta = condb.execute(
@@ -1100,7 +977,7 @@ Funcion Caga Animal
 @rutas_bovinos.post(
     "/crear_carga_animal/{id_bovino}",
     status_code=status.HTTP_201_CREATED)
-async def CrearCargaAnimal(id_bovino: str):
+async def CrearCargaAnimal(id_bovino: str,current_user: Esquema_Usuario = Depends(get_current_user)):
     eliminarduplicados()
 
     try:
@@ -1125,7 +1002,7 @@ Crear en la tabla de partos para calcular la fecha aproximada
 @rutas_bovinos.post(
     "/crear_fecha_apoximada_parto/{id_bovino}/{fecha_estimada_prenez}",
     status_code=status.HTTP_201_CREATED)
-async def CrearFechaAproximadaParto(id_bovino: str,fecha_estimada_prenez:date):
+async def CrearFechaAproximadaParto(id_bovino: str,fecha_estimada_prenez:date,current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
         fecha_aproximada_parto()
 
@@ -1167,7 +1044,7 @@ Funcion crear La temperatura
 @rutas_bovinos.post(
     "/crear_temperatura/{temperatura_ambiente}",
     status_code=status.HTTP_201_CREATED)
-async def crear_temperatura(temperatura_ambiente: float):
+async def crear_temperatura(temperatura_ambiente: float,current_user: Esquema_Usuario = Depends(get_current_user)):
     eliminarduplicados()
 
     try:
@@ -1198,7 +1075,7 @@ Crear Ceba
 @rutas_bovinos.post(
     "/crear_prod_ceba/{id_bovino}/{proposito}",
     status_code=status.HTTP_201_CREATED)
-async def CrearProdCeba(id_bovino: str,proposito:str):
+async def CrearProdCeba(id_bovino: str,proposito:str,current_user: Esquema_Usuario = Depends(get_current_user)):
 
     try:
 
@@ -1236,7 +1113,7 @@ Crear Descarte
 @rutas_bovinos.post(
     "/crear_descarte/{id_bovino}/{razon_descarte}",
     status_code=status.HTTP_201_CREATED)
-async def CrearDescarte(id_bovino: str,razon_descarte:str):
+async def CrearDescarte(id_bovino: str,razon_descarte:str,current_user: Esquema_Usuario = Depends(get_current_user)):
 
     try:
 
@@ -1262,7 +1139,7 @@ async def CrearDescarte(id_bovino: str,razon_descarte:str):
 La siguiente funcion realiza la actualizacion completa de la tabla de bovinos para cambiar los registros
 '''
 @rutas_bovinos.put("/cambiar_datos_bovino/{id_bovino}", status_code=HTTP_204_NO_CONTENT)
-async def cambiar_esta_bovino(data_update: Esquema_bovinos, id_bovino: str):
+async def cambiar_esta_bovino(data_update: Esquema_bovinos, id_bovino: str,current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
         condb.execute(modelo_bovinos_inventario.update().values(
             fecha_nacimiento=data_update.fecha_nacimiento, sexo=data_update.sexo, raza=data_update.raza,
@@ -1303,7 +1180,7 @@ async def cambiar_esta_bovino(data_update: Esquema_bovinos, id_bovino: str):
 La siguiente funcion realiza la actualizacion completa de la tabla de bovinos para cambiar los registros
 '''
 @rutas_bovinos.put("/cambiar_datos_bovino/{id_bovino}/{fecha_nacimiento}/{edad}/{raza}/{sexo}/{peso}/{marca}/{proposito}/{mansedumbre}/{estado}/{compra_bovino}", status_code=status.HTTP_201_CREATED)
-async def cambiar_esta_bovino(id_bovino:str,fecha_nacimiento:date,edad:int,raza:str,sexo:str,peso:float,marca:str,proposito:str,mansedumbre:str,estado:str,compra_bovino:str):
+async def cambiar_esta_bovino(id_bovino:str,fecha_nacimiento:date,edad:int,raza:str,sexo:str,peso:float,marca:str,proposito:str,mansedumbre:str,estado:str,compra_bovino:str,current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
         condb.execute(modelo_bovinos_inventario.update().values(
 
@@ -1385,7 +1262,7 @@ esto con el  fin de mostrar cuantos vientres NO estan produciendo en el hato"""
 
 
 @rutas_bovinos.get("/Calcular_vacas_vacias")
-async def vacas_vacias():
+async def vacas_vacias(current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
         # join de tabla bovinos y tabla leche mediante id_bovino \
         # filtrado y conteo animales con datos prenez Vacia que se encuentren vivos
@@ -1625,10 +1502,10 @@ response_model=list[esquema_indicadores]
 
 
 @rutas_bovinos.get("/Calcular_perdida_Terneros")
-async def perdida_TernerosAPI():
+async def perdida_TernerosAPI(current_user: Esquema_Usuario = Depends(get_current_user)):
  try:
 
-    perdida_Terneros1()
+    #perdida_Terneros1()
     response = session.query(modelo_indicadores).where(modelo_indicadores.c.IEP_hato).first()
     perdida_terneros = response[1]
 
@@ -1655,7 +1532,7 @@ proposito, sexo, estado, rango de edades y estado de ordeno"""
 
 
 @rutas_bovinos.get("/Calcular_animales_totales")
-async def animales_totales():
+async def animales_totales(current_user: Esquema_Usuario = Depends(get_current_user)):
 
 
   try:
@@ -1676,7 +1553,7 @@ async def animales_totales():
   return total_animales
 
 @rutas_bovinos.get("/Calcular_animales_ceba")
-async def animales_ceba():
+async def animales_ceba(current_user: Esquema_Usuario = Depends(get_current_user)):
   try:
     # consulta de total de animales vivos con proposito de ceba
     prop_ceba = session.query(modelo_bovinos_inventario). \
@@ -1697,7 +1574,7 @@ async def animales_ceba():
 
 
 @rutas_bovinos.get("/Calcular_animales_levante")
-async def animales_levante():
+async def animales_levante(current_user: Esquema_Usuario = Depends(get_current_user)):
     # consulta de total de animales vivos con proposito de levante
     prop_levante = session.query(modelo_bovinos_inventario). \
         filter(modelo_bovinos_inventario.c.estado == "Vivo",
@@ -1716,7 +1593,7 @@ async def animales_levante():
 
 
 @rutas_bovinos.get("/Calcular_animales_muertos")
-async def animales_muertos():
+async def animales_muertos(current_user: Esquema_Usuario = Depends(get_current_user)):
   try:
     # consulta de total de animales muertos
     estado_muerto = session.query(modelo_bovinos_inventario). \
@@ -1736,7 +1613,7 @@ async def animales_muertos():
 
 
 @rutas_bovinos.get("/Calcular_animales_vendidos")
-async def animales_vendidos():
+async def animales_vendidos(current_user: Esquema_Usuario = Depends(get_current_user)):
   try:
     # consulta de total de animales vendidos
     estado_vendido = session.query(modelo_bovinos_inventario). \
@@ -1756,7 +1633,7 @@ async def animales_vendidos():
 
 
 @rutas_bovinos.get("/Calcular_animales_machos")
-async def animales_sexo_macho():
+async def animales_sexo_macho(current_user: Esquema_Usuario = Depends(get_current_user)):
   try:
     # consulta de total de animales vivos con sexo macho
     machos = session.query(modelo_bovinos_inventario). \
@@ -1777,7 +1654,7 @@ async def animales_sexo_macho():
 
 
 @rutas_bovinos.get("/Calcular_animales_hembras")
-async def animales_sexo_hembra():
+async def animales_sexo_hembra(current_user: Esquema_Usuario = Depends(get_current_user)):
   try:
     # consulta de total de animales vivos con sexo hembra
     hembras = session.query(modelo_bovinos_inventario). \
@@ -1798,7 +1675,7 @@ async def animales_sexo_hembra():
 
 
 @rutas_bovinos.get("/Calcular_animales_ordeno")
-async def animales_en_ordeno():
+async def animales_en_ordeno(current_user: Esquema_Usuario = Depends(get_current_user)):
  try:
     # join, consulta y conteo de animales vivos que son ordenados
     vacas_ordeno = session.query(modelo_bovinos_inventario.c.estado, modelo_leche.c.ordeno). \
@@ -1823,7 +1700,7 @@ async def animales_en_ordeno():
 
 
 @rutas_bovinos.get("/Calcular_animales_edad_0_9")
-async def animales_edad_0_9():
+async def animales_edad_0_9(current_user: Esquema_Usuario = Depends(get_current_user)):
   try:
     # consulta y conteo de animales con edades entre 0 a 9 meses
     edades_0_9 = session.query(modelo_bovinos_inventario). \
@@ -1844,7 +1721,7 @@ async def animales_edad_0_9():
 
 
 @rutas_bovinos.get("/Calcular_animales_edad_9_12")
-async def animales_edad_9_12():
+async def animales_edad_9_12(current_user: Esquema_Usuario = Depends(get_current_user)):
   try:
     # consulta y conteo de animales con edades entre 10 a 12 meses
     edades_9_12 = session.query(modelo_bovinos_inventario). \
@@ -1865,7 +1742,7 @@ async def animales_edad_9_12():
 
 
 @rutas_bovinos.get("/Calcular_animales_edad_12_24")
-async def animales_edad_12_24():
+async def animales_edad_12_24(current_user: Esquema_Usuario = Depends(get_current_user)):
  try:
     # consulta y conteo de animales con edades entre 13 a 24 meses
     edades_12_24 = session.query(modelo_bovinos_inventario). \
@@ -1886,7 +1763,7 @@ async def animales_edad_12_24():
 
 
 @rutas_bovinos.get("/Calcular_animales_edad_24_36")
-async def animales_edad_24_36():
+async def animales_edad_24_36(current_user: Esquema_Usuario = Depends(get_current_user)):
   try:
     # consulta y conteo de animales con edades entre 25 a 36 meses
     edades_24_36 = session.query(modelo_bovinos_inventario). \
@@ -1907,7 +1784,7 @@ async def animales_edad_24_36():
 
 
 @rutas_bovinos.get("/Calcular_animales_edad_mayor_36")
-async def animales_edad_mayor_a_36():
+async def animales_edad_mayor_a_36(current_user: Esquema_Usuario = Depends(get_current_user)):
   try:
     # consulta y conteo de animales con edades igual o mayor a 37 meses
     edades_mayor_36 = session.query(modelo_bovinos_inventario). \
@@ -1928,7 +1805,7 @@ async def animales_edad_mayor_a_36():
 
 
 @rutas_bovinos.get("/Calcular_Animales_Optimo_Levante")
-async def Animales_Optimo_Levante():
+async def Animales_Optimo_Levante(current_user: Esquema_Usuario = Depends(get_current_user)):
  try:
     # join,consulta y conteo de animales vivos con estado optimo
     levante_optimo = session.query(modelo_bovinos_inventario.c.estado, modelo_levante.c.estado_optimo_levante). \
@@ -1950,7 +1827,7 @@ async def Animales_Optimo_Levante():
 
 "la siguiente funcion"
 @rutas_bovinos.get("/Calcular_Animales_Optimo_Ceba")
-async def Animales_Optimo_Ceba():
+async def Animales_Optimo_Ceba(current_user: Esquema_Usuario = Depends(get_current_user)):
   try:
     # join,consulta y conteo de animales vivos con estado optimo
     ceba_optimo = session.query(modelo_bovinos_inventario.c.estado, modelo_ceba.c.estado_optimo_ceba). \

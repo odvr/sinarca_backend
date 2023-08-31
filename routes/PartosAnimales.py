@@ -13,7 +13,9 @@ from datetime import date
 from fastapi import APIRouter, Response
 from fastapi import  status
 from starlette.status import HTTP_204_NO_CONTENT
-from schemas.schemas_bovinos import esquema_historial_partos
+from fastapi import  Depends
+from routes.rutas_bovinos import get_current_user
+from schemas.schemas_bovinos import esquema_historial_partos, Esquema_Usuario
 
 # Configuracion de la libreria para los logs de sinarca
 # Crea un objeto logger
@@ -30,7 +32,7 @@ logger.addHandler(file_handler)
 
 partos_bovinos = APIRouter()
 @partos_bovinos.post("/crear_Registro_Partos/{id_bovino}/{fecha_parto}/{tipo_parto}/{id_bovino_hijo}")
-async def crear_Registro_Partos(id_bovino:str,fecha_parto: date,tipo_parto:str,id_bovino_hijo:str ):
+async def crear_Registro_Partos(id_bovino:str,fecha_parto: date,tipo_parto:str,id_bovino_hijo:str,current_user: Esquema_Usuario = Depends(get_current_user) ):
 
     try:
         listar_tabla_Partos_Animales()
@@ -55,7 +57,7 @@ async def crear_Registro_Partos(id_bovino:str,fecha_parto: date,tipo_parto:str,i
 
 
 @partos_bovinos.get("/listar_tabla_Historial_Partos",response_model=list[esquema_historial_partos] )
-async def listar_tabla_Partos_Animales():
+async def listar_tabla_Partos_Animales(current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
         intervalo_partos()
         itemsListarPartos = session.execute(modelo_historial_partos.select()).all()
@@ -69,7 +71,7 @@ async def listar_tabla_Partos_Animales():
 
 
 @partos_bovinos.delete("/eliminar_bovino_partos/{id_bovino}", status_code=HTTP_204_NO_CONTENT)
-async def eliminar_bovino_fecha_partos(id_bovino: str):
+async def eliminar_bovino_fecha_partos(id_bovino: str,current_user: Esquema_Usuario = Depends(get_current_user)):
 
     try:
         condb.execute(modelo_partos.delete().where(modelo_partos.c.id_bovino == id_bovino))

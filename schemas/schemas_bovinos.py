@@ -16,6 +16,23 @@ from sqlalchemy.orm import sessionmaker
 
 #pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
+class Esquema_Usuario(BaseModel):
+    id_usuario : int
+    usuario_id :str
+    hashed_password: str
+
+    class Config:
+        orm_mode = True
+        env_file = ".env"
+class Esquema_Token(BaseModel):
+    access_token: str
+    token_type: str
+    class Config:
+        orm_mode = True
+        env_file = ".env"
+
+
+
 class User(BaseModel):
     id = str
     username = str

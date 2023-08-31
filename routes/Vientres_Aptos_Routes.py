@@ -12,7 +12,9 @@ from config.db import condb, session
 from fastapi import    APIRouter
 
 from models.modelo_bovinos import modelo_vientres_aptos
-
+from routes.rutas_bovinos import get_current_user
+from schemas.schemas_bovinos import Esquema_Usuario
+from fastapi import  Depends
 # Configuracion de la libreria para los logs de sinarca
 # Crea un objeto logger
 logger = logging.getLogger(__name__)
@@ -35,7 +37,7 @@ Vientres_Aptos = APIRouter()
 
 
 @Vientres_Aptos.get("/listar_vientres_aptos" )
-async def listar_vientres_aptos_modulo():
+async def listar_vientres_aptos_modulo(current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
         vientres_aptos()
         #Eliminacion_total_vientres_aptos()
@@ -49,7 +51,7 @@ async def listar_vientres_aptos_modulo():
     return tabla_vientres_aptos
 
 @Vientres_Aptos.get("/listar_contar_listar_vientres_aptos" )
-async def listar_contar_AnimalesDescarte():
+async def listar_contar_AnimalesDescarte(current_user: Esquema_Usuario = Depends(get_current_user)):
 
     try:
 
@@ -68,7 +70,7 @@ async def listar_contar_AnimalesDescarte():
 Listar animales con vientre apto
 """
 @Vientres_Aptos.get("/listar_contar_listar_vientres_aptos" )
-async def listar_contar_AnimalesDescarte():
+async def listar_contar_AnimalesDescarte(current_user: Esquema_Usuario = Depends(get_current_user)):
 
     try:
         itemsAnimalesVientresAptos = session.query(modelo_vientres_aptos). \

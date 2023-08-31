@@ -9,11 +9,12 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
 from config.db import condb, session
 from models.modelo_bovinos import modelo_veterinaria, modelo_veterinaria_evoluciones, modelo_veterinaria_comentarios
+from routes.rutas_bovinos import get_current_user
 from schemas.schemas_bovinos import esquema_veterinaria, esquema_veterinaria_evoluciones, \
-    esquema_veterinaria_comentarios
+    esquema_veterinaria_comentarios, Esquema_Usuario
 from datetime import date, datetime, timedelta
 from fastapi import  status, HTTPException, Depends
-
+from fastapi import  Depends
 oauth2_scheme = OAuth2PasswordBearer("/token")
 
 # Configuracion de las rutas para fash api
@@ -37,7 +38,7 @@ logger.addHandler(file_handler)
 Veterinaria = APIRouter()
 
 @Veterinaria.get("/listar_bovino_Veterinaria/{id_veterinaria}",response_model=esquema_veterinaria)
-async def id_inventario_bovino_Veterinaria(id_veterinaria: int):
+async def id_inventario_bovino_Veterinaria(id_veterinaria: int,current_user: Esquema_Usuario = Depends(get_current_user)):
 
     try:
         # Consultar los datos de producción de leche del bovino especificado
@@ -58,7 +59,7 @@ async def id_inventario_bovino_Veterinaria(id_veterinaria: int):
 
 
 @Veterinaria.post("/CrearRegistroVeterinaria/{id_bovino}/{sintomas}/{fecha_sintomas}/{comportamiento}/{condicion_corporal}/{postura}/{mucosa_ocular}/{mucosa_bucal}/{mucosa_rectal}/{mucosa_vulvar_prepusial}/{evolucion}/{tratamiento}/{piel_pelaje}",status_code=200)
-async def CrearRegistroVeterinaria(id_bovino:str,sintomas:str,fecha_sintomas:date,comportamiento:str,condicion_corporal:str,postura:str,mucosa_bucal :str, mucosa_ocular:str,mucosa_rectal:str,mucosa_vulvar_prepusial:str,evolucion:str,tratamiento:str,piel_pelaje:str ):
+async def CrearRegistroVeterinaria(id_bovino:str,sintomas:str,fecha_sintomas:date,comportamiento:str,condicion_corporal:str,postura:str,mucosa_bucal :str, mucosa_ocular:str,mucosa_rectal:str,mucosa_vulvar_prepusial:str,evolucion:str,tratamiento:str,piel_pelaje:str,current_user: Esquema_Usuario = Depends(get_current_user) ):
 
     try:
         ingresoVeterinaria = modelo_veterinaria.insert().values(id_bovino=id_bovino,sintomas=sintomas,fecha_sintomas=fecha_sintomas,comportamiento=comportamiento,condicion_corporal=condicion_corporal,postura=postura,mucosa_bucal= mucosa_bucal,mucosa_ocular=mucosa_ocular,mucosa_rectal=mucosa_rectal,mucosa_vulvar_prepusial=mucosa_vulvar_prepusial, evolucion=evolucion,tratamiento=tratamiento,piel_pelaje=piel_pelaje)
@@ -76,7 +77,7 @@ async def CrearRegistroVeterinaria(id_bovino:str,sintomas:str,fecha_sintomas:dat
 
 
 @Veterinaria.post("/ActualizarDetallesVeterinaria/{id_veterinaria}/{sintomas}/{fecha_sintomas}/{comportamiento}/{condicion_corporal}/{postura}/{mucosa_ocular}/{mucosa_bucal}/{mucosa_rectal}/{mucosa_vulvar_prepusial}/{evolucion}/{tratamiento}/{piel_pelaje}",status_code=200)
-async def ActualizarDetallesVeterinaria(id_veterinaria:str,sintomas:str,fecha_sintomas:date,comportamiento:str,condicion_corporal:str,postura:str,mucosa_bucal :str, mucosa_ocular:str,mucosa_rectal:str,mucosa_vulvar_prepusial:str,evolucion:str,tratamiento:str,piel_pelaje:str ):
+async def ActualizarDetallesVeterinaria(id_veterinaria:str,sintomas:str,fecha_sintomas:date,comportamiento:str,condicion_corporal:str,postura:str,mucosa_bucal :str, mucosa_ocular:str,mucosa_rectal:str,mucosa_vulvar_prepusial:str,evolucion:str,tratamiento:str,piel_pelaje:str,current_user: Esquema_Usuario = Depends(get_current_user) ):
 
     try:
 
@@ -100,7 +101,7 @@ async def ActualizarDetallesVeterinaria(id_veterinaria:str,sintomas:str,fecha_si
 
 
 @Veterinaria.get("/listar_bovino_Veterinaria_Comentarios/{id_veterinaria}",response_model=list[esquema_veterinaria_comentarios])
-async def id_inventario_bovino_Comentarios(id_veterinaria: int):
+async def id_inventario_bovino_Comentarios(id_veterinaria: int,current_user: Esquema_Usuario = Depends(get_current_user)):
 
     try:
         # Consultar los datos de producción de leche del bovino especificado
@@ -120,7 +121,7 @@ async def id_inventario_bovino_Comentarios(id_veterinaria: int):
 "Eliminar Comentarios de Veterinaria"
 
 @Veterinaria.delete("/eliminar_comentarios_evoluciones/{id_veterinaria}")
-async def Eliminar_Comentarios_Evoluciones(id_veterinaria: str):
+async def Eliminar_Comentarios_Evoluciones(id_veterinaria: str,current_user: Esquema_Usuario = Depends(get_current_user)):
 
     try:
 
@@ -137,7 +138,7 @@ async def Eliminar_Comentarios_Evoluciones(id_veterinaria: str):
 
 
 @Veterinaria.get("/listar_bovino_Veterinaria_Evoluciones",  response_model=list[esquema_veterinaria_evoluciones] )
-async def id_inventario_bovino_Veterinaria_Evoluciones():
+async def id_inventario_bovino_Veterinaria_Evoluciones(current_user: Esquema_Usuario = Depends(get_current_user)):
 
     try:
 
@@ -160,7 +161,7 @@ async def id_inventario_bovino_Veterinaria_Evoluciones():
 
 
 @Veterinaria.post("/Crear_Comentario/{id_veterinaria}/{comentarios}/{fecha_comentario}",status_code=200)
-async def crear_Comentario(id_veterinaria:int,comentarios:str,fecha_comentario:date ):
+async def crear_Comentario(id_veterinaria:int,comentarios:str,fecha_comentario:date,current_user: Esquema_Usuario = Depends(get_current_user) ):
 
     try:
 
@@ -188,7 +189,7 @@ async def crear_Comentario(id_veterinaria:int,comentarios:str,fecha_comentario:d
 
 '''
 @Veterinaria.post("/Crear_Evolucion/{id_bovino}/{tratamiento_evolucion}/{fecha_evolucion}",status_code=200)
-async def crear_evolucion(id_bovino:str,tratamiento_evolucion:str,fecha_evolucion:date ):
+async def crear_evolucion(id_bovino:str,tratamiento_evolucion:str,fecha_evolucion:date,current_user: Esquema_Usuario = Depends(get_current_user) ):
 
     try:
         consulta = condb.execute(

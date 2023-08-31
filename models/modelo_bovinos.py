@@ -21,8 +21,8 @@ from sqlalchemy.types import Integer, Text, String, DateTime
 modelo_users = Table("users", meta, Column("id", String(300), primary_key=True, unique=True, index=True),
                      Column("email", String(300), unique=True, index=True), Column("password", String(300)))
 
-modelo_usuarios = Table("usuarios", meta, Column("id_usuario", String(300), primary_key=True, unique=True, index=True),
-                     Column("full_name", String(300), unique=True, index=True), Column("hashed_password", String(300)))
+modelo_usuarios = Table("usuarios", meta, Column("id_usuario", Integer, primary_key=True, unique=True, index=True),
+                     Column("usuario_id", String(300), unique=True, index=True), Column("hashed_password", String(300)))
 
 
 MUserAuth = Table("UserAuth", meta, Column("email", String(300), primary_key=True, unique=True, index=True),
@@ -298,4 +298,5 @@ modelo_registro_pajillas = Table("registro_pajillas", meta, Column("id_pajillas"
                               Column("raza", String(300)),
                               Column("nombre_toro", String(300)),
                               Column("productor", String(300)))
+
 meta.create_all(engine)

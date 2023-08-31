@@ -11,7 +11,9 @@ from models.modelo_bovinos import  modelo_litros_leche
 from fastapi import  status,  APIRouter, Response
 from datetime import date
 from starlette.status import HTTP_204_NO_CONTENT
-from schemas.schemas_bovinos import  esquema_litros_leche
+from fastapi import  Depends
+from routes.rutas_bovinos import get_current_user
+from schemas.schemas_bovinos import esquema_litros_leche, Esquema_Usuario
 
 # Configuracion de la libreria para los logs de sinarca
 # Crea un objeto logger
@@ -32,7 +34,7 @@ Produccion_Leche_Litros_Diarios = APIRouter()
 
 
 @Produccion_Leche_Litros_Diarios.get("/listar_prod_leche_litros_diarios",response_model=list[esquema_litros_leche])
-async def inventario_prod_leche_Ls_diarios():
+async def inventario_prod_leche_Ls_diarios(current_user: Esquema_Usuario = Depends(get_current_user)):
 
     try:
 
@@ -53,7 +55,7 @@ la clase Esquema_bovinos  recibira como base para crear el animal esto con fin d
 """
 
 @Produccion_Leche_Litros_Diarios.post("/crear_registro_listros_diarios/{id_bovino}/{fecha_medicion}/{litros_leche}", status_code=status.HTTP_201_CREATED)
-async def crear_registro_listros_diarios(id_bovino:str,fecha_medicion:date,litros_leche:int ):
+async def crear_registro_listros_diarios(id_bovino:str,fecha_medicion:date,litros_leche:int,current_user: Esquema_Usuario = Depends(get_current_user) ):
 
     try:
         """
@@ -82,7 +84,7 @@ async def crear_registro_listros_diarios(id_bovino:str,fecha_medicion:date,litro
 
 
 @Produccion_Leche_Litros_Diarios.delete("/eliminar_registro_litros/{id_litros}", status_code=HTTP_204_NO_CONTENT)
-async def eliminar_bovino(id_litros: int):
+async def eliminar_bovino(id_litros: int,current_user: Esquema_Usuario = Depends(get_current_user)):
 
     try:
         condb.execute(modelo_litros_leche.delete().where(modelo_litros_leche.c.id_litros == id_litros))

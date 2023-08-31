@@ -12,8 +12,9 @@ from models.modelo_bovinos import modelo_capacidad_carga, modelo_carga_animal_y_
 from fastapi import  status,  APIRouter, Response
 
 from sqlalchemy import update
-
-from schemas.schemas_bovinos import esquema_carga_animal_y_consumo_agua, esquema_capacidad_carga
+from fastapi import  Depends
+from routes.rutas_bovinos import get_current_user
+from schemas.schemas_bovinos import esquema_carga_animal_y_consumo_agua, esquema_capacidad_carga, Esquema_Usuario
 
 # Configuracion de la libreria para los logs de sinarca
 # Crea un objeto logger
@@ -33,7 +34,7 @@ capacidad_carga_rutas = APIRouter()
 
 
 @capacidad_carga_rutas.get("/listar_capacidad_carga", response_model=list[esquema_capacidad_carga] )
-async def listar_capacidad_carga():
+async def listar_capacidad_carga(current_user: Esquema_Usuario = Depends(get_current_user)):
 
     try:
 
@@ -54,7 +55,7 @@ async def listar_capacidad_carga():
 
 
 @capacidad_carga_rutas.get("/listar_carga_animales", response_model=list[esquema_carga_animal_y_consumo_agua] )
-async def listar_carga_animales():
+async def listar_carga_animales(current_user: Esquema_Usuario = Depends(get_current_user)):
 
     try:
         #consumo_global_agua_y_totalidad_unidades_animales()
@@ -74,7 +75,7 @@ async def listar_carga_animales():
 
 
 @capacidad_carga_rutas.post("/crear_capacidad_carga/{medicion_aforo}/{hectareas_predio}/{tipo_de_muestra}", status_code=status.HTTP_201_CREATED)
-async def crear_capacidad_carga(medicion_aforo: float,hectareas_predio :float,tipo_de_muestra:str):
+async def crear_capacidad_carga(medicion_aforo: float,hectareas_predio :float,tipo_de_muestra:str,current_user: Esquema_Usuario = Depends(get_current_user)):
 
 
     try:

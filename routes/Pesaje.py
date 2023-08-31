@@ -14,7 +14,9 @@ from starlette.status import HTTP_204_NO_CONTENT
 from fastapi import  status, HTTPException, Depends
 from sqlalchemy import func
 from datetime import date, datetime, timedelta
-from schemas.schemas_bovinos import esquema_modelo_Reporte_Pesaje, esquema_orden_peso
+from fastapi import  Depends
+from routes.rutas_bovinos import get_current_user
+from schemas.schemas_bovinos import esquema_modelo_Reporte_Pesaje, esquema_orden_peso, Esquema_Usuario
 
 # Configuracion de la libreria para los logs de sinarca
 # Crea un objeto logger
@@ -34,7 +36,7 @@ pesaje = APIRouter()
 Ingresa los datos para el reporte de pesaje del animal 
 """
 @pesaje.post("/fecha_pesaje/{id_bovino}/{fecha_pesaje}/{peso}",status_code=200)
-async def crear_fecha_pesaje(id_bovino:str,fecha_pesaje:date,peso:float ):
+async def crear_fecha_pesaje(id_bovino:str,fecha_pesaje:date,peso:float,current_user: Esquema_Usuario = Depends(get_current_user) ):
 
     try:
 
@@ -55,7 +57,7 @@ async def crear_fecha_pesaje(id_bovino:str,fecha_pesaje:date,peso:float ):
 
 
 @pesaje.delete("/Eliminar_Registro_Peso/{id_pesaje}", status_code=200)
-async def Eliminar_Re(id_pesaje: str):
+async def Eliminar_Re(id_pesaje: str,current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
 
         condb.execute(modelo_datos_pesaje.delete().where(modelo_datos_pesaje.c.id_pesaje == id_pesaje))
@@ -71,7 +73,7 @@ async def Eliminar_Re(id_pesaje: str):
 
 
 @pesaje.get("/Promedio_Peso_Raza" , response_model=list[esquema_orden_peso])
-async def inventario_prod_leche():
+async def inventario_prod_leche(current_user: Esquema_Usuario = Depends(get_current_user)):
 
     try:
 
@@ -90,7 +92,7 @@ async def inventario_prod_leche():
 
 
 @pesaje.get("/listar_tabla_pesaje", response_model=list[esquema_modelo_Reporte_Pesaje] )
-async def listar_tabla_pesaje():
+async def listar_tabla_pesaje(current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
         actualizacion_peso()
         tabla_pesaje = session.query(modelo_datos_pesaje).all()
@@ -104,7 +106,7 @@ async def listar_tabla_pesaje():
 
 
 @pesaje.get("/listar_reporte_pesaje/Enero")
-async def listar_reporte_pesaje_enero():
+async def listar_reporte_pesaje_enero(current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
 
         resultadosEnero = session.query(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje),
@@ -125,7 +127,7 @@ async def listar_reporte_pesaje_enero():
 
 
 @pesaje.get("/listar_reporte_pesaje/Febrero")
-async def listar_reporte_pesaje_febrero():
+async def listar_reporte_pesaje_febrero(current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
 
         resultadosFebrero = session.query(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje),
@@ -147,7 +149,7 @@ async def listar_reporte_pesaje_febrero():
 
 '''
 @pesaje.get("/listar_reporte_pesaje/Marzo" )
-async def listar_reporte_pesaje_Marzo():
+async def listar_reporte_pesaje_Marzo(current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
 
 
@@ -171,7 +173,7 @@ async def listar_reporte_pesaje_Marzo():
 
 
 @pesaje.get("/listar_reporte_pesaje/Abril" )
-async def listar_reporte_pesaje_Abril():
+async def listar_reporte_pesaje_Abril(current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
 
         resultadosAbril = session.query(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje),
@@ -190,7 +192,7 @@ async def listar_reporte_pesaje_Abril():
         session.close()
 
 @pesaje.get("/listar_reporte_pesaje/Mayo" )
-async def listar_reporte_pesaje_Mayo():
+async def listar_reporte_pesaje_Mayo(current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
 
         resultadosMayo = session.query(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje),
@@ -210,7 +212,7 @@ async def listar_reporte_pesaje_Mayo():
 
 
 @pesaje.get("/listar_reporte_pesaje/Junio" )
-async def listar_reporte_pesaje_Junio():
+async def listar_reporte_pesaje_Junio(current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
 
         resultadosJunio = session.query(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje),
@@ -229,7 +231,7 @@ async def listar_reporte_pesaje_Junio():
         session.close()
 
 @pesaje.get("/listar_reporte_pesaje/Julio" )
-async def listar_reporte_pesaje_Julio():
+async def listar_reporte_pesaje_Julio(current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
 
         resultadosJulio = session.query(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje),
@@ -248,7 +250,7 @@ async def listar_reporte_pesaje_Julio():
 
 
 @pesaje.get("/listar_reporte_pesaje/Agosto" )
-async def listar_reporte_pesaje_Agosto():
+async def listar_reporte_pesaje_Agosto(current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
 
         resultadosAgosto = session.query(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje),
@@ -268,7 +270,7 @@ async def listar_reporte_pesaje_Agosto():
 
 
 @pesaje.get("/listar_reporte_pesaje/Septiembre" )
-async def listar_reporte_pesaje_Septiembre():
+async def listar_reporte_pesaje_Septiembre(current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
 
         resultadosSeptiembre = session.query(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje),
@@ -289,7 +291,7 @@ async def listar_reporte_pesaje_Septiembre():
 
 
 @pesaje.get("/listar_reporte_pesaje/Octubre" )
-async def listar_reporte_pesaje_Octubre():
+async def listar_reporte_pesaje_Octubre(current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
 
         resultadosOctubre = session.query(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje),
@@ -308,7 +310,7 @@ async def listar_reporte_pesaje_Octubre():
         session.close()
 
 @pesaje.get("/listar_reporte_pesaje/Noviembre" )
-async def listar_reporte_pesaje_Noviembre():
+async def listar_reporte_pesaje_Noviembre(current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
 
         resultadosNoviembre = session.query(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje),
@@ -327,7 +329,7 @@ async def listar_reporte_pesaje_Noviembre():
         session.close()
 
 @pesaje.get("/listar_reporte_pesaje/Diciembre" )
-async def listar_reporte_pesaje_Diciembre():
+async def listar_reporte_pesaje_Diciembre(current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
 
         resultadosDiciembre = session.query(func.MONTH(modelo_datos_pesaje.c.fecha_pesaje),
@@ -349,7 +351,7 @@ async def listar_reporte_pesaje_Diciembre():
 
 
 @pesaje.get("/listar_tabla_pesaje_por_animal/{id_bovino}",response_model=list[esquema_modelo_Reporte_Pesaje] )
-async def listar_tabla_pesaje_Por_Animal(id_bovino:str):
+async def listar_tabla_pesaje_Por_Animal(id_bovino:str,current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
 
         tabla_pesaje = session.query(modelo_datos_pesaje).where(modelo_datos_pesaje.columns.id_bovino == id_bovino).all()

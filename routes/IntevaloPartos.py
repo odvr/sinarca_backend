@@ -8,7 +8,10 @@ from config.db import condb, session
 # # importa el esquema de los bovinos
 from models.modelo_bovinos import  modelo_historial_intervalo_partos
 from fastapi import APIRouter
-from schemas.schemas_bovinos import esquema_historial_partos, esquema_intervalo_partos
+
+from routes.rutas_bovinos import get_current_user
+from schemas.schemas_bovinos import esquema_historial_partos, esquema_intervalo_partos, Esquema_Usuario
+
 # Configuracion de la libreria para los logs de sinarca
 # Crea un objeto logger
 logger = logging.getLogger(__name__)
@@ -16,6 +19,7 @@ logger.setLevel(logging.INFO)
 # Crea un manejador de archivo para guardar el log
 log_file = 'Log_Sinarca.log'
 file_handler = logging.FileHandler(log_file)
+from fastapi import  Depends
 # Define el formato del log
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 file_handler.setFormatter(formatter)
@@ -25,7 +29,7 @@ logger.addHandler(file_handler)
 IntevaloPartos = APIRouter()
 
 @IntevaloPartos.get("/listar_tabla_Intervalo_Partos",response_model=list[esquema_intervalo_partos] )
-async def listar_tabla_Intervalo_Partos():
+async def listar_tabla_Intervalo_Partos(current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
         intervalo_partos()
         promedio_intervalo_partos()

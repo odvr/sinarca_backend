@@ -19,14 +19,15 @@ from models.modelo_bovinos import modelo_bovinos_inventario, modelo_veterinaria,
     modelo_indicadores, modelo_ceba, modelo_macho_reproductor, modelo_carga_animal_y_consumo_agua, modelo_datos_pesaje, \
     modelo_capacidad_carga, modelo_calculadora_hectareas_pastoreo, modelo_partos, modelo_vientres_aptos, \
     modelo_descarte, modelo_users, modelo_arbol_genealogico, modelo_veterinaria_evoluciones
+
 from schemas.schemas_bovinos import Esquema_bovinos, esquema_produccion_levante, \
     esquema_produccion_ceba, esquema_datos_muerte, esquema_modelo_ventas, esquema_arbol_genealogico, \
     esquema_modelo_Reporte_Pesaje, esquema_produccion_leche, esquema_veterinaria, esquema_veterinaria_evoluciones, \
-    esquema_partos, esquema_macho_reproductor
+    esquema_partos, esquema_macho_reproductor, Esquema_Usuario
 from sqlalchemy import update, between, func
 from starlette.status import HTTP_204_NO_CONTENT
 from datetime import date, datetime, timedelta
-
+from fastapi import  Depends
 
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
@@ -57,7 +58,7 @@ logger.addHandler(file_handler)
 @ReproductorRutas.get("/listar_reproductor",response_model=list[esquema_macho_reproductor] )
 async def listar_reproductor():
     #llamdo de la funcion para calcular
-    vida_util_macho_reproductor()
+    #vida_util_macho_reproductor()
 
     try:
         vida_util_macho_reproductor()

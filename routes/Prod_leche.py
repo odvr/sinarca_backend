@@ -12,10 +12,10 @@ from models.modelo_bovinos import modelo_leche, modelo_bovinos_inventario, \
     modelo_indicadores, modelo_orden_litros
 from fastapi import  status,  APIRouter, Response
 from datetime import date,  timedelta
-from routes.rutas_bovinos import eliminarduplicados
+from routes.rutas_bovinos import eliminarduplicados, get_current_user
 from sqlalchemy import update
-from schemas.schemas_bovinos import esquema_produccion_leche, esquema_orden_litros
-
+from schemas.schemas_bovinos import esquema_produccion_leche, esquema_orden_litros, Esquema_Usuario
+from fastapi import  Depends
 # Configuracion de la libreria para los logs de sinarca
 # Crea un objeto logger
 logger = logging.getLogger(__name__)
@@ -37,7 +37,7 @@ Produccion_Leche = APIRouter()
 
 
 @Produccion_Leche.get("/Animales_leche")
-async def animales_leche():
+async def animales_leche(current_user: Esquema_Usuario = Depends(get_current_user)):
   try:
     # consulta de total de animales vivos con proposito de leche
     prop_leche = session.query(modelo_bovinos_inventario). \
@@ -58,7 +58,7 @@ async def animales_leche():
 
 
 @Produccion_Leche.get("/listar_bovino_prodLeche/{id_bovino}", response_model=esquema_produccion_leche )
-async def id_inventario_bovino_leche(id_bovino: str):
+async def id_inventario_bovino_leche(id_bovino: str,current_user: Esquema_Usuario = Depends(get_current_user)):
 
     try:
         # Consultar los datos de producción de leche del bovino especificado
@@ -77,7 +77,7 @@ async def id_inventario_bovino_leche(id_bovino: str):
 
 
 @Produccion_Leche.get("/listar_prod_leche" , response_model=list[esquema_produccion_leche])
-async def inventario_prod_leche():
+async def inventario_prod_leche(current_user: Esquema_Usuario = Depends(get_current_user)):
 
     try:
         Edad_Primer_Parto()
@@ -105,7 +105,7 @@ Promedio Por Razas
 
 
 @Produccion_Leche.get("/LitrosPorRaza" , response_model=list[esquema_orden_litros])
-async def inventario_prod_leche():
+async def inventario_prod_leche(current_user: Esquema_Usuario = Depends(get_current_user)):
 
     try:
 
@@ -144,7 +144,7 @@ def animales_no_ordeno():
 
 
 @Produccion_Leche.get("/Calcular_porcentaje_ordeno")
-async def porcentaje_ordeno():
+async def porcentaje_ordeno(current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
         animales_no_ordeno()
         # consulta de animales ordenados y no ordenados
@@ -184,7 +184,7 @@ async def porcentaje_ordeno():
 
 
 @Produccion_Leche.get("/Calcular_vacas_prenadas_porcentaje")
-async def vacas_prenadas_porcentaje():
+async def vacas_prenadas_porcentaje(current_user: Esquema_Usuario = Depends(get_current_user)):
   try:
     # consulta de vacas prenadas y vacas vacias en la base de datos
     prenadas, vacias = session.query \
@@ -223,7 +223,7 @@ async def vacas_prenadas_porcentaje():
 
 
 @Produccion_Leche.get("/Calcular_vacas_prenadas")
-async def vacas_prenadas():
+async def vacas_prenadas(current_user: Esquema_Usuario = Depends(get_current_user)):
   try:
     # join de tabla bovinos y tabla leche mediante id_bovino \
     # filtrado y conteo animales con datos prenez Prenada que se encuentren vivos
@@ -256,7 +256,7 @@ La siguiente api crea en la tabla de leche con la llave foranea de id_bovino est
     "/crear_prod_leche/{id_bovino}/{datos_prenez}/{ordeno}/{proposito}",
     status_code=status.HTTP_201_CREATED)
 async def CrearProdLeche( id_bovino: str,
-                   datos_prenez: str, ordeno: str,proposito:str):
+                   datos_prenez: str, ordeno: str,proposito:str,current_user: Esquema_Usuario = Depends(get_current_user)):
     eliminarduplicados()
 
     try:

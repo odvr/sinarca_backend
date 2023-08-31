@@ -27,12 +27,13 @@ from models.modelo_bovinos import modelo_bovinos_inventario, modelo_veterinaria,
     MUserAuth, modelo_compra, modelo_historial_perdida_terneros
 
 from routes.Reproductor import vida_util_macho_reproductor
+from routes.rutas_bovinos import get_current_user
 from schemas.schemas_bovinos import Esquema_bovinos, esquema_produccion_levante, \
     esquema_produccion_ceba, esquema_datos_muerte, esquema_modelo_ventas, esquema_arbol_genealogico, \
     esquema_modelo_Reporte_Pesaje, esquema_produccion_leche, esquema_veterinaria, esquema_veterinaria_evoluciones, \
     esquema_partos, esquema_macho_reproductor, esquema_indicadores, esquema_vientres_aptos, UserOut, UserAuth, Usuarios, \
     UsuariosInDB, TokenSchema, TokenPayload, TokenData, esquema_descarte, esquema_modelo_compra, \
-    esquema_historial_perdida_terneros
+    esquema_historial_perdida_terneros, Esquema_Usuario
 from sqlalchemy import update, between, func
 from starlette.status import HTTP_204_NO_CONTENT
 from datetime import date, datetime, timedelta
@@ -95,7 +96,7 @@ Historial_Perdida_Compras = APIRouter()
 
 
 @Historial_Perdida_Compras.get("/listar_tabla_historial_perdida_compras",response_model=list[esquema_historial_perdida_terneros])
-async def listar_tabla_perdida_terneros():
+async def listar_tabla_perdida_terneros(current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
         perdida_Terneros1()
         items_Perdida_terneros = condb.execute(modelo_historial_perdida_terneros.select()).fetchall()

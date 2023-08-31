@@ -7,8 +7,9 @@ from config.db import condb, session
 # # importa el esquema de los bovinos
 from models.modelo_bovinos import  modelo_levante
 from fastapi import  status,  APIRouter, Response
-
-from routes.rutas_bovinos import eliminarduplicados
+from fastapi import  Depends
+from routes.rutas_bovinos import eliminarduplicados, get_current_user
+from schemas.schemas_bovinos import Esquema_Usuario
 
 # Configuracion de la libreria para los logs de sinarca
 # Crea un objeto logger
@@ -32,7 +33,7 @@ Funcion crear Levante
 @levante.post(
     "/crear_prod_levante/{id_bovino}/{proposito}",
     status_code=status.HTTP_201_CREATED)
-async def CrearProdLevante(id_bovino: str,proposito:str):
+async def CrearProdLevante(id_bovino: str,proposito:str,current_user: Esquema_Usuario = Depends(get_current_user)):
     eliminarduplicados()
 
     try:

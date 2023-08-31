@@ -10,7 +10,9 @@ from starlette.status import HTTP_204_NO_CONTENT
 from config.db import  session
 
 from fastapi import APIRouter
-
+from fastapi import  Depends
+from routes.rutas_bovinos import get_current_user
+from schemas.schemas_bovinos import Esquema_Usuario
 
 # Configuracion de la libreria para los logs de sinarca
 # Crea un objeto logger
@@ -28,10 +30,11 @@ logger.addHandler(file_handler)
 Eliminar_Bovino = APIRouter()
 
 @Eliminar_Bovino.delete("/Eliminar_Bovino/{id_bovino}", status_code=HTTP_204_NO_CONTENT)
-async def Eliminar_total(id_bovino: str):
+async def Eliminar_total(id_bovino: str,current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
 
        eliminacionBovino(id_bovino)
+
 
     except Exception as e:
         logger.error(f'al intentar eliminar General un animal: {e}')

@@ -7,12 +7,13 @@ from sqlalchemy import func, desc, asc
 from Lib.cuvas_lactancias import Reporte_Curvas_lactancia_Mensuales_General
 # # importa la conexion de la base de datos
 from config.db import condb, session
-
+from fastapi import  Depends
 
 from fastapi import  status,  APIRouter, Response
 
 from models.modelo_bovinos import modelo_litros_leche, modelo_reporte_curva_lactancia_General
-from schemas.schemas_bovinos import esquema_reporte_curva_lactancia_General
+from routes.rutas_bovinos import get_current_user
+from schemas.schemas_bovinos import esquema_reporte_curva_lactancia_General, Esquema_Usuario
 
 # Configuracion de la libreria para los logs de sinarca
 # Crea un objeto logger
@@ -32,7 +33,7 @@ Curvas_Lantacia = APIRouter()
 
 
 @Curvas_Lantacia.get("/CurvasLactancia/{id_bovino}",response_model=list[esquema_reporte_curva_lactancia_General])
-async def Listar_curvas_lactancia(id_bovino:str):
+async def Listar_curvas_lactancia(id_bovino:str,current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
         Reporte_Curvas_lactancia_Mensuales_General()
 
