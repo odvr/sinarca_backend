@@ -7,29 +7,17 @@ Librerias requeridas
 
 import logging
 from http.client import HTTPException
-
+from sqlalchemy.orm import Session
 from fastapi import APIRouter, Response
-
-from Lib.actualizacion_peso import actualizacion_peso
-from Lib.endogamia import endogamia
-from Lib.Lib_Intervalo_Partos import intervalo_partos, promedio_intervalo_partos
-from Lib.funcion_vientres_aptos import vientres_aptos
 # importa la conexion de la base de datos
-from config.db import condb, session
+from config.db import get_session
 # importa el esquema de los bovinos
-from models.modelo_bovinos import modelo_bovinos_inventario, modelo_veterinaria, modelo_leche, modelo_levante, \
-    modelo_ventas, modelo_datos_muerte, \
-    modelo_indicadores, modelo_ceba, modelo_macho_reproductor, modelo_carga_animal_y_consumo_agua, modelo_datos_pesaje, \
-    modelo_capacidad_carga, modelo_calculadora_hectareas_pastoreo, modelo_partos, modelo_vientres_aptos, \
-    modelo_descarte, modelo_users, modelo_arbol_genealogico, modelo_litros_leche
-from schemas.schemas_bovinos import Esquema_bovinos,User, esquema_produccion_leche, esquema_produccion_levante,TokenSchema,esquema_descarte, \
-    esquema_produccion_ceba
-from sqlalchemy import select, insert, values, update, bindparam, between, join, func, null
-from starlette.status import HTTP_204_NO_CONTENT
-from datetime import date, datetime, timedelta
+from models.modelo_bovinos import modelo_bovinos_inventario, modelo_leche,modelo_litros_leche
+
+from sqlalchemy import  func
 
 
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi.security import OAuth2PasswordBearer
 
 from fastapi import  status, HTTPException, Depends
 
@@ -67,7 +55,7 @@ logger.addHandler(file_handler)
 #from twilio.rest import Client
 """la siguinete funcion determina e promedio de produccion de litros de leche
 de cada animal"""
-def promedio_litros_leche():
+def promedio_litros_leche(session=Session):
     try:
         # Realiza el join co la tabla de bovinos (solo se veran los id de los bovinos)
         # como la tabla de litros_leche puede tener un id repetido mas de una vez, se utiliza el conjunto o set

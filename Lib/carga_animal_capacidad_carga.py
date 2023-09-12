@@ -19,7 +19,7 @@ from Lib.funcion_litros_por_raza import litros_por_raza
 from Lib.funcion_peso_por_raza import peso_segun_raza
 from Lib.funcion_vientres_aptos import vientres_aptos
 # importa la conexion de la base de datos
-from config.db import condb, session
+from sqlalchemy.orm import Session
 # importa el esquema de los bovinos
 from models.modelo_bovinos import modelo_bovinos_inventario,modelo_veterinaria, modelo_leche, modelo_levante,modelo_ventas,modelo_datos_muerte, \
     modelo_indicadores, modelo_ceba, modelo_macho_reproductor, modelo_carga_animal_y_consumo_agua,modelo_datos_pesaje, \
@@ -68,7 +68,7 @@ logger.addHandler(file_handler)
 
 #from twilio.rest import Client
 
-def carga_animal():
+def carga_animal(session:Session):
   try:
       # join  tabla de bovinos y tabla de carga animal
       consulta_bovinos = session.query(modelo_bovinos_inventario).\
@@ -150,7 +150,7 @@ def carga_animal():
 
 """funcion de capacidad de carga"""
 
-def capacidad_carga():
+def capacidad_carga(session:Session):
   try:
     # consulta del resultado del aforo
     consulta_aforo = session.query(modelo_capacidad_carga). \

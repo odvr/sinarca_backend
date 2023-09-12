@@ -9,9 +9,7 @@ import logging
 
 from fastapi import APIRouter
 from fastapi.security import OAuth2PasswordBearer
-
-# importa la conexion de la base de datos
-from config.db import condb, session
+from sqlalchemy.orm import Session
 # importa el esquema de los bovinos
 from models.modelo_bovinos import modelo_bovinos_inventario, modelo_vientres_aptos, modelo_leche
 
@@ -48,7 +46,7 @@ que no tengan categoria de hembra de levante"""
 #Advertencia: ara que se jeceute corectamente esta funcion,
 # debe haberser ejecutado la funcion peso_segun_raza() y
 # tipo_ganado_leche()
-def vientres_aptos():
+def vientres_aptos(session: Session):
   try:
       #la siguiente consulta trae los animales hembras vacios
       consulta_vientres = session.query(modelo_leche.c.id_bovino,modelo_bovinos_inventario.c.edad,

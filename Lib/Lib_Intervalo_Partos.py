@@ -10,11 +10,8 @@ from http.client import HTTPException
 
 from fastapi import APIRouter, Response
 
-from Lib.actualizacion_peso import actualizacion_peso
-from Lib.endogamia import endogamia
-from Lib.funcion_vientres_aptos import vientres_aptos
 # importa la conexion de la base de datos
-from config.db import condb, session
+from sqlalchemy.orm import Session
 # importa el esquema de los bovinos
 from models.modelo_bovinos import modelo_bovinos_inventario, modelo_veterinaria, modelo_leche, modelo_levante, \
     modelo_ventas, modelo_datos_muerte, \
@@ -66,7 +63,7 @@ logger.addHandler(file_handler)
 #from twilio.rest import Client
 """la siguiente funcion calcula los intervalos de partos de cada animal y los inserta
 en la base de datos"""
-def intervalo_partos():
+def intervalo_partos(session=Session):
     try:
         # Realiza el join co la tabla de bovinos (solo se veran los id de los bovinos)
         #como la tabla de historial de partos puede tener un id repetido mas de una vez, se utiliza el conjunto o set
@@ -86,7 +83,7 @@ def intervalo_partos():
             session.commit()
             #esta consulta determina cual es el primer parto del bbovino
             #para ello ordena las fechas de registro de partos desde las mas antiguas y toma la fecha mas antigua
-            consulta_fecha_primer_parto = list(condb.execute(modelo_historial_partos.select(). \
+            consulta_fecha_primer_parto = list(session.execute(modelo_historial_partos.select(). \
                                            where(modelo_historial_partos.columns.id_bovino == id_bovino_partos). \
                                            order_by(asc(modelo_historial_partos.columns.fecha_parto))).first())
             #actualizacion del campo
@@ -196,7 +193,7 @@ def intervalo_partos():
         session.close()
 
 """la siguiente funcion calcula el intervalo de parto promedio de cada animal"""
-def promedio_intervalo_partos():
+def promedio_intervalo_partos(session=Session):
     try:
         # Realiza el join co la tabla de bovinos (solo se veran los id de los bovinos)
         # como la tabla de intervalos de parto puede tener un id repetido mas de una vez, se utiliza el conjunto o set
@@ -245,3 +242,44 @@ def promedio_intervalo_partos():
         raise
     finally:
         session.close()
+
+
+
+"""la siguiente funcion es una calculadora que determina la fecha aproximada de parto
+de un animal en base a su fecha de preñez"""
+def fecha_aproximada_parto(session=Session):
+  try:
+    # join de tablas
+
+
+    consulta_vacas = session.query(modelo_partos.c.id_bovino,modelo_partos.c.fecha_estimada_prenez, modelo_bovinos_inventario.c.edad,
+                                     modelo_bovinos_inventario.c.peso, modelo_bovinos_inventario.c.estado). \
+        join(modelo_partos,modelo_partos.c.id_bovino == modelo_bovinos_inventario.c.id_bovino).all()
+    #recorrer los campos
+    for i in consulta_vacas:
+        # Toma el ID del bovino en este caso es el campo 0
+        id = i[0]
+        # Toma la edad del animal en este caso es el campo 1
+        fecha_estimada_prenez = i[1]
+        # Toma la edad del animal en este caso es el campo 1
+        edad = i[2]
+        # Toma el peso del animal en este caso es el campo 2
+        peso = i[3]
+        # Toma el estado del animal en este caso es el campo 3
+        estado = i[4]
+        #calculo de la fecha aproximada de parto (la gestacion dura paorximadamente 280 dias)
+        if estado=="Vivo":
+          fecha_estimada_parto = fecha_estimada_prenez + timedelta(280)
+        else:
+          fecha_estimada_parto = None
+        #actualizacion de campos
+        session.execute(modelo_partos.update().values(fecha_estimada_parto=fecha_estimada_parto,edad=edad,
+                                                      peso=peso). \
+                        where(modelo_partos.columns.id_bovino == id))
+
+        session.commit()
+  except Exception as e:
+      logger.error(f'Error Funcion fecha_aproximada_parto: {e}')
+      raise
+  finally:
+      session.close()

@@ -6,13 +6,13 @@ Librerias requeridas
 '''
 
 import logging
-
+from sqlalchemy.orm import Session
 from fastapi import APIRouter
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy import desc
 
 # importa la conexion de la base de datos
-from config.db import condb,session
+from config.db import   get_session
 # importa el esquema de los bovinos
 from models.modelo_bovinos import modelo_datos_pesaje, modelo_bovinos_inventario
 
@@ -49,7 +49,7 @@ logger.addHandler(file_handler)
 """la siguiente funcion consulta los pesos de cada animal, toma el ultimo peso registrado
 segun fecha y lo actualiza en el campo peso de la tabla de bovinos"""
 
-def actualizacion_peso():
+def actualizacion_peso(session: Session):
     try:
 
 
@@ -66,7 +66,7 @@ def actualizacion_peso():
             # Realiza la consulta general de la tabla de registro de pesos
             #la consulta esta ordenada segun la fecha mas reciente
             # la consulta solo muestra los valores asociados a la fecha mas reciente
-            consulta_pesos =  list(condb.execute(modelo_datos_pesaje.select().\
+            consulta_pesos =  list(session.execute(modelo_datos_pesaje.select().\
                 where(modelo_datos_pesaje.columns.id_bovino==id).\
                     order_by(desc(modelo_datos_pesaje.columns.fecha_pesaje))).first())
             # actualizacion del campo
@@ -74,11 +74,11 @@ def actualizacion_peso():
             #el campo de peso tiene la posicion 3
             #el campo de id bovino tiene la posicion 1
             # se actualizara el peso en el id igual al de la lista
-            condb.execute(modelo_bovinos_inventario.update().values(peso=consulta_pesos[3]).where(
+            session.execute(modelo_bovinos_inventario.update().values(peso=consulta_pesos[3]).where(
                 modelo_bovinos_inventario.columns.id_bovino == consulta_pesos[1]))
-            condb.commit()
+            session.commit()
     except Exception as e:
         logger.error(f'Error Funcion actualizacion_peso: {e}')
         raise
     finally:
-        condb.close()
+        session.close()

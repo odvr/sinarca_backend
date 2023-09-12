@@ -4,7 +4,7 @@ Librerias requeridas
 import logging
 from sqlalchemy import func,and_
 # # importa la conexion de la base de datos
-from config.db import session, condb
+from sqlalchemy.orm import Session
 from datetime import datetime  # Importar el módulo datetime
 from models.modelo_bovinos import modelo_litros_leche, modelo_reporte_curva_lactancia_General
 # Configuracion de la libreria para los logs de sinarca
@@ -22,7 +22,7 @@ logger.addHandler(file_handler)
 """
 La siguiente funcion permite tomar el promedio mensual de todos los animales que se encuentran en la tabla de Reportes de Listros Diarios
 """
-def Reporte_Curvas_lactancia_Mensuales_General():
+def Reporte_Curvas_lactancia_Mensuales_General(session:Session):
  try:
     # Calcular el promedio mensual de litros de leche en MariaDB por cada ID de cliente
     resultados_mensuales = session.query(
@@ -43,7 +43,7 @@ def Reporte_Curvas_lactancia_Mensuales_General():
         fecha_actual = datetime.now()
 
         # Verificar si ya existe un registro con el mismo año, mes y promedio para el mismo bovino
-        consulta = condb.execute(
+        consulta = session.execute(
             modelo_reporte_curva_lactancia_General.select().where(
                 and_(
                     modelo_reporte_curva_lactancia_General.columns.id_bovino == id_bovino,

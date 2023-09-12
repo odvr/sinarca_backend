@@ -11,7 +11,7 @@ from fastapi import APIRouter
 from fastapi.security import OAuth2PasswordBearer
 
 # importa la conexion de la base de datos
-from config.db import condb
+from sqlalchemy.orm import Session
 # importa el esquema de los bovinos
 from models.modelo_bovinos import modelo_arbol_genealogico
 
@@ -47,7 +47,7 @@ logger.addHandler(file_handler)
 
 
 """A continuacion se muestran las funciones que determinan los lazos familiares"""
-def abuelo_materno():
+def abuelo_materno(condb: Session):
     try:
         # Realiza la consulta general de la tabla de arbol genealogico
         consulta_bovinos = condb.execute(modelo_arbol_genealogico.select()).fetchall()
@@ -83,7 +83,7 @@ def abuelo_materno():
         condb.close()
 
 
-def abuela_materna():
+def abuela_materna(condb: Session):
     try:
         # Realiza la consulta general de la tabla de arbol genealogico
         consulta_bovinos = condb.execute(modelo_arbol_genealogico.select()).fetchall()
@@ -118,7 +118,7 @@ def abuela_materna():
     finally:
         condb.close()
 
-def abuelo_paterno():
+def abuelo_paterno(condb: Session):
     try:
         # Realiza la consulta general de la tabla de arbol genealogico
         consulta_bovinos = condb.execute(modelo_arbol_genealogico.select()).fetchall()
@@ -154,7 +154,7 @@ def abuelo_paterno():
         condb.close()
 
 
-def abuela_paterna():
+def abuela_paterna(condb: Session):
     try:
         # Realiza la consulta general de la tabla de arbol genealogico
         consulta_bovinos = condb.execute(modelo_arbol_genealogico.select()).fetchall()
@@ -190,7 +190,7 @@ def abuela_paterna():
     finally:
         condb.close()
 
-def bisabuelo_materno():
+def bisabuelo_materno(condb: Session):
     try:
         # Realiza la consulta general de la tabla de arbol genealogico
         consulta_bovinos = condb.execute(modelo_arbol_genealogico.select()).fetchall()
@@ -228,7 +228,7 @@ def bisabuelo_materno():
     finally:
         condb.close()
 
-def biabuelo_paterno():
+def biabuelo_paterno(condb: Session):
     try:
         # Realiza la consulta general de la tabla de arbol genealogico
         consulta_bovinos = condb.execute(modelo_arbol_genealogico.select()).fetchall()
@@ -266,15 +266,15 @@ def biabuelo_paterno():
 
 
 """A continuacion se muestra la funcion de indice de endogamia"""
-def endogamia():
+def endogamia(condb: Session):
  #para poder realizar esta funcion correctamente, los lazos familiares y sus campos deben estar listos y llenados
  #por lo tanto se debe llamar a las funcies que establecen dichos lazos familiares
- abuelo_materno()
- abuela_materna()
- abuelo_paterno()
- abuela_paterna()
- bisabuelo_materno()
- biabuelo_paterno()
+ abuelo_materno(condb=condb)
+ abuela_materna(condb=condb)
+ abuelo_paterno(condb=condb)
+ abuela_paterna(condb=condb)
+ bisabuelo_materno(condb=condb)
+ biabuelo_paterno(condb=condb)
  try:
      # Realiza la consulta general de la tabla de arbol genealogico
      consulta_bovinos = condb.execute(modelo_arbol_genealogico.select()).fetchall()

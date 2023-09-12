@@ -10,26 +10,12 @@ from http.client import HTTPException
 
 from fastapi import APIRouter, Response
 
-from Lib.actualizacion_peso import actualizacion_peso
-from Lib.endogamia import endogamia
-from Lib.funcion_IEP_por_raza import IEP_por_raza
-from Lib.Lib_Intervalo_Partos import intervalo_partos, promedio_intervalo_partos
-from Lib.funcion_litros_leche import promedio_litros_leche
-from Lib.funcion_litros_por_raza import litros_por_raza
-from Lib.funcion_vientres_aptos import vientres_aptos
 # importa la conexion de la base de datos
-from config.db import condb, session
+from sqlalchemy.orm import Session
 # importa el esquema de los bovinos
-from models.modelo_bovinos import modelo_bovinos_inventario, modelo_veterinaria, modelo_leche, modelo_levante, \
-    modelo_ventas, modelo_datos_muerte, \
-    modelo_indicadores, modelo_ceba, modelo_macho_reproductor, modelo_carga_animal_y_consumo_agua, modelo_datos_pesaje, \
-    modelo_capacidad_carga, modelo_calculadora_hectareas_pastoreo, modelo_partos, modelo_vientres_aptos, \
-    modelo_descarte, modelo_users, modelo_arbol_genealogico, modelo_orden_peso
-from schemas.schemas_bovinos import Esquema_bovinos,User, esquema_produccion_leche, esquema_produccion_levante,TokenSchema,esquema_descarte, \
-    esquema_produccion_ceba
-from sqlalchemy import select, insert, values, update, bindparam, between, join, func, null
-from starlette.status import HTTP_204_NO_CONTENT
-from datetime import date, datetime, timedelta
+from models.modelo_bovinos import modelo_bovinos_inventario,modelo_orden_peso
+
+from sqlalchemy import  between, func
 
 
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
@@ -73,7 +59,7 @@ logger.addHandler(file_handler)
  fin de obtener un listado de animales ordenado del mas pesado al menos pesado segun su raza
   esta funcion solo aplicara para animales con edad mayor o igual a 24 meses que es la edad donde
   se considera que han alcanzado su peso adulto o estan por alcanzarlo"""
-def peso_segun_raza():
+def peso_segun_raza(session: Session):
     try:
         #obtencion de un listado de todas las razas a trabajar
         razas =  list(set(session.query(modelo_bovinos_inventario.columns.raza). \

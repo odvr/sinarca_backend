@@ -96,11 +96,11 @@ Historial_Perdida_Compras = APIRouter()
 
 
 @Historial_Perdida_Compras.get("/listar_tabla_historial_perdida_compras",response_model=list[esquema_historial_perdida_terneros])
-async def listar_tabla_perdida_terneros(current_user: Esquema_Usuario = Depends(get_current_user)):
+async def listar_tabla_perdida_terneros():
     try:
         perdida_Terneros1()
         items_Perdida_terneros = condb.execute(modelo_historial_perdida_terneros.select()).fetchall()
-
+        condb.close()
 
     except Exception as e:
         logger.error(f'Error al obtener Listar REGISTRO DE PERDIDA TERNEROS : {e}')

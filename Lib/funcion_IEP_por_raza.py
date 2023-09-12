@@ -6,35 +6,15 @@ Librerias requeridas
 '''
 
 import logging
-from http.client import HTTPException
 
-from fastapi import APIRouter, Response
 
-from Lib.actualizacion_peso import actualizacion_peso
-from Lib.endogamia import endogamia
-from Lib.Lib_Intervalo_Partos import intervalo_partos, promedio_intervalo_partos
-from Lib.funcion_litros_leche import promedio_litros_leche
-from Lib.funcion_vientres_aptos import vientres_aptos
-# importa la conexion de la base de datos
-from config.db import condb, session
+from fastapi import APIRouter
+
+
 # importa el esquema de los bovinos
-from models.modelo_bovinos import modelo_bovinos_inventario, modelo_veterinaria, modelo_leche, modelo_levante, \
-    modelo_ventas, modelo_datos_muerte, \
-    modelo_indicadores, modelo_ceba, modelo_macho_reproductor, modelo_carga_animal_y_consumo_agua, modelo_datos_pesaje, \
-    modelo_capacidad_carga, modelo_calculadora_hectareas_pastoreo, modelo_partos, modelo_vientres_aptos, \
-    modelo_descarte, modelo_users, modelo_arbol_genealogico, modelo_orden_IEP
-from schemas.schemas_bovinos import Esquema_bovinos,User, esquema_produccion_leche, esquema_produccion_levante,TokenSchema,esquema_descarte, \
-    esquema_produccion_ceba
-from sqlalchemy import select, insert, values, update, bindparam, between, join, func, null
-from starlette.status import HTTP_204_NO_CONTENT
-from datetime import date, datetime, timedelta
-
-
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-
-from fastapi import  status, HTTPException, Depends
-
-oauth2_scheme = OAuth2PasswordBearer("/token")
+from models.modelo_bovinos import modelo_bovinos_inventario,  modelo_leche,modelo_indicadores, modelo_orden_IEP
+from sqlalchemy.orm import Session
+from sqlalchemy import  func
 
 
 
@@ -73,7 +53,7 @@ entre el intervalo entre partos promedio de un animal con el
   el fin de mostrar cuales son los animales mejores en terminos de
   su raza"""
 
-def IEP_por_raza():
+def IEP_por_raza(session: Session):
     try:
        # la siguiente consulta trae el listado de razas de los animales en el modulo de leche
        razas_IEP_leche = list(set(session.query(modelo_bovinos_inventario.c.raza). \

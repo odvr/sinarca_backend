@@ -13,17 +13,22 @@ from sqlalchemy.orm import sessionmaker
 Registra tu base de datos siguiendo los parametros en el ejemplo:
 mariadb+mariadbconnector://usuario:password@IPbasededatos:puerto/nombreBasededatos"
 """
-try:
-    engine = sqlalchemy.create_engine("mariadb+mariadbconnector://root:1q2w3e4r@sinarcadb.cc3ho0ocanpp.us-east-1.rds.amazonaws.com:3306/sinarca")
-    #Session = sessionmaker(engine)
+engine = sqlalchemy.create_engine("mariadb+mariadbconnector://root:1q2w3e4r@localhost:3306/sinarcas")
+meta = MetaData()
+def get_session():
+    engine = sqlalchemy.create_engine("mariadb+mariadbconnector://root:1q2w3e4r@localhost:3306/sinarcas")
+    try:
 
-    meta = MetaData()
-    # llama esta variable cuando quieras interactuar con la base de datos
-    Session = sessionmaker(bind=engine)
-    session = Session()
-    condb = Session()
-except:
-    print("Valida las credenciales de la base de datos")
+        Session = sessionmaker(bind=engine)
+        session = Session()
+        return session
+    except Exception as e:
+        raise e
+
+
+
+
+
 
 
 

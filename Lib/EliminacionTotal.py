@@ -8,7 +8,7 @@ import logging
 
 
 # importa la conexion de la base de datos
-from config.db import session
+from sqlalchemy.orm import Session
 # importa el esquema de los bovinos
 from models.modelo_bovinos import modelo_bovinos_inventario, modelo_veterinaria, modelo_leche, modelo_levante, \
     modelo_ventas, modelo_datos_muerte, \
@@ -38,7 +38,7 @@ file_handler.setFormatter(formatter)
 logger.addHandler(file_handler)
 
 """la siguiente funcion tiene como objetivo eliminar el bovino que se desee"""
-def eliminacionBovino(id_bov_eliminar):
+def eliminacionBovino(id_bov_eliminar,session: Session):
   try:
       #consulta de id de parametro en la base de datos
       #consulta de bovino en la tabla de inventario

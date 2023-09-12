@@ -116,13 +116,13 @@ class Esquema_bovinos(BaseModel):
         env_file = ".env"
 
 class esquema_produccion_ceba(BaseModel):
-    id_ceba:int
-    proposito: str
-    id_bovino : str
-    edad: int
-    peso: int
-    estado: str
-    estado_optimo_ceba:str
+    id_ceba: int
+    proposito: Optional[str] = None
+    id_bovino : Optional[str] = None
+    edad: Optional[int] = None
+    peso: Optional[int] = None
+    estado: Optional[str] = None
+    estado_optimo_ceba: Optional[str] = None
     class Config:
         orm_mode = True
         env_file = ".env"
@@ -311,7 +311,7 @@ class esquema_descarte(BaseModel):
     id_bovino: str
     edad:Optional[int] = None
     peso:Optional[float] = None
-    razon_descarte: str
+    razon_descarte:Optional[str] = None
     class Config:
         orm_mode = True
         env_file = ".env"

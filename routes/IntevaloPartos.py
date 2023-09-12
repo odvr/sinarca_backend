@@ -4,11 +4,11 @@ Librerias requeridas
 import logging
 from Lib.Lib_Intervalo_Partos import intervalo_partos, promedio_intervalo_partos
 # # importa la conexion de la base de datos
-from config.db import condb, session
+from config.db import get_session
 # # importa el esquema de los bovinos
 from models.modelo_bovinos import  modelo_historial_intervalo_partos
 from fastapi import APIRouter
-
+from sqlalchemy.orm import Session
 from routes.rutas_bovinos import get_current_user
 from schemas.schemas_bovinos import esquema_historial_partos, esquema_intervalo_partos, Esquema_Usuario
 
@@ -27,19 +27,24 @@ file_handler.setFormatter(formatter)
 logger.addHandler(file_handler)
 
 IntevaloPartos = APIRouter()
-
-@IntevaloPartos.get("/listar_tabla_Intervalo_Partos",response_model=list[esquema_intervalo_partos] )
-async def listar_tabla_Intervalo_Partos(current_user: Esquema_Usuario = Depends(get_current_user)):
+def get_database_session():
+    db = get_session()
     try:
-        intervalo_partos()
-        promedio_intervalo_partos()
-        itemsListarIntevaloPartos = session.execute(modelo_historial_intervalo_partos.select()).all()
+        yield db
+    finally:
+        db.close()
+@IntevaloPartos.get("/listar_tabla_Intervalo_Partos",response_model=list[esquema_intervalo_partos] )
+async def listar_tabla_Intervalo_Partos(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+    try:
+        intervalo_partos(session=db)
+        promedio_intervalo_partos(session=db)
+        itemsListarIntevaloPartos = db.execute(modelo_historial_intervalo_partos.select()).all()
 
     except Exception as e:
         logger.error(f'Error al obtener TABLA DE ENDOGAMIA: {e}')
         raise
     finally:
-        session.close()
+        db.close()
     return itemsListarIntevaloPartos
 
 

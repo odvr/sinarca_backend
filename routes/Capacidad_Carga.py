@@ -1,12 +1,13 @@
 '''
 Librerias requeridas
 '''
+from sqlalchemy.orm import Session
 import logging
 from Lib.Lib_Intervalo_Partos import intervalo_partos
 from Lib.actualizacion_peso import actualizacion_peso
 from Lib.carga_animal_capacidad_carga import carga_animal,capacidad_carga
 # # importa la conexion de la base de datos
-from config.db import condb, session
+from config.db import get_session
 # # importa el esquema de los bovinos
 from models.modelo_bovinos import modelo_capacidad_carga, modelo_carga_animal_y_consumo_agua
 from fastapi import  status,  APIRouter, Response
@@ -30,24 +31,30 @@ file_handler.setFormatter(formatter)
 logger.addHandler(file_handler)
 
 capacidad_carga_rutas = APIRouter()
-
+def get_database_session():
+    db = get_session()
+    try:
+        yield db
+    finally:
+        db.close()
 
 
 @capacidad_carga_rutas.get("/listar_capacidad_carga", response_model=list[esquema_capacidad_carga] )
-async def listar_capacidad_carga(current_user: Esquema_Usuario = Depends(get_current_user)):
+async def listar_capacidad_carga(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
 
     try:
 
-        carga_animal()
-        capacidad_carga()
-        actualizacion_peso()
-        itemscargaAnimales = session.execute(modelo_capacidad_carga.select()).all()
+        carga_animal(session=db)
+        capacidad_carga(session=db)
+        actualizacion_peso(session=db)
+        itemscargaAnimales = db.execute(modelo_capacidad_carga.select()).all()
+
 
     except Exception as e:
         logger.error(f'Error al obtener inventario de LISTAR CApacidad Carga: {e}')
         raise
     finally:
-        session.close()
+        db.close()
     return itemscargaAnimales
 
 
@@ -55,19 +62,19 @@ async def listar_capacidad_carga(current_user: Esquema_Usuario = Depends(get_cur
 
 
 @capacidad_carga_rutas.get("/listar_carga_animales", response_model=list[esquema_carga_animal_y_consumo_agua] )
-async def listar_carga_animales(current_user: Esquema_Usuario = Depends(get_current_user)):
+async def listar_carga_animales(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
 
     try:
         #consumo_global_agua_y_totalidad_unidades_animales()
-        carga_animal()
-        capacidad_carga()
-        itemscargaAnimales = session.execute(modelo_carga_animal_y_consumo_agua.select()).all()
+        carga_animal(session=db)
+        capacidad_carga(session=db)
+        itemscargaAnimales = db.execute(modelo_carga_animal_y_consumo_agua.select()).all()
 
     except Exception as e:
         logger.error(f'Error al obtener inventario de LISTAR CARGA ANIMALES: {e}')
         raise
     finally:
-        session.close()
+        db.close()
     return itemscargaAnimales
 
 
@@ -75,7 +82,7 @@ async def listar_carga_animales(current_user: Esquema_Usuario = Depends(get_curr
 
 
 @capacidad_carga_rutas.post("/crear_capacidad_carga/{medicion_aforo}/{hectareas_predio}/{tipo_de_muestra}", status_code=status.HTTP_201_CREATED)
-async def crear_capacidad_carga(medicion_aforo: float,hectareas_predio :float,tipo_de_muestra:str,current_user: Esquema_Usuario = Depends(get_current_user)):
+async def crear_capacidad_carga(medicion_aforo: float,hectareas_predio :float,tipo_de_muestra:str,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
 
 
     try:
@@ -83,15 +90,15 @@ async def crear_capacidad_carga(medicion_aforo: float,hectareas_predio :float,ti
 
         hectareas_forraje = update(modelo_capacidad_carga).where(modelo_capacidad_carga.c.id_capacidad == 1).values(
             medicion_aforo=medicion_aforo,hectareas_predio=hectareas_predio,tipo_de_muestra=tipo_de_muestra)
-        condb.execute(hectareas_forraje)
-        condb.commit()
-        carga_animal()
-        capacidad_carga()
+        db.execute(hectareas_forraje)
+        db.commit()
+        carga_animal(session=db)
+        capacidad_carga(session=db)
 
     except Exception as e:
         logger.error(f'Error al Crear CAPACIDAD CARGA: {e}')
         raise
     finally:
-        condb.close()
+        db.close()
 
     return Response(status_code=status.HTTP_201_CREATED)
