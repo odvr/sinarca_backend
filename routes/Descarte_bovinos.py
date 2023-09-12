@@ -49,7 +49,7 @@ def get_database_session():
 async def listarAnimalesDescarte(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
 
     try:
-
+        descarte(db=db)
         itemsAnimalesDescarte = db.execute(modelo_descarte.select()).all()
 
     except Exception as e:
@@ -64,10 +64,9 @@ async def listarAnimalesDescarte(db: Session = Depends(get_database_session),cur
 async def listar_contar_AnimalesDescarte(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
 
     try:
+        descarte(db=db)
 
-        #itemsAnimalesDescarte = session.execute(modelo_descarte).count()
-        itemsAnimalesDescarte = db.query(modelo_descarte). \
-            where(modelo_descarte.columns.id_bovino).count()
+        itemsAnimalesDescarte = db.query(modelo_descarte).where(modelo_descarte.columns.id_descarte).count()
 
     except Exception as e:
         logger.error(f'Error al obtener inventario de Anamales de Descarte: {e}')

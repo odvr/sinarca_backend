@@ -205,8 +205,8 @@ async def crear_Comentario(id_veterinaria:int,comentarios:str,fecha_comentario:d
 
 
 '''
-@Veterinaria.post("/Crear_Evolucion/{id_bovino}/{tratamiento_evolucion}/{fecha_evolucion}",status_code=200,tags=["Veterinaria"])
-async def crear_evolucion(id_bovino:str,tratamiento_evolucion:str,fecha_evolucion:date,db: Session = Depends(get_database_session),
+@Veterinaria.post("/Crear_Evolucion/{id_bovino}/{fecha_evolucion}",status_code=200,tags=["Veterinaria"])
+async def crear_evolucion(id_bovino:str,fecha_evolucion:date,db: Session = Depends(get_database_session),
         current_user: Esquema_Usuario = Depends(get_current_user) ):
 
     try:
@@ -215,14 +215,14 @@ async def crear_evolucion(id_bovino:str,tratamiento_evolucion:str,fecha_evolucio
                 modelo_veterinaria_evoluciones.columns.id_bovino == id_bovino)).first()
 
         if consulta is None:
-            ingresoEvolucion = modelo_veterinaria_evoluciones.insert().values(id_bovino=id_bovino,tratamiento_evolucion=tratamiento_evolucion,fecha_evolucion=fecha_evolucion)
+            ingresoEvolucion = modelo_veterinaria_evoluciones.insert().values(id_bovino=id_bovino,fecha_evolucion=fecha_evolucion)
 
             db.execute(ingresoEvolucion)
             db.commit()
         else:
 
             db.execute(modelo_veterinaria_evoluciones.update().where(modelo_veterinaria_evoluciones.c.id_bovino == id_bovino).values(
-                id_bovino=id_bovino,tratamiento_evolucion=tratamiento_evolucion,fecha_evolucion=fecha_evolucion))
+                id_bovino=id_bovino,fecha_evolucion=fecha_evolucion))
             db.commit()
 
 

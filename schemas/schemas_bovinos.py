@@ -288,7 +288,7 @@ class esquema_veterinaria(BaseModel):
 class esquema_veterinaria_evoluciones(BaseModel):
     id_evolucion: int
     id_bovino: str
-    tratamiento_evolucion: str
+    tratamiento_evolucion:Optional[str] = None
     fecha_evolucion: date
     class Config:
         orm_mode = True
@@ -298,7 +298,7 @@ class esquema_veterinaria_evoluciones(BaseModel):
 class esquema_veterinaria_comentarios(BaseModel):
     id_comentario: int
     id_veterinaria: int
-    comentarios: str
+    comentarios:Optional[str] = None
     fecha_comentario: date
     class Config:
         orm_mode = True
