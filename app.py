@@ -1,12 +1,14 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+
 from routes.Capacidad_Carga import capacidad_carga_rutas
 from routes.Ceba_Bovinos import Ceba_Bovinos
 from routes.Curvas_Lactancia import Curvas_Lantacia
 from routes.Datos_Compra import datos_compra
 from routes.Descarte_bovinos import bovinos_descarte
 from routes.Formulario_Bovinos import Formulario_Bovino
+from routes.Historial_Perdida_Terneros import Historial_Perdida_Terneros
 from routes.PartosAnimales import partos_bovinos
 from routes.Pesaje import pesaje
 from routes.Prod_leche import Produccion_Leche
@@ -70,11 +72,7 @@ app.include_router(ReproductorRutas)
 app.include_router(Vientres_Aptos)
 app.include_router(capacidad_carga_rutas)
 app.include_router(bovinos_descarte)
-
-
-
-
-#app.include_router(appArchivos)
+app.include_router(Historial_Perdida_Terneros)
 
 
 

@@ -54,3 +54,19 @@ async def inventario_bovinos_venta_id(id_bovino:str,db: Session = Depends(get_da
         db.close()
 
     return consulta
+
+
+@Ventas_Bovinos.get("/listar_tabla_ventas",response_model=list[esquema_modelo_ventas])
+async def listar_tabla_ventas(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+    try:
+
+        consultaVentas = db.query(modelo_ventas). \
+            filter(modelo_ventas.c.estado == "Vendido").all()
+
+    except Exception as e:
+        logger.error(f'Error al obtener Listar REGISTRO DE VENTAS : {e}')
+        raise
+    finally:
+        db.close()
+
+    return consultaVentas

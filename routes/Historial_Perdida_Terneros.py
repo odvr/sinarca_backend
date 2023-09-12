@@ -8,7 +8,7 @@ import math
 from http.client import HTTPException
 from typing import Annotated
 from fastapi import APIRouter, Response
-
+from sqlalchemy.orm import Session
 from Lib.actualizacion_peso import actualizacion_peso
 
 from Lib.endogamia import endogamia
@@ -17,7 +17,7 @@ from Lib.funcion_peso_por_raza import peso_segun_raza
 from Lib.funcion_vientres_aptos import vientres_aptos
 from Lib.perdida_Terneros import perdida_Terneros1
 # importa la conexion de la base de datos
-from config.db import condb, session
+from config.db import get_session
 # importa el esquema de los bovinos
 from models.modelo_bovinos import modelo_bovinos_inventario, modelo_veterinaria, modelo_leche, modelo_levante, \
     modelo_ventas, modelo_datos_muerte, \
@@ -92,20 +92,25 @@ from jose import jwt
 from fastapi import FastAPI, status, HTTPException
 
 
-Historial_Perdida_Compras = APIRouter()
-
-
-@Historial_Perdida_Compras.get("/listar_tabla_historial_perdida_compras",response_model=list[esquema_historial_perdida_terneros])
-async def listar_tabla_perdida_terneros():
+Historial_Perdida_Terneros = APIRouter()
+def get_database_session():
+    db = get_session()
     try:
-        perdida_Terneros1()
-        items_Perdida_terneros = condb.execute(modelo_historial_perdida_terneros.select()).fetchall()
-        condb.close()
+        yield db
+    finally:
+        db.close()
+
+@Historial_Perdida_Terneros.get("/listar_tabla_historial_perdida_terneros",response_model=list[esquema_historial_perdida_terneros])
+async def listar_tabla_perdida_terneros(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+    try:
+        perdida_Terneros1(db=db)
+        items_Perdida_terneros = db.execute(modelo_historial_perdida_terneros.select()).fetchall()
+        db.close()
 
     except Exception as e:
         logger.error(f'Error al obtener Listar REGISTRO DE PERDIDA TERNEROS : {e}')
         raise
     finally:
-        session.close()
+        db.close()
 
     return items_Perdida_terneros

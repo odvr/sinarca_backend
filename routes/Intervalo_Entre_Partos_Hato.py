@@ -70,7 +70,10 @@ async def listar_tabla_intervalo_entre_partos(db: Session = Depends(get_database
 
         if response:
             itemsintervalo_entre_partos = response[28]
+
             return itemsintervalo_entre_partos
+        elif response is None:
+            return 0
 
         else:
             raise HTTPException(status_code=404, detail="No se encontraron datos de IEP HATO")

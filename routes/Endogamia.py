@@ -117,3 +117,18 @@ async def crear_endogamia(id_bovino:str,id_bovino_madre: str,id_bovino_padre:str
     return Response(status_code=status.HTTP_201_CREATED)
 
 
+@Endogamia.delete("/eliminar_bovino_endogamia/{id_bovino}")
+async def Eliminar_endogamia(id_bovino: str,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+
+    try:
+
+
+        db.execute(modelo_arbol_genealogico.delete().where(modelo_arbol_genealogico.c.id_bovino == id_bovino))
+        db.commit()
+    except Exception as e:
+        logger.error(f'Error al intentar Eliminar Registro de Arbol Genialogico: {e}')
+        raise
+    finally:
+        db.close()
+
+    return
