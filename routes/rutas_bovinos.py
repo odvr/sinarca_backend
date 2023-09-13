@@ -6,7 +6,7 @@ Librerias requeridas
 import logging
 
 from http.client import HTTPException
-
+from sqlalchemy import and_
 from fastapi import APIRouter, Request
 
 from Lib.perdida_Terneros import perdida_Terneros1
@@ -171,7 +171,7 @@ async def animales_levante(db: Session = Depends(get_database_session),current_u
         # consulta de total de animales vivos con propósito de levante
         prop_levante = db.query(modelo_bovinos_inventario). \
             filter(modelo_bovinos_inventario.c.estado == "Vivo",
-                   modelo_bovinos_inventario.c.proposito == "Levante").count()
+                   modelo_bovinos_inventario.c.proposito == "Levante",modelo_bovinos_inventario.c.usuario_id == current_user).count()
         # actualización de campos
         db.execute(update(modelo_indicadores).
                     where(modelo_indicadores.c.id_indicadores == 1).
@@ -192,7 +192,7 @@ async def animales_ceba(db: Session = Depends(get_database_session),current_user
     # consulta de total de animales vivos con proposito de ceba
     prop_ceba = db.query(modelo_bovinos_inventario). \
         filter(modelo_bovinos_inventario.c.estado == "Vivo",
-               modelo_bovinos_inventario.c.proposito == "Ceba").count()
+               modelo_bovinos_inventario.c.proposito == "Ceba",modelo_bovinos_inventario.c.usuario_id == current_user).count()
     # actualizacion de campos
     db.execute(update(modelo_indicadores).
                     where(modelo_indicadores.c.id_indicadores == 1).
@@ -213,13 +213,17 @@ async def animales_edad_0_9(db: Session = Depends(get_database_session),current_
   try:
     # consulta y conteo de animales con edades entre 0 a 9 meses
     edades_0_9 = db.query(modelo_bovinos_inventario). \
-        where(between(modelo_bovinos_inventario.columns.edad, 0, 9)). \
-        filter(modelo_bovinos_inventario.c.estado == "Vivo").count()
+        where(and_(
+        between(modelo_bovinos_inventario.columns.edad, 0, 9),
+        modelo_bovinos_inventario.c.estado == "Vivo",
+        modelo_bovinos_inventario.c.usuario_id == current_user
+    )).count()
+
     # actualizacion de campos
     db.execute(update(modelo_indicadores).
                     where(modelo_indicadores.c.id_indicadores == 1).
                     values(animales_rango_edades_0_9=edades_0_9))
-    logger.info(f'Funcion animales_edad_0_9 {edades_0_9} ')
+
     db.commit()
     db.close()
   except Exception as e:
@@ -235,8 +239,12 @@ async def animales_edad_9_12(db: Session = Depends(get_database_session),current
   try:
     # consulta y conteo de animales con edades entre 10 a 12 meses
     edades_9_12 = db.query(modelo_bovinos_inventario). \
-        where(between(modelo_bovinos_inventario.columns.edad, 10, 12)). \
-        filter(modelo_bovinos_inventario.c.estado == "Vivo").count()
+        where(and_(
+        between(modelo_bovinos_inventario.columns.edad, 10, 12),
+        modelo_bovinos_inventario.c.estado == "Vivo",
+        modelo_bovinos_inventario.c.usuario_id == current_user
+    )).count()
+
     # actualizacion de campos
     db.execute(update(modelo_indicadores).
                     where(modelo_indicadores.c.id_indicadores == 1).
@@ -257,8 +265,12 @@ async def animales_edad_12_24(db: Session = Depends(get_database_session),curren
  try:
     # consulta y conteo de animales con edades entre 13 a 24 meses
     edades_12_24 = db.query(modelo_bovinos_inventario). \
-        where(between(modelo_bovinos_inventario.columns.edad, 13, 24)). \
-        filter(modelo_bovinos_inventario.c.estado == "Vivo").count()
+        where(and_(
+        between(modelo_bovinos_inventario.columns.edad, 13, 24),
+        modelo_bovinos_inventario.c.estado == "Vivo",
+        modelo_bovinos_inventario.c.usuario_id == current_user
+    )).count()
+
     # actualizacion de campos
     db.execute(update(modelo_indicadores).
                     where(modelo_indicadores.c.id_indicadores == 1).
@@ -279,8 +291,12 @@ async def animales_edad_24_36(db: Session = Depends(get_database_session),curren
     try:
         # consulta y conteo de animales con edades entre 25 a 36 meses
         edades_24_36 = db.query(modelo_bovinos_inventario). \
-            filter(modelo_bovinos_inventario.c.edad.between(25, 36)). \
-            filter(modelo_bovinos_inventario.c.estado == "Vivo").count()
+            where(and_(
+            between(modelo_bovinos_inventario.columns.edad, 25, 36),
+            modelo_bovinos_inventario.c.estado == "Vivo",
+            modelo_bovinos_inventario.c.usuario_id == current_user
+        )).count()
+
         # actualización de campos
         db.execute(update(modelo_indicadores).
                     where(modelo_indicadores.c.id_indicadores == 1).
@@ -297,8 +313,12 @@ async def animales_edad_mayor_a_36(db: Session = Depends(get_database_session),c
   try:
     # consulta y conteo de animales con edades igual o mayor a 37 meses
     edades_mayor_36 = db.query(modelo_bovinos_inventario). \
-        where(between(modelo_bovinos_inventario.columns.edad, 37, 500)). \
-        filter(modelo_bovinos_inventario.c.estado == "Vivo").count()
+        where(and_(
+        between(modelo_bovinos_inventario.columns.edad, 37, 500),
+        modelo_bovinos_inventario.c.estado == "Vivo",
+        modelo_bovinos_inventario.c.usuario_id == current_user
+    )).count()
+
     # actualizacion de campos
     db.execute(update(modelo_indicadores).
                     where(modelo_indicadores.c.id_indicadores == 1).
@@ -318,7 +338,7 @@ async def animales_sexo_macho(db: Session = Depends(get_database_session),curren
     # consulta de total de animales vivos con sexo macho
     machos = db.query(modelo_bovinos_inventario). \
         filter(modelo_bovinos_inventario.c.estado == "Vivo",
-               modelo_bovinos_inventario.c.sexo == "Macho").count()
+               modelo_bovinos_inventario.c.sexo == "Macho",modelo_bovinos_inventario.c.usuario_id == current_user).count()
     # actualizacion de campos
     db.execute(update(modelo_indicadores).
                     where(modelo_indicadores.c.id_indicadores == 1).
@@ -339,7 +359,7 @@ async def animales_sexo_hembra(db: Session = Depends(get_database_session),curre
     # consulta de total de animales vivos con sexo hembra
     hembras = db.query(modelo_bovinos_inventario). \
         filter(modelo_bovinos_inventario.c.estado == "Vivo",
-               modelo_bovinos_inventario.c.sexo == "Hembra").count()
+               modelo_bovinos_inventario.c.sexo == "Hembra",modelo_bovinos_inventario.c.usuario_id == current_user).count()
     # actualizacion de campos
     db.execute(update(modelo_indicadores).
                     where(modelo_indicadores.c.id_indicadores == 1).
@@ -358,12 +378,12 @@ async def animales_sexo_hembra(db: Session = Depends(get_database_session),curre
 async def animales_vendidos(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
         # consulta de total de animales vendidos
-        estado_vendido = db.query(modelo_bovinos_inventario).filter(modelo_bovinos_inventario.c.estado == "Vendido").count()
+        estado_vendido = db.query(modelo_bovinos_inventario).filter(modelo_bovinos_inventario.c.estado == "Vendido",modelo_bovinos_inventario.c.usuario_id == current_user).count()
         # actualización de campos
         db.execute(update(modelo_indicadores).
                     where(modelo_indicadores.c.id_indicadores == 1).
                     values(animales_vendidos=estado_vendido))
-        logger.info(f'Función animales_vendidos {estado_vendido} ')
+
         db.commit()
         db.close()
         return estado_vendido
@@ -379,7 +399,7 @@ async def animales_muertos(db: Session = Depends(get_database_session),current_u
   try:
     # consulta de total de animales muertos
     estado_muerto = db.query(modelo_bovinos_inventario). \
-        filter(modelo_bovinos_inventario.c.estado == "Muerto").count()
+        filter(modelo_bovinos_inventario.c.estado == "Muerto",modelo_bovinos_inventario.c.usuario_id == current_user).count()
     # actualizacion de campos
     db.execute(update(modelo_indicadores).
                     where(modelo_indicadores.c.id_indicadores == 1).

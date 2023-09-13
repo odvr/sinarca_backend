@@ -61,7 +61,7 @@ async def listar_tabla_ventas(db: Session = Depends(get_database_session),curren
     try:
 
         consultaVentas = db.query(modelo_ventas). \
-            filter(modelo_ventas.c.estado == "Vendido").all()
+            filter(modelo_ventas.c.estado == "Vendido",modelo_ventas.c.usuario_id == current_user).all()
 
     except Exception as e:
         logger.error(f'Error al obtener Listar REGISTRO DE VENTAS : {e}')

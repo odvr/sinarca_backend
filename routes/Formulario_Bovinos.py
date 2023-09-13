@@ -70,7 +70,9 @@ async def crear_bovinos(id_bovino:str,fecha_nacimiento:date,edad:int,raza:str,se
         proposito=proposito,
         mansedumbre=mansedumbre,
         estado=estado,
-        compra_bovino=compra_bovino
+        compra_bovino=compra_bovino,
+        usuario_id=current_user
+
                                                               )
         db.execute(ingreso)
 
@@ -107,7 +109,7 @@ async def crear_reporte_ventas(id_bovino:str,estado:str,numero_bono_venta:str,fe
             ingresoVentas = modelo_ventas.insert().values(id_bovino=id_bovino, estado=estado,
                                                           numero_bono_venta=numero_bono_venta, fecha_venta=fecha_venta,
                                                           precio_venta=precio_venta, razon_venta=razon_venta,
-                                                          medio_pago=medio_pago, comprador=comprador)
+                                                          medio_pago=medio_pago, comprador=comprador,usuario_id=current_user)
             db.execute(ingresoVentas)
             db.commit()
 
@@ -153,7 +155,7 @@ async def crear_registro_muerte(id_bovino:str,estado:str,fecha_muerte:date,razon
         if consulta is None:
             ingresoRegistroMuerte = modelo_datos_muerte.insert().values(id_bovino=id_bovino, estado=estado,
                                                                         fecha_muerte=fecha_muerte,
-                                                                        razon_muerte=razon_muerte)
+                                                                        razon_muerte=razon_muerte,usuario_id=current_user)
             db.execute(ingresoRegistroMuerte)
             db.commit()
 
@@ -191,7 +193,7 @@ async def CrearProdCeba(id_bovino: str,proposito:str,db: Session = Depends(get_d
                 modelo_ceba.columns.id_bovino == id_bovino)).first()
 
         if consulta is None:
-            ingresopceba = modelo_ceba.insert().values(id_bovino=id_bovino, proposito=proposito)
+            ingresopceba = modelo_ceba.insert().values(id_bovino=id_bovino, proposito=proposito,usuario_id=current_user)
             db.execute(ingresopceba)
             db.commit()
         else:
@@ -224,7 +226,7 @@ async def CrearCargaAnimal(id_bovino: str,db: Session = Depends(get_database_ses
     eliminarduplicados(db=db)
 
     try:
-        ingresoCargaAnimal = modelo_carga_animal_y_consumo_agua.insert().values(id_bovino=id_bovino)
+        ingresoCargaAnimal = modelo_carga_animal_y_consumo_agua.insert().values(id_bovino=id_bovino,usuario_id=current_user)
 
 
         db.execute(ingresoCargaAnimal)

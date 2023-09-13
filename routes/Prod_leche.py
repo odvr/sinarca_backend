@@ -261,7 +261,7 @@ async def vacas_prenadas(db: Session = Depends(get_database_session),current_use
 
 
 @Produccion_Leche.get("/Calcular_porcentaje_ordeno")
-async def porcentaje_ordeno(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+async def porcentaje_ordeno_calcular(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
         animales_no_ordeno(session=db)
         # consulta de animales ordenados y no ordenados
@@ -370,7 +370,7 @@ async def CrearProdLeche( id_bovino: str,
         if consulta is None:
             ingresopleche = modelo_leche.insert().values(id_bovino=id_bovino,
                                                           datos_prenez=datos_prenez,
-                                                         ordeno=ordeno, proposito=proposito)
+                                                         ordeno=ordeno, proposito=proposito,usuario_id=current_user)
 
             db.execute(ingresopleche)
             db.commit()

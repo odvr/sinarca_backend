@@ -105,11 +105,7 @@ class Esquema_bovinos(BaseModel):
     mansedumbre : str
     estado: str
     compra_bovino: Optional[str] = None
-
-
-
-
-
+    usuario_id:Optional[str] = None
     #Este Config La clase se utiliza para proporcionar configuraciones a Pydantic.
     class Config:
         orm_mode = True
@@ -123,6 +119,7 @@ class esquema_produccion_ceba(BaseModel):
     peso: Optional[int] = None
     estado: Optional[str] = None
     estado_optimo_ceba: Optional[str] = None
+    usuario_id: Optional[str] = None
     class Config:
         orm_mode = True
         env_file = ".env"
@@ -134,6 +131,8 @@ class esquema_produccion_levante(BaseModel):
     estado: str
     proposito: str
     estado_optimo_levante : str
+    usuario_id: Optional[str] = None
+
     class Config:
         orm_mode = True
         env_file = ".env"
@@ -150,6 +149,7 @@ class esquema_produccion_leche(BaseModel):
     num_partos: Optional[int] = None
     intervalo_entre_partos : Optional[float] = None
     tipo_ganado: Optional[str] = None
+    usuario_id: Optional[str] = None
     class Config:
         orm_mode = True
         env_file = ".env"
@@ -160,6 +160,7 @@ class esquema_datos_muerte(BaseModel):
     estado: str
     razon_muerte:str
     fecha_muerte:date
+    usuario_id: Optional[str] = None
     class Config:
         orm_mode = True
         env_file = ".env"
@@ -177,6 +178,7 @@ class esquema_arbol_genealogico(BaseModel):
     tipo_de_apareamiento:str
     consanguinidad:float
     notificacion:str
+    usuario_id: Optional[str] = None
     class Config:
         orm_mode = True
         env_file = ".env"
@@ -210,6 +212,7 @@ class esquema_indicadores(BaseModel):
     interpretacion_relacion_toros_vientres_aptos:Optional[str]
     total_unidades_animales:Optional[str] = None
     IEP_hato:Optional[float] = None
+    usuario_id: Optional[str] = None
     class Config:
         orm_mode = True
         env_file = ".env"
@@ -221,6 +224,7 @@ class esquema_macho_reproductor(BaseModel):
     peso: int
     estado: str
     fecha_vida_util: date
+    usuario_id: Optional[str] = None
     class Config:
         orm_mode = True
         env_file = ".env"
@@ -235,6 +239,7 @@ class esquema_modelo_ventas(BaseModel):
     razon_venta:str
     medio_pago: str
     comprador: str
+    usuario_id: Optional[str] = None
     class Config:
         orm_mode = True
         env_file = ".env"
@@ -250,6 +255,7 @@ class esquema_modelo_compra(BaseModel):
     razon_compra:str
     medio_pago_compra: str
     comprador: str
+    usuario_id: Optional[str] = None
     class Config:
         orm_mode = True
         env_file = ".env"
@@ -258,6 +264,7 @@ class esquema_modelo_Reporte_Pesaje(BaseModel):
     id_bovino: str
     fecha_pesaje: date
     peso:float
+    usuario_id: Optional[str] = None
     class Config:
         orm_mode = True
         env_file = ".env"
@@ -277,6 +284,7 @@ class esquema_veterinaria(BaseModel):
     tratamiento: str
     evolucion: str
     piel_pelaje:str
+    usuario_id: Optional[str] = None
     class Config:
         orm_mode = True
         env_file = ".env"
@@ -290,6 +298,7 @@ class esquema_veterinaria_evoluciones(BaseModel):
     id_bovino: str
     tratamiento_evolucion:Optional[str] = None
     fecha_evolucion: date
+    usuario_id: Optional[str] = None
     class Config:
         orm_mode = True
         env_file = ".env"
@@ -300,6 +309,7 @@ class esquema_veterinaria_comentarios(BaseModel):
     id_veterinaria: int
     comentarios:Optional[str] = None
     fecha_comentario: date
+    usuario_id: Optional[str] = None
     class Config:
         orm_mode = True
         env_file = ".env"
@@ -312,6 +322,7 @@ class esquema_descarte(BaseModel):
     edad:Optional[int] = None
     peso:Optional[float] = None
     razon_descarte:Optional[str] = None
+    usuario_id: Optional[str] = None
     class Config:
         orm_mode = True
         env_file = ".env"
@@ -323,6 +334,7 @@ class esquema_partos(BaseModel):
     peso: int
     fecha_estimada_prenez: Optional[date] = None
     fecha_estimada_parto: Optional[date] = None
+    usuario_id: Optional[str] = None
 
 
     class Config:
@@ -337,6 +349,7 @@ class esquema_carga_animal_y_consumo_agua(BaseModel):
     valor_unidad_animal: float
     consumo_forraje_vivo:float
     raza:str
+    usuario_id: Optional[str] = None
     class Config:
         orm_mode = True
         env_file = ".env"
@@ -349,6 +362,7 @@ class esquema_capacidad_carga(BaseModel):
     carga_animal_recomendada: float
     capacidad_carga: str
     carga_animal_usuario: float
+    usuario_id: Optional[str] = None
     class Config:
         orm_mode = True
         env_file = ".env"
@@ -358,6 +372,7 @@ class esquema_calculadora_hectareas_pastoreo(BaseModel):
     id_bovino: str
     hectareas_necesarias: int
     consumo_agua: int
+    usuario_id: Optional[str] = None
     class Config:
         orm_mode = True
         env_file = ".env"
@@ -368,6 +383,7 @@ class esquema_vientres_aptos(BaseModel):
     edad: int
     peso: float
     raza:str
+    usuario_id: Optional[str] = None
     class Config:
         orm_mode = True
         env_file = ".env"
@@ -378,6 +394,7 @@ class esquema_historial_partos(BaseModel):
     fecha_parto: date
     tipo_parto: str
     id_bovino_hijo:str
+    usuario_id: Optional[str] = None
     class Config:
         orm_mode = True
         env_file = ".env"
@@ -388,6 +405,7 @@ class esquema_intervalo_partos(BaseModel):
     fecha_parto1: date
     fecha_parto2: date
     intervalo:float
+    usuario_id: Optional[str] = None
     class Config:
         orm_mode = True
         env_file = ".env"
@@ -397,6 +415,7 @@ class esquema_litros_leche(BaseModel):
     id_bovino: str
     fecha_medicion: date
     litros_leche:float
+    usuario_id: Optional[str] = None
     class Config:
         orm_mode = True
         env_file = ".env"
@@ -408,6 +427,7 @@ class esquema_reporte_curva_lactancia_General(BaseModel):
     mes: str
     promedio:float
     Hora_Reporte:date
+    usuario_id: Optional[str] = None
     class Config:
         orm_mode = True
         env_file = ".env"
@@ -419,6 +439,7 @@ class esquema_orden_IEP(BaseModel):
     intervalo_promedio_raza: float
     intervalo_promedio_animal: float
     diferencia: float
+    usuario_id: Optional[str] = None
     class Config:
         orm_mode = True
         env_file = ".env"
@@ -430,6 +451,7 @@ class esquema_orden_litros(BaseModel):
     litros_promedio_raza: float
     litros_promedio_animal: float
     diferencia: float
+    usuario_id: Optional[str] = None
     class Config:
         orm_mode = True
         env_file = ".env"
@@ -441,6 +463,7 @@ class esquema_orden_peso(BaseModel):
     peso_promedio_raza: float
     peso_promedio_animal: float
     diferencia: float
+    usuario_id: Optional[str] = None
     class Config:
         orm_mode = True
         env_file = ".env"
@@ -449,6 +472,7 @@ class esquema_historial_perdida_terneros(BaseModel):
     id_perdida: int
     periodo: int
     perdida:float
+    usuario_id: Optional[str] = None
     class Config:
         orm_mode = True
         env_file = ".env"
@@ -457,6 +481,7 @@ class esquema_historial_supervivencia(BaseModel):
     id_supervivencia: int
     periodo: int
     supervivencia:float
+    usuario_id: Optional[str] = None
     class Config:
         orm_mode = True
         env_file = ".env"
@@ -467,6 +492,7 @@ class esquema_registro_pajillas(BaseModel):
     raza:str
     nombre_toro: str
     productor:str
+    usuario_id: Optional[str] = None
     class Config:
         orm_mode = True
         env_file = ".env"

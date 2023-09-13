@@ -70,7 +70,7 @@ async def crear_reporte_compras(id_bovino:str,estado:str,numero_bono_compra:str,
             ingresoVentas = modelo_compra.insert().values(id_bovino=id_bovino, estado=estado,
                                                           numero_bono_compra=numero_bono_compra, fecha_compra=fecha_compra,
                                                           precio_compra=precio_compra, razon_compra=razon_compra,
-                                                          medio_pago_compra=medio_pago_compra, comprador=comprador)
+                                                          medio_pago_compra=medio_pago_compra, comprador=comprador,usuario_id=current_user)
             db.execute(ingresoVentas)
             db.commit()
 
@@ -80,7 +80,7 @@ async def crear_reporte_compras(id_bovino:str,estado:str,numero_bono_compra:str,
             db.execute(modelo_compra.update().where(modelo_compra.c.id_bovino == id_bovino).values(
                 estado=estado,numero_bono_compra=numero_bono_compra, fecha_compra=fecha_compra,
                                                           precio_compra=precio_compra, razon_compra=razon_compra,
-                                                          medio_pago_compra=medio_pago_compra, comprador=comprador))
+                                                          medio_pago_compra=medio_pago_compra, comprador=comprador,usuario_id=current_user))
             db.commit()
 
             db.commit()
@@ -123,7 +123,7 @@ async def animales_comprados(db: Session = Depends(get_database_session),current
   try:
     # consulta de total de animales vendidos
     estado_comprados = db.query(modelo_compra). \
-        filter(modelo_compra.c.estado == "Vivo").count()
+        filter(modelo_compra.c.estado == "Vivo",modelo_compra.c.usuario_id == current_user).count()
 
 
     db.commit()
@@ -142,7 +142,7 @@ async def listar_tabla_compras(db: Session = Depends(get_database_session),curre
 
 
         items_Compra = db.query(modelo_compra). \
-            filter(modelo_compra.c.estado == "Vivo").all()
+            filter(modelo_compra.c.estado == "Vivo",modelo_compra.c.usuario_id == current_user).all()
 
     except Exception as e:
         logger.error(f'Error al obtener Listar REGISTRO DE COMPRAS : {e}')

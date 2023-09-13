@@ -56,15 +56,10 @@ async def inventario_bovino(db: Session = Depends(get_database_session),current_
     # Se llama la funcion con el fin que esta realice el calculo pertinete a la edad del animal ingresado
     calculoEdad(db=db)
     actualizacion_peso(session=db)
-
     eliminarduplicados(db=db)
-
     vida_util_macho_reproductor(db=db)
-
-
     try:
-        items = db.execute(modelo_bovinos_inventario.select()).fetchall()
-
+        items = db.query(modelo_bovinos_inventario).filter(modelo_bovinos_inventario.c.usuario_id == current_user ).all()
 
     except Exception as e:
         logger.error(f'Error al obtener inventario de bovinos: {e}')

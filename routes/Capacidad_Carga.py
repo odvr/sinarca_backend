@@ -3,7 +3,7 @@ Librerias requeridas
 '''
 from sqlalchemy.orm import Session
 import logging
-from Lib.Lib_Intervalo_Partos import intervalo_partos
+
 from Lib.actualizacion_peso import actualizacion_peso
 from Lib.carga_animal_capacidad_carga import carga_animal,capacidad_carga
 # # importa la conexion de la base de datos

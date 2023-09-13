@@ -53,7 +53,7 @@ async def listar_tabla_solo_machos(db: Session = Depends(get_database_session),c
     try:
         machos = db.query(modelo_bovinos_inventario). \
             filter(
-                   modelo_bovinos_inventario.c.sexo == "Macho").all()
+                   modelo_bovinos_inventario.c.sexo == "Macho",modelo_bovinos_inventario.c.usuario_id == current_user).all()
 
 
     except Exception as e:
@@ -67,7 +67,7 @@ async def listar_tabla_solo_hembras(db: Session = Depends(get_database_session),
 
     try:
         hembras = db.query(modelo_bovinos_inventario). \
-            filter( modelo_bovinos_inventario.c.sexo == "Hembra").all()
+            filter( modelo_bovinos_inventario.c.sexo == "Hembra",modelo_bovinos_inventario.c.usuario_id == current_user).all()
         #itemsAnimalesVeterinaria =  session.execute(modelo_veterinaria.select()).all()
 
     except Exception as e:
@@ -83,8 +83,9 @@ async def listar_tabla_solo_hembras(db: Session = Depends(get_database_session),
 async def listar_tabla_endogamia(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
 
     try:
-        itemsAnimalesEndogamia =  db.execute(modelo_arbol_genealogico.select()).all()
-
+        #itemsAnimalesEndogamia =  db.execute(modelo_arbol_genealogico.select()).all()
+        itemsAnimalesEndogamia = db.query(modelo_arbol_genealogico).filter(modelo_arbol_genealogico.c.usuario_id == current_user).all()
+        print(itemsAnimalesEndogamia)
     except Exception as e:
         logger.error(f'Error al obtener TABLA DE ENDOGAMIA: {e}')
         raise
@@ -101,7 +102,7 @@ async def crear_endogamia(id_bovino:str,id_bovino_madre: str,id_bovino_padre:str
     try:
         ingresoEndogamia = modelo_arbol_genealogico.insert().values(id_bovino=id_bovino,
                                                      id_bovino_madre=id_bovino_madre,
-                                                     id_bovino_padre=id_bovino_padre,
+                                                     id_bovino_padre=id_bovino_padre,usuario_id=current_user
                                                    )
 
 

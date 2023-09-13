@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from models.modelo_bovinos import modelo_bovinos_inventario
 
-class CRUDBobinos:
+class CRUDBovinos:
     def __init__(self):
         """
         CRUD object with default methods to Create, Read, Update, Delete (CRUD).
@@ -20,12 +20,12 @@ class CRUDBobinos:
     def get(self, db: Session, id: Any) -> Any:
         return db.query(self.model).filter(self.model.id == id).first()
 
-    def count_animals(self,db: Session):
+    def count_animals(self,db: Session,current_user):
         contar = db.query(modelo_bovinos_inventario).filter(modelo_bovinos_inventario.c.estado == "Vivo",
-                                                   modelo_bovinos_inventario.c.proposito == "Leche").count()
+                                                   modelo_bovinos_inventario.c.proposito == "Leche",modelo_bovinos_inventario.c.usuario_id == current_user).count()
         db.close()
         return contar
 
 
 
-bobinos_iventario = CRUDBobinos()
+bovinos_inventario_leche = CRUDBovinos()

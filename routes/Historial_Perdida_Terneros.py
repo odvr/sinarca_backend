@@ -23,8 +23,7 @@ from models.modelo_bovinos import modelo_bovinos_inventario, modelo_veterinaria,
     modelo_ventas, modelo_datos_muerte, \
     modelo_indicadores, modelo_ceba, modelo_macho_reproductor, modelo_carga_animal_y_consumo_agua, modelo_datos_pesaje, \
     modelo_capacidad_carga, modelo_calculadora_hectareas_pastoreo, modelo_partos, modelo_vientres_aptos, \
-    modelo_descarte, modelo_users, modelo_arbol_genealogico, modelo_veterinaria_evoluciones, modelo_usuarios, MUserOut, \
-    MUserAuth, modelo_compra, modelo_historial_perdida_terneros
+    modelo_descarte, modelo_historial_perdida_terneros
 
 from routes.Reproductor import vida_util_macho_reproductor
 from routes.rutas_bovinos import get_current_user

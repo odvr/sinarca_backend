@@ -48,7 +48,7 @@ async def crear_fecha_pesaje(id_bovino:str,fecha_pesaje:date,peso:float,db: Sess
     try:
 
 
-        ingresoFechaPesaje = modelo_datos_pesaje.insert().values(id_bovino=id_bovino,fecha_pesaje=fecha_pesaje,peso=peso)
+        ingresoFechaPesaje = modelo_datos_pesaje.insert().values(id_bovino=id_bovino,fecha_pesaje=fecha_pesaje,peso=peso,usuario_id=current_user)
 
 
         db.execute(ingresoFechaPesaje)
@@ -86,7 +86,9 @@ async def inventario_prod_leche(db: Session = Depends(get_database_session),curr
 
 
         peso_segun_raza(session=db)
-        itemsPromedioRaza = db.query(modelo_orden_peso).all()
+        #itemsPromedioRaza = db.query(modelo_orden_peso).all()
+        itemsPromedioRaza = db.query(modelo_orden_peso).filter(modelo_orden_peso.c.usuario_id == current_user).all()
+        print(itemsPromedioRaza)
 
     except Exception as e:
         logger.error(f'Error al obtener inventario de Promedio Por Razas: {e}')
@@ -97,11 +99,13 @@ async def inventario_prod_leche(db: Session = Depends(get_database_session),curr
 
 
 
-@pesaje.get("/listar_tabla_pesaje", response_model=list[esquema_modelo_Reporte_Pesaje] )
+@pesaje.get("/listar_tabla_pesaje", response_model=list[esquema_modelo_Reporte_Pesaje], tags=["Pesaje"] )
 async def listar_tabla_pesaje(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
         actualizacion_peso(session=db)
-        tabla_pesaje = db.query(modelo_datos_pesaje).all()
+        #tabla_pesaje = db.query(modelo_datos_pesaje).all()
+        tabla_pesaje = db.query(modelo_datos_pesaje).filter(modelo_datos_pesaje.c.usuario_id == current_user).all()
+
 
     except Exception as e:
         logger.error(f'Error al obtener inventario de TABLA PESAJE: {e}')

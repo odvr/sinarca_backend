@@ -20,9 +20,9 @@ class CRUDcalcular_animales_totales:
     def get(self, db: Session, id: Any) -> Any:
         return db.query(self.model).filter(self.model.id == id).first()
 
-    def ContarAnimalesCrud(self,db: Session):
+    def ContarAnimalesCrud(self,db: Session,current_user):
         Contar = db.query(modelo_bovinos_inventario). \
-        filter(modelo_bovinos_inventario.c.estado == "Vivo").count()
+        filter(modelo_bovinos_inventario.c.estado == "Vivo",modelo_bovinos_inventario.c.usuario_id == current_user).count()
 
         db.close()
         return Contar

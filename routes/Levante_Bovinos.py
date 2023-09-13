@@ -87,3 +87,39 @@ async def Animales_Optimo_Levante(db: Session = Depends(get_database_session),cu
  finally:
      db.close()
  return levante_optimo
+
+
+@Levante_Bovinos.post(
+    "/crear_prod_levante/{id_bovino}/{proposito}",
+    status_code=status.HTTP_201_CREATED)
+async def CrearProdLevante(id_bovino: str,proposito:str,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+    eliminarduplicados(db=db)
+
+    try:
+
+        consulta = db.execute(
+            modelo_levante.select().where(
+                modelo_levante.columns.id_bovino == id_bovino)).first()
+
+        if consulta is None:
+            ingresoplevante = modelo_levante.insert().values(id_bovino=id_bovino, proposito=proposito,usuario_id=current_user)
+
+            db.execute(ingresoplevante)
+            db.commit()
+
+        else:
+
+            db.execute(modelo_levante.update().where(modelo_levante.c.id_bovino == id_bovino).values(
+                id_bovino=id_bovino, proposito=proposito))
+            db.commit()
+
+            db.commit()
+
+
+    except Exception as e:
+        logger.error(f'Error al Crear Bovino para la tabla de Produccion de Levante: {e}')
+        raise
+    finally:
+        db.close()
+
+    return Response(status_code=status.HTTP_201_CREATED)

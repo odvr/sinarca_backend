@@ -52,7 +52,7 @@ async def id_inventario_bovinos_muertos(db: Session = Depends(get_database_sessi
     try:
         # consulta y seleccion de los animales muertos
         consulta = db.query(modelo_datos_muerte). \
-            filter(modelo_datos_muerte.c.estado == "Muerto").all()
+            filter(modelo_datos_muerte.c.estado == "Muerto",modelo_datos_muerte.c.usuario_id == current_user).all()
 
     except Exception as e:
         logger.error(f'Error al obtener Listar REGISTRO DE MUERTE : {e}')
