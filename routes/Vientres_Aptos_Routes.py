@@ -46,7 +46,8 @@ async def listar_vientres_aptos_modulo(db: Session = Depends(get_database_sessio
     try:
         vientres_aptos(session=db)
         #Eliminacion_total_vientres_aptos()
-        tabla_vientres_aptos = db.query(modelo_vientres_aptos).all()
+        #tabla_vientres_aptos = db.query(modelo_vientres_aptos).all()
+        tabla_vientres_aptos = db.query(modelo_vientres_aptos).filter(modelo_vientres_aptos.c.usuario_id == current_user).all()
 
     except Exception as e:
         logger.error(f'Error al obtener inventario de TABLA VIENTRES APTOS: {e}')
@@ -60,8 +61,8 @@ async def listar_contar_AnimalesDescarte(db: Session = Depends(get_database_sess
 
     try:
 
-        itemsAnimalesVientresAptos = db.query(modelo_vientres_aptos). \
-            where(modelo_vientres_aptos.columns.id_vientre).count()
+        #itemsAnimalesVientresAptos = db.query(modelo_vientres_aptos).where(modelo_vientres_aptos.columns.id_vientre).count()
+        itemsAnimalesVientresAptos = db.query(modelo_vientres_aptos).filter(modelo_vientres_aptos.c.usuario_id == current_user,modelo_vientres_aptos.columns.id_vientre).count()
 
     except Exception as e:
         logger.error(f'Error al obtener CONTAR VIENTRES APTOS: {e}')
@@ -73,13 +74,13 @@ async def listar_contar_AnimalesDescarte(db: Session = Depends(get_database_sess
 
 """
 Listar animales con vientre apto
-"""
 @Vientres_Aptos.get("/listar_contar_listar_vientres_aptos" )
 async def listar_contar_AnimalesDescarte(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
 
     try:
         itemsAnimalesVientresAptos = db.query(modelo_vientres_aptos). \
             where(modelo_vientres_aptos.columns.id_vientre).count()
+        
 
     except Exception as e:
         logger.error(f'Error al obtener CONTAR VIENTRES APTOS: {e}')
@@ -87,5 +88,7 @@ async def listar_contar_AnimalesDescarte(db: Session = Depends(get_database_sess
     finally:
         db.close()
     return itemsAnimalesVientresAptos
+"""
+
 
 

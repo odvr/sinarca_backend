@@ -50,7 +50,8 @@ async def listarAnimalesDescarte(db: Session = Depends(get_database_session),cur
 
     try:
         descarte(db=db)
-        itemsAnimalesDescarte = db.execute(modelo_descarte.select()).all()
+        #itemsAnimalesDescarte = db.execute(modelo_descarte.select()).all()
+        itemsAnimalesDescarte = db.query(modelo_descarte).filter(modelo_descarte.c.usuario_id == current_user).all()
 
     except Exception as e:
         logger.error(f'Error al obtener inventario de Anamales de Descarte: {e}')
@@ -66,7 +67,9 @@ async def listar_contar_AnimalesDescarte(db: Session = Depends(get_database_sess
     try:
         descarte(db=db)
 
-        itemsAnimalesDescarte = db.query(modelo_descarte).where(modelo_descarte.columns.id_descarte).count()
+        #itemsAnimalesDescarte = db.query(modelo_descarte).where(modelo_descarte.columns.id_descarte).count()
+        itemsAnimalesDescarte = db.query(modelo_descarte).filter(modelo_descarte.c.usuario_id == current_user,modelo_descarte.columns.id_descarte).count()
+
 
     except Exception as e:
         logger.error(f'Error al obtener inventario de Anamales de Descarte: {e}')
@@ -86,7 +89,7 @@ async def CrearDescarte(id_bovino: str,razon_descarte:str,db: Session = Depends(
 
     try:
         descarte(db=db)
-        ingresodescarte = modelo_descarte.insert().values(id_bovino=id_bovino,razon_descarte=razon_descarte)
+        ingresodescarte = modelo_descarte.insert().values(id_bovino=id_bovino,razon_descarte=razon_descarte,usuario_id=current_user)
 
 
         db.execute(ingresodescarte)

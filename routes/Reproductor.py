@@ -62,12 +62,13 @@ def get_database_session():
         db.close()
 @ReproductorRutas.get("/listar_reproductor",response_model=list[esquema_macho_reproductor] )
 async def listar_reproductor(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
-    #llamdo de la funcion para calcular
-    #vida_util_macho_reproductor()
+
+
 
     try:
         vida_util_macho_reproductor(db=db)
-        itemsreproductor = db.execute(modelo_macho_reproductor.select()).all()
+        #itemsreproductor = db.execute(modelo_macho_reproductor.select()).all()
+        itemsreproductor = db.query(modelo_macho_reproductor).filter(modelo_macho_reproductor.c.usuario_id == current_user).all()
 
     except Exception as e:
         logger.error(f'Error al obtener inventario de REPRODUCTOR: {e}')
@@ -91,7 +92,7 @@ async def CrearReproductor(id_bovino: str,db: Session = Depends(get_database_ses
                 modelo_macho_reproductor.columns.id_bovino == id_bovino)).first()
 
         if consulta is None:
-            CrearMacho = modelo_macho_reproductor.insert().values(id_bovino=id_bovino)
+            CrearMacho = modelo_macho_reproductor.insert().values(id_bovino=id_bovino,usuario_id=current_user)
 
             db.execute(CrearMacho)
             db.commit()

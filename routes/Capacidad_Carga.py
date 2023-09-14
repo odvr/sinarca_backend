@@ -47,7 +47,8 @@ async def listar_capacidad_carga(db: Session = Depends(get_database_session),cur
         carga_animal(session=db)
         capacidad_carga(session=db)
         actualizacion_peso(session=db)
-        itemscargaAnimales = db.execute(modelo_capacidad_carga.select()).all()
+        #itemscargaAnimales = db.execute(modelo_capacidad_carga.select()).all()
+        itemscargaAnimales = db.query(modelo_capacidad_carga).filter(modelo_capacidad_carga.c.usuario_id == current_user).all()
 
 
     except Exception as e:
@@ -68,7 +69,10 @@ async def listar_carga_animales(db: Session = Depends(get_database_session),curr
         #consumo_global_agua_y_totalidad_unidades_animales()
         carga_animal(session=db)
         capacidad_carga(session=db)
-        itemscargaAnimales = db.execute(modelo_carga_animal_y_consumo_agua.select()).all()
+        #itemscargaAnimales = db.execute(modelo_carga_animal_y_consumo_agua.select()).all()
+        itemscargaAnimales = db.query(modelo_carga_animal_y_consumo_agua).filter(
+            modelo_carga_animal_y_consumo_agua.c.usuario_id == current_user).all()
+
 
     except Exception as e:
         logger.error(f'Error al obtener inventario de LISTAR CARGA ANIMALES: {e}')
@@ -89,7 +93,7 @@ async def crear_capacidad_carga(medicion_aforo: float,hectareas_predio :float,ti
 
 
         hectareas_forraje = update(modelo_capacidad_carga).where(modelo_capacidad_carga.c.id_capacidad == 1).values(
-            medicion_aforo=medicion_aforo,hectareas_predio=hectareas_predio,tipo_de_muestra=tipo_de_muestra)
+            medicion_aforo=medicion_aforo,hectareas_predio=hectareas_predio,tipo_de_muestra=tipo_de_muestra,usuario_id=current_user)
         db.execute(hectareas_forraje)
         db.commit()
         carga_animal(session=db)
