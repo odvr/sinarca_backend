@@ -1,5 +1,5 @@
 import sys
-sys.path.append('..')
+#sys.path.append('..')
 
 from .crud_bovinos_inventario import  bovinos_inventario_leche
 from .crud_indicadores import indicadores
