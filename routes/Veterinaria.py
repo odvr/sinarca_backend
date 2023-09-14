@@ -52,8 +52,9 @@ async def id_inventario_bovino_Veterinaria(id_veterinaria: int,db: Session = Dep
 
     try:
         # Consultar los datos de producción de leche del bovino especificado
-        consulta = db.execute(
-            modelo_veterinaria.select().where(modelo_veterinaria.columns.id_veterinaria == id_veterinaria)).first()
+        #consulta = db.execute( modelo_veterinaria.select().where(modelo_veterinaria.columns.id_veterinaria == id_veterinaria)).first()
+
+        consulta = db.query(modelo_veterinaria).filter(modelo_veterinaria.columns.id_veterinaria == id_veterinaria,modelo_veterinaria.c.usuario_id == current_user).all()
         # Cerrar la sesión
         db.close()
 
@@ -73,7 +74,7 @@ async def CrearRegistroVeterinaria(id_bovino:str,sintomas:str,fecha_sintomas:dat
         current_user: Esquema_Usuario = Depends(get_current_user) ):
 
     try:
-        ingresoVeterinaria = modelo_veterinaria.insert().values(id_bovino=id_bovino,sintomas=sintomas,fecha_sintomas=fecha_sintomas,comportamiento=comportamiento,condicion_corporal=condicion_corporal,postura=postura,mucosa_bucal= mucosa_bucal,mucosa_ocular=mucosa_ocular,mucosa_rectal=mucosa_rectal,mucosa_vulvar_prepusial=mucosa_vulvar_prepusial, evolucion=evolucion,tratamiento=tratamiento,piel_pelaje=piel_pelaje)
+        ingresoVeterinaria = modelo_veterinaria.insert().values(id_bovino=id_bovino,sintomas=sintomas,fecha_sintomas=fecha_sintomas,comportamiento=comportamiento,condicion_corporal=condicion_corporal,postura=postura,mucosa_bucal= mucosa_bucal,mucosa_ocular=mucosa_ocular,mucosa_rectal=mucosa_rectal,mucosa_vulvar_prepusial=mucosa_vulvar_prepusial, evolucion=evolucion,tratamiento=tratamiento,piel_pelaje=piel_pelaje,usuario_id=current_user)
         db.execute(ingresoVeterinaria)
         db.commit()
 
@@ -118,8 +119,9 @@ async def id_inventario_bovino_Comentarios(id_veterinaria: int,db: Session = Dep
 
     try:
         # Consultar los datos de producción de leche del bovino especificado
-        consulta = db.execute(
-            modelo_veterinaria_comentarios.select().where(modelo_veterinaria_comentarios.columns.id_veterinaria == id_veterinaria)).all()
+        #consulta = db.execute(modelo_veterinaria_comentarios.select().where(modelo_veterinaria_comentarios.columns.id_veterinaria == id_veterinaria)).all()
+
+        consulta = db.query(modelo_veterinaria_comentarios).filter(modelo_veterinaria_comentarios.columns.id_veterinaria == id_veterinaria,modelo_veterinaria_comentarios.c.usuario_id == current_user).all()
         # Cerrar la sesión
         db.close()
 
@@ -160,8 +162,8 @@ async def id_inventario_bovino_Veterinaria_Evoluciones(db: Session = Depends(get
         tabla_pesaje = db.query(modelo_veterinaria_evoluciones).where(
             modelo_veterinaria_evoluciones.columns.id_bovino).all()
 
-        consulta = db.execute(
-            modelo_veterinaria_evoluciones.select()).all()
+        #consulta = db.execute( modelo_veterinaria_evoluciones.select()).all()
+        consulta = db.query(modelo_veterinaria_evoluciones).filter(modelo_veterinaria_evoluciones.c.usuario_id == current_user).all()
         # Cerrar la sesión
         db.close()
 
@@ -181,7 +183,7 @@ async def crear_Comentario(id_veterinaria:int,comentarios:str,fecha_comentario:d
 
     try:
 
-            ingresoEvolucion = modelo_veterinaria_comentarios.insert().values(id_veterinaria=id_veterinaria,comentarios=comentarios,fecha_comentario=fecha_comentario)
+            ingresoEvolucion = modelo_veterinaria_comentarios.insert().values(id_veterinaria=id_veterinaria,comentarios=comentarios,fecha_comentario=fecha_comentario,usuario_id=current_user)
 
             db.execute(ingresoEvolucion)
             db.commit()
@@ -210,19 +212,17 @@ async def crear_evolucion(id_bovino:str,fecha_evolucion:date,db: Session = Depen
         current_user: Esquema_Usuario = Depends(get_current_user) ):
 
     try:
-        consulta = db.execute(
-            modelo_veterinaria_evoluciones.select().where(
-                modelo_veterinaria_evoluciones.columns.id_bovino == id_bovino)).first()
+        consulta = db.execute( modelo_veterinaria_evoluciones.select().where(modelo_veterinaria_evoluciones.columns.id_bovino == id_bovino)).first()
 
         if consulta is None:
-            ingresoEvolucion = modelo_veterinaria_evoluciones.insert().values(id_bovino=id_bovino,fecha_evolucion=fecha_evolucion)
+            ingresoEvolucion = modelo_veterinaria_evoluciones.insert().values(id_bovino=id_bovino,fecha_evolucion=fecha_evolucion,usuario_id=current_user)
 
             db.execute(ingresoEvolucion)
             db.commit()
         else:
 
             db.execute(modelo_veterinaria_evoluciones.update().where(modelo_veterinaria_evoluciones.c.id_bovino == id_bovino).values(
-                id_bovino=id_bovino,fecha_evolucion=fecha_evolucion))
+                id_bovino=id_bovino,fecha_evolucion=fecha_evolucion,usuario_id=current_user))
             db.commit()
 
 
@@ -245,10 +245,9 @@ async def listar_tabla_veterinaria(id_bovino:str,db: Session = Depends(get_datab
 
     try:
 
-        #itemsAnimalesVeterinaria =  session.execute(modelo_veterinaria.select()).all()
-        itemsAnimalesVeterinaria = db.execute(
-            modelo_veterinaria.select().where(modelo_veterinaria.columns.id_bovino == id_bovino)).all()
 
+        #itemsAnimalesVeterinaria = db.execute( modelo_veterinaria.select().where(modelo_veterinaria.columns.id_bovino == id_bovino)).all()
+        itemsAnimalesVeterinaria = db.query(modelo_veterinaria).filter(modelo_veterinaria.c.usuario_id == current_user,modelo_veterinaria.columns.id_bovino == id_bovino).all()
     except Exception as e:
         logger.error(f'Error al obtener TABLA DE VETERINARIA: {e}')
         raise

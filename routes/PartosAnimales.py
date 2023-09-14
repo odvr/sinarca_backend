@@ -50,6 +50,7 @@ async def crear_Registro_Partos(id_bovino:str,fecha_parto: date,tipo_parto:str,i
                                                      fecha_parto=fecha_parto,
                                                      tipo_parto=tipo_parto,
                                                      id_bovino_hijo=id_bovino_hijo,
+                                                     usuario_id=current_user
                                                    )
 
 
@@ -71,7 +72,8 @@ async def crear_Registro_Partos(id_bovino:str,fecha_parto: date,tipo_parto:str,i
 async def listar_tabla_Partos_Animales(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user) ):
     try:
         intervalo_partos(session=db)
-        itemsListarPartos = db.execute(modelo_historial_partos.select()).all()
+        #itemsListarPartos = db.execute(modelo_historial_partos.select()).all()
+        itemsListarPartos = db.query(modelo_historial_partos).filter(modelo_historial_partos.c.usuario_id == current_user).all()
 
     except Exception as e:
         logger.error(f'Error al obtener TABLA DE ENDOGAMIA: {e}')
@@ -113,7 +115,7 @@ async def CrearFechaAproximadaParto(id_bovino: str,fecha_estimada_prenez:date,db
 
         if consulta is None:
             ingresocalcularFechaParto = modelo_partos.insert().values(id_bovino=id_bovino,
-                                                                      fecha_estimada_prenez=fecha_estimada_prenez)
+                                                                      fecha_estimada_prenez=fecha_estimada_prenez,usuario_id=current_user)
 
             db.execute(ingresocalcularFechaParto)
             db.commit()
@@ -146,7 +148,8 @@ async def listar_fecha_parto(db: Session = Depends(get_database_session),current
     try:
         fecha_aproximada_parto(session=db)
 
-        listar_fecha_estimada_parto = db.execute(modelo_partos.select()).all()
+        #listar_fecha_estimada_parto = db.execute(modelo_partos.select()).all()
+        listar_fecha_estimada_parto = db.query(modelo_partos).filter(modelo_partos.c.usuario_id == current_user).all()
 
     except Exception as e:
         logger.error(f'Error al obtener inventario de Fecha de Parto: {e}')

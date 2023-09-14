@@ -43,7 +43,8 @@ async def inventario_prod_leche_Ls_diarios(db: Session = Depends(get_database_se
 
     try:
 
-        itemsLeche = db.execute(modelo_litros_leche.select()).all()
+        #itemsLeche = db.execute(modelo_litros_leche.select()).all()
+        itemsLeche = db.query(modelo_litros_leche).filter(modelo_litros_leche.c.usuario_id == current_user).all()
 
 
 
@@ -69,7 +70,8 @@ async def crear_registro_listros_diarios(id_bovino:str,fecha_medicion:date,litro
         Reporte_Curvas_lactancia_Mensuales_General(session=db)
 
         ingresoFechaLitraje = modelo_litros_leche.insert().values(id_bovino=id_bovino,
-                                                                 fecha_medicion=fecha_medicion, litros_leche=litros_leche
+                                                                 fecha_medicion=fecha_medicion, litros_leche=litros_leche,
+                                                                 usuario_id = current_user
 
                                                                  )
 

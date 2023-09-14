@@ -38,7 +38,8 @@ async def listar_tabla_Intervalo_Partos(db: Session = Depends(get_database_sessi
     try:
         intervalo_partos(session=db)
         promedio_intervalo_partos(session=db)
-        itemsListarIntevaloPartos = db.execute(modelo_historial_intervalo_partos.select()).all()
+        #itemsListarIntevaloPartos = db.execute(modelo_historial_intervalo_partos.select()).all()
+        itemsListarIntevaloPartos = db.query(modelo_historial_intervalo_partos).filter(modelo_historial_intervalo_partos.c.usuario_id == current_user).all()
 
     except Exception as e:
         logger.error(f'Error al obtener TABLA DE ENDOGAMIA: {e}')

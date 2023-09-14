@@ -59,7 +59,8 @@ async def inventario_ceba(db: Session = Depends(get_database_session),current_us
 
     try:
 
-        itemsceba = db.execute(modelo_ceba.select()).all()
+        #itemsceba = db.execute(modelo_ceba.select()).all()
+        itemsceba = db.query(modelo_ceba).filter(modelo_ceba.c.usuario_id == current_user).all()
 
     except Exception as e:
         logger.error(f'Error al obtener inventario de Produccion Levante: {e}')

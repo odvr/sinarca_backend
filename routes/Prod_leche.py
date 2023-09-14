@@ -67,7 +67,7 @@ async def id_inventario_bovino_leche(id_bovino: str,db: Session = Depends(get_da
     return consulta
 
 
-@Produccion_Leche.get("/listar_prod_leche" , response_model=list[esquema_produccion_leche])
+@Produccion_Leche.get("/listar_prod_leche" , response_model=list[esquema_produccion_leche],tags=["Produccion Leche"])
 async def inventario_prod_leche(db: Session = Depends(get_database_session),
         current_user: Esquema_Usuario = Depends(get_current_user)):
 
@@ -80,7 +80,8 @@ async def inventario_prod_leche(db: Session = Depends(get_database_session),
         EliminarDuplicadosLeche(condb=db)
 
 
-        itemsLeche = db.query(modelo_leche).all()
+        #itemsLeche = db.query(modelo_leche).all()
+        itemsLeche = db.query(modelo_leche).filter(modelo_leche.c.usuario_id == current_user).all()
 
     except Exception as e:
         logger.error(f'Error al obtener inventario de Produccion Leche: {e}')
@@ -105,7 +106,8 @@ async def inventario_prod_leche(db: Session = Depends(get_database_session),
 
         litros_por_raza(session=db)
 
-        itemsLeche = db.query(modelo_orden_litros).all()
+        #itemsLeche = db.query(modelo_orden_litros).all()
+        itemsLeche = db.query(modelo_orden_litros).filter(modelo_orden_litros.c.usuario_id == current_user).all()
 
     except Exception as e:
         logger.error(f'Error al obtener inventario de Promedio Por Razas: {e}')
@@ -223,7 +225,7 @@ async def animales_en_ordeno(db: Session = Depends(get_database_session),current
     # join, consulta y conteo de animales vivos que son ordenados
     vacas_ordeno = db.query(modelo_bovinos_inventario.c.estado, modelo_leche.c.ordeno). \
         join(modelo_leche, modelo_bovinos_inventario.c.id_bovino == modelo_leche.c.id_bovino). \
-        filter(modelo_bovinos_inventario.c.estado == 'Vivo', modelo_leche.c.ordeno == 'Si').count()
+        filter(modelo_bovinos_inventario.c.estado == 'Vivo', modelo_leche.c.ordeno == 'Si',modelo_leche.c.usuario_id == current_user).count()
     # actualizacion de campos
     db.execute(update(modelo_indicadores).
                     where(modelo_indicadores.c.id_indicadores == 1).
@@ -306,7 +308,7 @@ async def vacas_vacias(db: Session = Depends(get_database_session),current_user:
         # filtrado y conteo animales con datos prenez Vacia que se encuentren vivos
         consulta_vacias = db.query(modelo_bovinos_inventario.c.estado, modelo_leche.c.datos_prenez). \
             join(modelo_leche, modelo_bovinos_inventario.c.id_bovino == modelo_leche.c.id_bovino). \
-            filter(modelo_bovinos_inventario.c.estado == 'Vivo', modelo_leche.c.datos_prenez == 'Vacia').count()
+            filter(modelo_bovinos_inventario.c.estado == 'Vivo', modelo_leche.c.datos_prenez == 'Vacia',modelo_leche.c.usuario_id == current_user).count()
         # actualizacion del campo
         db.execute(update(modelo_indicadores).
                         where(modelo_indicadores.c.id_indicadores == 1).
@@ -331,7 +333,7 @@ async def vacas_prenadas(db: Session = Depends(get_database_session),
     # filtrado y conteo animales con datos prenez Prenada que se encuentren vivos
     consulta_prenadas = db.query(modelo_bovinos_inventario.c.estado, modelo_leche.c.datos_prenez). \
         join(modelo_leche, modelo_bovinos_inventario.c.id_bovino == modelo_leche.c.id_bovino). \
-        filter(modelo_bovinos_inventario.c.estado == 'Vivo', modelo_leche.c.datos_prenez == 'Prenada').count()
+        filter(modelo_bovinos_inventario.c.estado == 'Vivo', modelo_leche.c.datos_prenez == 'Prenada',modelo_leche.c.usuario_id == current_user).count()
     # actualizacion del campo
     db.execute(update(modelo_indicadores).
                     where(modelo_indicadores.c.id_indicadores == 1).
@@ -523,7 +525,7 @@ def Dias_Abiertos(condb=Session):
 def EliminarDuplicadosLeche(condb:Session):
     itemsLeche = condb.execute(modelo_leche.select()).all()
 
-    print(itemsLeche)
+
 
     for ileche in itemsLeche:
         propositoleche = ileche[7]

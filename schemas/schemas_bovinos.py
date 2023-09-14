@@ -330,8 +330,8 @@ class esquema_descarte(BaseModel):
 class esquema_partos(BaseModel):
     id_parto: int
     id_bovino: str
-    edad: int
-    peso: int
+    edad: Optional[int] = None
+    peso: Optional[int] = None
     fecha_estimada_prenez: Optional[date] = None
     fecha_estimada_parto: Optional[date] = None
     usuario_id: Optional[str] = None
