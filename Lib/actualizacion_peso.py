@@ -63,20 +63,28 @@ def actualizacion_peso(session: Session):
         for i in consulta_id:
             # Toma el ID del bovino, este es el campo numero 0
             id = i[0]
+
             # Realiza la consulta general de la tabla de registro de pesos
             #la consulta esta ordenada segun la fecha mas reciente
             # la consulta solo muestra los valores asociados a la fecha mas reciente
-            consulta_pesos =  list(session.execute(modelo_datos_pesaje.select().\
+            consulta_pesos =  (session.execute(modelo_datos_pesaje.select().\
                 where(modelo_datos_pesaje.columns.id_bovino==id).\
                     order_by(desc(modelo_datos_pesaje.columns.fecha_pesaje))).first())
-            # actualizacion del campo
-            #segun la posicion en la lista se actualizan los campos
-            #el campo de peso tiene la posicion 3
-            #el campo de id bovino tiene la posicion 1
-            # se actualizara el peso en el id igual al de la lista
-            session.execute(modelo_bovinos_inventario.update().values(peso=consulta_pesos[3]).where(
-                modelo_bovinos_inventario.columns.id_bovino == consulta_pesos[1]))
-            session.commit()
+            if consulta_pesos is None:
+                logger.error(f'Error Funcion actualizacion_peso: {consulta_pesos}')
+                pass
+            else:
+                # actualizacion del campo
+                # segun la posicion en la lista se actualizan los campos
+                # el campo de peso tiene la posicion 3
+                # el campo de id bovino tiene la posicion 1
+                # se actualizara el peso en el id igual al de la lista
+
+                session.execute(modelo_bovinos_inventario.update().values(peso=consulta_pesos[3]).where(
+                    modelo_bovinos_inventario.columns.id_bovino == consulta_pesos[1]))
+                session.commit()
+
+
     except Exception as e:
         logger.error(f'Error Funcion actualizacion_peso: {e}')
         raise
