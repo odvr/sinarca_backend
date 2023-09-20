@@ -68,7 +68,7 @@ logger.addHandler(file_handler)
 
 #from twilio.rest import Client
 
-def carga_animal(session:Session):
+def carga_animal(session:Session,current_user):
   try:
       # join  tabla de bovinos y tabla de carga animal
       consulta_bovinos = session.query(modelo_bovinos_inventario).\
@@ -137,7 +137,7 @@ def carga_animal(session:Session):
               # interpretacion y actualizacion del campo
               interpretacion = f'Tienes un total de {round((total_unidades_animales), 2)} unidades animales'
               session.execute(modelo_indicadores.update().values(total_unidades_animales=interpretacion). \
-                              where(modelo_indicadores.columns.id_indicadores == 1))
+                              where(modelo_indicadores.columns.id_indicadores == current_user))
               session.commit()
           session.commit()
       session.commit()

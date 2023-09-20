@@ -66,7 +66,7 @@ async def listar_reproductor(db: Session = Depends(get_database_session),current
 
 
     try:
-        vida_util_macho_reproductor(db=db)
+        vida_util_macho_reproductor(db=db,current_user=current_user)
         #itemsreproductor = db.execute(modelo_macho_reproductor.select()).all()
         itemsreproductor = db.query(modelo_macho_reproductor).filter(modelo_macho_reproductor.c.usuario_id == current_user).all()
 
@@ -139,18 +139,19 @@ async def eliminar_bovino_reproductor(id_bovino: str,db: Session = Depends(get_d
     return Response(status_code=HTTP_204_NO_CONTENT)
 
 
-@ReproductorRutas.get("/Indicadores", response_model=list[esquema_indicadores])
+@ReproductorRutas.get("/Indicadores",response_model=list[esquema_indicadores] )
 async def relacion_toros_vientres_aptos(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
-        vida_util_macho_reproductor(db=db)
+        vida_util_macho_reproductor(db=db,current_user=current_user)
         vientres_aptos(session=db)
-        relacion_macho_reproductor_vientres_aptos(db=db)
+        relacion_macho_reproductor_vientres_aptos(db=db,current_user=current_user)
 
-        response = db.query(modelo_indicadores).all()
+        response = db.query(modelo_indicadores).filter(modelo_indicadores.c.id_indicadores == current_user).all()
 
-
-        return response
-
+        if response:
+            return response
+        else:
+            return {"message": "No se encontraron resultados"}
 
     except Exception as e:
         logger.error(f'Error al obtener la consulta de RELACION Y VIENTRES APTOS: {e}')

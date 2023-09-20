@@ -81,7 +81,7 @@ async def Animales_Optimo_Ceba(db: Session = Depends(get_database_session),curre
                modelo_ceba.c.estado_optimo_ceba == "Estado Optimo").count()
     # actualizacion de campos
     db.execute(update(modelo_indicadores).
-                    where(modelo_indicadores.c.id_indicadores == 1).
+                    where(modelo_indicadores.c.id_indicadores == current_user).
                     values(animales_optimos_ceba=ceba_optimo))
     logger.info(f'Funcion Animales_Optimo_Ceba {ceba_optimo} ')
     db.commit()

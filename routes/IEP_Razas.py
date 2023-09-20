@@ -41,11 +41,7 @@ def get_database_session():
 @IEP_Razas.get("/Tabla_iep_por_raza",response_model=list[esquema_orden_IEP] )
 async def listar_tabla_IEP_Razas(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
-        IEP_por_raza(session=db)
-
-
-
-
+        IEP_por_raza(session=db,current_user=current_user)
         itemsListarIntevaloPartos = db.execute(modelo_orden_IEP.select()).all()
 
     except Exception as e:

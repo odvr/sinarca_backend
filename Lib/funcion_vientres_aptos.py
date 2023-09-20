@@ -56,6 +56,7 @@ def vientres_aptos(session: Session):
           filter( modelo_leche.columns.datos_prenez == "Vacia",
                   modelo_leche.columns.tipo_ganado != "Hembra de levante").all()
 
+
       for i in consulta_vientres:
           # Toma el ID del bovino en este caso es el campo 0
           idBovinoConsultaVientresAptos = i[0]
@@ -78,8 +79,8 @@ def vientres_aptos(session: Session):
                   edad=edadBovinoConsultaVientresAptos,
                   peso=pesoBovinoConsultaVientresAptos,
                   raza=razaBovinoConsultaVientresAptos)
-              condb.execute(ingresoVientresAptos)
-              condb.commit()
+              session.execute(ingresoVientresAptos)
+              session.commit()
           else:
               #si el animal ya existe actualiza sus datos
               session.execute(modelo_vientres_aptos.update().values(edad=edadBovinoConsultaVientresAptos,

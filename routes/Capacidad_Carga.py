@@ -44,7 +44,7 @@ async def listar_capacidad_carga(db: Session = Depends(get_database_session),cur
 
     try:
 
-        carga_animal(session=db)
+        carga_animal(session=db,current_user=current_user)
         capacidad_carga(session=db)
         actualizacion_peso(session=db)
         #itemscargaAnimales = db.execute(modelo_capacidad_carga.select()).all()
@@ -67,7 +67,7 @@ async def listar_carga_animales(db: Session = Depends(get_database_session),curr
 
     try:
         #consumo_global_agua_y_totalidad_unidades_animales()
-        carga_animal(session=db)
+        carga_animal(session=db,current_user=current_user)
         capacidad_carga(session=db)
         #itemscargaAnimales = db.execute(modelo_carga_animal_y_consumo_agua.select()).all()
         itemscargaAnimales = db.query(modelo_carga_animal_y_consumo_agua).filter(

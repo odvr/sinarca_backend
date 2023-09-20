@@ -29,7 +29,7 @@ logger.addHandler(file_handler)
 
 """la siguiente funncion la fecha en que un macho empezara a bajar fertilidad, para ello
  suma los dias de vida util con la edad del animal para determinar este campo"""
-def vida_util_macho_reproductor(db: Session):
+def vida_util_macho_reproductor(db: Session,current_user):
  try:
      #join con tabla de bovinos y consulta
 
@@ -66,7 +66,7 @@ def vida_util_macho_reproductor(db: Session):
 
 """la siguiente funncion determina si la cantidad de machos reproductores es suficciente
 o demasiada para las hembras que se pueden preñar """
-def relacion_macho_reproductor_vientres_aptos(db: Session ):
+def relacion_macho_reproductor_vientres_aptos(db: Session, current_user):
   #la siguiente variable debe ser global ya que esta dentro de un bucle if anidado
   global interpretacion
   try:
@@ -81,7 +81,7 @@ def relacion_macho_reproductor_vientres_aptos(db: Session ):
         interpretacion= f'No posees ninguna hembra apta para reproducirse'
         # actualizacion de campo de cantidad de vientres aptos
         db.execute(update(modelo_indicadores).
-                        where(modelo_indicadores.c.id_indicadores == 1).
+                        where(modelo_indicadores.c.id_indicadores == current_user).
                         values(vientres_aptos=cantidad_vientres_aptos,
                                relacion_toros_vientres_aptos=relacion,
                                interpretacion_relacion_toros_vientres_aptos=interpretacion))
@@ -104,11 +104,11 @@ def relacion_macho_reproductor_vientres_aptos(db: Session ):
             interpretacion = f'Tienes la cantidad correcta de reproductores, tienes {cantidad_reproductores} machos reproductores para tus {cantidad_vientres_aptos} hembras aptas'
         # actualizacion de campo de cantidad de vientres aptos
         db.execute(update(modelo_indicadores).
-                        where(modelo_indicadores.c.id_indicadores == 1).
+                        where(modelo_indicadores.c.id_indicadores == current_user).
                         values(vientres_aptos=cantidad_vientres_aptos,
                                relacion_toros_vientres_aptos=relacion,
                                interpretacion_relacion_toros_vientres_aptos=interpretacion))
-        logger.info(f'Funcion relacion_macho_reproductor_vientres_aptos {cantidad_vientres_aptos, relacion, interpretacion} ')
+
         db.commit()
   except Exception as e:
       logger.error(f'Error Funcion relacion_macho_reproductor_vientres_aptos: {e}')

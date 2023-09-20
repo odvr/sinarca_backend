@@ -143,7 +143,7 @@ def animales_no_ordeno(session:Session,current_user):
 async def porcentaje_ordeno(db: Session = Depends(get_database_session),
         current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
-        animales_no_ordeno(session=db)
+        animales_no_ordeno(session=db,current_user=current_user)
         # consulta de animales ordenados y no ordenados
         ordeno, no_ordeno = db.query \
             (modelo_indicadores.c.vacas_en_ordeno, modelo_indicadores.c.vacas_no_ordeno).first()

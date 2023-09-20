@@ -57,7 +57,7 @@ async def inventario_bovino(db: Session = Depends(get_database_session),current_
     calculoEdad(db=db)
     actualizacion_peso(session=db)
     eliminarduplicados(db=db)
-    vida_util_macho_reproductor(db=db)
+    vida_util_macho_reproductor(db=db,current_user=current_user)
     try:
         items = db.query(modelo_bovinos_inventario).filter(modelo_bovinos_inventario.c.usuario_id == current_user ).all()
 

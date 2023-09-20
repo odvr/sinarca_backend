@@ -426,7 +426,6 @@ async def perdida_TernerosAPI(db: Session = Depends(get_database_session),curren
 
     if response:
         Perdida_Terneros = response.perdida_de_terneros
-
         return Perdida_Terneros
     else:
         return {"message": "No se encontraron resultados"}

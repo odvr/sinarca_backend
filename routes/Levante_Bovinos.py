@@ -78,7 +78,7 @@ async def Animales_Optimo_Levante(db: Session = Depends(get_database_session),cu
                modelo_levante.c.estado_optimo_levante == "Estado Optimo").count()
     # actualizacion de campos
     db.execute(update(modelo_indicadores).
-                    where(modelo_indicadores.c.id_indicadores == 1).
+                    where(modelo_indicadores.c.id_indicadores == current_user).
                     values(animales_optimos_levante=levante_optimo))
 
     db.commit()

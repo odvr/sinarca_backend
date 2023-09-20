@@ -102,7 +102,7 @@ def get_database_session():
 @Historial_Perdida_Terneros.get("/listar_tabla_historial_perdida_terneros",response_model=list[esquema_historial_perdida_terneros])
 async def listar_tabla_perdida_terneros(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
-        perdida_Terneros1(db=db)
+        perdida_Terneros1(db=db,current_user=current_user)
         items_Perdida_terneros = db.execute(modelo_historial_perdida_terneros.select()).fetchall()
         db.close()
 

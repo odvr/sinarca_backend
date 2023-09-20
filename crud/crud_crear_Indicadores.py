@@ -3,7 +3,7 @@ from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union
 from sqlalchemy.orm import Session
 
 
-from models.modelo_bovinos import modelo_bovinos_inventario, modelo_indicadores
+from models.modelo_bovinos import modelo_bovinos_inventario, modelo_indicadores, modelo_capacidad_carga
 
 
 class Crear_Indicadores:
@@ -26,6 +26,12 @@ class Crear_Indicadores:
         db.commit()
         db.close()
         return ingreso
+    def Crear_indicadores_capacidad_carga(self, db: Session, current_user):
+        ingreso = modelo_capacidad_carga.insert().values(id_capacidad=current_user )
+        db.commit()
+        db.close()
+        return ingreso
+
 
 
 

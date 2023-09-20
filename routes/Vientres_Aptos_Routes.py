@@ -61,7 +61,7 @@ async def listar_contar_AnimalesDescarte(db: Session = Depends(get_database_sess
 
     try:
 
-        #itemsAnimalesVientresAptos = db.query(modelo_vientres_aptos).where(modelo_vientres_aptos.columns.id_vientre).count()
+
         itemsAnimalesVientresAptos = db.query(modelo_vientres_aptos).filter(modelo_vientres_aptos.c.usuario_id == current_user,modelo_vientres_aptos.columns.id_vientre).count()
 
     except Exception as e:

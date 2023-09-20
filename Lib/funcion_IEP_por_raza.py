@@ -53,7 +53,7 @@ entre el intervalo entre partos promedio de un animal con el
   el fin de mostrar cuales son los animales mejores en terminos de
   su raza"""
 
-def IEP_por_raza(session: Session):
+def IEP_por_raza(session: Session,current_user):
     try:
        # la siguiente consulta trae el listado de razas de los animales en el modulo de leche
        razas_IEP_leche = list(set(session.query(modelo_bovinos_inventario.c.raza). \
@@ -149,7 +149,7 @@ def IEP_por_raza(session: Session):
        else:
            session.execute(modelo_indicadores.update().
                            values(IEP_hato=consulta_IEP_prom_hato[0][0]).
-                           where(modelo_indicadores.columns.id_indicadores == 1))
+                           where(modelo_indicadores.columns.id_indicadores == current_user))
            session.commit()
 
        logger.info(f'Funcion IEP_por_raza')
