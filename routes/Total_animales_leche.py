@@ -26,8 +26,7 @@ async def animales_leche(
     # consulta de total de animales vivos con propósito de leche
 
     prop_leche = crud.bovinos_inventario_leche.count_animals(db=db,current_user=current_user)
-
     # actualización de campos
-    crud.indicadores.set_prop_milk(db=db,milk_count=prop_leche)
+    crud.indicadores.set_prop_milk(db=db,milk_count=prop_leche,current_user=current_user)
 
     return  prop_leche

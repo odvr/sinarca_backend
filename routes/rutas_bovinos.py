@@ -4,7 +4,7 @@ Librerias requeridas
 '''
 
 import logging
-
+import crud
 from http.client import HTTPException
 from sqlalchemy import and_
 from fastapi import APIRouter, Request
@@ -15,10 +15,7 @@ from config.db import   get_session
 from models.modelo_bovinos import modelo_usuarios, modelo_bovinos_inventario, modelo_indicadores
 from sqlalchemy.orm import Session
 
-from schemas.schemas_bovinos import  Esquema_Token, Esquema_Usuario
-
-
-
+from schemas.schemas_bovinos import Esquema_Token, Esquema_Usuario, esquema_indicadores
 
 '''***********'''
 from passlib.context import CryptContext
@@ -156,8 +153,12 @@ async def create_user(data: Esquema_Usuario,db: Session = Depends(get_database_s
     ingreso = modelo_usuarios.insert().values(usuario_id=data.usuario_id,
         hashed_password=get_hashed_password(data.hashed_password)
         )
+    # Crea el registro en el Indicador del usuario
+    CrearIndicadores = crud.crear_indicadores.Crear_indicadores_db(db=db, current_user=data.usuario_id)
+
 
     db.execute(ingreso)
+    db.execute(CrearIndicadores)
     db.commit()
 
     return user
@@ -174,7 +175,7 @@ async def animales_levante(db: Session = Depends(get_database_session),current_u
                    modelo_bovinos_inventario.c.proposito == "Levante",modelo_bovinos_inventario.c.usuario_id == current_user).count()
         # actualización de campos
         db.execute(update(modelo_indicadores).
-                    where(modelo_indicadores.c.id_indicadores == 1).
+                    where(modelo_indicadores.c.id_indicadores == current_user).
                     values(animales_levante=prop_levante))
         db.commit()
         db.close()
@@ -195,7 +196,7 @@ async def animales_ceba(db: Session = Depends(get_database_session),current_user
                modelo_bovinos_inventario.c.proposito == "Ceba",modelo_bovinos_inventario.c.usuario_id == current_user).count()
     # actualizacion de campos
     db.execute(update(modelo_indicadores).
-                    where(modelo_indicadores.c.id_indicadores == 1).
+                    where(modelo_indicadores.c.id_indicadores == current_user).
                     values(animales_ceba=prop_ceba))
     logger.info(f'Funcion animales_ceba {prop_ceba} ')
     db.commit()
@@ -221,7 +222,7 @@ async def animales_edad_0_9(db: Session = Depends(get_database_session),current_
 
     # actualizacion de campos
     db.execute(update(modelo_indicadores).
-                    where(modelo_indicadores.c.id_indicadores == 1).
+                    where(modelo_indicadores.c.id_indicadores == current_user).
                     values(animales_rango_edades_0_9=edades_0_9))
 
     db.commit()
@@ -247,7 +248,7 @@ async def animales_edad_9_12(db: Session = Depends(get_database_session),current
 
     # actualizacion de campos
     db.execute(update(modelo_indicadores).
-                    where(modelo_indicadores.c.id_indicadores == 1).
+                    where(modelo_indicadores.c.id_indicadores == current_user).
                     values(animales_rango_edades_9_12=edades_9_12))
     logger.info(f'Funcion animales_edad_9_12 {edades_9_12} ')
     db.commit()
@@ -273,7 +274,7 @@ async def animales_edad_12_24(db: Session = Depends(get_database_session),curren
 
     # actualizacion de campos
     db.execute(update(modelo_indicadores).
-                    where(modelo_indicadores.c.id_indicadores == 1).
+                    where(modelo_indicadores.c.id_indicadores == current_user).
                     values(animales_rango_edades_12_24=edades_12_24))
     logger.info(f'Funcion animales_edad_12_24 {edades_12_24} ')
     db.commit()
@@ -299,7 +300,7 @@ async def animales_edad_24_36(db: Session = Depends(get_database_session),curren
 
         # actualización de campos
         db.execute(update(modelo_indicadores).
-                    where(modelo_indicadores.c.id_indicadores == 1).
+                    where(modelo_indicadores.c.id_indicadores == current_user).
                     values(animales_rango_edades_24_36=edades_24_36))
         logger.info(f'Función animales_edad_24_36 {edades_24_36} ')
         db.commit()
@@ -321,7 +322,7 @@ async def animales_edad_mayor_a_36(db: Session = Depends(get_database_session),c
 
     # actualizacion de campos
     db.execute(update(modelo_indicadores).
-                    where(modelo_indicadores.c.id_indicadores == 1).
+                    where(modelo_indicadores.c.id_indicadores == current_user).
                     values(animales_rango_edades_mayor_36=edades_mayor_36))
     logger.info(f'Funcion animales_edad_mayor_a_36 {edades_mayor_36} ')
     db.commit()
@@ -341,7 +342,7 @@ async def animales_sexo_macho(db: Session = Depends(get_database_session),curren
                modelo_bovinos_inventario.c.sexo == "Macho",modelo_bovinos_inventario.c.usuario_id == current_user).count()
     # actualizacion de campos
     db.execute(update(modelo_indicadores).
-                    where(modelo_indicadores.c.id_indicadores == 1).
+                    where(modelo_indicadores.c.id_indicadores == current_user).
                     values(machos=machos))
     logger.info(f'Funcion animales_sexo_macho {machos} ')
     db.commit()
@@ -362,7 +363,7 @@ async def animales_sexo_hembra(db: Session = Depends(get_database_session),curre
                modelo_bovinos_inventario.c.sexo == "Hembra",modelo_bovinos_inventario.c.usuario_id == current_user).count()
     # actualizacion de campos
     db.execute(update(modelo_indicadores).
-                    where(modelo_indicadores.c.id_indicadores == 1).
+                    where(modelo_indicadores.c.id_indicadores == current_user).
                     values(hembras=hembras))
     logger.info(f'Funcion animales_sexo_hembra {hembras} ')
     db.commit()
@@ -381,7 +382,7 @@ async def animales_vendidos(db: Session = Depends(get_database_session),current_
         estado_vendido = db.query(modelo_bovinos_inventario).filter(modelo_bovinos_inventario.c.estado == "Vendido",modelo_bovinos_inventario.c.usuario_id == current_user).count()
         # actualización de campos
         db.execute(update(modelo_indicadores).
-                    where(modelo_indicadores.c.id_indicadores == 1).
+                    where(modelo_indicadores.c.id_indicadores == current_user).
                     values(animales_vendidos=estado_vendido))
 
         db.commit()
@@ -402,7 +403,7 @@ async def animales_muertos(db: Session = Depends(get_database_session),current_u
         filter(modelo_bovinos_inventario.c.estado == "Muerto",modelo_bovinos_inventario.c.usuario_id == current_user).count()
     # actualizacion de campos
     db.execute(update(modelo_indicadores).
-                    where(modelo_indicadores.c.id_indicadores == 1).
+                    where(modelo_indicadores.c.id_indicadores == current_user).
                     values(animales_fallecidos=estado_muerto))
 
     db.commit()
@@ -417,17 +418,24 @@ async def animales_muertos(db: Session = Depends(get_database_session),current_u
 @rutas_bovinos.get("/Calcular_perdida_Terneros")
 async def perdida_TernerosAPI(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
  try:
+    perdida_Terneros1(db=db,current_user=current_user)
+    response= db.query(modelo_indicadores). \
+        filter(
+        modelo_indicadores.c.id_indicadores == current_user, modelo_indicadores.c.perdida_de_terneros).first()
 
-    perdida_Terneros1(db=db)
-    response = db.query(modelo_indicadores).where(modelo_indicadores.c.IEP_hato).first()
-    if response is None:
-        # No se encontraron resultados, devuelve una respuesta apropiada
+
+    if response:
+        Perdida_Terneros = response.perdida_de_terneros
+
+        return Perdida_Terneros
+    else:
         return {"message": "No se encontraron resultados"}
-    perdida_terneros = response[1]
+
+
+        #return response
 
  except Exception as e:
      logger.error(f'Error Funcion perdida_Terneros: {e}')
      raise
  finally:
      db.close()
- return perdida_terneros

@@ -26,7 +26,7 @@ async def animales_totales(db: Session = Depends(get_database_session),
         # consulta de total de animales vivos .ContarAnimalesCrud(db=db)
         total_animales = crud.TotalBovinos.ContarAnimalesCrud(db=db,current_user=current_user)
         # actualización de campos
-        crud.indicadores.set_Cantidad_Total_Animales(db=db, CantidadAnimalesActuales=total_animales)
+        crud.indicadores.set_Cantidad_Total_Animales(db=db, CantidadAnimalesActuales=total_animales,current_user=current_user)
 
     except Exception as e:
       raise

@@ -119,7 +119,7 @@ async def inventario_prod_leche(db: Session = Depends(get_database_session),
 
 
 
-def animales_no_ordeno(session:Session):
+def animales_no_ordeno(session:Session,current_user):
   try:
     # join, consulta y conteo de animales vivos que no son ordenados
     vacas_no_ordeno = session.query(modelo_bovinos_inventario.c.estado, modelo_leche.c.ordeno). \
@@ -127,7 +127,7 @@ def animales_no_ordeno(session:Session):
         filter(modelo_bovinos_inventario.c.estado == 'Vivo', modelo_leche.c.ordeno == 'No').count()
     # actualizacion de campos
     session.execute(update(modelo_indicadores).
-                    where(modelo_indicadores.c.id_indicadores == 1).
+                    where(modelo_indicadores.c.id_indicadores == current_user).
                     values(vacas_no_ordeno=vacas_no_ordeno))
 
     session.commit()
@@ -151,7 +151,7 @@ async def porcentaje_ordeno(db: Session = Depends(get_database_session),
             vacas_ordeno_porcentaje = 0
             # actualizacion de campos
             db.execute(update(modelo_indicadores).
-                            where(modelo_indicadores.c.id_indicadores == 1).
+                            where(modelo_indicadores.c.id_indicadores == current_user).
                             values(porcentaje_ordeno=vacas_ordeno_porcentaje))
             logger.info(f'Funcion porcentaje_ordeno {vacas_ordeno_porcentaje} ')
             db.commit()
@@ -159,7 +159,7 @@ async def porcentaje_ordeno(db: Session = Depends(get_database_session),
             vacas_ordeno_porcentaje = 0
             # actualizacion de campos
             db.execute(update(modelo_indicadores).
-                            where(modelo_indicadores.c.id_indicadores == 1).
+                            where(modelo_indicadores.c.id_indicadores == current_user).
                             values(porcentaje_ordeno=vacas_ordeno_porcentaje))
 
             db.commit()
@@ -168,9 +168,9 @@ async def porcentaje_ordeno(db: Session = Depends(get_database_session),
             vacas_ordeno_porcentaje = (ordeno / (no_ordeno + ordeno)) * 100
             # actualizacion de campos
             db.execute(update(modelo_indicadores).
-                            where(modelo_indicadores.c.id_indicadores == 1).
+                            where(modelo_indicadores.c.id_indicadores == current_user).
                             values(porcentaje_ordeno=vacas_ordeno_porcentaje))
-            logger.info(f'Funcion porcentaje_ordeno {vacas_ordeno_porcentaje} ')
+
             db.commit()
     except Exception as e:
         logger.error(f'Error Funcion porcentaje_ordeno: {e}')
@@ -185,20 +185,19 @@ async def vacas_prenadas_porcentaje(db: Session = Depends(get_database_session),
         current_user: Esquema_Usuario = Depends(get_current_user)):
   try:
     # consulta de vacas prenadas y vacas vacias en la base de datos
-    prenadas, vacias = db.query \
-        (modelo_indicadores.c.vacas_prenadas, modelo_indicadores.c.vacas_vacias).first()
+    prenadas, vacias = db.query(modelo_indicadores.c.vacas_prenadas, modelo_indicadores.c.vacas_vacias).first()
     # calculo del total de animales
     if prenadas is None or vacias is None:
         vacas_estado_pren =0
         # actualizacion de campos
         db.execute(update(modelo_indicadores).
-                        where(modelo_indicadores.c.id_indicadores == 1).
+                        where(modelo_indicadores.c.id_indicadores == current_user).
                         values(vacas_prenadas_porcentaje=vacas_estado_pren))
     elif prenadas==0:
         vacas_estado_pren = 0
         # actualizacion de campos
         db.execute(update(modelo_indicadores).
-                        where(modelo_indicadores.c.id_indicadores == 1).
+                        where(modelo_indicadores.c.id_indicadores == current_user).
                         values(vacas_prenadas_porcentaje=vacas_estado_pren))
     else:
         # calculo procentaje de vacas prenadas
@@ -206,7 +205,7 @@ async def vacas_prenadas_porcentaje(db: Session = Depends(get_database_session),
         vacas_estado_pren = (prenadas / totales) * 100
         # actualizacion de campos
         db.execute(update(modelo_indicadores).
-                        where(modelo_indicadores.c.id_indicadores == 1).
+                        where(modelo_indicadores.c.id_indicadores == current_user).
                         values(vacas_prenadas_porcentaje=vacas_estado_pren))
 
 
@@ -228,7 +227,7 @@ async def animales_en_ordeno(db: Session = Depends(get_database_session),current
         filter(modelo_bovinos_inventario.c.estado == 'Vivo', modelo_leche.c.ordeno == 'Si',modelo_leche.c.usuario_id == current_user).count()
     # actualizacion de campos
     db.execute(update(modelo_indicadores).
-                    where(modelo_indicadores.c.id_indicadores == 1).
+                    where(modelo_indicadores.c.id_indicadores == current_user).
                     values(vacas_en_ordeno=vacas_ordeno))
 
     db.commit()
@@ -250,7 +249,7 @@ async def vacas_prenadas(db: Session = Depends(get_database_session),current_use
         filter(modelo_bovinos_inventario.c.estado == 'Vivo', modelo_leche.c.datos_prenez == 'Prenada').count()
     # actualizacion del campo
     db.execute(update(modelo_indicadores).
-                    where(modelo_indicadores.c.id_indicadores == 1).
+                    where(modelo_indicadores.c.id_indicadores == current_user).
                     values(vacas_prenadas=consulta_prenadas))
 
     db.commit()
@@ -273,7 +272,7 @@ async def porcentaje_ordeno_calcular(db: Session = Depends(get_database_session)
             vacas_ordeno_porcentaje = 0
             # actualizacion de campos
             db.execute(update(modelo_indicadores).
-                            where(modelo_indicadores.c.id_indicadores == 1).
+                            where(modelo_indicadores.c.id_indicadores == current_user).
                             values(porcentaje_ordeno=vacas_ordeno_porcentaje))
             logger.info(f'Funcion porcentaje_ordeno {vacas_ordeno_porcentaje} ')
             db.commit()
@@ -281,7 +280,7 @@ async def porcentaje_ordeno_calcular(db: Session = Depends(get_database_session)
             vacas_ordeno_porcentaje = 0
             # actualizacion de campos
             db.execute(update(modelo_indicadores).
-                            where(modelo_indicadores.c.id_indicadores == 1).
+                            where(modelo_indicadores.c.id_indicadores == current_user).
                             values(porcentaje_ordeno=vacas_ordeno_porcentaje))
 
             db.commit()
@@ -290,7 +289,7 @@ async def porcentaje_ordeno_calcular(db: Session = Depends(get_database_session)
             vacas_ordeno_porcentaje = (ordeno / (no_ordeno + ordeno)) * 100
             # actualizacion de campos
             db.execute(update(modelo_indicadores).
-                            where(modelo_indicadores.c.id_indicadores == 1).
+                            where(modelo_indicadores.c.id_indicadores == current_user).
                             values(porcentaje_ordeno=vacas_ordeno_porcentaje))
 
             db.commit()
@@ -311,7 +310,7 @@ async def vacas_vacias(db: Session = Depends(get_database_session),current_user:
             filter(modelo_bovinos_inventario.c.estado == 'Vivo', modelo_leche.c.datos_prenez == 'Vacia',modelo_leche.c.usuario_id == current_user).count()
         # actualizacion del campo
         db.execute(update(modelo_indicadores).
-                        where(modelo_indicadores.c.id_indicadores == 1).
+                        where(modelo_indicadores.c.id_indicadores == current_user).
                         values(vacas_vacias=consulta_vacias))
 
         db.commit()
@@ -326,7 +325,7 @@ async def vacas_vacias(db: Session = Depends(get_database_session),current_user:
 
 
 @Produccion_Leche.get("/Calcular_vacas_prenadas")
-async def vacas_prenadas(db: Session = Depends(get_database_session),
+async def vacas_prenadas_calcular(db: Session = Depends(get_database_session),
         current_user: Esquema_Usuario = Depends(get_current_user)):
   try:
     # join de tabla bovinos y tabla leche mediante id_bovino \
@@ -336,7 +335,7 @@ async def vacas_prenadas(db: Session = Depends(get_database_session),
         filter(modelo_bovinos_inventario.c.estado == 'Vivo', modelo_leche.c.datos_prenez == 'Prenada',modelo_leche.c.usuario_id == current_user).count()
     # actualizacion del campo
     db.execute(update(modelo_indicadores).
-                    where(modelo_indicadores.c.id_indicadores == 1).
+                    where(modelo_indicadores.c.id_indicadores == current_user).
                     values(vacas_prenadas=consulta_prenadas))
 
     db.commit()

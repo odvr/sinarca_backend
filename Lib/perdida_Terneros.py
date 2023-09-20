@@ -51,7 +51,7 @@ de animales muertos y el total para mediante una regla de 3 obtener
 el porcentaje
 """
 
-def perdida_Terneros1(db: Session):
+def perdida_Terneros1(db: Session,current_user):
  try:
 
      consulta_primer_muerte = db.query(modelo_bovinos_inventario.c.id_bovino,modelo_datos_muerte.c.fecha_muerte). \
@@ -148,7 +148,7 @@ def perdida_Terneros1(db: Session):
      consulta_ultimo_periodo = db.query(modelo_historial_perdida_terneros.c.perdida).\
          group_by(asc(modelo_historial_perdida_terneros.c.perdida)).all()
      db.execute(update(modelo_indicadores).
-                     where(modelo_indicadores.c.id_indicadores == 1).
+                     where(modelo_indicadores.c.id_indicadores == current_user).
                      values(perdida_de_terneros=consulta_ultimo_periodo[0][0]))
      db.commit()
      db.close()

@@ -183,7 +183,7 @@ class esquema_arbol_genealogico(BaseModel):
         orm_mode = True
         env_file = ".env"
 class esquema_indicadores(BaseModel):
-    id_indicadores: int
+    id_indicadores: str
     perdida_de_terneros: Optional[float] = None
     tasa_supervivencia: Optional[float] = None
     total_animales:Optional[int] = None

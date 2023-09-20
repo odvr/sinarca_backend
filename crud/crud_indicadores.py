@@ -12,14 +12,14 @@ class CRUDIndicadores:
     def get(self, db, id):
         return db.query(self.model).filter(self.model.id == id).first()
 
-    def set_prop_milk(self, db, milk_count):
-        stmt = update(self.model).where(self.model.c.id_indicadores == 1).values(animales_leche=milk_count)
+    def set_prop_milk(self, db, milk_count,current_user):
+        stmt = update(self.model).where(self.model.c.id_indicadores == current_user).values(animales_leche=milk_count)
         db.execute(stmt)
         db.commit()
         db.close()
 
-    def set_Cantidad_Total_Animales(self, db, CantidadAnimalesActuales):
-        sstmt = update(self.model).where(self.model.c.id_indicadores == 1).values(total_animales=CantidadAnimalesActuales)
+    def set_Cantidad_Total_Animales(self, db, CantidadAnimalesActuales,current_user):
+        sstmt = update(self.model).where(self.model.c.id_indicadores == current_user).values(total_animales=CantidadAnimalesActuales)
 
         db.execute(sstmt)
         db.commit()

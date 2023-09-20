@@ -109,7 +109,7 @@ modelo_arbol_genealogico = Table("arbol_genealogico", meta,
                                  Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id", ondelete="CASCADE"))
                                  )
 """modelo para indicadores"""
-modelo_indicadores = Table("indicadores", meta, Column("id_indicadores", Integer, primary_key=True),
+modelo_indicadores = Table("indicadores", meta, Column("id_indicadores", String(300), primary_key=True),
                            Column("perdida_de_terneros", Float),
                            Column("tasa_supervivencia", Float),
                            Column("total_animales", Integer),
