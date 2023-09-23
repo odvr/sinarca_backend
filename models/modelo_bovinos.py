@@ -241,7 +241,7 @@ modelo_carga_animal_y_consumo_agua = Table("carga_animal", meta, Column("id_carg
                                            Column("raza", String(300)),
                                            Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id", ondelete="CASCADE")))
 
-modelo_capacidad_carga = Table("capacidad_carga", meta, Column("id_capacidad", Integer, primary_key=True),
+modelo_capacidad_carga = Table("capacidad_carga", meta, Column("id_capacidad", String(300), primary_key=True),
                                Column("medicion_aforo", Float),
                                Column("hectareas_predio", Float),
                                Column("tipo_de_muestra", String(300)),

@@ -155,7 +155,8 @@ async def create_user(data: Esquema_Usuario,db: Session = Depends(get_database_s
         )
     # Crea el registro en el Indicador del usuario
     CrearIndicadores = crud.crear_indicadores.Crear_indicadores_db(db=db, current_user=data.usuario_id)
-
+    # Crea el registro en el Capacidad de carga
+    CrearIndicadores = crud.crear_indicadores.Crear_indicadores_capacidad_carga(db=db, current_user=data.usuario_id)
 
     db.execute(ingreso)
     db.execute(CrearIndicadores)

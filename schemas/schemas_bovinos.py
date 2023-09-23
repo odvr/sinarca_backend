@@ -356,7 +356,7 @@ class esquema_carga_animal_y_consumo_agua(BaseModel):
         env_file = ".env"
 
 class esquema_capacidad_carga(BaseModel):
-    id_capacidad: int
+    id_capacidad: str
     medicion_aforo: float
     hectareas_predio: float
     tipo_de_muestra: str

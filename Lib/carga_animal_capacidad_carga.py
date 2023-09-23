@@ -150,11 +150,11 @@ def carga_animal(session:Session,current_user):
 
 """funcion de capacidad de carga"""
 
-def capacidad_carga(session:Session):
+def capacidad_carga(session:Session,current_user):
   try:
     # consulta del resultado del aforo
     consulta_aforo = session.query(modelo_capacidad_carga). \
-          where(modelo_capacidad_carga.c.id_capacidad == 1).all()
+          where(modelo_capacidad_carga.c.id_capacidad == current_user).all()
     for i in consulta_aforo:
         # Toma el resultado del aforo (campo 1)
         # el aforo determina cuantos kilogramos de materia seca produce un metro cuadrado de pasto en el predio
@@ -177,7 +177,7 @@ def capacidad_carga(session:Session):
                                                                    capacidad_carga=interpertacion_capacidad,
                                                                    carga_animal_recomendada=carga_animal_recomendada,
                                                                    carga_animal_usuario=carga_animal_usuario). \
-                            where(modelo_capacidad_carga.columns.id_capacidad == 1))
+                            where(modelo_capacidad_carga.columns.id_capacidad == current_user))
             session.commit()
         elif hectareas_predio is None or hectareas_predio==0:
             interpertacion_capacidad = "No posees aforos registrados hasta el momento"
@@ -192,7 +192,7 @@ def capacidad_carga(session:Session):
                                                                    capacidad_carga=interpertacion_capacidad,
                                                                    carga_animal_recomendada=carga_animal_recomendada,
                                                                    carga_animal_usuario=carga_animal_usuario). \
-                            where(modelo_capacidad_carga.columns.id_capacidad == 1))
+                            where(modelo_capacidad_carga.columns.id_capacidad == current_user))
             session.commit()
         elif tipo_aforo is None:
             interpertacion_capacidad = "No posees aforos registrados hasta el momento"
@@ -207,7 +207,7 @@ def capacidad_carga(session:Session):
                                                                    capacidad_carga=interpertacion_capacidad,
                                                                    carga_animal_recomendada=carga_animal_recomendada,
                                                                    carga_animal_usuario=carga_animal_usuario). \
-                            where(modelo_capacidad_carga.columns.id_capacidad == 1))
+                            where(modelo_capacidad_carga.columns.id_capacidad == current_user))
             session.commit()
         else:
             consulta_unidades_animales_usuario = session.query(
@@ -237,7 +237,7 @@ def capacidad_carga(session:Session):
                     session.execute(modelo_capacidad_carga.update().values(capacidad_carga=interpertacion_capacidad,
                                                                            carga_animal_recomendada=carga_animal_recomendada,
                                                                            carga_animal_usuario=carga_animal_usuario). \
-                                    where(modelo_capacidad_carga.columns.id_capacidad == 1))
+                                    where(modelo_capacidad_carga.columns.id_capacidad == current_user))
                     session.commit()
 
                 elif tipo_aforo == "Materia seca":
@@ -256,7 +256,7 @@ def capacidad_carga(session:Session):
                     session.execute(modelo_capacidad_carga.update().values(capacidad_carga=interpertacion_capacidad,
                                                                            carga_animal_recomendada=carga_animal_recomendada,
                                                                            carga_animal_usuario=carga_animal_usuario). \
-                                    where(modelo_capacidad_carga.columns.id_capacidad == 1))
+                                    where(modelo_capacidad_carga.columns.id_capacidad == current_user))
                     session.commit()
   except Exception as e:
       logger.error(f'Error Funcion capacidad_carga: {e}')
