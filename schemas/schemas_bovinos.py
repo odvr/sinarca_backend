@@ -270,20 +270,21 @@ class esquema_modelo_Reporte_Pesaje(BaseModel):
         env_file = ".env"
 
 class esquema_veterinaria(BaseModel):
-    id_veterinaria: int
-    id_bovino: str
-    sintomas: str
-    fecha_sintomas: date
-    comportamiento:str
-    condicion_corporal: str
-    postura: str
-    mucosa_ocular: str
-    mucosa_bucal: str
-    mucosa_rectal: str
-    mucosa_vulvar_prepusial: str
-    tratamiento: str
-    evolucion: str
-    piel_pelaje:str
+    id_veterinaria:int
+    id_bovino:Optional[str] = None
+    sintomas:Optional[str] = None
+    fecha_sintomas:Optional[date] = None
+    comportamiento:Optional[str] = None
+    condicion_corporal:Optional[str] = None
+    postura:Optional[str] = None
+    mucosa_ocular:Optional[str] = None
+    mucosa_bucal:Optional[str] = None
+    mucosa_rectal:Optional[str] = None
+    mucosa_vulvar_prepusial:Optional[str] = None
+    tratamiento:Optional[str] = None
+    evolucion:Optional[str] = None
+    piel_pelaje:Optional[str] = None
+    estado_Historia_clinica:Optional[str] = None
     usuario_id: Optional[str] = None
     class Config:
         orm_mode = True
@@ -297,7 +298,7 @@ class esquema_veterinaria_evoluciones(BaseModel):
     id_evolucion: int
     id_bovino: str
     tratamiento_evolucion:Optional[str] = None
-    fecha_evolucion: date
+    fecha_evolucion: Optional[date] = None
     usuario_id: Optional[str] = None
     class Config:
         orm_mode = True

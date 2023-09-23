@@ -4,6 +4,7 @@ Librerias requeridas
 '''
 
 import logging
+from starlette.status import HTTP_204_NO_CONTENT
 from sqlalchemy.orm import Session
 from fastapi import APIRouter, Response
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
@@ -54,7 +55,8 @@ async def id_inventario_bovino_Veterinaria(id_veterinaria: int,db: Session = Dep
         # Consultar los datos de producción de leche del bovino especificado
         #consulta = db.execute( modelo_veterinaria.select().where(modelo_veterinaria.columns.id_veterinaria == id_veterinaria)).first()
 
-        consulta = db.query(modelo_veterinaria).filter(modelo_veterinaria.columns.id_veterinaria == id_veterinaria,modelo_veterinaria.c.usuario_id == current_user).all()
+        consulta = db.query(modelo_veterinaria).filter(modelo_veterinaria.columns.id_veterinaria == id_veterinaria,modelo_veterinaria.c.usuario_id == current_user).first()
+
         # Cerrar la sesión
         db.close()
 
@@ -69,12 +71,12 @@ async def id_inventario_bovino_Veterinaria(id_veterinaria: int,db: Session = Dep
 
 
 
-@Veterinaria.post("/CrearRegistroVeterinaria/{id_bovino}/{sintomas}/{fecha_sintomas}/{comportamiento}/{condicion_corporal}/{postura}/{mucosa_ocular}/{mucosa_bucal}/{mucosa_rectal}/{mucosa_vulvar_prepusial}/{evolucion}/{tratamiento}/{piel_pelaje}",status_code=200,tags=["Veterinaria"])
-async def CrearRegistroVeterinaria(id_bovino:str,sintomas:str,fecha_sintomas:date,comportamiento:str,condicion_corporal:str,postura:str,mucosa_bucal :str, mucosa_ocular:str,mucosa_rectal:str,mucosa_vulvar_prepusial:str,evolucion:str,tratamiento:str,piel_pelaje:str,db: Session = Depends(get_database_session),
+@Veterinaria.post("/CrearRegistroVeterinaria/{id_bovino}/{sintomas}/{fecha_sintomas}/{comportamiento}/{condicion_corporal}/{postura}/{mucosa_ocular}/{mucosa_bucal}/{mucosa_rectal}/{mucosa_vulvar_prepusial}/{evolucion}/{tratamiento}/{piel_pelaje}/{EstadoHistoriaClinica}",status_code=200,tags=["Veterinaria"])
+async def CrearRegistroVeterinaria(id_bovino:str,sintomas:str,fecha_sintomas:date,comportamiento:str,condicion_corporal:str,postura:str,mucosa_bucal :str, mucosa_ocular:str,mucosa_rectal:str,mucosa_vulvar_prepusial:str,evolucion:str,tratamiento:str,piel_pelaje:str,EstadoHistoriaClinica:str,db: Session = Depends(get_database_session),
         current_user: Esquema_Usuario = Depends(get_current_user) ):
 
     try:
-        ingresoVeterinaria = modelo_veterinaria.insert().values(id_bovino=id_bovino,sintomas=sintomas,fecha_sintomas=fecha_sintomas,comportamiento=comportamiento,condicion_corporal=condicion_corporal,postura=postura,mucosa_bucal= mucosa_bucal,mucosa_ocular=mucosa_ocular,mucosa_rectal=mucosa_rectal,mucosa_vulvar_prepusial=mucosa_vulvar_prepusial, evolucion=evolucion,tratamiento=tratamiento,piel_pelaje=piel_pelaje,usuario_id=current_user)
+        ingresoVeterinaria = modelo_veterinaria.insert().values(id_bovino=id_bovino,sintomas=sintomas,fecha_sintomas=fecha_sintomas,comportamiento=comportamiento,condicion_corporal=condicion_corporal,postura=postura,mucosa_bucal= mucosa_bucal,mucosa_ocular=mucosa_ocular,mucosa_rectal=mucosa_rectal,mucosa_vulvar_prepusial=mucosa_vulvar_prepusial, evolucion=evolucion,tratamiento=tratamiento,piel_pelaje=piel_pelaje,usuario_id=current_user,estado_Historia_clinica=EstadoHistoriaClinica)
         db.execute(ingresoVeterinaria)
         db.commit()
 
@@ -88,26 +90,25 @@ async def CrearRegistroVeterinaria(id_bovino:str,sintomas:str,fecha_sintomas:dat
 
 
 
-@Veterinaria.post("/ActualizarDetallesVeterinaria/{id_veterinaria}/{sinomas}/{fecha_sintomas}/{comportamiento}/{condicion_corporal}/{postura}/{mucosa_ocular}/{mucosa_bucal}/{mucosa_rectal}/{mucosa_vulvar_prepusial}/{evolucion}/{tratamiento}/{piel_pelaje}",status_code=200,tags=["Veterinaria"])
-async def ActualizarDetallesVeterinaria(id_veterinaria:str,sintomas:str,fecha_sintomas:date,comportamiento:str,condicion_corporal:str,postura:str,mucosa_bucal :str, mucosa_ocular:str,mucosa_rectal:str,mucosa_vulvar_prepusial:str,evolucion:str,tratamiento:str,piel_pelaje:str,db: Session = Depends(get_database_session),
+@Veterinaria.put("/ActualizarDetallesVeterinaria/{id_veterinaria}/{sinomas}/{fecha_sintomas}/{comportamiento}/{condicion_corporal}/{postura}/{mucosa_ocular}/{mucosa_bucal}/{mucosa_rectal}/{mucosa_vulvar_prepusial}/{evolucion}/{tratamiento}/{piel_pelaje}",status_code=200,tags=["Veterinaria"])
+async def ActualizarDetallesVeterinaria(id_veterinaria:int,sintomas:str,fecha_sintomas:date,comportamiento:str,condicion_corporal:str,postura:str,mucosa_bucal :str, mucosa_ocular:str,mucosa_rectal:str,mucosa_vulvar_prepusial:str,evolucion:str,tratamiento:str,piel_pelaje:str,db: Session = Depends(get_database_session),
         current_user: Esquema_Usuario = Depends(get_current_user) ):
 
     try:
-
         db.execute(modelo_veterinaria.update().where(
             modelo_veterinaria.c.id_veterinaria == id_veterinaria).values(
             sintomas=sintomas,fecha_sintomas=fecha_sintomas,comportamiento=comportamiento,condicion_corporal=condicion_corporal,postura=postura,mucosa_bucal= mucosa_bucal,mucosa_ocular=mucosa_ocular,mucosa_rectal=mucosa_rectal,mucosa_vulvar_prepusial=mucosa_vulvar_prepusial, evolucion=evolucion,tratamiento=tratamiento,piel_pelaje=piel_pelaje))
         db.commit()
-        db.commit()
+
 
     except Exception as e:
-        logger.error(f'Error al Crear INGRESO DE PESAJE: {e}')
+        logger.error(f'Error al Editar Bovino: {e}')
         raise
+
     finally:
         db.close()
 
-    return Response(status_code=status.HTTP_201_CREATED)
-
+    return Response(status_code=HTTP_204_NO_CONTENT)
 
 
 
@@ -245,8 +246,6 @@ async def listar_tabla_veterinaria(id_bovino:str,db: Session = Depends(get_datab
 
     try:
 
-
-        #itemsAnimalesVeterinaria = db.execute( modelo_veterinaria.select().where(modelo_veterinaria.columns.id_bovino == id_bovino)).all()
         itemsAnimalesVeterinaria = db.query(modelo_veterinaria).filter(modelo_veterinaria.c.usuario_id == current_user,modelo_veterinaria.columns.id_bovino == id_bovino).all()
     except Exception as e:
         logger.error(f'Error al obtener TABLA DE VETERINARIA: {e}')
@@ -256,4 +255,19 @@ async def listar_tabla_veterinaria(id_bovino:str,db: Session = Depends(get_datab
     return itemsAnimalesVeterinaria
 
 
+@Veterinaria.delete("/eliminar_bovino_veterinaria_historial_clinico/{id_bovino}")
+async def Eliminar_endogamia(id_bovino: str,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+
+    try:
+
+
+        db.execute(modelo_veterinaria.delete().where(modelo_veterinaria.c.id_veterinaria == id_bovino))
+        db.commit()
+    except Exception as e:
+        logger.error(f'Error al intentar Eliminar Registro de Arbol Genialogico: {e}')
+        raise
+    finally:
+        db.close()
+
+    return
 

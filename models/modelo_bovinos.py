@@ -198,6 +198,7 @@ modelo_veterinaria = Table("veterinaria", meta, Column("id_veterinaria", Integer
                            Column("tratamiento", String(300)),
                            Column("evolucion", String(300)),
                            Column("piel_pelaje", String(255)),
+                           Column("estado_Historia_clinica", String(255)),
                            Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id", ondelete="CASCADE"))
                            )
 
