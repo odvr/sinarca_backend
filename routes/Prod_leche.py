@@ -239,26 +239,7 @@ async def animales_en_ordeno(db: Session = Depends(get_database_session),current
  return vacas_ordeno
 
 
-@Produccion_Leche.get("/Calcular_vacas_prenadas")
-async def vacas_prenadas(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
-  try:
-    # join de tabla bovinos y tabla leche mediante id_bovino \
-    # filtrado y conteo animales con datos prenez Prenada que se encuentren vivos
-    consulta_prenadas = db.query(modelo_bovinos_inventario.c.estado, modelo_leche.c.datos_prenez). \
-        join(modelo_leche, modelo_bovinos_inventario.c.id_bovino == modelo_leche.c.id_bovino). \
-        filter(modelo_bovinos_inventario.c.estado == 'Vivo', modelo_leche.c.datos_prenez == 'Prenada').count()
-    # actualizacion del campo
-    db.execute(update(modelo_indicadores).
-                    where(modelo_indicadores.c.id_indicadores == current_user).
-                    values(vacas_prenadas=consulta_prenadas))
 
-    db.commit()
-  except Exception as e:
-      logger.error(f'Error Funcion vacas_prenadas: {e}')
-      raise
-  finally:
-      db.close()
-  return consulta_prenadas
 
 
 @Produccion_Leche.get("/Calcular_porcentaje_ordeno")
@@ -330,21 +311,30 @@ async def vacas_prenadas_calcular(db: Session = Depends(get_database_session),
   try:
     # join de tabla bovinos y tabla leche mediante id_bovino \
     # filtrado y conteo animales con datos prenez Prenada que se encuentren vivos
+
+    """
+    
+    
+    """
     consulta_prenadas = db.query(modelo_bovinos_inventario.c.estado, modelo_leche.c.datos_prenez). \
         join(modelo_leche, modelo_bovinos_inventario.c.id_bovino == modelo_leche.c.id_bovino). \
-        filter(modelo_bovinos_inventario.c.estado == 'Vivo', modelo_leche.c.datos_prenez == 'Prenada',modelo_leche.c.usuario_id == current_user).count()
+        filter(modelo_bovinos_inventario.c.estado == 'Vivo', modelo_leche.c.datos_prenez == 'Prenada',modelo_leche.c.usuario_id==current_user).count()
     # actualizacion del campo
     db.execute(update(modelo_indicadores).
                     where(modelo_indicadores.c.id_indicadores == current_user).
                     values(vacas_prenadas=consulta_prenadas))
 
     db.commit()
+
+    return consulta_prenadas
+
+
   except Exception as e:
       logger.error(f'Error Funcion vacas_prenadas: {e}')
       raise
   finally:
       db.close()
-  return consulta_prenadas
+
 
 
 
