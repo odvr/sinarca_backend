@@ -130,7 +130,8 @@ def carga_animal(session:Session,current_user):
                       pass
           # consulta de sumatoria de las unidades animales
           consulta_unidades_animales = session.query(
-              func.sum(modelo_carga_animal_y_consumo_agua.columns.valor_unidad_animal)).all()
+              func.sum(modelo_carga_animal_y_consumo_agua.columns.valor_unidad_animal)).\
+              filter(modelo_carga_animal_y_consumo_agua.columns.usuario_id==current_user).all()
           for i in consulta_unidades_animales:
               # Toma la totalidad de unidades animales en este caso es el campo 0
               total_unidades_animales = i[0]
