@@ -63,7 +63,7 @@ async def id_inventario_bovinos_muertos(db: Session = Depends(get_database_sessi
     return consulta
 
 
-@Muertes_Bovinos.get("/id_listar_bovino_muerte/{id_bovino}",response_model=esquema_datos_muerte)
+@Muertes_Bovinos.get("/id_listar_bovino_muerte/{id_bovino}")
 async def inventario_bovinos_muertos_id(id_bovino:str,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
         consulta = db.execute(

@@ -102,3 +102,22 @@ async def CrearDescarte(id_bovino: str,razon_descarte:str,db: Session = Depends(
         db.close()
 
     return Response( status_code=status.HTTP_201_CREATED)
+
+
+
+
+
+@bovinos_descarte.delete("/eliminar_registro_Descarte/{id_descarte}")
+async def eliminar_descarte(id_descarte: int,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user) ):
+
+    try:
+        db.execute(modelo_descarte.delete().where(modelo_descarte.c.id_descarte == id_descarte))
+        db.commit()
+        # retorna un estado de no contenido
+        return
+
+    except Exception as e:
+        logger.error(f'Error al Intentar Eliminar Registro Pajillas: {e}')
+        raise
+    finally:
+        db.close()

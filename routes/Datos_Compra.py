@@ -102,11 +102,11 @@ async def crear_reporte_compras(id_bovino:str,estado:str,numero_bono_compra:str,
 """
 
 """
-@datos_compra.get("/id_listar_bovino_compra/{id_bovino}",response_model=esquema_modelo_compra)
+@datos_compra.get("/id_listar_bovino_compra/{id_bovino}")
 async def inventario_bovinos_compra_id(id_bovino:str,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
-        consulta = db.execute(
-            modelo_compra.select().where(modelo_compra.columns.id_bovino == id_bovino)).first()
+        consulta = db.execute(modelo_compra.select().where(modelo_compra.columns.id_bovino == id_bovino)).first()
+
 
     except Exception as e:
         pass

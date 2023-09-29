@@ -14,7 +14,7 @@ from config.db import   get_session
 from fastapi import APIRouter, Response,status
 # importa el esquema de los bovinos
 from models.modelo_bovinos import modelo_bovinos_inventario, modelo_ventas, modelo_datos_muerte, modelo_ceba, \
-    modelo_carga_animal_y_consumo_agua
+    modelo_carga_animal_y_consumo_agua, modelo_levante, modelo_datos_pesaje
 from sqlalchemy.orm import Session
 
 from routes.rutas_bovinos import get_current_user
@@ -52,20 +52,21 @@ la clase Esquema_bovinos  recibira como base para crear el animal esto con fin d
 """
 
 
-@Formulario_Bovino.post("/crear_bovino/{id_bovino}/{fecha_nacimiento}/{edad}/{raza}/{sexo}/{peso}/{marca}/{proposito}/{mansedumbre}/{estado}/{compra_bovino}", status_code=status.HTTP_201_CREATED,tags=["Formualario_Bovinos"])
-async def crear_bovinos(id_bovino:str,fecha_nacimiento:date,edad:int,raza:str,sexo:str,peso:float,marca:str,proposito:str,mansedumbre:str,estado:str,compra_bovino:str,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+@Formulario_Bovino.post("/crear_bovino/{id_bovino}/{fecha_nacimiento}/{raza}/{sexo}/{marca}/{proposito}/{mansedumbre}/{estado}/{compra_bovino}/{fecha_pesaje}/{peso}", status_code=status.HTTP_201_CREATED,tags=["Formualario_Bovinos"])
+async def crear_bovinos(id_bovino:str,fecha_nacimiento:date,raza:str,sexo:str,marca:str,proposito:str,mansedumbre:str,estado:str,compra_bovino:str,fecha_pesaje:date,peso:float,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
     eliminarduplicados(db=db)
 
     vientres_aptos(session=db)
 
     try:
+
         #bovinos_dic = esquemaBovinos.dict()
         ingreso = modelo_bovinos_inventario.insert().values(  id_bovino=id_bovino,
         fecha_nacimiento=fecha_nacimiento,
-        edad=edad,
+
         raza=raza,
         sexo=sexo,
-        peso=peso,
+
         marca=marca,
         proposito=proposito,
         mansedumbre=mansedumbre,
@@ -74,7 +75,65 @@ async def crear_bovinos(id_bovino:str,fecha_nacimiento:date,edad:int,raza:str,se
         usuario_id=current_user
 
                                                               )
+
         db.execute(ingreso)
+        db.commit()
+
+
+
+        # Animales de Ceba
+
+        consulta = db.execute(
+            modelo_ceba.select().where(
+                modelo_ceba.columns.id_bovino == id_bovino)).first()
+
+        if consulta is None and proposito == "Ceba":
+            ingresopceba = modelo_ceba.insert().values(id_bovino=id_bovino, proposito=proposito,
+                                                       usuario_id=current_user)
+            db.execute(ingresopceba)
+            db.commit()
+        else:
+
+            db.execute(modelo_ceba.update().where(modelo_ceba.c.id_bovino == id_bovino).values(
+                proposito=proposito))
+            db.commit()
+
+
+        # Crea los animales de levante
+
+        consulta = db.execute(
+            modelo_levante.select().where(
+                modelo_levante.columns.id_bovino == id_bovino)).first()
+
+        if consulta is None and proposito == "Levante":
+            ingresoplevante = modelo_levante.insert().values(id_bovino=id_bovino, proposito=proposito,
+                                                             usuario_id=current_user)
+
+            db.execute(ingresoplevante)
+            db.commit()
+
+        else:
+
+            db.execute(modelo_levante.update().where(modelo_levante.c.id_bovino == id_bovino).values(
+                id_bovino=id_bovino, proposito=proposito))
+            db.commit()
+
+            db.commit()
+        # Crea el animal con la fecha de pesaje
+
+        ingresoFechaPesaje = modelo_datos_pesaje.insert().values(id_bovino=id_bovino, fecha_pesaje=fecha_pesaje,
+                                                                 peso=peso, usuario_id=current_user)
+
+        db.execute(ingresoFechaPesaje)
+
+
+        db.commit()
+
+        # Crea la carga Animal
+
+        ingresoCargaAnimal = modelo_carga_animal_y_consumo_agua.insert().values(id_bovino=id_bovino,
+                                                                                usuario_id=current_user)
+        db.execute(ingresoCargaAnimal)
 
         db.commit()
     except Exception as e:

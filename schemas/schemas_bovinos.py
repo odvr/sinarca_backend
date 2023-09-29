@@ -96,10 +96,10 @@ class TokenPayload(BaseModel):
 class Esquema_bovinos(BaseModel):
     id_bovino : str
     fecha_nacimiento: date
-    edad: int
+    edad: Optional[int] = None
     sexo :str
     raza : str
-    peso: float
+    peso: Optional[float] = None
     marca :str
     proposito: str
     mansedumbre : str
@@ -157,9 +157,9 @@ class esquema_produccion_leche(BaseModel):
 class esquema_datos_muerte(BaseModel):
     id_datos_muerte: int
     id_bovino: str
-    estado: str
-    razon_muerte:str
-    fecha_muerte:date
+    estado: Optional[str] = None
+    razon_muerte: Optional[str] = None
+    fecha_muerte: Optional[date] = None
     usuario_id: Optional[str] = None
     class Config:
         orm_mode = True
@@ -231,14 +231,14 @@ class esquema_macho_reproductor(BaseModel):
 
 class esquema_modelo_ventas(BaseModel):
     id_venta: int
-    id_bovino: str
-    numero_bono_venta: str
-    estado: str
-    fecha_venta: date
-    precio_venta:int
-    razon_venta:str
-    medio_pago: str
-    comprador: str
+    id_bovino: Optional[str] = None
+    numero_bono_venta: Optional[str] = None
+    estado: Optional[str] = None
+    fecha_venta: Optional[date] = None
+    precio_venta: Optional[int] = None
+    razon_venta: Optional[str] = None
+    medio_pago: Optional[str] = None
+    comprador: Optional[str] = None
     usuario_id: Optional[str] = None
     class Config:
         orm_mode = True
@@ -248,13 +248,13 @@ class esquema_modelo_ventas(BaseModel):
 class esquema_modelo_compra(BaseModel):
     id_compra_bovino: int
     id_bovino: str
-    numero_bono_compra: str
-    estado: str
-    fecha_compra: date
-    precio_compra:int
-    razon_compra:str
-    medio_pago_compra: str
-    comprador: str
+    numero_bono_compra: Optional[str] = None
+    estado: Optional[str] = None
+    fecha_compra: Optional[date] = None
+    precio_compra: Optional[int] = None
+    razon_compra: Optional[str] = None
+    medio_pago_compra: Optional[str] = None
+    comprador: Optional[str] = None
     usuario_id: Optional[str] = None
     class Config:
         orm_mode = True
@@ -344,12 +344,12 @@ class esquema_partos(BaseModel):
 
 class esquema_carga_animal_y_consumo_agua(BaseModel):
     id_carga_animal: int
-    id_bovino: str
-    edad: int
-    peso: int
+    id_bovino: Optional[str] = None
+    edad: Optional[int] = None
+    peso: Optional[int] = None
     valor_unidad_animal: float
     consumo_forraje_vivo:float
-    raza:str
+    raza: Optional[str] = None
     usuario_id: Optional[str] = None
     class Config:
         orm_mode = True
@@ -489,10 +489,10 @@ class esquema_historial_supervivencia(BaseModel):
 
 class esquema_registro_pajillas(BaseModel):
     id_pajillas: int
-    Codigo_toro_pajilla: str
-    raza:str
-    nombre_toro: str
-    productor:str
+    Codigo_toro_pajilla: Optional[str] = None
+    raza: Optional[str] = None
+    nombre_toro: Optional[str] = None
+    productor: Optional[str] = None
     usuario_id: Optional[str] = None
     class Config:
         orm_mode = True

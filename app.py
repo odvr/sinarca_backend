@@ -12,6 +12,7 @@ from routes.Historial_Perdida_Terneros import Historial_Perdida_Terneros
 from routes.PartosAnimales import partos_bovinos
 from routes.Pesaje import pesaje
 from routes.Prod_leche import Produccion_Leche
+from routes.Registro_Pajillas import Pajillas
 from routes.Reproductor import ReproductorRutas
 from routes.Total_Animales import Pruebas_TotalAnimales
 from routes.Total_animales_leche import Pruebas_Leche
@@ -73,6 +74,7 @@ app.include_router(Vientres_Aptos)
 app.include_router(capacidad_carga_rutas)
 app.include_router(bovinos_descarte)
 app.include_router(Historial_Perdida_Terneros)
+app.include_router(Pajillas)
 
 
 
