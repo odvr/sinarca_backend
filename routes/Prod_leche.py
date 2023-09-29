@@ -76,7 +76,7 @@ async def inventario_prod_leche(db: Session = Depends(get_database_session),
         Edad_Primer_Parto(session=db)
         Edad_Sacrificio_Lecheras(condb=db)
         promedio_litros_leche(session=db)
-        intervalo_partos(session=db)
+        intervalo_partos(session=db,current_user=current_user)
         EliminarDuplicadosLeche(condb=db)
 
 

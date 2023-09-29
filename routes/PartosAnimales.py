@@ -72,7 +72,7 @@ async def crear_Registro_Partos(id_bovino:str,tipo_parto:str,id_bovino_hijo:str,
 @partos_bovinos.get("/listar_tabla_Historial_Partos",response_model=list[esquema_historial_partos] )
 async def listar_tabla_Partos_Animales(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user) ):
     try:
-        intervalo_partos(session=db)
+        intervalo_partos(session=db,current_user=current_user)
         #itemsListarPartos = db.execute(modelo_historial_partos.select()).all()
         itemsListarPartos = db.query(modelo_historial_partos).filter(modelo_historial_partos.c.usuario_id == current_user).all()
 

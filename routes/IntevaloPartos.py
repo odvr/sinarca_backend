@@ -36,8 +36,8 @@ def get_database_session():
 @IntevaloPartos.get("/listar_tabla_Intervalo_Partos",response_model=list[esquema_intervalo_partos] )
 async def listar_tabla_Intervalo_Partos(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
-        intervalo_partos(session=db)
-        promedio_intervalo_partos(session=db)
+        intervalo_partos(session=db,current_user=current_user)
+        promedio_intervalo_partos(session=db,current_user=current_user)
         #itemsListarIntevaloPartos = db.execute(modelo_historial_intervalo_partos.select()).all()
         itemsListarIntevaloPartos = db.query(modelo_historial_intervalo_partos).filter(modelo_historial_intervalo_partos.c.usuario_id == current_user).all()
 

@@ -63,17 +63,21 @@ logger.addHandler(file_handler)
 #from twilio.rest import Client
 """la siguiente funcion calcula los intervalos de partos de cada animal y los inserta
 en la base de datos"""
-def intervalo_partos(session=Session):
+def intervalo_partos(session:Session,current_user):
     try:
         # Realiza el join co la tabla de bovinos (solo se veran los id de los bovinos)
         #como la tabla de historial de partos puede tener un id repetido mas de una vez, se utiliza el conjunto o set
         #el set no permite elementos repetidos, por lo tanto solo nos dara un listado de id unicos
-        consulta_animal_partos= set(session.query(modelo_bovinos_inventario.c.id_bovino, modelo_historial_partos.c.id_bovino). \
-            join(modelo_historial_partos, modelo_bovinos_inventario.c.id_bovino == modelo_historial_partos.c.id_bovino).all())
+        consulta_animal_partos= set(session.query(modelo_bovinos_inventario.c.id_bovino, modelo_historial_partos.c.id_bovino,
+                                                  modelo_bovinos_inventario.c.usuario_id). \
+            join(modelo_historial_partos, modelo_bovinos_inventario.c.id_bovino == modelo_historial_partos.c.id_bovino).
+            filter( modelo_bovinos_inventario.c.usuario_id==current_user).all())
         # recorre el bucle
         for i in consulta_animal_partos:
             # Toma el ID del bovino, este es el campo numero 0
             id_bovino_partos = i[0]
+            # Toma el ID del usuario, este es el campo numero 2
+            usuario_id = i[2]
             # cosulta que determina la cantidad de partos de cada animal
             cantidad_partos = session.query(modelo_historial_partos). \
                 filter(modelo_historial_partos.columns.id_bovino == id_bovino_partos).count()
@@ -124,7 +128,8 @@ def intervalo_partos(session=Session):
                                                                                              consulta_partos[e][2],
                                                                                              fecha_parto2=
                                                                                              consulta_partos[e + 1][2],
-                                                                                             intervalo=intervalo_parto)
+                                                                                             intervalo=intervalo_parto,
+                                                                                             usuario_id=usuario_id)
 
                         session.execute(ingresointervalo)
                         session.commit()
@@ -193,13 +198,14 @@ def intervalo_partos(session=Session):
         session.close()
 
 """la siguiente funcion calcula el intervalo de parto promedio de cada animal"""
-def promedio_intervalo_partos(session=Session):
+def promedio_intervalo_partos(session:Session,current_user):
     try:
         # Realiza el join co la tabla de bovinos (solo se veran los id de los bovinos)
         # como la tabla de intervalos de parto puede tener un id repetido mas de una vez, se utiliza el conjunto o set
         # el set no permite elementos repetidos, por lo tanto solo nos dara un listado de id unicos
         consulta_animal_intervalos = set(session.query(modelo_bovinos_inventario.c.id_bovino, modelo_historial_intervalo_partos.c.id_bovino). \
-            join(modelo_historial_intervalo_partos,modelo_bovinos_inventario.c.id_bovino == modelo_historial_intervalo_partos.c.id_bovino).all())
+            join(modelo_historial_intervalo_partos,modelo_bovinos_inventario.c.id_bovino == modelo_historial_intervalo_partos.c.id_bovino).
+            filter( modelo_bovinos_inventario.c.usuario_id==current_user).all())
         # recorre el bucle
         for i in consulta_animal_intervalos:
             # Toma el ID del bovino, este es el campo numero 0
