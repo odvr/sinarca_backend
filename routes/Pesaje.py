@@ -85,7 +85,7 @@ async def inventario_prod_leche(db: Session = Depends(get_database_session),curr
     try:
 
 
-        peso_segun_raza(session=db)
+        peso_segun_raza(session=db,current_user=current_user)
         #itemsPromedioRaza = db.query(modelo_orden_peso).all()
         itemsPromedioRaza = db.query(modelo_orden_peso).filter(modelo_orden_peso.c.usuario_id == current_user).all()
         print(itemsPromedioRaza)

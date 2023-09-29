@@ -12,6 +12,8 @@ from fastapi import APIRouter, Response
 
 # importa la conexion de la base de datos
 from sqlalchemy.orm import Session
+from sqlalchemy.sql.functions import current_user
+
 # importa el esquema de los bovinos
 from models.modelo_bovinos import modelo_bovinos_inventario,modelo_orden_peso
 
@@ -59,7 +61,7 @@ logger.addHandler(file_handler)
  fin de obtener un listado de animales ordenado del mas pesado al menos pesado segun su raza
   esta funcion solo aplicara para animales con edad mayor o igual a 24 meses que es la edad donde
   se considera que han alcanzado su peso adulto o estan por alcanzarlo"""
-def peso_segun_raza(session: Session):
+def peso_segun_raza(session:Session,current_user):
     try:
         #obtencion de un listado de todas las razas a trabajar
         razas =  list(set(session.query(modelo_bovinos_inventario.columns.raza). \
@@ -75,14 +77,16 @@ def peso_segun_raza(session: Session):
                 where(between(modelo_bovinos_inventario.columns.edad, 24, 500)).\
                 filter(modelo_bovinos_inventario.columns.sexo=="Macho",
                        modelo_bovinos_inventario.columns.raza==raza_a_trabajar,
-                       modelo_bovinos_inventario.columns.estado=="Vivo").all()
+                       modelo_bovinos_inventario.columns.estado=="Vivo",
+                       modelo_bovinos_inventario.columns.usuario_id==current_user).all()
             # consulta de peso promedio por raza para animales de sexo hembra
             consulta_peso_prom_por_raza_hembra = session.query(
                 func.avg(modelo_bovinos_inventario.columns.peso)).\
                 where(between(modelo_bovinos_inventario.columns.edad, 24, 500)).\
                 filter(modelo_bovinos_inventario.columns.sexo=="Hembra",
                        modelo_bovinos_inventario.columns.raza==raza_a_trabajar,
-                       modelo_bovinos_inventario.columns.estado=="Vivo").all()
+                       modelo_bovinos_inventario.columns.estado=="Vivo",
+                       modelo_bovinos_inventario.columns.usuario_id==current_user).all()
             #esta consulta trae los bovinos vivos con edad igual o mayor a dos anos
             consulta_bovinos_peso = session.query(modelo_bovinos_inventario). \
                 where(between(modelo_bovinos_inventario.columns.edad, 24, 500)). \
@@ -97,6 +101,8 @@ def peso_segun_raza(session: Session):
                 raza_bovino = i[4]
                 # Toma el sexo bovino, este es el campo numero 3
                 sexo_bovino = i[3]
+                # Toma el usuario, este es el campo numero 12
+                usuario = i[11]
                 #si el bovino es macho se aplicara lo siguiente
                 if sexo_bovino=="Macho":
                     #si el promedio segun raza es una consulta vacia entonces no se realizara ningun cambio
@@ -117,7 +123,8 @@ def peso_segun_raza(session: Session):
                                                                                  peso_promedio_raza=
                                                                                  consulta_peso_prom_por_raza_macho[0][
                                                                                      0],
-                                                                                 diferencia=diferencia)
+                                                                                 diferencia=diferencia,
+                                                                                 usuario_id=usuario)
 
                                 session.execute(ingresoDatos)
                                 session.commit()
@@ -129,7 +136,8 @@ def peso_segun_raza(session: Session):
                                                                                   peso_promedio_raza=
                                                                                   consulta_peso_prom_por_raza_macho[0][
                                                                                       0],
-                                                                                  diferencia=diferencia). \
+                                                                                  diferencia=diferencia,
+                                                                                 usuario_id=usuario). \
                                                 where(modelo_orden_peso.columns.id_bovino == id_bovino_peso))
                                 session.commit()
                         else:
@@ -153,7 +161,8 @@ def peso_segun_raza(session: Session):
                                                                                  peso_promedio_raza=
                                                                                  consulta_peso_prom_por_raza_hembra[0][
                                                                                      0],
-                                                                                 diferencia=diferencia)
+                                                                                 diferencia=diferencia,
+                                                                                 usuario_id=usuario)
 
                                 session.execute(ingresoDatos)
                                 session.commit()
@@ -165,7 +174,8 @@ def peso_segun_raza(session: Session):
                                                                                   peso_promedio_raza=
                                                                                   consulta_peso_prom_por_raza_hembra[0][
                                                                                       0],
-                                                                                  diferencia=diferencia). \
+                                                                                  diferencia=diferencia,
+                                                                                 usuario_id=usuario). \
                                                 where(modelo_orden_peso.columns.id_bovino == id_bovino_peso))
                                 session.commit()
                         else:
