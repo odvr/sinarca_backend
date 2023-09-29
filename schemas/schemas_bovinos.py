@@ -392,7 +392,7 @@ class esquema_vientres_aptos(BaseModel):
 class esquema_historial_partos(BaseModel):
     id_parto: int
     id_bovino: str
-    fecha_parto: date
+    fecha_parto: Optional[date] = None
     tipo_parto: str
     id_bovino_hijo:str
     usuario_id: Optional[str] = None

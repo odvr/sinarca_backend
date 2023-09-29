@@ -8,6 +8,7 @@ from Lib.Lib_Intervalo_Partos import intervalo_partos, fecha_aproximada_parto
 # # importa la conexion de la base de datos
 from sqlalchemy.orm import Session
 
+from Lib.Registro_partos import registro_partos_animales
 from config.db import get_session
 # # importa el esquema de los bovinos
 from models.modelo_bovinos import modelo_historial_partos, modelo_partos
@@ -41,13 +42,13 @@ def get_database_session():
         yield db
     finally:
         db.close()
-@partos_bovinos.post("/crear_Registro_Partos/{id_bovino}/{fecha_parto}/{tipo_parto}/{id_bovino_hijo}")
-async def crear_Registro_Partos(id_bovino:str,fecha_parto: date,tipo_parto:str,id_bovino_hijo:str,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user) ):
+@partos_bovinos.post("/crear_Registro_Partos/{id_bovino}/{tipo_parto}/{id_bovino_hijo}")
+async def crear_Registro_Partos(id_bovino:str,tipo_parto:str,id_bovino_hijo:str,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user) ):
 
     try:
 
         ingresoRegistroPartos= modelo_historial_partos.insert().values(id_bovino=id_bovino,
-                                                     fecha_parto=fecha_parto,
+
                                                      tipo_parto=tipo_parto,
                                                      id_bovino_hijo=id_bovino_hijo,
                                                      usuario_id=current_user
@@ -56,7 +57,7 @@ async def crear_Registro_Partos(id_bovino:str,fecha_parto: date,tipo_parto:str,i
 
         db.execute(ingresoRegistroPartos)
         db.commit()
-
+        registro_partos_animales(session=db)
     except Exception as e:
         logger.error(f'Error al Crear INDICE DE PARTOS: {e}')
         raise
@@ -157,3 +158,20 @@ async def listar_fecha_parto(db: Session = Depends(get_database_session),current
     finally:
         db.close()
     return listar_fecha_estimada_parto
+
+
+
+@partos_bovinos.delete("/eliminar_registro_Partos_Bovinos/{id_parto}")
+async def eliminar_Parto_Bovinos(id_parto: int,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user) ):
+
+    try:
+        db.execute(modelo_historial_partos.delete().where(modelo_historial_partos.c.id_parto == id_parto))
+        db.commit()
+        # retorna un estado de no contenido
+        return
+
+    except Exception as e:
+        logger.error(f'Error al Intentar Eliminar Registro Partos Bovinos: {e}')
+        raise
+    finally:
+        db.close()

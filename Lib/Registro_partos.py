@@ -12,13 +12,13 @@ from Lib.actualizacion_peso import actualizacion_peso
 from Lib.endogamia import endogamia
 from Lib.funcion_vientres_aptos import vientres_aptos
 # importa la conexion de la base de datos
-from config.db import condb, session
+from sqlalchemy.orm import Session
 # importa el esquema de los bovinos
 from models.modelo_bovinos import modelo_bovinos_inventario, modelo_veterinaria, modelo_leche, modelo_levante, \
     modelo_ventas, modelo_datos_muerte, \
     modelo_indicadores, modelo_ceba, modelo_macho_reproductor, modelo_carga_animal_y_consumo_agua, modelo_datos_pesaje, \
     modelo_capacidad_carga, modelo_calculadora_hectareas_pastoreo, modelo_partos, modelo_vientres_aptos, \
-    modelo_descarte, modelo_users, modelo_arbol_genealogico, modelo_veterinaria_evoluciones, \
+    modelo_descarte,  modelo_arbol_genealogico, modelo_veterinaria_evoluciones, \
     modelo_historial_supervivencia, modelo_historial_partos
 from routes.Reproductor import vida_util_macho_reproductor
 from schemas.schemas_bovinos import Esquema_bovinos, esquema_produccion_levante, \
@@ -58,8 +58,9 @@ logger.addHandler(file_handler)
 """
 
 
-def registro_partos_animales():
+def registro_partos_animales(session: Session):
  try:
+
      consulta_partos = session.query(modelo_historial_partos.c.id_bovino_hijo).all()
      # recorre el bucle
      for i in consulta_partos:
