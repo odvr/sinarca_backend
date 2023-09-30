@@ -90,19 +90,23 @@ async def CrearRegistroVeterinaria(id_bovino:str,sintomas:str,fecha_sintomas:dat
 
 
 
-@Veterinaria.put("/ActualizarDetallesVeterinaria/{id_veterinaria}/{sinomas}/{fecha_sintomas}/{comportamiento}/{condicion_corporal}/{postura}/{mucosa_ocular}/{mucosa_bucal}/{mucosa_rectal}/{mucosa_vulvar_prepusial}/{evolucion}/{tratamiento}/{piel_pelaje}",status_code=200,tags=["Veterinaria"])
-async def ActualizarDetallesVeterinaria(id_veterinaria:int,sintomas:str,fecha_sintomas:date,comportamiento:str,condicion_corporal:str,postura:str,mucosa_bucal :str, mucosa_ocular:str,mucosa_rectal:str,mucosa_vulvar_prepusial:str,evolucion:str,tratamiento:str,piel_pelaje:str,db: Session = Depends(get_database_session),
+@Veterinaria.put("/ActualizarDetallesVeterinaria/{id_veterinaria}/{sintomas}/{fecha_sintomas}/{comportamiento}/{condicion_corporal}/{postura}/{mucosa_ocular}/{mucosa_bucal}/{mucosa_rectal}/{mucosa_vulvar_prepusial}/{evolucion}/{tratamiento}/{piel_pelaje}",status_code=200,tags=["Veterinaria"])
+async def ActualizarDetallesVeterinaria(id_veterinaria:str,sintomas:str,fecha_sintomas:date,comportamiento:str,condicion_corporal:str,postura:str,mucosa_bucal :str, mucosa_ocular:str,mucosa_rectal:str,mucosa_vulvar_prepusial:str,evolucion:str,tratamiento:str,piel_pelaje:str,db: Session = Depends(get_database_session),
         current_user: Esquema_Usuario = Depends(get_current_user) ):
 
     try:
         db.execute(modelo_veterinaria.update().where(
             modelo_veterinaria.c.id_veterinaria == id_veterinaria).values(
-            sintomas=sintomas,fecha_sintomas=fecha_sintomas,comportamiento=comportamiento,condicion_corporal=condicion_corporal,postura=postura,mucosa_bucal= mucosa_bucal,mucosa_ocular=mucosa_ocular,mucosa_rectal=mucosa_rectal,mucosa_vulvar_prepusial=mucosa_vulvar_prepusial, evolucion=evolucion,tratamiento=tratamiento,piel_pelaje=piel_pelaje))
+            sintomas=sintomas, fecha_sintomas=fecha_sintomas, comportamiento=comportamiento,
+            condicion_corporal=condicion_corporal, postura=postura, mucosa_bucal=mucosa_bucal,
+            mucosa_ocular=mucosa_ocular, mucosa_rectal=mucosa_rectal, mucosa_vulvar_prepusial=mucosa_vulvar_prepusial,
+            evolucion=evolucion, tratamiento=tratamiento, piel_pelaje=piel_pelaje))
+        db.commit()
         db.commit()
 
 
     except Exception as e:
-        logger.error(f'Error al Editar Bovino: {e}')
+        logger.error(f'Error al Editar Bovino Veterinaria: {e}')
         raise
 
     finally:
@@ -136,13 +140,13 @@ async def id_inventario_bovino_Comentarios(id_veterinaria: int,db: Session = Dep
 
 "Eliminar Comentarios de Veterinaria"
 
-@Veterinaria.delete("/eliminar_comentarios_evoluciones/{id_veterinaria}",tags=["Veterinaria"])
-async def Eliminar_Comentarios_Evoluciones(id_veterinaria: str,db: Session = Depends(get_database_session),
+@Veterinaria.delete("/eliminar_comentarios_evoluciones/{id_comentario}",tags=["Veterinaria"])
+async def Eliminar_Comentarios_Evoluciones(id_comentario: int,db: Session = Depends(get_database_session),
         current_user: Esquema_Usuario = Depends(get_current_user)):
 
     try:
 
-        db.execute(modelo_veterinaria_comentarios.delete().where(modelo_veterinaria_comentarios.c.id_veterinaria == id_veterinaria))
+        db.execute(modelo_veterinaria_comentarios.delete().where(modelo_veterinaria_comentarios.c.id_comentario == id_comentario))
         db.commit()
     except Exception as e:
         logger.error(f'Error al intentar Eliminar Comentarios Y Evoluciones: {e}')
