@@ -11,6 +11,7 @@ from datetime import date, timedelta
 from fastapi import APIRouter
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy import desc
+from sqlalchemy.sql.functions import current_user
 
 # importa la conexion de la base de datos
 from config.db import condb, session
@@ -60,7 +61,8 @@ def tipo_ganado_leche():
         animales_leche= session.query(modelo_bovinos_inventario.c.estado, modelo_leche.c.id_bovino,
                                       modelo_bovinos_inventario.c.raza,modelo_bovinos_inventario.c.peso,
                                       modelo_bovinos_inventario.c.edad). \
-                   join(modelo_leche, modelo_bovinos_inventario.c.id_bovino == modelo_leche.c.id_bovino).all()
+                   join(modelo_leche, modelo_bovinos_inventario.c.id_bovino == modelo_leche.c.id_bovino).\
+            filter(modelo_bovinos_inventario.c.usuario_id==current_user).all()
         # recorre el bucle
         for i in animales_leche:
             # Toma el ID del bovino, este es el campo numero 1

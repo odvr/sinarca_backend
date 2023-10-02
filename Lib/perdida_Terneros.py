@@ -57,22 +57,26 @@ def perdida_Terneros1(db: Session,current_user):
      consulta_primer_muerte = db.query(modelo_bovinos_inventario.c.id_bovino,modelo_datos_muerte.c.fecha_muerte). \
          join(modelo_datos_muerte,modelo_bovinos_inventario.c.id_bovino == modelo_datos_muerte.c.id_bovino).\
          where(between(modelo_bovinos_inventario.columns.edad, 0, 12))\
-         .group_by(asc(modelo_datos_muerte.c.fecha_muerte)).first()
+         .group_by(asc(modelo_datos_muerte.c.fecha_muerte)).\
+         filter( modelo_bovinos_inventario.c.usuario_id==current_user).first()
      #si retorna una consulta vacia entonces indicara cero perdida de terneros
      if consulta_primer_muerte is None or consulta_primer_muerte==[]:
          periodo_actual= int(datetime.now().year)
          tasa_perd = 0
          consulta_existencia=db.query(modelo_historial_perdida_terneros). \
-             where(modelo_historial_perdida_terneros.columns.periodo==periodo_actual).all()
+             where(modelo_historial_perdida_terneros.columns.periodo==periodo_actual).\
+             filter(modelo_historial_perdida_terneros.c.usuario_id==current_user).all()
          if consulta_existencia==[]:
              ingresoperiodo = modelo_historial_perdida_terneros.insert().values(periodo=periodo_actual,
-                                                                                  perdida=tasa_perd)
+                                                                                  perdida=tasa_perd,
+                                                                                 usuario_id=current_user)
 
              db.execute(ingresoperiodo)
              db.commit()
          else:
              db.execute(modelo_historial_perdida_terneros.update().values(perdida=tasa_perd). \
-                             where(modelo_historial_perdida_terneros.columns.periodo==periodo_actual))
+                             where(modelo_historial_perdida_terneros.columns.periodo==periodo_actual).
+                        filter( modelo_historial_perdida_terneros.c.usuario_id==current_user))
              db.commit()
      #en caso de que exista uno o mas registros de muertes, se tomara la fecha mas antigua para el bucle
      # a partir de ese año se realizara un listado de perdidas de tenero por cada periodo hasta el actual
@@ -81,7 +85,6 @@ def perdida_Terneros1(db: Session,current_user):
          c=0
          while (c < contador):
              periodo = consulta_primer_muerte[1].year + c
-             print(periodo)
              # se determinan las fechas del periodo (inicio y fin de año)
              fecha_inicio = datetime(periodo, 1, 1)
              fecha_fin = datetime(periodo, 12, 31)
@@ -89,21 +92,25 @@ def perdida_Terneros1(db: Session,current_user):
              muertes_periodo = db.query(modelo_bovinos_inventario.c.id_bovino, modelo_datos_muerte.c.fecha_muerte). \
                  join(modelo_datos_muerte, modelo_bovinos_inventario.c.id_bovino == modelo_datos_muerte.c.id_bovino). \
                  where(between(modelo_datos_muerte.columns.fecha_muerte, fecha_inicio, fecha_fin)) \
-                 .filter(between(modelo_bovinos_inventario.columns.edad, 0, 12)).count()
+                 .filter(between(modelo_bovinos_inventario.columns.edad, 0, 12),
+                         modelo_bovinos_inventario.c.usuario_id==current_user).count()
              # calculo de la tasa de perdida de terneros
              if muertes_periodo == 0:
                  tasa_perd = 0
                  consulta_existencia = db.query(modelo_historial_perdida_terneros). \
-                     where(modelo_historial_perdida_terneros.columns.periodo == periodo).all()
+                     where(modelo_historial_perdida_terneros.columns.periodo == periodo).\
+                     filter( modelo_historial_perdida_terneros.c.usuario_id==current_user).all()
                  if consulta_existencia == []:
                      ingresoperiodo = modelo_historial_perdida_terneros.insert().values(periodo=periodo,
-                                                                                        perdida=tasa_perd)
+                                                                                        perdida=tasa_perd,
+                                                                                 usuario_id=current_user)
 
                      db.execute(ingresoperiodo)
                      db.commit()
                  else:
                      db.execute(modelo_historial_perdida_terneros.update().values(perdida=tasa_perd). \
-                                     where(modelo_historial_perdida_terneros.columns.periodo == periodo))
+                                     where(modelo_historial_perdida_terneros.columns.periodo == periodo).
+                                filter(modelo_historial_perdida_terneros.c.usuario_id==current_user))
                      db.commit()
              else:
                  #para determinar los totales es necesario determinar los animales que
@@ -112,41 +119,50 @@ def perdida_Terneros1(db: Session,current_user):
                  fecha_fin_nacimiento = datetime(periodo, 12, 31)
 
                  totales_periodo= db.query(modelo_bovinos_inventario). \
-                 where(between(modelo_bovinos_inventario.columns.fecha_nacimiento, fecha_inicio_nacimiento, fecha_fin_nacimiento)).count()
+                 where(between(modelo_bovinos_inventario.columns.fecha_nacimiento, fecha_inicio_nacimiento, fecha_fin_nacimiento)).\
+                     filter( modelo_bovinos_inventario.c.usuario_id==current_user).count()
 
                  tasa_perd = (muertes_periodo / totales_periodo) * 100
              consulta_existencia = db.query(modelo_historial_perdida_terneros). \
-                 where(modelo_historial_perdida_terneros.columns.periodo == periodo).all()
+                 where(modelo_historial_perdida_terneros.columns.periodo == periodo).\
+                 filter(modelo_historial_perdida_terneros.c.usuario_id==current_user).all()
              if consulta_existencia == []:
                  ingresoperiodo = modelo_historial_perdida_terneros.insert().values(periodo=periodo,
-                                                                                    perdida=tasa_perd)
+                                                                                    perdida=tasa_perd,
+                                                                                 usuario_id=current_user)
 
                  db.execute(ingresoperiodo)
                  db.commit()
              else:
                  db.execute(modelo_historial_perdida_terneros.update().values(perdida=tasa_perd). \
-                                 where(modelo_historial_perdida_terneros.columns.periodo == periodo))
+                                 where(modelo_historial_perdida_terneros.columns.periodo == periodo).
+                            filter( modelo_historial_perdida_terneros.c.usuario_id==current_user))
                  db.commit()
              c= c+1
 
      # el siguiente codigo permite actualizar los periodos si se cambia la primer fecha de muerte
      if consulta_primer_muerte is None or consulta_primer_muerte==[]:
          db.execute(modelo_historial_perdida_terneros.delete().
-                         where(modelo_historial_perdida_terneros.c.periodo!=datetime.now().year))
+                         where(modelo_historial_perdida_terneros.c.periodo!=datetime.now().year).
+                    filter(modelo_historial_perdida_terneros.c.usuario_id==current_user))
          db.commit()
      else:
          consulta_periodos = db.query(modelo_historial_perdida_terneros.c.periodo). \
-             filter(modelo_historial_perdida_terneros.c.periodo < consulta_primer_muerte[1].year).all()
+             filter(modelo_historial_perdida_terneros.c.periodo < consulta_primer_muerte[1].year,
+                    modelo_historial_perdida_terneros.c.usuario_id==current_user).all()
          if consulta_periodos is None or consulta_periodos == []:
              pass
          else:
              db.execute(modelo_historial_perdida_terneros.delete().
-                             where(modelo_historial_perdida_terneros.c.periodo < consulta_primer_muerte[1].year))
+                             where(modelo_historial_perdida_terneros.c.periodo < consulta_primer_muerte[1].year).
+                        filter(modelo_historial_perdida_terneros.c.usuario_id==current_user))
              db.commit()
 
      #actualizacion del valor mas actual en ela tabla de indicadores
      consulta_ultimo_periodo = db.query(modelo_historial_perdida_terneros.c.perdida).\
-         group_by(asc(modelo_historial_perdida_terneros.c.perdida)).all()
+         group_by(asc(modelo_historial_perdida_terneros.c.perdida)).\
+         filter(modelo_historial_perdida_terneros.c.usuario_id==current_user).all()
+
      db.execute(update(modelo_indicadores).
                      where(modelo_indicadores.c.id_indicadores == current_user).
                      values(perdida_de_terneros=consulta_ultimo_periodo[0][0]))
