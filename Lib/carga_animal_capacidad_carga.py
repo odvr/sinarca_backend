@@ -72,7 +72,8 @@ def carga_animal(session:Session,current_user):
   try:
       # join  tabla de bovinos y tabla de carga animal
       consulta_bovinos = session.query(modelo_bovinos_inventario).\
-          filter( modelo_bovinos_inventario.c.estado=="Vivo").all()
+          filter(modelo_bovinos_inventario.c.estado=="Vivo",
+                 modelo_bovinos_inventario.columns.usuario_id==current_user).all()
       if consulta_bovinos==[]:
           pass
       else:
@@ -115,7 +116,8 @@ def carga_animal(session:Session,current_user):
               consulta_bovinos_modulo = session.query(modelo_bovinos_inventario.c.id_bovino,
                                                       modelo_bovinos_inventario.c.estado). \
                   join(modelo_carga_animal_y_consumo_agua,
-                       modelo_bovinos_inventario.c.id_bovino == modelo_carga_animal_y_consumo_agua.c.id_bovino).all()
+                       modelo_bovinos_inventario.c.id_bovino == modelo_carga_animal_y_consumo_agua.c.id_bovino).\
+                  filter(modelo_bovinos_inventario.columns.usuario_id==current_user).all()
               for i in consulta_bovinos_modulo:
                   # Toma el ID del bovino en este caso es el campo 0
                   id_bov = i[0]
@@ -212,7 +214,8 @@ def capacidad_carga(session:Session,current_user):
             session.commit()
         else:
             consulta_unidades_animales_usuario = session.query(
-                func.sum(modelo_carga_animal_y_consumo_agua.columns.valor_unidad_animal)).all()
+                func.sum(modelo_carga_animal_y_consumo_agua.columns.valor_unidad_animal)).\
+                filter(modelo_capacidad_carga.columns.usuario_id == current_user).all()
             for i in consulta_unidades_animales_usuario:
                 # Toma la totalidad de unidades animales en este caso es el campo 0
                 total_unidades_animales = i[0]
