@@ -4,8 +4,10 @@ Librerias requeridas
 import logging
 from Lib.Lib_Intervalo_Partos import intervalo_partos
 from Lib.Lib_eliminar_duplicados_bovinos import eliminarduplicados
+from Lib.clasificacion_ganado_leche import tipo_ganado_leche
 from Lib.funcion_litros_leche import promedio_litros_leche
 from Lib.funcion_litros_por_raza import litros_por_raza
+from Lib.funcion_peso_por_raza import peso_segun_raza
 # # importa la conexion de la base de datos
 from config.db import  get_session
 # # importa el esquema de los bovinos
@@ -73,11 +75,14 @@ async def inventario_prod_leche(db: Session = Depends(get_database_session),
 
     try:
         "Librerias Requeridas"
+        peso_segun_raza(session=db,current_user=current_user)
         Edad_Primer_Parto(session=db)
         Edad_Sacrificio_Lecheras(condb=db)
         promedio_litros_leche(session=db)
         intervalo_partos(session=db,current_user=current_user)
         EliminarDuplicadosLeche(condb=db)
+        tipo_ganado_leche(session= db,current_user=current_user)
+
 
 
         #itemsLeche = db.query(modelo_leche).all()

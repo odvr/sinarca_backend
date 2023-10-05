@@ -14,7 +14,7 @@ from sqlalchemy import desc
 from sqlalchemy.sql.functions import current_user
 
 # importa la conexion de la base de datos
-from config.db import condb, session
+from sqlalchemy.orm import Session
 # importa el esquema de los bovinos
 from models.modelo_bovinos import modelo_bovinos_inventario, modelo_leche, modelo_historial_partos, \
     modelo_orden_peso
@@ -55,7 +55,7 @@ logger.addHandler(file_handler)
  parida o una novilla de vientre"""
 #Advertencia: para que se jeceute corectamente esta funcion,
 # debe haberser ejecutado la funcion peso_segun_raza()
-def tipo_ganado_leche():
+def tipo_ganado_leche(session:Session,current_user):
     try:
         #consulta que trae el listado de animales en leche
         animales_leche= session.query(modelo_bovinos_inventario.c.estado, modelo_leche.c.id_bovino,
@@ -131,7 +131,7 @@ def tipo_ganado_leche():
                 #si posee por lo menos un parto entonces se evalua si sera escotera o parida
                 elif consulta_num_partos[0] > 0:
                     #se consulta la fecha de su ultimo parto y la cria que pario
-                    consulta_ultimo_parto = list(condb.execute(modelo_historial_partos.select(). \
+                    consulta_ultimo_parto = list(session.execute(modelo_historial_partos.select(). \
                                                         where(modelo_historial_partos.columns.id_bovino == id_bovino_leche). \
                                                         order_by(desc(modelo_historial_partos.columns.fecha_parto))).first())
                     #se consulta el estado de la cria parida
