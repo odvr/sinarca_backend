@@ -380,10 +380,10 @@ class esquema_calculadora_hectareas_pastoreo(BaseModel):
 
 class esquema_vientres_aptos(BaseModel):
     id_vientre: int
-    id_bovino: str
-    edad: int
-    peso: float
-    raza:str
+    id_bovino: Optional[str] = None
+    edad: Optional[int] = None
+    peso: Optional[float] = None
+    raza: Optional[str] = None
     usuario_id: Optional[str] = None
     class Config:
         orm_mode = True

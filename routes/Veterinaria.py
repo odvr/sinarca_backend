@@ -90,8 +90,8 @@ async def CrearRegistroVeterinaria(id_bovino:str,sintomas:str,fecha_sintomas:dat
 
 
 
-@Veterinaria.put("/ActualizarDetallesVeterinaria/{id_veterinaria}/{sintomas}/{fecha_sintomas}/{comportamiento}/{condicion_corporal}/{postura}/{mucosa_ocular}/{mucosa_bucal}/{mucosa_rectal}/{mucosa_vulvar_prepusial}/{evolucion}/{tratamiento}/{piel_pelaje}",status_code=200,tags=["Veterinaria"])
-async def ActualizarDetallesVeterinaria(id_veterinaria:str,sintomas:str,fecha_sintomas:date,comportamiento:str,condicion_corporal:str,postura:str,mucosa_bucal :str, mucosa_ocular:str,mucosa_rectal:str,mucosa_vulvar_prepusial:str,evolucion:str,tratamiento:str,piel_pelaje:str,db: Session = Depends(get_database_session),
+@Veterinaria.put("/ActualizarDetallesVeterinaria/{id_veterinaria}/{sintomas}/{fecha_sintomas}/{comportamiento}/{condicion_corporal}/{postura}/{mucosa_ocular}/{mucosa_bucal}/{mucosa_rectal}/{mucosa_vulvar_prepusial}/{evolucion}/{tratamiento}/{piel_pelaje}/{estado}",status_code=200,tags=["Veterinaria"])
+async def ActualizarDetallesVeterinaria(id_veterinaria:str,sintomas:str,fecha_sintomas:date,comportamiento:str,condicion_corporal:str,postura:str,mucosa_bucal :str, mucosa_ocular:str,mucosa_rectal:str,mucosa_vulvar_prepusial:str,evolucion:str,tratamiento:str,piel_pelaje:str,estado:str,db: Session = Depends(get_database_session),
         current_user: Esquema_Usuario = Depends(get_current_user) ):
 
     try:
@@ -100,7 +100,7 @@ async def ActualizarDetallesVeterinaria(id_veterinaria:str,sintomas:str,fecha_si
             sintomas=sintomas, fecha_sintomas=fecha_sintomas, comportamiento=comportamiento,
             condicion_corporal=condicion_corporal, postura=postura, mucosa_bucal=mucosa_bucal,
             mucosa_ocular=mucosa_ocular, mucosa_rectal=mucosa_rectal, mucosa_vulvar_prepusial=mucosa_vulvar_prepusial,
-            evolucion=evolucion, tratamiento=tratamiento, piel_pelaje=piel_pelaje))
+            evolucion=evolucion, tratamiento=tratamiento, piel_pelaje=piel_pelaje,estado_Historia_clinica=estado))
         db.commit()
         db.commit()
 
