@@ -44,7 +44,7 @@ def get_database_session():
 @Vientres_Aptos.get("/listar_vientres_aptos" )
 async def listar_vientres_aptos_modulo(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
-        vientres_aptos(session=db)
+        vientres_aptos(session=db,current_user=current_user)
         #Eliminacion_total_vientres_aptos()
         #tabla_vientres_aptos = db.query(modelo_vientres_aptos).all()
         tabla_vientres_aptos = db.query(modelo_vientres_aptos).filter(modelo_vientres_aptos.c.usuario_id == current_user).all()

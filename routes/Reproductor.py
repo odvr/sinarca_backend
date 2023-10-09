@@ -143,7 +143,7 @@ async def eliminar_bovino_reproductor(id_bovino: str,db: Session = Depends(get_d
 async def relacion_toros_vientres_aptos(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
         vida_util_macho_reproductor(db=db,current_user=current_user)
-        vientres_aptos(session=db)
+        vientres_aptos(session=db,current_user=current_user)
         relacion_macho_reproductor_vientres_aptos(db=db,current_user=current_user)
 
         response = db.query(modelo_indicadores).filter(modelo_indicadores.c.id_indicadores == current_user).all()

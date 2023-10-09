@@ -46,7 +46,7 @@ que no tengan categoria de hembra de levante"""
 #Advertencia: ara que se jeceute corectamente esta funcion,
 # debe haberser ejecutado la funcion peso_segun_raza() y
 # tipo_ganado_leche()
-def vientres_aptos(session: Session):
+def vientres_aptos(session:Session,current_user):
   try:
       #la siguiente consulta trae los animales hembras vacios
       consulta_vientres = session.query(modelo_leche.c.id_bovino,modelo_bovinos_inventario.c.edad,
@@ -54,7 +54,8 @@ def vientres_aptos(session: Session):
           join(modelo_leche, modelo_bovinos_inventario.c.id_bovino==modelo_leche.c.id_bovino).\
           where(modelo_bovinos_inventario.c.estado=="Vivo").\
           filter( modelo_leche.columns.datos_prenez == "Vacia",
-                  modelo_leche.columns.tipo_ganado != "Hembra de levante").all()
+                  modelo_leche.columns.tipo_ganado != "Hembra de levante",
+                  modelo_leche.columns.usuario_id==current_user).all()
 
 
       for i in consulta_vientres:
@@ -78,7 +79,8 @@ def vientres_aptos(session: Session):
                   id_bovino=idBovinoConsultaVientresAptos,
                   edad=edadBovinoConsultaVientresAptos,
                   peso=pesoBovinoConsultaVientresAptos,
-                  raza=razaBovinoConsultaVientresAptos)
+                  raza=razaBovinoConsultaVientresAptos,
+                  usuario_id=current_user)
               session.execute(ingresoVientresAptos)
               session.commit()
           else:
@@ -92,7 +94,8 @@ def vientres_aptos(session: Session):
           pass
       #el siguiente codigo permite eliminar animales cuyo estado o condicion sea cambiada
       #consulta de los vientres aptos
-      consulta_vientres_aptos = session.query(modelo_vientres_aptos.c.id_bovino).all()
+      consulta_vientres_aptos = session.query(modelo_vientres_aptos.c.id_bovino).\
+          filter(modelo_vientres_aptos.columns.usuario_id==current_user).all()
       for i in consulta_vientres_aptos:
           # Toma el ID del bovino en este caso es el campo 0
           idBov = i[0]

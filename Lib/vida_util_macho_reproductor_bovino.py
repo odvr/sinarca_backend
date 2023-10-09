@@ -35,7 +35,8 @@ def vida_util_macho_reproductor(db: Session,current_user):
 
     consulta_machos_r = db.query(modelo_macho_reproductor.c.id_bovino,modelo_bovinos_inventario.c.edad,modelo_bovinos_inventario.c.peso,
                           modelo_bovinos_inventario.c.estado,modelo_bovinos_inventario.c.fecha_nacimiento).\
-        join(modelo_macho_reproductor,modelo_bovinos_inventario.c.id_bovino == modelo_macho_reproductor.c.id_bovino).all()
+        join(modelo_macho_reproductor,modelo_bovinos_inventario.c.id_bovino == modelo_macho_reproductor.c.id_bovino).\
+        filter(modelo_macho_reproductor.c.usuario_id==current_user).all()
 
 
     # Recorre los campos de la consulta
@@ -64,7 +65,7 @@ def vida_util_macho_reproductor(db: Session,current_user):
  finally:
   db.close()
 
-"""la siguiente funncion determina si la cantidad de machos reproductores es suficciente
+"""la siguiente funncion determina si la cantidad de machos reproductores es suficiente
 o demasiada para las hembras que se pueden preñar """
 def relacion_macho_reproductor_vientres_aptos(db: Session, current_user):
   #la siguiente variable debe ser global ya que esta dentro de un bucle if anidado
@@ -72,10 +73,14 @@ def relacion_macho_reproductor_vientres_aptos(db: Session, current_user):
   try:
     # consulta y conteo de toros reproductores vivos
     cantidad_reproductores = db.query(modelo_macho_reproductor). \
-        where(modelo_macho_reproductor.columns.estado == "Vivo").count()
+        where(modelo_macho_reproductor.columns.estado == "Vivo").\
+        filter(modelo_macho_reproductor.c.usuario_id==current_user).count()
+
     # consulta y conteo de vientres aptos vivos
     cantidad_vientres_aptos = db.query(modelo_vientres_aptos).\
-        where(modelo_vientres_aptos.columns.id_bovino).count()
+        where(modelo_vientres_aptos.columns.id_vientre).\
+        filter(modelo_vientres_aptos.c.usuario_id==current_user).count()
+
     if cantidad_vientres_aptos==0 or cantidad_vientres_aptos is None:
         relacion =0
         interpretacion= f'No posees ninguna hembra apta para reproducirse'
