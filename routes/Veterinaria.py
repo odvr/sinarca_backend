@@ -10,10 +10,11 @@ from fastapi import APIRouter, Response
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 import json
 from config.db import get_session
-from models.modelo_bovinos import modelo_veterinaria, modelo_veterinaria_evoluciones, modelo_veterinaria_comentarios
+from models.modelo_bovinos import modelo_veterinaria, modelo_veterinaria_evoluciones, modelo_veterinaria_comentarios, \
+    modelo_registro_vacunas_bovinos
 from routes.rutas_bovinos import get_current_user
 from schemas.schemas_bovinos import esquema_veterinaria, esquema_veterinaria_evoluciones, \
-    esquema_veterinaria_comentarios, Esquema_Usuario
+    esquema_veterinaria_comentarios, Esquema_Usuario, esquema_registro_vacunas_bovinos
 from datetime import date, datetime, timedelta
 from fastapi import  status, HTTPException, Depends
 from fastapi import  Depends
@@ -275,3 +276,59 @@ async def Eliminar_endogamia(id_bovino: str,db: Session = Depends(get_database_s
 
     return
 
+
+# Registro de Vacunacion Bovinos
+
+
+@Veterinaria.post("/CrearRegistroVacunacion/{id_bovino}/{fecha_registro_vacunacion}/{tipo_vacuna}",status_code=200,tags=["Veterinaria"])
+async def CrearRegistroVacunacionBovinos(id_bovino:str,fecha_registro_vacunacion:date,tipo_vacuna:str,db: Session = Depends(get_database_session),
+        current_user: Esquema_Usuario = Depends(get_current_user) ):
+
+    try:
+        fecha_bitacora_Sistema = datetime.now()
+        ingresoRegistroVacunacion = modelo_registro_vacunas_bovinos.insert().values(id_bovino=id_bovino,fecha_registrada_usuario=fecha_registro_vacunacion,tipo_vacuna=tipo_vacuna,fecha_bitacora_Sistema=fecha_bitacora_Sistema,usuario_id=current_user)
+        db.execute(ingresoRegistroVacunacion)
+        db.commit()
+
+    except Exception as e:
+        logger.error(f'Error al Crear INGRESO DE REGISTRO DE VACUNAS: {e}')
+        raise
+    finally:
+        db.close()
+
+    return Response(status_code=status.HTTP_201_CREATED)
+
+@Veterinaria.get("/listar_Registros_Vacunas",  response_model=list[esquema_registro_vacunas_bovinos],tags=["Veterinaria"])
+async def Listar_Registro_Vacunas_Bovinos(db: Session = Depends(get_database_session),
+        current_user: Esquema_Usuario = Depends(get_current_user)):
+
+    try:
+
+        consulta = db.query(modelo_registro_vacunas_bovinos).filter(modelo_registro_vacunas_bovinos.c.usuario_id == current_user).all()
+        # Cerrar la sesión
+        db.close()
+
+    except Exception as e:
+        logger.error(f'Error al obtener Listar Veterinaria Registro Vacunas: {e}')
+        raise
+    finally:
+        db.close()
+    # condb.commit()
+    return consulta
+
+
+@Veterinaria.delete("/Eliminar_Registros_Vacunacion/{id_vacunacion_bovinos}",tags=["Veterinaria"])
+async def Eliminar_Registros_Vacunacion(id_vacunacion_bovinos: int,db: Session = Depends(get_database_session),
+        current_user: Esquema_Usuario = Depends(get_current_user)):
+
+    try:
+
+        db.execute(modelo_registro_vacunas_bovinos.delete().where(modelo_registro_vacunas_bovinos.c.id_vacunacion_bovinos == id_vacunacion_bovinos))
+        db.commit()
+    except Exception as e:
+        logger.error(f'Error al intentar Eliminar Registro Vacunas: {e}')
+        raise
+    finally:
+        db.close()
+
+    return

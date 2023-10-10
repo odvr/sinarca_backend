@@ -215,6 +215,12 @@ modelo_veterinaria_comentarios = Table("Comentarios_Veterinaria", meta, Column("
                            Column("fecha_comentario", Date),
                            Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id"))
                                        )
+modelo_registro_vacunas_bovinos = Table("registro_vacunacion_bovinos", meta, Column("id_vacunacion_bovinos", Integer, primary_key=True),
+                        Column("id_bovino", String(300), ForeignKey("bovinos.id_bovino")),
+                        Column("fecha_registrada_usuario", Date),
+                        Column("tipo_vacuna", String(50)),
+                        Column("fecha_bitacora_Sistema", DateTime),
+                        Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
 
 
 modelo_descarte = Table("descarte", meta, Column("id_descarte", Integer, primary_key=True),

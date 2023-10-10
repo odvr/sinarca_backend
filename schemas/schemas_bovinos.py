@@ -303,6 +303,16 @@ class esquema_veterinaria_evoluciones(BaseModel):
     class Config:
         orm_mode = True
         env_file = ".env"
+class esquema_registro_vacunas_bovinos(BaseModel):
+    id_vacunacion_bovinos: int
+    id_bovino: str
+    fecha_registrada_usuario:Optional[date] = None
+    tipo_vacuna: Optional[str] = None
+    fecha_bitacora_Sistema: Optional[date] = None
+    usuario_id: Optional[str] = None
+    class Config:
+        orm_mode = True
+        env_file = ".env"
 
 
 class esquema_veterinaria_comentarios(BaseModel):
