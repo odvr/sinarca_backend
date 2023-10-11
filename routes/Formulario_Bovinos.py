@@ -56,7 +56,7 @@ la clase Esquema_bovinos  recibira como base para crear el animal esto con fin d
 async def crear_bovinos(id_bovino:str,fecha_nacimiento:date,raza:str,sexo:str,marca:str,proposito:str,mansedumbre:str,estado:str,compra_bovino:str,fecha_pesaje:date,peso:float,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
     eliminarduplicados(db=db)
 
-    vientres_aptos(session=db)
+    vientres_aptos(session=db,current_user=current_user)
 
     try:
 
