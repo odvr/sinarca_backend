@@ -38,7 +38,7 @@ en las que una interfaz que se ejecuta en un navegador tiene código JavaScript 
 '''
 app = FastAPI()
 
-origins = ["*"]
+origins = ["https://sinarca.co"]
 
 app.add_middleware(
     CORSMiddleware,
