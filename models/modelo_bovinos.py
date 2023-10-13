@@ -30,7 +30,7 @@ modelo_usuarios = Table("usuarios", meta, Column("id_usuario", Integer, primary_
 
 """
 modelo_bovinos_inventario = Table("bovinos", meta,
-                                  Column("id_bovino", String(300), primary_key=True),
+                                  Column("id_bovino", Integer, primary_key=True),
                                   Column("fecha_nacimiento", Date),
                                   Column("edad", Integer),
                                   Column("sexo", String(300)),
@@ -41,35 +41,38 @@ modelo_bovinos_inventario = Table("bovinos", meta,
                                   Column("mansedumbre", String(300)),
                                   Column("estado", String(300)),
                                   Column("compra_bovino", String(300)),
-                                 Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
+                                  Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")),
+                                  Column("nombre_bovino", String(300)))
 
 modelo_ceba = Table("produccion_ceba", meta,
                     Column("id_ceba", Integer, primary_key=True),
-                    Column("id_bovino", String(300), ForeignKey("bovinos.id_bovino")),
+                    Column("id_bovino", Integer, ForeignKey("bovinos.id_bovino")),
                     Column("edad", Integer),
                     Column("peso", Float),
                     Column("estado", String(300)),
                     Column("proposito", String(300)),
                     Column("estado_optimo_ceba", String(300)),
-                    Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id"))
+                    Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")),
+                    Column("nombre_bovino", String(300), ForeignKey("bovinos.nombre_bovino"))
                     )
 
 
 
 modelo_levante = Table("produccion_levante", meta,
                        Column("id_levante", Integer, primary_key=True),
-                       Column("id_bovino", String(300), ForeignKey("bovinos.id_bovino")),
+                       Column("id_bovino", Integer, ForeignKey("bovinos.id_bovino")),
                        Column("edad", Integer),
                        Column("peso", Float),
                        Column("estado", String(300)),
                        Column("proposito", String(300)),
                        Column("estado_optimo_levante", String(300)),
-                       Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id"))
+                       Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")),
+                       Column("nombre_bovino", String(300), ForeignKey("bovinos.nombre_bovino"))
                        )
 
 modelo_leche = Table("produccion_leche", meta,
                      Column("id_leche", Integer, primary_key=True),
-                     Column("id_bovino", String(300), ForeignKey("bovinos.id_bovino")),
+                     Column("id_bovino", Integer, ForeignKey("bovinos.id_bovino")),
                      Column("fecha_primer_parto", Date),
                      Column("edad_primer_parto", Integer),
                      Column("datos_prenez", String(300)),
@@ -80,33 +83,44 @@ modelo_leche = Table("produccion_leche", meta,
                      Column("num_partos", Integer),
                      Column("intervalo_entre_partos", Float),
                      Column("tipo_ganado", String(300)),
-                     Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id"))
+                     Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")),
+                     Column("nombre_bovino", String(300), ForeignKey("bovinos.nombre_bovino"))
                      )
 
 modelo_datos_muerte = Table("datos_muerte", meta,
                             Column("id_datos_muerte", Integer, primary_key=True),
-                            Column("id_bovino", String(300), ForeignKey("bovinos.id_bovino")),
+                            Column("id_bovino", Integer, ForeignKey("bovinos.id_bovino")),
                             Column("razon_muerte", String(300)),
                             Column("estado", String(300)),
                             Column("fecha_muerte", Date),
-                            Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id"))
+                            Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")),
+                            Column("nombre_bovino", String(300), ForeignKey("bovinos.nombre_bovino"))
                             )
 
 modelo_arbol_genealogico = Table("arbol_genealogico", meta,
                                  Column("id_arbol_genealogico", Integer, primary_key=True),
-                                 Column("id_bovino", String(300), ForeignKey("bovinos.id_bovino")),
-                                 Column("id_bovino_madre", String(300)),
-                                 Column("id_bovino_padre", String(300)),
-                                 Column("abuelo_paterno", String(300)),
-                                 Column("abuela_paterna", String(300)),
-                                 Column("abuelo_materno", String(300)),
-                                 Column("abuela_materna", String(300)),
-                                 Column("bisabuelo_materno", String(300)),
-                                 Column("bisabuelo_paterno", String(300)),
+                                 Column("id_bovino", Integer, ForeignKey("bovinos.id_bovino")),
+                                 Column("id_bovino_madre", Integer),
+                                 Column("id_bovino_padre", Integer),
+                                 Column("abuelo_paterno", Integer),
+                                 Column("abuela_paterna", Integer),
+                                 Column("abuelo_materno", Integer),
+                                 Column("abuela_materna", Integer),
+                                 Column("bisabuelo_materno", Integer),
+                                 Column("bisabuelo_paterno", Integer),
                                  Column("tipo_de_apareamiento", String(300)),
                                  Column("consanguinidad", Float),
                                  Column("notificacion", String(300)),
-                                 Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id"))
+                                 Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")),
+                                 Column("nombre_bovino", String(300), ForeignKey("bovinos.nombre_bovino")),
+                                 Column("nombre_bovino_madre", String(300)),
+                                 Column("nombre_bovino_padre", String(300)),
+                                 Column("nombre_bovino_abuelo_paterno", String(300)),
+                                 Column("nombre_bovino_abuela_paterna", String(300)),
+                                 Column("nombre_bovino_abuelo_materno", String(300)),
+                                 Column("nombre_bovino_abuela_materna", String(300)),
+                                 Column("nombre_bovino_bisabuelo_materno", String(300)),
+                                 Column("nombre_bovino_bisabuelo_paterno", String(300))
                                  )
 """modelo para indicadores"""
 modelo_indicadores = Table("indicadores", meta, Column("id_indicadores", String(300), primary_key=True),
@@ -142,17 +156,18 @@ modelo_indicadores = Table("indicadores", meta, Column("id_indicadores", String(
                            )
 
 modelo_macho_reproductor = Table("macho_reproductor", meta, Column("id_macho", Integer, primary_key=True),
-                                 Column("id_bovino", String(300), ForeignKey("bovinos.id_bovino"),
+                                 Column("id_bovino", Integer, ForeignKey("bovinos.id_bovino"),
                                         unique=True),
                                  Column("edad", Integer),
                                  Column("peso", Float),
                                  Column("estado", String(300)),
                                  Column("fecha_vida_util", Date),
-                                 Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id"))
+                                 Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")),
+                                 Column("nombre_bovino", String(300), ForeignKey("bovinos.nombre_bovino"))
                                  )
 
 modelo_ventas = Table("ventas", meta, Column("id_venta", Integer, primary_key=True),
-Column("id_bovino", String(300), ForeignKey("bovinos.id_bovino")),
+Column("id_bovino", Integer, ForeignKey("bovinos.id_bovino")),
                       Column("numero_bono_venta", String(300)),
                       Column("estado", String(300)),
                       Column("fecha_venta", Date),
@@ -160,12 +175,13 @@ Column("id_bovino", String(300), ForeignKey("bovinos.id_bovino")),
                       Column("razon_venta", String(300)),
                       Column("medio_pago", String(300)),
                       Column("comprador", String(300)),
-                      Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id"))
+                      Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")),
+                      Column("nombre_bovino", String(300), ForeignKey("bovinos.nombre_bovino"))
                       )
 
 
 modelo_compra = Table("compra_bovino", meta, Column("id_compra_bovino", Integer, primary_key=True),
-Column("id_bovino", String(300), ForeignKey("bovinos.id_bovino")),
+Column("id_bovino", Integer, ForeignKey("bovinos.id_bovino")),
                       Column("numero_bono_compra", String(300)),
                       Column("estado", String(300)),
                       Column("fecha_compra", Date),
@@ -173,19 +189,21 @@ Column("id_bovino", String(300), ForeignKey("bovinos.id_bovino")),
                       Column("razon_compra", String(300)),
                       Column("medio_pago_compra", String(300)),
                       Column("comprador", String(300)),
-                      Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id"))
+                      Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")),
+                      Column("nombre_bovino", String(300), ForeignKey("bovinos.nombre_bovino"))
                       )
 
 
 modelo_datos_pesaje  = Table("ReportesPesaje", meta, Column("id_pesaje", Integer, primary_key=True),
-                      Column("id_bovino", String(300), ForeignKey("bovinos.id_bovino")),
+                      Column("id_bovino", Integer, ForeignKey("bovinos.id_bovino")),
                       Column("fecha_pesaje", Date),
                       Column("peso", Float),
-                      Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id"))
+                      Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")),
+                      Column("nombre_bovino", String(300), ForeignKey("bovinos.nombre_bovino"))
                              )
 
 modelo_veterinaria = Table("veterinaria", meta, Column("id_veterinaria", Integer, primary_key=True),
-                           Column("id_bovino", String(300), ForeignKey("bovinos.id_bovino")),
+                           Column("id_bovino", Integer, ForeignKey("bovinos.id_bovino")),
                            Column("sintomas", String(300)),
                            Column("fecha_sintomas", Date),
                            Column("comportamiento", String(300)),
@@ -199,14 +217,16 @@ modelo_veterinaria = Table("veterinaria", meta, Column("id_veterinaria", Integer
                            Column("evolucion", String(300)),
                            Column("piel_pelaje", String(255)),
                            Column("estado_Historia_clinica", String(255)),
-                           Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id"))
+                           Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")),
+                           Column("nombre_bovino", String(300), ForeignKey("bovinos.nombre_bovino"))
                            )
 
 modelo_veterinaria_evoluciones = Table("Evoluciones_Bovinos", meta, Column("id_evolucion", Integer, primary_key=True),
-                           Column("id_bovino", String(300), ForeignKey("bovinos.id_bovino")),
+                           Column("id_bovino", Integer, ForeignKey("bovinos.id_bovino")),
                            Column("tratamiento_evolucion", String(300)),
                            Column("fecha_evolucion", Date),
-                           Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id"))
+                           Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")),
+                           Column("nombre_bovino", String(300), ForeignKey("bovinos.nombre_bovino"))
                                        )
 
 modelo_veterinaria_comentarios = Table("Comentarios_Veterinaria", meta, Column("id_comentario", Integer, primary_key=True),
@@ -216,36 +236,40 @@ modelo_veterinaria_comentarios = Table("Comentarios_Veterinaria", meta, Column("
                            Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id"))
                                        )
 modelo_registro_vacunas_bovinos = Table("registro_vacunacion_bovinos", meta, Column("id_vacunacion_bovinos", Integer, primary_key=True),
-                        Column("id_bovino", String(300), ForeignKey("bovinos.id_bovino")),
+                        Column("id_bovino", Integer, ForeignKey("bovinos.id_bovino")),
                         Column("fecha_registrada_usuario", Date),
                         Column("tipo_vacuna", String(50)),
                         Column("fecha_bitacora_Sistema", DateTime),
-                        Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
+                        Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")),
+                        Column("nombre_bovino", String(300), ForeignKey("bovinos.nombre_bovino")))
 
 
 modelo_descarte = Table("descarte", meta, Column("id_descarte", Integer, primary_key=True),
-                        Column("id_bovino", String(300), ForeignKey("bovinos.id_bovino"),unique=True),
+                        Column("id_bovino", Integer, ForeignKey("bovinos.id_bovino"),unique=True),
                         Column("edad", Integer),
                         Column("peso", Float),
                         Column("razon_descarte", String(300)),
-                        Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
+                        Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")),
+                        Column("nombre_bovino", String(300), ForeignKey("bovinos.nombre_bovino")))
 
 modelo_partos = Table("partos", meta, Column("id_parto", Integer, primary_key=True),
-                      Column("id_bovino", String(300),ForeignKey("bovinos.id_bovino")),
+                      Column("id_bovino", Integer,ForeignKey("bovinos.id_bovino")),
                       Column("edad", Integer),
                       Column("peso", Float),
                       Column("fecha_estimada_prenez", Date),
                       Column("fecha_estimada_parto", Date),
-                      Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
+                      Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")),
+                      Column("nombre_bovino", String(300), ForeignKey("bovinos.nombre_bovino")))
 
 modelo_carga_animal_y_consumo_agua = Table("carga_animal", meta, Column("id_carga_animal", Integer, primary_key=True),
-                                           Column("id_bovino", String(300), ForeignKey("bovinos.id_bovino"),unique=True),
+                                           Column("id_bovino", Integer, ForeignKey("bovinos.id_bovino"),unique=True),
                                            Column("edad", Integer),
                                            Column("peso", Float),
                                            Column("valor_unidad_animal", Float),
                                            Column("consumo_forraje_vivo", Float),
                                            Column("raza", String(300)),
-                                           Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
+                                           Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")),
+                                           Column("nombre_bovino", String(300), ForeignKey("bovinos.nombre_bovino")))
 
 modelo_capacidad_carga = Table("capacidad_carga", meta, Column("id_capacidad", String(300), primary_key=True),
                                Column("medicion_aforo", Float),
@@ -254,70 +278,80 @@ modelo_capacidad_carga = Table("capacidad_carga", meta, Column("id_capacidad", S
                                Column("carga_animal_recomendada", Float),
                                Column("capacidad_carga", String(300)),
                                Column("carga_animal_usuario", Float),
-                               Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
+                               Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")),
+                               Column("nombre_bovino", String(300), ForeignKey("bovinos.nombre_bovino")))
 
 modelo_calculadora_hectareas_pastoreo = Table("pastoreo", meta, Column("id_pastoreo", Integer, primary_key=True),
-                                              Column("id_bovino", String(300), ForeignKey("bovinos.id_bovino")),
+                                              Column("id_bovino", Integer, ForeignKey("bovinos.id_bovino")),
                                               Column("hectareas_necesarias", Float),
                                               Column("consumo_agua", String(300)),
-                                              Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
+                                              Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")),
+                                              Column("nombre_bovino", String(300), ForeignKey("bovinos.nombre_bovino")))
 
 modelo_vientres_aptos = Table("vientres_aptos", meta, Column("id_vientre", Integer, primary_key=True),
-                              Column("id_bovino", String(300), ForeignKey("bovinos.id_bovino"),unique=True),
+                              Column("id_bovino", Integer, ForeignKey("bovinos.id_bovino"),unique=True),
                               Column("edad", Integer),
                               Column("peso", Float),
                               Column("raza", String(300)),
-                              Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
+                              Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")),
+                              Column("nombre_bovino", String(300), ForeignKey("bovinos.nombre_bovino")))
 
 modelo_historial_partos = Table("historial_partos", meta, Column("id_parto", Integer, primary_key=True),
-                              Column("id_bovino", String(300)),
+                              Column("id_bovino", Integer),
                               Column("fecha_parto", Date),
                               Column("tipo_parto", String(300)),
-                              Column("id_bovino_hijo", String(300)),
-                              Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
+                              Column("id_bovino_hijo", Integer),
+                              Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")),
+                              Column("nombre_bovino", String(300), ForeignKey("bovinos.nombre_bovino"))  )
 
 modelo_historial_intervalo_partos = Table("intervalo_partos", meta, Column("id_intervalo", Integer, primary_key=True),
-                              Column("id_bovino", String(300)),
+                              Column("id_bovino", Integer),
                               Column("fecha_parto1", Date),
                               Column("fecha_parto2", Date),
                               Column("intervalo", Float),
-                              Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
+                              Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")),
+                              Column("nombre_bovino", String(300), ForeignKey("bovinos.nombre_bovino")))
 
 modelo_litros_leche = Table("litros_leche", meta, Column("id_litros", Integer, primary_key=True),
-                              Column("id_bovino", String(300)),
+                              Column("id_bovino", Integer),
                               Column("fecha_medicion", Date),
                               Column("litros_leche", Float),
-                              Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
+                              Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")),
+                              Column("nombre_bovino", String(300), ForeignKey("bovinos.nombre_bovino")))
 
 modelo_reporte_curva_lactancia_General = Table("reporte_curva_lactancia_general", meta, Column("id_curva_lactancia_general", Integer, primary_key=True),
-                              Column("id_bovino", String(300)),
+                              Column("id_bovino", Integer),
                               Column("anio", String(10)),
                               Column("mes", String(10)),
                               Column("promedio", Float),
                               Column("Hora_Reporte", DateTime),
-                              Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
+                              Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")),
+                              Column("nombre_bovino", String(300), ForeignKey("bovinos.nombre_bovino")))
 
 modelo_orden_IEP = Table("orden_por_IEP", meta, Column("id_IEP", Integer, primary_key=True),
-                              Column("id_bovino", String(300),ForeignKey("bovinos.id_bovino"),unique=True),
+                              Column("id_bovino", Integer,ForeignKey("bovinos.id_bovino"),unique=True),
                               Column("raza", String(300)),
                               Column("intervalo_promedio_raza", Float),
                               Column("intervalo_promedio_animal", Float),
                               Column("diferencia", Float),
-                              Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
+                              Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")),
+                              Column("nombre_bovino", String(300), ForeignKey("bovinos.nombre_bovino")))
 
 modelo_orden_litros = Table("orden_por_litros", meta, Column("id_litros_leche", Integer, primary_key=True),
-                              Column("id_bovino", String(300), ForeignKey("bovinos.id_bovino"),unique=True),
+                              Column("id_bovino", Integer, ForeignKey("bovinos.id_bovino"),unique=True),
                               Column("raza", String(300)),
                               Column("litros_promedio_raza", Float),
                               Column("litros_promedio_animal", Float),
-                              Column("diferencia", Float),Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
+                              Column("diferencia", Float),Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")),
+                              Column("nombre_bovino", String(300), ForeignKey("bovinos.nombre_bovino")))
 
 modelo_orden_peso = Table("orden_por_peso", meta, Column("id_peso", Integer, primary_key=True),
-                              Column("id_bovino", String(300),ForeignKey("bovinos.id_bovino"),unique=True),
+                              Column("id_bovino", Integer,ForeignKey("bovinos.id_bovino"),unique=True),
                               Column("raza", String(300)),
                               Column("peso_promedio_raza", Float),
                               Column("peso_promedio_animal", Float),
-                              Column("diferencia", Float),Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
+                              Column("diferencia", Float),Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")),
+                              Column("nombre_bovino", String(300), ForeignKey("bovinos.nombre_bovino")))
 
 modelo_historial_perdida_terneros = Table("historial_perdidas_terneros", meta, Column("id_perdida", Integer, primary_key=True),
                               Column("periodo", Integer),
