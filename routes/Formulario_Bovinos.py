@@ -52,34 +52,35 @@ la clase Esquema_bovinos  recibira como base para crear el animal esto con fin d
 """
 
 
-@Formulario_Bovino.post("/crear_bovino/{id_bovino}/{fecha_nacimiento}/{raza}/{sexo}/{marca}/{proposito}/{mansedumbre}/{estado}/{compra_bovino}/{fecha_pesaje}/{peso}", status_code=status.HTTP_201_CREATED,tags=["Formualario_Bovinos"])
-async def crear_bovinos(id_bovino:str,fecha_nacimiento:date,raza:str,sexo:str,marca:str,proposito:str,mansedumbre:str,estado:str,compra_bovino:str,fecha_pesaje:date,peso:float,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+@Formulario_Bovino.post("/crear_bovino/{nombre_bovino}/{fecha_nacimiento}/{raza}/{sexo}/{marca}/{proposito}/{mansedumbre}/{estado}/{compra_bovino}/{fecha_pesaje}/{peso}", status_code=status.HTTP_201_CREATED,tags=["Formualario_Bovinos"])
+async def crear_bovinos(nombre_bovino:str,fecha_nacimiento:date,raza:str,sexo:str,marca:str,proposito:str,mansedumbre:str,estado:str,compra_bovino:str,fecha_pesaje:date,peso:float,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
     eliminarduplicados(db=db)
 
     vientres_aptos(session=db,current_user=current_user)
 
     try:
 
-        #bovinos_dic = esquemaBovinos.dict()
-        ingreso = modelo_bovinos_inventario.insert().values(  id_bovino=id_bovino,
-        fecha_nacimiento=fecha_nacimiento,
 
+        ingreso = modelo_bovinos_inventario.insert().values(  nombre_bovino=nombre_bovino,
+        fecha_nacimiento=fecha_nacimiento,
         raza=raza,
         sexo=sexo,
-
         marca=marca,
         proposito=proposito,
         mansedumbre=mansedumbre,
         estado=estado,
         compra_bovino=compra_bovino,
         usuario_id=current_user
+                                                             )
 
-                                                              )
 
-        db.execute(ingreso)
+
+        result = db.execute(ingreso)
         db.commit()
+        # Obtener el ID del bovino insertado
+        id_bovino = result.inserted_primary_key[0]
 
-
+        print(id_bovino)
 
         # Animales de Ceba
 

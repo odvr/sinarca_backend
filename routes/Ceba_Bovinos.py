@@ -11,6 +11,7 @@ from Lib.Lib_Intervalo_Partos import intervalo_partos, fecha_aproximada_parto
 from sqlalchemy.orm import Session
 
 from Lib.Lib_eliminar_duplicados_bovinos import eliminarduplicados
+from Lib.Tasa_Supervivencia import tasa_supervivencia
 from config.db import get_session
 # # importa el esquema de los bovinos
 from models.modelo_bovinos import modelo_historial_partos, modelo_partos, modelo_levante, modelo_bovinos_inventario, \
@@ -55,7 +56,7 @@ async def inventario_ceba(db: Session = Depends(get_database_session),current_us
     Estado_Optimo_Ceba(db=db)
     eliminarduplicados(db=db)
 
-
+    #tasa_supervivencia(session=Session, current_user=current_user)
 
     try:
 
