@@ -4,34 +4,21 @@ Librerias requeridas
 '''
 
 import logging
-from http.client import HTTPException
 
-from fastapi import APIRouter, Response
+from fastapi import APIRouter
+from sqlalchemy.orm import Session
 
-from Lib.actualizacion_peso import actualizacion_peso
-from Lib.endogamia import endogamia
-from Lib.funcion_vientres_aptos import vientres_aptos
 # importa la conexion de la base de datos
-from config.db import condb, session
 # importa el esquema de los bovinos
-from models.modelo_bovinos import modelo_bovinos_inventario, modelo_veterinaria, modelo_leche, modelo_levante, \
-    modelo_ventas, modelo_datos_muerte, \
-    modelo_indicadores, modelo_ceba, modelo_macho_reproductor, modelo_carga_animal_y_consumo_agua, modelo_datos_pesaje, \
-    modelo_capacidad_carga, modelo_calculadora_hectareas_pastoreo, modelo_partos, modelo_vientres_aptos, \
-    modelo_descarte, modelo_users, modelo_arbol_genealogico, modelo_veterinaria_evoluciones, modelo_historial_supervivencia
-from routes.Reproductor import vida_util_macho_reproductor
-from schemas.schemas_bovinos import Esquema_bovinos, esquema_produccion_levante, \
-    esquema_produccion_ceba, esquema_datos_muerte, esquema_modelo_ventas, esquema_arbol_genealogico, \
-    esquema_modelo_Reporte_Pesaje, esquema_produccion_leche, esquema_veterinaria, esquema_veterinaria_evoluciones, \
-    esquema_partos, esquema_macho_reproductor, esquema_indicadores
-from sqlalchemy import update, between, func, asc, desc
+from models.modelo_bovinos import modelo_bovinos_inventario, modelo_leche, modelo_ventas, modelo_datos_muerte, \
+    modelo_indicadores, modelo_datos_pesaje, \
+    modelo_calculadora_hectareas_pastoreo, modelo_partos, modelo_vientres_aptos, \
+    modelo_arbol_genealogico, modelo_veterinaria_evoluciones, modelo_historial_supervivencia
+from sqlalchemy import update, between, asc, desc
 from starlette.status import HTTP_204_NO_CONTENT
-from datetime import date, datetime, timedelta
-
+from datetime import date, datetime
 
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-
-from fastapi import  status, HTTPException, Depends
 
 oauth2_scheme = OAuth2PasswordBearer("/token")
 
@@ -58,26 +45,30 @@ por año
 """
 
 
-def tasa_supervivencia():
+def tasa_supervivencia(session:Session,current_user):
  try:
      consulta_primer_muerte = session.query(modelo_bovinos_inventario.c.id_bovino,modelo_datos_muerte.c.fecha_muerte). \
          join(modelo_datos_muerte,modelo_bovinos_inventario.c.id_bovino == modelo_datos_muerte.c.id_bovino)\
-         .group_by(asc(modelo_datos_muerte.c.fecha_muerte)).first()
+         .group_by(asc(modelo_datos_muerte.c.fecha_muerte)).\
+         filter(modelo_bovinos_inventario.columns.usuario_id==current_user).first()
      #si retorna una consulta vacia entonces indicara cero muertes
      if consulta_primer_muerte is None or consulta_primer_muerte==[]:
          periodo_actual= int(datetime.now().year)
-         tasa_supervivencia= 0
+         tasa_supervivencia= 100
          consulta_existencia=session.query(modelo_historial_supervivencia). \
-             where(modelo_historial_supervivencia.columns.periodo==periodo_actual).all()
+             where(modelo_historial_supervivencia.columns.periodo==periodo_actual).\
+             filter(modelo_historial_supervivencia.columns.usuario_id==current_user).all()
          if consulta_existencia==[]:
              ingresoperiodo = modelo_historial_supervivencia.insert().values(periodo=periodo_actual,
-                                                                             supervivencia=tasa_supervivencia)
+                                                                             supervivencia=tasa_supervivencia,
+                                                                             usuario_id=current_user)
 
              session.execute(ingresoperiodo)
              session.commit()
          else:
              session.execute(modelo_historial_supervivencia.update().values(supervivencia=tasa_supervivencia). \
-                             where(modelo_historial_supervivencia.columns.periodo==periodo_actual))
+                             where(modelo_historial_supervivencia.columns.periodo==periodo_actual).
+                             filter(modelo_historial_supervivencia.columns.usuario_id==current_user))
              session.commit()
      #en caso de que exista uno o mas registros de muertes, se tomara la fecha mas antigua para el bucle
      # a partir de ese año se realizara un listado de supervivencias por cada periodo hasta el actual
@@ -92,21 +83,25 @@ def tasa_supervivencia():
              # la siguiente consulta trae la cantidad de muertes para cada periodo a evaluar
              muertes_periodo = session.query(modelo_bovinos_inventario.c.id_bovino, modelo_datos_muerte.c.fecha_muerte). \
                  join(modelo_datos_muerte, modelo_bovinos_inventario.c.id_bovino == modelo_datos_muerte.c.id_bovino). \
-                 where(between(modelo_datos_muerte.columns.fecha_muerte, fecha_inicio, fecha_fin)).count()
+                 where(between(modelo_datos_muerte.columns.fecha_muerte, fecha_inicio, fecha_fin)).\
+                 filter(modelo_bovinos_inventario.columns.usuario_id==current_user).count()
              # calculo de la tasa de perdida de terneros
              if muertes_periodo == 0:
-                 tasa_supervivencia = 0
+                 tasa_supervivencia = 100
                  consulta_existencia = session.query(modelo_historial_supervivencia). \
-                     where(modelo_historial_supervivencia.columns.periodo == periodo).all()
+                     where(modelo_historial_supervivencia.columns.periodo == periodo).\
+                     filter(modelo_historial_supervivencia.columns.usuario_id==current_user).all()
                  if consulta_existencia == []:
                      ingresoperiodo = modelo_historial_supervivencia.insert().values(periodo=periodo,
-                                                                             supervivencia=tasa_supervivencia)
+                                                                             supervivencia=tasa_supervivencia,
+                                                                             usuario_id=current_user)
 
                      session.execute(ingresoperiodo)
                      session.commit()
                  else:
                      session.execute(modelo_historial_supervivencia.update().values(supervivencia=tasa_supervivencia). \
-                                     where(modelo_historial_supervivencia.columns.periodo == periodo))
+                                     where(modelo_historial_supervivencia.columns.periodo == periodo).
+                                     filter(modelo_historial_supervivencia.columns.usuario_id==current_user))
                      session.commit()
              else:
                  #para determinar los totales es necesario determinar los animales que
@@ -114,28 +109,36 @@ def tasa_supervivencia():
                  fecha_fin_nacimiento = datetime(periodo, 12, 31)
 
                  totales=session.query(modelo_bovinos_inventario). \
-                 where(modelo_bovinos_inventario.columns.fecha_nacimiento < fecha_fin_nacimiento).count()
+                 where(modelo_bovinos_inventario.columns.fecha_nacimiento < fecha_fin_nacimiento).\
+                     filter(modelo_bovinos_inventario.columns.usuario_id==current_user).count()
 
                  muertos=session.query(modelo_datos_muerte). \
-                 where(modelo_datos_muerte.columns.fecha_muerte < datetime(periodo, 1, 1)).count()
+                 where(modelo_datos_muerte.columns.fecha_muerte < datetime(periodo, 1, 1)).\
+                     filter(modelo_datos_muerte.columns.usuario_id==current_user).count()
 
                  vendidos=session.query(modelo_ventas). \
-                     where(modelo_ventas.columns.fecha_venta < datetime((periodo+1), 12, 31)).count()
+                     where(modelo_ventas.columns.fecha_venta < datetime((periodo+1), 12, 31)).\
+                     filter(modelo_ventas.columns.usuario_id==current_user).count()
 
                  totales_periodo= totales - muertos - vendidos
 
                  tasa_supervivencia = ( (totales_periodo-muertes_periodo)* 100)/totales_periodo
+
              consulta_existencia = session.query(modelo_historial_supervivencia). \
-                 where(modelo_historial_supervivencia.columns.periodo == periodo).all()
+                 where(modelo_historial_supervivencia.columns.periodo == periodo).\
+                 filter(modelo_historial_supervivencia.columns.usuario_id==current_user).all()
+
              if consulta_existencia == []:
                  ingresoperiodo = modelo_historial_supervivencia.insert().values(periodo=periodo,
-                                                                                supervivencia=tasa_supervivencia)
+                                                                                supervivencia=tasa_supervivencia,
+                                                                                usuario_id=current_user)
 
                  session.execute(ingresoperiodo)
                  session.commit()
              else:
                  session.execute(modelo_historial_supervivencia.update().values(supervivencia=tasa_supervivencia). \
-                                 where(modelo_historial_supervivencia.columns.periodo == periodo))
+                                 where(modelo_historial_supervivencia.columns.periodo == periodo).
+                                 filter(modelo_historial_supervivencia.columns.usuario_id==current_user))
                  session.commit()
 
              c= c+1
@@ -143,23 +146,28 @@ def tasa_supervivencia():
      # el siguiente codigo permite actualizar los periodos si se cambia la primer fecha de muerte
      if consulta_primer_muerte is None or consulta_primer_muerte==[]:
          session.execute(modelo_historial_supervivencia.delete().
-                         where(modelo_historial_supervivencia.c.periodo!=datetime.now().year))
+                         where(modelo_historial_supervivencia.c.periodo!=datetime.now().year).
+                         filter(modelo_historial_supervivencia.columns.usuario_id==current_user))
          session.commit()
      else:
          consulta_periodos = session.query(modelo_historial_supervivencia.c.periodo). \
-             filter(modelo_historial_supervivencia.c.periodo < consulta_primer_muerte[1].year).all()
+             filter(modelo_historial_supervivencia.c.periodo < consulta_primer_muerte[1].year,
+                    modelo_historial_supervivencia.columns.usuario_id==current_user).all()
          if consulta_periodos is None or consulta_periodos == []:
              pass
          else:
              session.execute(modelo_historial_supervivencia.delete().
-                             where(modelo_historial_supervivencia.c.periodo < consulta_primer_muerte[1].year))
+                             where(modelo_historial_supervivencia.c.periodo < consulta_primer_muerte[1].year).
+                             filter(modelo_historial_supervivencia.columns.usuario_id==current_user))
              session.commit()
 
      #actualizacion del valor mas actual en ela tabla de indicadores
      consulta_ultimo_periodo = session.query(modelo_historial_supervivencia.c.supervivencia).\
-         group_by(asc(modelo_historial_supervivencia.c.supervivencia)).all()
+         group_by(asc(modelo_historial_supervivencia.c.supervivencia)).\
+         filter(modelo_historial_supervivencia.columns.usuario_id==current_user).all()
+
      session.execute(update(modelo_indicadores).
-                     where(modelo_indicadores.c.id_indicadores == 1).
+                     where(modelo_indicadores.c.id_indicadores == current_user).
                      values(tasa_supervivencia=consulta_ultimo_periodo[0][0]))
      session.commit()
 
