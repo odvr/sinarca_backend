@@ -7,7 +7,7 @@ import logging
 from sqlalchemy.orm import Session
 from fastapi import APIRouter, Response
 
-
+import crud
 from Lib.funcion_vientres_aptos import vientres_aptos
 from Lib.vida_util_macho_reproductor_bovino import vida_util_macho_reproductor, \
     relacion_macho_reproductor_vientres_aptos
@@ -90,9 +90,9 @@ async def CrearReproductor(id_bovino: str,db: Session = Depends(get_database_ses
         consulta = db.execute(
             modelo_macho_reproductor.select().where(
                 modelo_macho_reproductor.columns.id_bovino == id_bovino)).first()
-
+        nombre_bovino = crud.bovinos_inventario.Buscar_Nombre(db=db, id_bovino=id_bovino, current_user=current_user)
         if consulta is None:
-            CrearMacho = modelo_macho_reproductor.insert().values(id_bovino=id_bovino,usuario_id=current_user)
+            CrearMacho = modelo_macho_reproductor.insert().values(id_bovino=id_bovino,usuario_id=current_user,nombre_bovino=nombre_bovino)
 
             db.execute(CrearMacho)
             db.commit()

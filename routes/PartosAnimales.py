@@ -4,6 +4,8 @@ Librerias requeridas
 
 import logging
 import json
+
+import crud
 from Lib.Lib_Intervalo_Partos import intervalo_partos, fecha_aproximada_parto
 # # importa la conexion de la base de datos
 from sqlalchemy.orm import Session
@@ -127,10 +129,12 @@ async def CrearFechaAproximadaParto(id_bovino: str,fecha_estimada_prenez:date,db
         consulta = db.execute(
             modelo_partos.select().where(
                 modelo_partos.columns.id_bovino == id_bovino)).first()
+        """Busca el Nombre del Bovino"""
+        nombre_bovino = crud.bovinos_inventario.Buscar_Nombre(db=db, id_bovino=id_bovino, current_user=current_user)
 
         if consulta is None:
             ingresocalcularFechaParto = modelo_partos.insert().values(id_bovino=id_bovino,
-                                                                      fecha_estimada_prenez=fecha_estimada_prenez,usuario_id=current_user)
+                                                                      fecha_estimada_prenez=fecha_estimada_prenez,usuario_id=current_user,nombre_bovino=nombre_bovino)
 
             db.execute(ingresocalcularFechaParto)
             db.commit()

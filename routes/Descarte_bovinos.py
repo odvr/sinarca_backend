@@ -5,6 +5,7 @@ Librerias requeridas
 from sqlalchemy.orm import Session
 import logging
 
+import crud
 from Lib.Lib_Descarte import descarte
 from Lib.Lib_Intervalo_Partos import intervalo_partos
 from Lib.actualizacion_peso import actualizacion_peso
@@ -89,7 +90,8 @@ async def CrearDescarte(id_bovino: str,razon_descarte:str,db: Session = Depends(
 
     try:
         descarte(db=db)
-        ingresodescarte = modelo_descarte.insert().values(id_bovino=id_bovino,razon_descarte=razon_descarte,usuario_id=current_user)
+        nombre_bovino = crud.bovinos_inventario.Buscar_Nombre(db=db, id_bovino=id_bovino, current_user=current_user)
+        ingresodescarte = modelo_descarte.insert().values(id_bovino=id_bovino,razon_descarte=razon_descarte,usuario_id=current_user,nombre_bovino=nombre_bovino)
 
 
         db.execute(ingresodescarte)

@@ -529,13 +529,13 @@ def EliminarDuplicadosLeche(condb:Session):
         idleche = ileche[0]
 
         if propositoleche == 'Levante':
-            eliminarlevanteleche = condb.execute(modelo_leche.delete().where(modelo_leche.c.id_leche == idleche))
+            condb.execute(modelo_leche.delete().where(modelo_leche.c.id_leche == idleche))
 
-            condb.commit(eliminarlevanteleche)
+            condb.commit()
 
         elif propositoleche == 'Ceba':
-            eliminarCebaleche = condb.execute(modelo_leche.delete().where(modelo_leche.c.id_leche == idleche))
-            condb.commit(eliminarCebaleche)
+            condb.execute(modelo_leche.delete().where(modelo_leche.c.id_leche == idleche))
+            condb.commit()
 
 
 """esta funcion calcula el porcentaje de vacas que se encuentran preñadas"""
