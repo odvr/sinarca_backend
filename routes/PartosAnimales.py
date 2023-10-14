@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 from Lib.Registro_partos import registro_partos_animales
 from config.db import get_session
 # # importa el esquema de los bovinos
-from models.modelo_bovinos import modelo_historial_partos, modelo_partos
+from models.modelo_bovinos import modelo_historial_partos, modelo_partos, modelo_bovinos_inventario
 from datetime import date
 from fastapi import APIRouter, Response
 from fastapi import  status
@@ -47,11 +47,25 @@ async def crear_Registro_Partos(id_bovino:str,tipo_parto:str,id_bovino_hijo:str,
 
     try:
 
+
+        """Se realizan las consultas para indexar los nombres de los animales"""
+        ConsultarMadre = db.query(modelo_bovinos_inventario).filter(modelo_bovinos_inventario.columns.id_bovino == id_bovino,
+                                                       modelo_bovinos_inventario.c.usuario_id == current_user).first()
+        Nombre_Madre = ConsultarMadre.nombre_bovino
+
+        ConsultarHijo = db.query(modelo_bovinos_inventario).filter(
+            modelo_bovinos_inventario.columns.id_bovino == id_bovino_hijo,
+            modelo_bovinos_inventario.c.usuario_id == current_user).first()
+        Nombre_Hijo = ConsultarHijo.nombre_bovino
+
         ingresoRegistroPartos= modelo_historial_partos.insert().values(id_bovino=id_bovino,
 
                                                      tipo_parto=tipo_parto,
                                                      id_bovino_hijo=id_bovino_hijo,
-                                                     usuario_id=current_user
+                                                     usuario_id=current_user,
+                                                     nombre_madre = Nombre_Madre,
+                                                     nombre_hijo=Nombre_Hijo,
+
                                                    )
 
 

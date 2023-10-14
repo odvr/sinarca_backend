@@ -2,12 +2,15 @@
 Librerias requeridas
 '''
 import logging
+
+import crud
 from Lib.Lib_Intervalo_Partos import intervalo_partos
 from Lib.cuvas_lactancias import Reporte_Curvas_lactancia_Mensuales_General
 # # importa la conexion de la base de datos
 from config.db import get_session
+
 # # importa el esquema de los bovinos
-from models.modelo_bovinos import  modelo_litros_leche
+from models.modelo_bovinos import modelo_litros_leche, modelo_bovinos_inventario
 from fastapi import  status,  APIRouter, Response
 from datetime import date
 from starlette.status import HTTP_204_NO_CONTENT
@@ -69,9 +72,12 @@ async def crear_registro_listros_diarios(id_bovino:str,fecha_medicion:date,litro
         """
         Reporte_Curvas_lactancia_Mensuales_General(session=db)
 
+        "Clase para Buscar El Nombre de los Bovinos"
+        Nombre_Bovino = crud.bovinos_inventario.Buscar_Nombre(db=db, id_bovino=id_bovino, current_user=current_user)
+
         ingresoFechaLitraje = modelo_litros_leche.insert().values(id_bovino=id_bovino,
                                                                  fecha_medicion=fecha_medicion, litros_leche=litros_leche,
-                                                                 usuario_id = current_user
+                                                                 usuario_id = current_user, nombre_bovino = Nombre_Bovino
 
                                                                  )
 

@@ -302,7 +302,8 @@ modelo_historial_partos = Table("historial_partos", meta, Column("id_parto", Int
                               Column("tipo_parto", String(300)),
                               Column("id_bovino_hijo", Integer),
                               Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")),
-                              Column("nombre_bovino", String(300))  )
+                              Column("nombre_madre", String(300)),
+                              Column("nombre_hijo", String(300)))
 
 modelo_historial_intervalo_partos = Table("intervalo_partos", meta, Column("id_intervalo", Integer, primary_key=True),
                               Column("id_bovino", Integer),

@@ -11,7 +11,7 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 import json
 from config.db import get_session
 from models.modelo_bovinos import modelo_veterinaria, modelo_veterinaria_evoluciones, modelo_veterinaria_comentarios, \
-    modelo_registro_vacunas_bovinos
+    modelo_registro_vacunas_bovinos, modelo_bovinos_inventario
 from routes.rutas_bovinos import get_current_user
 from schemas.schemas_bovinos import esquema_veterinaria, esquema_veterinaria_evoluciones, \
     esquema_veterinaria_comentarios, Esquema_Usuario, esquema_registro_vacunas_bovinos
@@ -219,9 +219,14 @@ async def crear_evolucion(id_bovino:str,fecha_evolucion:date,db: Session = Depen
 
     try:
         consulta = db.execute( modelo_veterinaria_evoluciones.select().where(modelo_veterinaria_evoluciones.columns.id_bovino == id_bovino)).first()
+        """Se realizan las consultas para indexar los nombres de los animales"""
+        ConsultarNombre = db.query(modelo_bovinos_inventario).filter(
+            modelo_bovinos_inventario.columns.id_bovino == id_bovino,
+            modelo_bovinos_inventario.c.usuario_id == current_user).first()
+        Nombre_Bovino = ConsultarNombre.nombre_bovino
 
         if consulta is None:
-            ingresoEvolucion = modelo_veterinaria_evoluciones.insert().values(id_bovino=id_bovino,fecha_evolucion=fecha_evolucion,usuario_id=current_user)
+            ingresoEvolucion = modelo_veterinaria_evoluciones.insert().values(id_bovino=id_bovino,fecha_evolucion=fecha_evolucion,usuario_id=current_user,nombre_bovino = Nombre_Bovino)
 
             db.execute(ingresoEvolucion)
             db.commit()

@@ -11,6 +11,7 @@ from fastapi import APIRouter, Request
 
 from Lib.perdida_Terneros import perdida_Terneros1
 from config.db import   get_session
+from crud.crud_bovinos_inventario import CRUDBovinos
 # importa el esquema de los bovinos
 from models.modelo_bovinos import modelo_usuarios, modelo_bovinos_inventario, modelo_indicadores
 from sqlalchemy.orm import Session
@@ -157,6 +158,7 @@ async def create_user(data: Esquema_Usuario,db: Session = Depends(get_database_s
     CrearIndicadores = crud.crear_indicadores.Crear_indicadores_db(db=db, current_user=data.usuario_id)
     # Crea el registro en el Capacidad de carga
     CrearIndicadoresCapacidadCarga = crud.crear_indicadores.Crear_indicadores_capacidad_carga(db=db, current_user=data.usuario_id)
+
 
     db.execute(ingreso)
     db.execute(CrearIndicadores)

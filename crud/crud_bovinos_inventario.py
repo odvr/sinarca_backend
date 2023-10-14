@@ -25,7 +25,13 @@ class CRUDBovinos:
                                                    modelo_bovinos_inventario.c.proposito == "Leche",modelo_bovinos_inventario.c.usuario_id == current_user).count()
         db.close()
         return contar
+    def Buscar_Nombre(self,db: Session,id_bovino, current_user):
+        ConsultarNombre = db.query(modelo_bovinos_inventario).filter(
+            modelo_bovinos_inventario.columns.id_bovino == id_bovino,
+            modelo_bovinos_inventario.c.usuario_id == current_user).first()
+        Nombre_Bovino = ConsultarNombre.nombre_bovino
+        db.close()
+        return Nombre_Bovino
 
 
-
-bovinos_inventario_leche = CRUDBovinos()
+bovinos_inventario = CRUDBovinos()

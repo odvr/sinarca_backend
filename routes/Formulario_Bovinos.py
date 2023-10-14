@@ -14,7 +14,7 @@ from config.db import   get_session
 from fastapi import APIRouter, Response,status
 # importa el esquema de los bovinos
 from models.modelo_bovinos import modelo_bovinos_inventario, modelo_ventas, modelo_datos_muerte, modelo_ceba, \
-    modelo_carga_animal_y_consumo_agua, modelo_levante, modelo_datos_pesaje
+    modelo_carga_animal_y_consumo_agua, modelo_levante, modelo_datos_pesaje, modelo_leche
 from sqlalchemy.orm import Session
 
 from routes.rutas_bovinos import get_current_user
@@ -52,8 +52,8 @@ la clase Esquema_bovinos  recibira como base para crear el animal esto con fin d
 """
 
 
-@Formulario_Bovino.post("/crear_bovino/{nombre_bovino}/{fecha_nacimiento}/{raza}/{sexo}/{marca}/{proposito}/{mansedumbre}/{estado}/{compra_bovino}/{fecha_pesaje}/{peso}", status_code=status.HTTP_201_CREATED,tags=["Formualario_Bovinos"])
-async def crear_bovinos(nombre_bovino:str,fecha_nacimiento:date,raza:str,sexo:str,marca:str,proposito:str,mansedumbre:str,estado:str,compra_bovino:str,fecha_pesaje:date,peso:float,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+@Formulario_Bovino.post("/crear_bovino/{nombre_bovino}/{fecha_nacimiento}/{raza}/{sexo}/{marca}/{proposito}/{mansedumbre}/{estado}/{compra_bovino}/{fecha_pesaje}/{peso}/{datos_prenez}/{ordeno}", status_code=status.HTTP_201_CREATED,tags=["Formualario_Bovinos"])
+async def crear_bovinos(nombre_bovino:str,fecha_nacimiento:date,raza:str,sexo:str,marca:str,proposito:str,mansedumbre:str,estado:str,compra_bovino:str,fecha_pesaje:date,peso:float,datos_prenez: str, ordeno: str,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
     eliminarduplicados(db=db)
 
     vientres_aptos(session=db,current_user=current_user)
@@ -80,7 +80,7 @@ async def crear_bovinos(nombre_bovino:str,fecha_nacimiento:date,raza:str,sexo:st
         # Obtener el ID del bovino insertado
         id_bovino = result.inserted_primary_key[0]
 
-        print(id_bovino)
+
 
         # Animales de Ceba
 
@@ -90,7 +90,7 @@ async def crear_bovinos(nombre_bovino:str,fecha_nacimiento:date,raza:str,sexo:st
 
         if consulta is None and proposito == "Ceba":
             ingresopceba = modelo_ceba.insert().values(id_bovino=id_bovino, proposito=proposito,
-                                                       usuario_id=current_user)
+                                                       usuario_id=current_user,nombre_bovino=nombre_bovino)
             db.execute(ingresopceba)
             db.commit()
         else:
@@ -102,13 +102,13 @@ async def crear_bovinos(nombre_bovino:str,fecha_nacimiento:date,raza:str,sexo:st
 
         # Crea los animales de levante
 
-        consulta = db.execute(
+        consultaLevante = db.execute(
             modelo_levante.select().where(
                 modelo_levante.columns.id_bovino == id_bovino)).first()
 
-        if consulta is None and proposito == "Levante":
+        if consultaLevante is None and proposito == "Levante":
             ingresoplevante = modelo_levante.insert().values(id_bovino=id_bovino, proposito=proposito,
-                                                             usuario_id=current_user)
+                                                             usuario_id=current_user,nombre_bovino=nombre_bovino)
 
             db.execute(ingresoplevante)
             db.commit()
@@ -116,14 +116,14 @@ async def crear_bovinos(nombre_bovino:str,fecha_nacimiento:date,raza:str,sexo:st
         else:
 
             db.execute(modelo_levante.update().where(modelo_levante.c.id_bovino == id_bovino).values(
-                id_bovino=id_bovino, proposito=proposito))
+                id_bovino=id_bovino, proposito=proposito,nombre_bovino=nombre_bovino))
             db.commit()
 
             db.commit()
         # Crea el animal con la fecha de pesaje
 
         ingresoFechaPesaje = modelo_datos_pesaje.insert().values(id_bovino=id_bovino, fecha_pesaje=fecha_pesaje,
-                                                                 peso=peso, usuario_id=current_user)
+                                                                 peso=peso, usuario_id=current_user,nombre_bovino=nombre_bovino)
 
         db.execute(ingresoFechaPesaje)
 
@@ -133,10 +133,38 @@ async def crear_bovinos(nombre_bovino:str,fecha_nacimiento:date,raza:str,sexo:st
         # Crea la carga Animal
 
         ingresoCargaAnimal = modelo_carga_animal_y_consumo_agua.insert().values(id_bovino=id_bovino,
-                                                                                usuario_id=current_user)
+                                                                                usuario_id=current_user,nombre_bovino=nombre_bovino)
         db.execute(ingresoCargaAnimal)
 
         db.commit()
+
+
+        """
+        Codigo para crear produccion de leche
+        """
+        consultaLeche = db.execute(
+            modelo_leche.select().where(
+                modelo_leche.columns.id_bovino == id_bovino)).first()
+
+        if consultaLeche is None and proposito == "Leche":
+            ingresopleche = modelo_leche.insert().values(id_bovino=id_bovino,
+                                                         datos_prenez=datos_prenez,
+                                                         ordeno=ordeno, proposito=proposito, usuario_id=current_user,nombre_bovino=nombre_bovino)
+
+            db.execute(ingresopleche)
+            db.commit()
+        else:
+
+            db.execute(modelo_leche.update().where(modelo_leche.c.id_bovino == id_bovino).values(
+                id_bovino=id_bovino,
+                datos_prenez=datos_prenez,
+                ordeno=ordeno, proposito=proposito))
+            db.commit()
+
+
+
+
+
     except Exception as e:
         logger.error(f'Error al Crear Bovino para la tabla de inventarios: {e}')
         raise
@@ -150,10 +178,6 @@ async def crear_bovinos(nombre_bovino:str,fecha_nacimiento:date,raza:str,sexo:st
 
 """
 Ingresa los datos para el reporte de VENTA para el animal
-
-
-
-
 
 """
 @Formulario_Bovino.post("/crear_venta/{id_bovino}/{estado}/{numero_bono_venta}/{fecha_venta}/{precio_venta}/{razon_venta}/{medio_pago}/{comprador}",status_code=200,tags=["Formualario_Bovinos"])
@@ -324,6 +348,8 @@ La siguiente funcion realiza la actualizacion completa de la tabla de bovinos pa
 @Formulario_Bovino.put("/cambiar_datos_bovino/{id_bovino}/{fecha_nacimiento}/{edad}/{raza}/{sexo}/{peso}/{marca}/{proposito}/{mansedumbre}/{estado}/{compra_bovino}", status_code=status.HTTP_201_CREATED)
 async def cambiar_esta_bovino(id_bovino:str,fecha_nacimiento:date,edad:int,raza:str,sexo:str,peso:float,marca:str,proposito:str,mansedumbre:str,estado:str,compra_bovino:str,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
+
+
         db.execute(modelo_bovinos_inventario.update().values(
 
 

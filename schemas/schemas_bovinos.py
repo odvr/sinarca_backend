@@ -434,7 +434,8 @@ class esquema_historial_partos(BaseModel):
     tipo_parto: str
     id_bovino_hijo:int
     usuario_id: Optional[str] = None
-    nombre_bovino:Optional[str] = None
+    nombre_madre:Optional[str] = None
+    nombre_hijo: Optional[str] = None
     class Config:
         orm_mode = True
         env_file = ".env"
