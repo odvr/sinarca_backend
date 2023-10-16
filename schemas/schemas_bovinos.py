@@ -174,15 +174,15 @@ class esquema_arbol_genealogico(BaseModel):
     id_bovino: int
     id_bovino_madre: int
     id_bovino_padre: int
-    abuelo_paterno:int
-    abuela_paterna:int
-    abuelo_materno:int
-    abuela_materna:int
-    bisabuelo_materno:int
-    bisabuelo_paterno:int
-    tipo_de_apareamiento:str
-    consanguinidad:float
-    notificacion:str
+    abuelo_paterno:Optional[int] = None
+    abuela_paterna:Optional[int] = None
+    abuelo_materno:Optional[int] = None
+    abuela_materna:Optional[int] = None
+    bisabuelo_materno:Optional[int] = None
+    bisabuelo_paterno:Optional[int] = None
+    tipo_de_apareamiento:Optional[str] = None
+    consanguinidad:Optional[float] = None
+    notificacion:Optional[str] = None
     usuario_id: Optional[str] = None
     nombre_bovino:Optional[str] = None
     nombre_bovino_madre:Optional[str] = None

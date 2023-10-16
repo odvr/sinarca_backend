@@ -68,61 +68,85 @@ def intervalo_partos(session:Session,current_user):
         # Realiza el join co la tabla de bovinos (solo se veran los id de los bovinos)
         #como la tabla de historial de partos puede tener un id repetido mas de una vez, se utiliza el conjunto o set
         #el set no permite elementos repetidos, por lo tanto solo nos dara un listado de id unicos
-        consulta_animal_partos= set(session.query(modelo_bovinos_inventario.c.id_bovino, modelo_historial_partos.c.id_bovino,
+        consulta_animal_partos= set(session.query(modelo_bovinos_inventario.c.id_bovino, modelo_leche.c.id_bovino,
                                                   modelo_bovinos_inventario.c.usuario_id). \
-            join(modelo_historial_partos, modelo_bovinos_inventario.c.id_bovino == modelo_historial_partos.c.id_bovino).
+            join(modelo_leche, modelo_bovinos_inventario.c.id_bovino == modelo_leche.c.id_bovino).
             filter( modelo_bovinos_inventario.c.usuario_id==current_user).all())
+
         # recorre el bucle
         for i in consulta_animal_partos:
             # Toma el ID del bovino, este es el campo numero 0
             id_bovino_partos = i[0]
             # Toma el ID del usuario, este es el campo numero 2
             usuario_id = i[2]
-            # cosulta que determina la cantidad de partos de cada animal
-            cantidad_partos = session.query(modelo_historial_partos). \
-                filter(modelo_historial_partos.columns.id_bovino == id_bovino_partos).count()
-            # actualizacion de campo de numero de partos
-            session.execute(modelo_leche.update().values(num_partos=cantidad_partos). \
-                            where(modelo_leche.columns.id_bovino == id_bovino_partos))
-            session.commit()
-            #esta consulta determina cual es el primer parto del bbovino
-            #para ello ordena las fechas de registro de partos desde las mas antiguas y toma la fecha mas antigua
-            consulta_fecha_primer_parto = list(session.execute(modelo_historial_partos.select(). \
-                                           where(modelo_historial_partos.columns.id_bovino == id_bovino_partos). \
-                                           order_by(asc(modelo_historial_partos.columns.fecha_parto))).first())
-            #actualizacion del campo
-            session.execute(modelo_leche.update().values(fecha_primer_parto=consulta_fecha_primer_parto[2]). \
-                            where(modelo_leche.columns.id_bovino == id_bovino_partos))
-            session.commit()
-            #si la cantidad de partos es menor a 1 entonces no existe intervalo entre partos
-            if cantidad_partos==1:
+            #la siguiente consulta permte saber si el animal existe en el registro de partos
+            consulta_existencia_partos = session.query(modelo_historial_partos). \
+                filter(modelo_historial_partos.columns.id_bovino == id_bovino_partos).all()
+            #si el animal no existe en el registro de partos significara que tendra un intervalo entre partos
+            #de cero
+            if consulta_existencia_partos==[]:
+                partos_defecto=0
                 intervalo_entre_partos_defecto=0
-                session.execute(modelo_leche.update().values(intervalo_entre_partos=intervalo_entre_partos_defecto). \
+                # actualizacion de campos
+                session.execute(modelo_leche.update().values(num_partos=partos_defecto,
+                                                             intervalo_entre_partos=intervalo_entre_partos_defecto). \
                                 where(modelo_leche.columns.id_bovino == id_bovino_partos))
                 session.commit()
+                #tambien se actualizara los valores de edad primer parto y fecha primer parto
+                valor_defecto = None
+                session.execute(modelo_leche.update().values(edad_primer_parto=valor_defecto,
+                                                             fecha_primer_parto=valor_defecto,
+                                                             fecha_vida_util=valor_defecto).where(
+                    modelo_leche.columns.id_bovino == id_bovino_partos))
+
+                session.commit()
             else:
-                pass
-            #esta consulta trae en orden segun fecha de parto los partos del animal
-            consulta_partos = session.query(modelo_historial_partos).\
-                filter(modelo_historial_partos.columns.id_bovino==id_bovino_partos).\
+                # cosulta que determina la cantidad de partos de cada animal
+                cantidad_partos = session.query(modelo_historial_partos). \
+                    filter(modelo_historial_partos.columns.id_bovino == id_bovino_partos).count()
+                # actualizacion de campo de numero de partos
+                session.execute(modelo_leche.update().values(num_partos=cantidad_partos). \
+                                where(modelo_leche.columns.id_bovino == id_bovino_partos))
+                session.commit()
+                # esta consulta determina cual es el primer parto del bovino
+                # para ello ordena las fechas de registro de partos desde las mas antiguas y toma la fecha mas antigua
+                consulta_fecha_primer_parto = list(session.execute(modelo_historial_partos.select(). \
+                   where(modelo_historial_partos.columns.id_bovino == id_bovino_partos). \
+                    order_by(asc(modelo_historial_partos.columns.fecha_parto))).first())
+                # actualizacion del campo
+                session.execute(modelo_leche.update().values(fecha_primer_parto=consulta_fecha_primer_parto[2]). \
+                                where(modelo_leche.columns.id_bovino == id_bovino_partos))
+                session.commit()
+                # si la cantidad de partos es menor a 1 entonces no existe intervalo entre partos
+                if cantidad_partos == 1:
+                    intervalo_entre_partos_defecto = 0
+                    session.execute(modelo_leche.update().values(intervalo_entre_partos=intervalo_entre_partos_defecto). \
+                                    where(modelo_leche.columns.id_bovino == id_bovino_partos))
+                    session.commit()
+                else:
+                    pass
+                # esta consulta trae en orden segun fecha de parto los partos del animal
+                consulta_partos = session.query(modelo_historial_partos). \
+                    filter(modelo_historial_partos.columns.id_bovino == id_bovino_partos). \
                     order_by(desc(modelo_historial_partos.columns.fecha_parto)).all()
-            #para calcular el intervalo entre partos es necesario un bucle
-            #si un animal tiene 3 partos, tendra 2 intervalos, si tiene 5 partos, tendra 4 intervalos
-            #por ello la cantidad de intervalos es igual a los partos menos 1
-            contador = cantidad_partos - 1
-            e=0
-            while (e<contador):
-                #determinacion del intervalo entre partos
-                    intervalo_parto= int(((consulta_partos[e][2]).year-(consulta_partos[e+1][2]).year)*365 +\
-                                     ((consulta_partos[e][2]).month-(consulta_partos[e+1][2]).month)*30.4 + \
-                                     ((consulta_partos[e][2]).day-(consulta_partos[e+1][2]).day))
-                #consulta que determina si el intervalo calulado ya existe en la tabla
+                # para calcular el intervalo entre partos es necesario un bucle
+                # si un animal tiene 3 partos, tendra 2 intervalos, si tiene 5 partos, tendra 4 intervalos
+                # por ello la cantidad de intervalos es igual a los partos menos 1
+                contador = cantidad_partos - 1
+                e = 0
+                while (e < contador):
+                    # determinacion del intervalo entre partos
+                    intervalo_parto = int(((consulta_partos[e][2]).year - (consulta_partos[e + 1][2]).year) * 365 + \
+                                          ((consulta_partos[e][2]).month - (consulta_partos[e + 1][2]).month) * 30.4 + \
+                                          ((consulta_partos[e][2]).day - (consulta_partos[e + 1][2]).day))
+                    # consulta que determina si el intervalo calulado ya existe en la tabla
                     consulta_existencia_intervalo = session.query(modelo_historial_intervalo_partos). \
                         filter(modelo_historial_intervalo_partos.columns.id_bovino == id_bovino_partos,
-                               modelo_historial_intervalo_partos.columns.fecha_parto1==consulta_partos[e][2],
-                               modelo_historial_intervalo_partos.columns.fecha_parto2==consulta_partos[e+1][2]).all()
-                #si el intervalo no existe (consulta vacia) entonces sera creado
-                    if consulta_existencia_intervalo==[]:
+                               modelo_historial_intervalo_partos.columns.fecha_parto1 == consulta_partos[e][2],
+                               modelo_historial_intervalo_partos.columns.fecha_parto2 == consulta_partos[e + 1][
+                                   2]).all()
+                    # si el intervalo no existe (consulta vacia) entonces sera creado
+                    if consulta_existencia_intervalo == []:
                         ingresointervalo = modelo_historial_intervalo_partos.insert().values(id_bovino=id_bovino_partos,
                                                                                              fecha_parto1=
                                                                                              consulta_partos[e][2],
@@ -134,63 +158,64 @@ def intervalo_partos(session:Session,current_user):
                         session.execute(ingresointervalo)
                         session.commit()
                         e = e + 1
-                  #si el intervalo existe entonces no se realizara ningun cambio
+                    # si el intervalo existe entonces no se realizara ningun cambio
                     else:
                         pass
                         e = e + 1
-            #debido a que el usuario puede alterar y eliminar las fechas de partos
-            # es necesario eliminar los intervalos que tienen las fechas antes de ser cambiadas
-            #Esta consulta permite averiguar todos los intervalos existentes
-            consulta_fechas = session.query(modelo_historial_intervalo_partos).all()
-            for i in consulta_fechas:
-                # Toma el ID del bovino, este es el campo numero 1
-                id_bovino_fecha = i[1]
-                # Toma la primera fecha de parto, este es el campo numero 2
-                f_parto1 = i[2]
-                # Toma la segunda fecha de parto, este es el campo numero 3
-                f_parto2 = i[3]
-                #consulta en el historial de partos si existe la primera fecha de parto de ese bovino
-                consulta_f1=session.query(modelo_historial_partos).\
-                    where(modelo_historial_partos.c.id_bovino==id_bovino_fecha).\
-                    filter(modelo_historial_partos.c.fecha_parto==f_parto1).all()
-                #si no existe esa fecha en el historial de parto siginifica que fue cambiada o eliminada
-                #entonces se debe eliminar el intervalo que contenga la fecha (pues esta trabajando con una fecha vieja)
-                if consulta_f1==[]:
-                    session.execute(modelo_historial_intervalo_partos.delete(). \
-                                    where(modelo_historial_intervalo_partos.c.id_bovino == id_bovino_partos). \
-                                    filter(modelo_historial_intervalo_partos.c.fecha_parto1 == f_parto1))
+                # debido a que el usuario puede alterar y eliminar las fechas de partos
+                # es necesario eliminar los intervalos que tienen las fechas antes de ser cambiadas
+                # Esta consulta permite averiguar todos los intervalos existentes
+                consulta_fechas = session.query(modelo_historial_intervalo_partos).all()
+                for i in consulta_fechas:
+                    # Toma el ID del bovino, este es el campo numero 1
+                    id_bovino_fecha = i[1]
+                    # Toma la primera fecha de parto, este es el campo numero 2
+                    f_parto1 = i[2]
+                    # Toma la segunda fecha de parto, este es el campo numero 3
+                    f_parto2 = i[3]
+                    # consulta en el historial de partos si existe la primera fecha de parto de ese bovino
+                    consulta_f1 = session.query(modelo_historial_partos). \
+                        where(modelo_historial_partos.c.id_bovino == id_bovino_fecha). \
+                        filter(modelo_historial_partos.c.fecha_parto == f_parto1).all()
+                    # si no existe esa fecha en el historial de parto siginifica que fue cambiada o eliminada
+                    # entonces se debe eliminar el intervalo que contenga la fecha (pues esta trabajando con una fecha vieja)
+                    if consulta_f1 == []:
+                        session.execute(modelo_historial_intervalo_partos.delete(). \
+                                        where(modelo_historial_intervalo_partos.c.id_bovino == id_bovino_partos). \
+                                        filter(modelo_historial_intervalo_partos.c.fecha_parto1 == f_parto1))
+                        session.commit()
+                    # en caso de existir no se realizaran cambios
+                    else:
+                        pass
+                    # aplicamos el metodo anterior con la segunda fecha de parto
+                    consulta_f2 = session.query(modelo_historial_partos). \
+                        where(modelo_historial_partos.c.id_bovino == id_bovino_fecha). \
+                        filter(modelo_historial_partos.c.fecha_parto == f_parto2).all()
+                    if consulta_f2 == []:
+                        session.execute(modelo_historial_intervalo_partos.delete(). \
+                                        where(modelo_historial_intervalo_partos.c.id_bovino == id_bovino_partos). \
+                                        filter(modelo_historial_intervalo_partos.c.fecha_parto2 == f_parto2))
+                        session.commit()
+                    else:
+                        pass
+                # el siguiente codigo permite establecer si un animal tiene o no registros de parto
+            consulta_id_bovinos_leche = session.query(modelo_leche).all()
+            for i in consulta_id_bovinos_leche:
+                # Toma el ID del bovino, este es el campo numero 0
+                id_bovino_partos_consulta_id_bovinos_leche = i[1]
+                # consulta que determina si el animal tiene algun registro de parto
+                consulta_bovinos_en_modulo_partos = session.query(modelo_historial_partos). \
+                    filter(
+                    modelo_historial_partos.columns.id_bovino == id_bovino_partos_consulta_id_bovinos_leche).all()
+                # en caso de no tener regisros de parto sera actualizado al valor a 0
+                if consulta_bovinos_en_modulo_partos == []:
+                    valor_defecto_cantidad_partos = 0
+                    session.execute(modelo_leche.update().values(num_partos=valor_defecto_cantidad_partos). \
+                                    where(modelo_leche.columns.id_bovino == id_bovino_partos_consulta_id_bovinos_leche))
                     session.commit()
-                #en caso de existir no se realizaran cambios
                 else:
                     pass
-                #aplicamos el metodo anterior con la segunda fecha de parto
-                consulta_f2=session.query(modelo_historial_partos). \
-                    where(modelo_historial_partos.c.id_bovino == id_bovino_fecha). \
-                    filter(modelo_historial_partos.c.fecha_parto==f_parto2).all()
-                if consulta_f2 == []:
-                    session.execute(modelo_historial_intervalo_partos.delete(). \
-                                    where(modelo_historial_intervalo_partos.c.id_bovino == id_bovino_partos). \
-                                    filter(modelo_historial_intervalo_partos.c.fecha_parto2 == f_parto2))
-                    session.commit()
-                else:
-                    pass
-        #el siguiente codigo permite establecer si un animal tiene o no registros de parto
-        consulta_id_bovinos_leche = session.query(modelo_leche).all()
-        for i in consulta_id_bovinos_leche:
-            # Toma el ID del bovino, este es el campo numero 0
-            id_bovino_partos_consulta_id_bovinos_leche = i[1]
-            #consulta que determina si el animal tiene algun registro de parto
-            consulta_bovinos_en_modulo_partos = session.query(modelo_historial_partos). \
-                filter(modelo_historial_partos.columns.id_bovino == id_bovino_partos_consulta_id_bovinos_leche).all()
-            #en caso de no tener regisros de parto sera actualizado al valor a 0
-            if consulta_bovinos_en_modulo_partos == []:
-                valor_defecto_cantidad_partos = 0
-                session.execute(modelo_leche.update().values(num_partos=valor_defecto_cantidad_partos). \
-                                where(modelo_leche.columns.id_bovino == id_bovino_partos_consulta_id_bovinos_leche))
-                session.commit()
-            else:
-                pass
-        session.commit()
+            session.commit()
     except Exception as e:
         logger.error(f'Error Funcion intervalo_partos: {e}')
         raise
