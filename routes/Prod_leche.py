@@ -4,6 +4,7 @@ Librerias requeridas
 import logging
 from Lib.Lib_Intervalo_Partos import intervalo_partos
 from Lib.Lib_eliminar_duplicados_bovinos import eliminarduplicados
+from Lib.Registro_partos import registro_partos_animales
 from Lib.clasificacion_ganado_leche import tipo_ganado_leche
 from Lib.funcion_IEP_por_raza import IEP_por_raza
 from Lib.funcion_litros_leche import promedio_litros_leche
@@ -84,6 +85,7 @@ async def inventario_prod_leche(db: Session = Depends(get_database_session),
         EliminarDuplicadosLeche(condb=db)
         tipo_ganado_leche(session= db,current_user=current_user)
         IEP_por_raza(session= db,current_user=current_user)
+        registro_partos_animales(session= db,current_user=current_user)
 
 
 

@@ -431,7 +431,7 @@ class esquema_historial_partos(BaseModel):
     id_parto: int
     id_bovino: int
     fecha_parto: Optional[date] = None
-    tipo_parto: str
+    tipo_parto: Optional[str] = None
     id_bovino_hijo:int
     usuario_id: Optional[str] = None
     nombre_madre:Optional[str] = None

@@ -7,6 +7,7 @@ import logging
 from http.client import HTTPException
 
 from fastapi import APIRouter, Response
+from sqlalchemy.sql.functions import current_user
 
 from Lib.actualizacion_peso import actualizacion_peso
 from Lib.endogamia import endogamia
@@ -58,23 +59,76 @@ logger.addHandler(file_handler)
 """
 
 
-def registro_partos_animales(session: Session):
+def registro_partos_animales(session: Session,current_user):
  try:
-
-     consulta_partos = session.query(modelo_historial_partos.c.id_bovino_hijo).all()
-     # recorre el bucle
+     #consulta que trae los datos de madre e hijos
+     consulta_partos = session.query(modelo_arbol_genealogico.c.id_bovino_madre,
+                                     modelo_arbol_genealogico.c.id_bovino,
+                                     modelo_bovinos_inventario.c.fecha_nacimiento,
+                                     modelo_arbol_genealogico.c.nombre_bovino_madre,
+                                     modelo_bovinos_inventario.c.nombre_bovino). \
+         join(modelo_arbol_genealogico, modelo_bovinos_inventario.c.id_bovino == modelo_arbol_genealogico.c.id_bovino). \
+         filter(modelo_bovinos_inventario.c.usuario_id == current_user).all()
+     #recorre el bucle for
      for i in consulta_partos:
+         # Toma el ID de la bovino madre, este es el campo numero 0
+         id_bovino_madre = i[0]
          # Toma el ID del bovino, este es el campo numero 1
-         id_bovino_parido = i[0]
+         id_bovino = i[1]
+         # Toma la fecha de nacimiento del bovino, este es el campo numero 2
+         fecha_nacimiento = i[2]
+         # Toma el nombre de la madre, este es el campo numero 3
+         nombre_bovino_madre = i[3]
+         # Toma el nombre de la madre, este es el campo numero 3
+         nombre_bovino = i[4]
+         #la siguiente consulta se realiza con el fin de identificar
+         # los animales que esten en produccion de leche
+         consulta_proposito = session.query(modelo_bovinos_inventario). \
+             where(modelo_bovinos_inventario.c.id_bovino == id_bovino_madre). \
+             filter(modelo_bovinos_inventario.c.proposito == "Leche").all()
 
-         consulta_fecha_nacimiento=session.query(modelo_bovinos_inventario.c.fecha_nacimiento).\
-             filter(modelo_bovinos_inventario.c.id_bovino==id_bovino_parido).all()
-         for i in consulta_fecha_nacimiento:
-             # Toma el ID del bovino, este es el campo numero 1
-             fecha_nacimiento = i[0]
-             session.execute(modelo_historial_partos.update().values(fecha_parto=fecha_nacimiento). \
-                             where(modelo_historial_partos.columns.id_bovino_hijo == id_bovino_parido))
+         if consulta_proposito is None or consulta_proposito == []:
+             existencia = session.query(modelo_historial_partos). \
+                 where(modelo_historial_partos.c.id_bovino == id_bovino_madre).all()
+             if existencia == []:
+                 pass
+             else:
+                 session.execute(modelo_historial_partos.delete(). \
+                                 where(modelo_historial_partos.c.id_bovino == id_bovino_madre))
+                 session.commit()
+         else:
+             existencia = session.query(modelo_historial_partos). \
+                 where(modelo_historial_partos.c.id_bovino_hijo == id_bovino).all()
+             if existencia==[] or existencia is None:
+                 ingresoPartos = modelo_historial_partos.insert().values(id_bovino=id_bovino_madre,
+                                                                         fecha_parto=fecha_nacimiento,
+                                                                         id_bovino_hijo=id_bovino,
+                                                                         usuario_id=current_user,
+                                                                         nombre_madre=nombre_bovino_madre,
+                                                                         nombre_hijo=nombre_bovino)
+                 session.execute(ingresoPartos)
+                 session.commit()
+
+             else:
+                 session.execute(modelo_historial_partos.update().values(fecha_parto=fecha_nacimiento,
+                                                                         nombre_madre=nombre_bovino_madre,
+                                                                         nombre_hijo=nombre_bovino). \
+                                 where(modelo_historial_partos.columns.id_bovino == id_bovino))
+                 session.commit()
+
+     existencia_en_arbol = session.query(modelo_historial_partos).all()
+     for i in existencia_en_arbol:
+         # Toma el ID del hijo
+         id_bovino_hijo = i[4]
+         existencia = session.query(modelo_arbol_genealogico). \
+             where(modelo_arbol_genealogico.c.id_bovino == id_bovino_hijo).all()
+         if existencia is None or existencia == []:
+             session.execute(modelo_historial_partos.delete(). \
+                             where(modelo_historial_partos.c.id_bovino_hijo == id_bovino_hijo))
              session.commit()
+         else:
+             pass
+
  except Exception as e:
      logger.error(f'Error Funcion registro_partos_animales: {e}')
      raise
