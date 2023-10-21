@@ -3,19 +3,21 @@
 Librerias requeridas
 @autor : odvr
 '''
-
+from typing import Optional
 import logging
 from datetime import date, datetime, timedelta
 from fastapi import APIRouter, Depends
 from sqlalchemy import and_
 from starlette.status import HTTP_204_NO_CONTENT
 from Lib.Lib_eliminar_duplicados_bovinos import eliminarduplicados
+from Lib.endogamia import endogamia
 from Lib.funcion_vientres_aptos import vientres_aptos
 from config.db import   get_session
 from fastapi import APIRouter, Response,status
 # importa el esquema de los bovinos
 from models.modelo_bovinos import modelo_bovinos_inventario, modelo_ventas, modelo_datos_muerte, modelo_ceba, \
-    modelo_carga_animal_y_consumo_agua, modelo_levante, modelo_datos_pesaje, modelo_leche, modelo_macho_reproductor
+    modelo_carga_animal_y_consumo_agua, modelo_levante, modelo_datos_pesaje, modelo_leche, modelo_macho_reproductor, \
+    modelo_compra, modelo_arbol_genealogico
 from sqlalchemy.orm import Session
 
 from routes.rutas_bovinos import get_current_user
@@ -53,8 +55,8 @@ la clase Esquema_bovinos  recibira como base para crear el animal esto con fin d
 """
 
 
-@Formulario_Bovino.post("/crear_bovino/{nombre_bovino}/{fecha_nacimiento}/{raza}/{sexo}/{marca}/{proposito}/{mansedumbre}/{estado}/{compra_bovino}/{fecha_pesaje}/{peso}/{datos_prenez}/{ordeno}", status_code=status.HTTP_201_CREATED,tags=["Formualario_Bovinos"])
-async def crear_bovinos(nombre_bovino:str,fecha_nacimiento:date,raza:str,sexo:str,marca:str,proposito:str,mansedumbre:str,estado:str,compra_bovino:str,fecha_pesaje:date,peso:float,datos_prenez: str, ordeno: str,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+@Formulario_Bovino.post("/crear_bovino/{nombre_bovino}/{fecha_nacimiento}/{raza}/{sexo}/{marca}/{proposito}/{mansedumbre}/{estado}/{compra_bovino}/{fecha_pesaje}/{peso}/{datos_prenez}/{ordeno}/{fecha_muerte}/{razon_muerte}/{numero_bono_venta}/{fecha_venta}/{precio_venta}/{razon_venta}/{medio_pago}/{comprador}/{numero_bono_compra}/{fecha_compra}/{precio_compra}/{razon_compra}/{medio_pago_compra}/{comprador_compras}/{id_bovino_madre}/{id_bovino_padre}", status_code=status.HTTP_201_CREATED,tags=["Formualario_Bovinos"])
+async def crear_bovinos(nombre_bovino:str,fecha_nacimiento:date,raza:str,sexo:str,marca:str,proposito:str,mansedumbre:str,estado:str,compra_bovino:str,fecha_pesaje:date,peso:float,datos_prenez: str, ordeno: str,fecha_muerte: date,razon_muerte:str,numero_bono_venta:str,fecha_venta:date,precio_venta:int,razon_venta:str,medio_pago:str,comprador:str,numero_bono_compra:str,fecha_compra:date,precio_compra:int,razon_compra:str,medio_pago_compra:str,comprador_compras:str,id_bovino_madre: str,id_bovino_padre:str, db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
     eliminarduplicados(db=db)
 
     vientres_aptos(session=db,current_user=current_user)
@@ -184,7 +186,102 @@ async def crear_bovinos(nombre_bovino:str,fecha_nacimiento:date,raza:str,sexo:st
                     datos_prenez=datos_prenez,
                     ordeno=ordeno, proposito=proposito))
                 db.commit()
+
+
+            """
+            Crea el registro de Muerte si el estado es muerto 
+            """
+            consulta_Estado_Muerte = db.execute(
+                modelo_datos_muerte.select().where(
+                    modelo_datos_muerte.columns.id_bovino == id_bovino)).first()
+
+            if consulta_Estado_Muerte is None and estado == "Muerto":
+                ingresoRegistroMuerte = modelo_datos_muerte.insert().values(id_bovino=id_bovino, estado=estado,
+                                                                            fecha_muerte=fecha_muerte,
+                                                                            razon_muerte=razon_muerte,
+                                                                            usuario_id=current_user,nombre_bovino=nombre_bovino
+                                                                            )
+                db.execute(ingresoRegistroMuerte)
+                db.commit()
+
+
+            else:
+
+                db.execute(modelo_datos_muerte.update().where(modelo_datos_muerte.c.id_bovino == id_bovino).values(
+                    estado=estado, razon_muerte=razon_muerte, fecha_muerte=fecha_muerte))
+
+                db.commit()
+
+            """
+            Crea la venta 
+            """
+            consulta_Venta = db.execute(
+                modelo_ventas.select().where(
+                    modelo_ventas.columns.id_bovino == id_bovino)).first()
+
+            if consulta_Venta is None and estado == "Vendido":
+                ingresoVentas = modelo_ventas.insert().values(id_bovino=id_bovino, estado=estado,
+                                                              numero_bono_venta=numero_bono_venta,
+                                                              fecha_venta=fecha_venta,
+                                                              precio_venta=precio_venta, razon_venta=razon_venta,
+                                                              medio_pago=medio_pago, comprador=comprador,
+                                                              usuario_id=current_user,nombre_bovino=nombre_bovino)
+                db.execute(ingresoVentas)
+                db.commit()
+
+
+            else:
+
+                db.execute(modelo_ventas.update().where(modelo_ventas.c.id_bovino == id_bovino).values(
+                    estado=estado, numero_bono_venta=numero_bono_venta, fecha_venta=fecha_venta,
+                    precio_venta=precio_venta, razon_venta=razon_venta,
+                    medio_pago=medio_pago, comprador=comprador))
+                db.commit()
+
+
+
+            """ 
+                    Crea la compra si  valida que sea comprado
+                    """
+            consulta_Compra = db.execute(
+                modelo_compra.select().where(
+                    modelo_compra.columns.id_bovino == id_bovino)).first()
+            print(consulta_Compra)
+
+            if consulta_Compra is None and compra_bovino == "Si":
+                ingresoCompra = modelo_compra.insert().values(id_bovino=id_bovino, estado=estado,
+                                                              numero_bono_compra=numero_bono_compra,
+                                                              fecha_compra=fecha_compra,
+                                                              precio_compra=precio_compra, razon_compra=razon_compra,
+                                                              medio_pago_compra=medio_pago_compra, comprador=comprador_compras,
+                                                              usuario_id=current_user,nombre_bovino=nombre_bovino)
+                db.execute(ingresoCompra)
+
+                db.commit()
+
+
+            else:
+
+                db.execute(modelo_compra.update().where(modelo_compra.c.id_bovino == id_bovino).values(
+                    estado=estado, numero_bono_compra=numero_bono_compra, fecha_compra=fecha_compra,
+                    precio_compra=precio_compra, razon_compra=razon_compra,
+                    medio_pago_compra=medio_pago_compra, comprador=comprador_compras, usuario_id=current_user))
+                db.commit()
+
+            """
+            Crear Indice de Endogamia
+            """
+            ingresoEndogamia = modelo_arbol_genealogico.insert().values(id_bovino=id_bovino,
+                                                                        id_bovino_madre=id_bovino_madre,
+                                                                        id_bovino_padre=id_bovino_padre,
+                                                                        usuario_id=current_user
+                                                                        )
+
+            db.execute(ingresoEndogamia)
+            db.commit()
+            endogamia(condb=db)
             return Response(status_code=status.HTTP_201_CREATED)
+
         else:
             return Response(status_code=status.HTTP_400_BAD_REQUEST)
 
@@ -235,7 +332,7 @@ async def crear_reporte_ventas(id_bovino:str,estado:str,numero_bono_venta:str,fe
                                                           medio_pago=medio_pago, comprador=comprador))
             db.commit()
 
-            db.commit()
+
 
 
 

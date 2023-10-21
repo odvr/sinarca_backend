@@ -83,7 +83,7 @@ async def crear_reporte_compras(id_bovino:str,estado:str,numero_bono_compra:str,
                                                           medio_pago_compra=medio_pago_compra, comprador=comprador,usuario_id=current_user))
             db.commit()
 
-            db.commit()
+
 
 
 
