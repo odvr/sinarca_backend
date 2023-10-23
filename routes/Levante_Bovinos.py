@@ -5,6 +5,8 @@ Librerias requeridas
 import logging
 import json
 from sqlalchemy import update
+
+import crud
 from Lib.Levante_Ceba_Bovinos import Estado_Optimo_Levante
 from Lib.Lib_Intervalo_Partos import intervalo_partos, fecha_aproximada_parto
 # # importa la conexion de la base de datos
@@ -101,9 +103,10 @@ async def CrearProdLevante(id_bovino: str,proposito:str,db: Session = Depends(ge
         consulta = db.execute(
             modelo_levante.select().where(
                 modelo_levante.columns.id_bovino == id_bovino)).first()
-
+        nombre_bovino = crud.crud_bovinos_inventario.CRUDBovinos.Buscar_Nombre(id_bovino=id_bovino,
+                                                                               current_user=current_user)
         if consulta is None:
-            ingresoplevante = modelo_levante.insert().values(id_bovino=id_bovino, proposito=proposito,usuario_id=current_user)
+            ingresoplevante = modelo_levante.insert().values(id_bovino=id_bovino, proposito=proposito,usuario_id=current_user,nombre_bovino=nombre_bovino)
 
             db.execute(ingresoplevante)
             db.commit()

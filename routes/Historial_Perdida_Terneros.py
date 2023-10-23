@@ -103,8 +103,11 @@ def get_database_session():
 async def listar_tabla_perdida_terneros(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
         perdida_Terneros1(db=db,current_user=current_user)
-        items_Perdida_terneros = db.execute(modelo_historial_perdida_terneros.select()).fetchall()
+        #items_Perdida_terneros = db.execute(modelo_historial_perdida_terneros.select()).fetchall()
+        items_Perdida_terneros = db.query(modelo_historial_perdida_terneros).filter(modelo_historial_perdida_terneros.c.usuario_id == current_user).all()
         db.close()
+
+        return items_Perdida_terneros
 
     except Exception as e:
         logger.error(f'Error al obtener Listar REGISTRO DE PERDIDA TERNEROS : {e}')
@@ -112,4 +115,3 @@ async def listar_tabla_perdida_terneros(db: Session = Depends(get_database_sessi
     finally:
         db.close()
 
-    return items_Perdida_terneros

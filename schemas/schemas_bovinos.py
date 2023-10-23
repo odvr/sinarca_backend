@@ -235,10 +235,10 @@ class esquema_indicadores(BaseModel):
 class esquema_macho_reproductor(BaseModel):
     id_macho: int
     id_bovino: int
-    edad: int
-    peso: int
-    estado: str
-    fecha_vida_util: date
+    edad: Optional[int] = None
+    peso: Optional[int] = None
+    estado: Optional[str] = None
+    fecha_vida_util: Optional[date] = None
     usuario_id: Optional[str] = None
     nombre_bovino:Optional[str] = None
     class Config:

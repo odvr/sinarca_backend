@@ -66,7 +66,11 @@ async def listar_reproductor(db: Session = Depends(get_database_session),current
 
 
     try:
-        vida_util_macho_reproductor(db=db,current_user=current_user)
+
+
+        vida_util_macho_reproductor(db=db, current_user=current_user)
+        vientres_aptos(session=db, current_user=current_user)
+        relacion_macho_reproductor_vientres_aptos(db=db, current_user=current_user)
         #itemsreproductor = db.execute(modelo_macho_reproductor.select()).all()
         itemsreproductor = db.query(modelo_macho_reproductor).filter(modelo_macho_reproductor.c.usuario_id == current_user).all()
 

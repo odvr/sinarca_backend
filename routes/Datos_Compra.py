@@ -6,8 +6,7 @@ Librerias requeridas
 import logging
 from fastapi import APIRouter, Response
 
-
-
+import crud
 # importa la conexion de la base de datos
 from config.db import get_session
 # importa el esquema de los bovinos
@@ -65,12 +64,14 @@ async def crear_reporte_compras(id_bovino:str,estado:str,numero_bono_compra:str,
         consulta = db.execute(
             modelo_compra.select().where(
                 modelo_compra.columns.id_bovino == id_bovino)).first()
+        nombre_bovino = crud.bovinos_inventario.Buscar_Nombre(db=db, id_bovino=id_bovino,
+                                                                               current_user=current_user)
 
         if consulta is None:
             ingresoVentas = modelo_compra.insert().values(id_bovino=id_bovino, estado=estado,
                                                           numero_bono_compra=numero_bono_compra, fecha_compra=fecha_compra,
                                                           precio_compra=precio_compra, razon_compra=razon_compra,
-                                                          medio_pago_compra=medio_pago_compra, comprador=comprador,usuario_id=current_user)
+                                                          medio_pago_compra=medio_pago_compra, comprador=comprador,usuario_id=current_user,nombre_bovino=nombre_bovino)
             db.execute(ingresoVentas)
             db.commit()
 
@@ -102,7 +103,7 @@ async def crear_reporte_compras(id_bovino:str,estado:str,numero_bono_compra:str,
 """
 
 """
-@datos_compra.get("/id_listar_bovino_compra/{id_bovino}")
+@datos_compra.get("/id_listar_bovino_compra/{id_bovino}",response_model=esquema_modelo_compra)
 async def inventario_bovinos_compra_id(id_bovino:str,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
         consulta = db.execute(modelo_compra.select().where(modelo_compra.columns.id_bovino == id_bovino)).first()

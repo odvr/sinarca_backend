@@ -162,7 +162,7 @@ async def porcentaje_ordeno(db: Session = Depends(get_database_session),
             db.execute(update(modelo_indicadores).
                             where(modelo_indicadores.c.id_indicadores == current_user).
                             values(porcentaje_ordeno=vacas_ordeno_porcentaje))
-            logger.info(f'Funcion porcentaje_ordeno {vacas_ordeno_porcentaje} ')
+
             db.commit()
         elif ordeno is None or no_ordeno is None:
             vacas_ordeno_porcentaje = 0
@@ -181,12 +181,13 @@ async def porcentaje_ordeno(db: Session = Depends(get_database_session),
                             values(porcentaje_ordeno=vacas_ordeno_porcentaje))
 
             db.commit()
+        return vacas_ordeno_porcentaje
     except Exception as e:
         logger.error(f'Error Funcion porcentaje_ordeno: {e}')
         raise
     finally:
         db.close()
-    return vacas_ordeno_porcentaje
+
 
 
 @Produccion_Leche.get("/Calcular_vacas_prenadas_porcentaje")
@@ -195,6 +196,8 @@ async def vacas_prenadas_porcentaje(db: Session = Depends(get_database_session),
   try:
     # consulta de vacas prenadas y vacas vacias en la base de datos
     prenadas, vacias = db.query(modelo_indicadores.c.vacas_prenadas, modelo_indicadores.c.vacas_vacias).first()
+    #prenadas, vacias = db.query(modelo_indicadores.c.vacas_prenadas, modelo_indicadores.c.vacas_vacias,modelo_indicadores.c.usuario_id).filter(modelo_indicadores.c.usuario_id == current_user).first()
+
     # calculo del total de animales
     if prenadas is None or vacias is None:
         vacas_estado_pren =0
@@ -240,12 +243,13 @@ async def animales_en_ordeno(db: Session = Depends(get_database_session),current
                     values(vacas_en_ordeno=vacas_ordeno))
 
     db.commit()
+    return vacas_ordeno
  except Exception as e:
      logger.error(f'Error Funcion animales_en_ordeno: {e}')
      raise
  finally:
      db.close()
- return vacas_ordeno
+
 
 
 
@@ -321,13 +325,11 @@ async def vacas_prenadas_calcular(db: Session = Depends(get_database_session),
     # join de tabla bovinos y tabla leche mediante id_bovino \
     # filtrado y conteo animales con datos prenez Prenada que se encuentren vivos
 
-    """
-    
-    
-    """
-    consulta_prenadas = db.query(modelo_bovinos_inventario.c.estado, modelo_leche.c.datos_prenez). \
+
+    consulta_prenadas = db.query(modelo_bovinos_inventario.c.estado, modelo_leche.c.datos_prenez,modelo_bovinos_inventario.c.usuario_id). \
         join(modelo_leche, modelo_bovinos_inventario.c.id_bovino == modelo_leche.c.id_bovino). \
         filter(modelo_bovinos_inventario.c.estado == 'Vivo', modelo_leche.c.datos_prenez == 'Prenada',modelo_leche.c.usuario_id==current_user).count()
+    print(consulta_prenadas)
     # actualizacion del campo
     db.execute(update(modelo_indicadores).
                     where(modelo_indicadores.c.id_indicadores == current_user).
@@ -366,11 +368,13 @@ async def CrearProdLeche( id_bovino: str,
         consulta = db.execute(
             modelo_leche.select().where(
                 modelo_leche.columns.id_bovino == id_bovino)).first()
+        nombre_bovino = crud.crud_bovinos_inventario.CRUDBovinos.Buscar_Nombre(db=db, id_bovino=id_bovino,
+                                                                               current_user=current_user)
 
         if consulta is None:
             ingresopleche = modelo_leche.insert().values(id_bovino=id_bovino,
                                                           datos_prenez=datos_prenez,
-                                                         ordeno=ordeno, proposito=proposito,usuario_id=current_user)
+                                                         ordeno=ordeno, proposito=proposito,usuario_id=current_user,nombre_bovino=nombre_bovino)
 
             db.execute(ingresopleche)
             db.commit()

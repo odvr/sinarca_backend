@@ -41,7 +41,7 @@ def get_database_session():
 
 
 
-@Ventas_Bovinos.get("/id_listar_bovino_venta/{id_bovino}",tags=["Ventas Bovinos"])
+@Ventas_Bovinos.get("/id_listar_bovino_venta/{id_bovino}",response_model=esquema_modelo_ventas,tags=["Ventas Bovinos"])
 async def inventario_bovinos_venta_id(id_bovino:str,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
         consulta = db.execute(
