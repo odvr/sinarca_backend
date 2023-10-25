@@ -128,11 +128,11 @@ class esquema_produccion_ceba(BaseModel):
 class esquema_produccion_levante(BaseModel):
     id_levante:int
     id_bovino:int
-    edad: int
-    peso: int
-    estado: str
-    proposito: str
-    estado_optimo_levante : str
+    edad: Optional[int] = None
+    peso: Optional[int] = None
+    estado: Optional[str] = None
+    proposito: Optional[str] = None
+    estado_optimo_levante : Optional[str] = None
     usuario_id: Optional[str] = None
     nombre_bovino:Optional[str] = None
 

@@ -42,6 +42,9 @@ def eliminarduplicados(db: Session ):
         if proposito == 'Levante':
             db.execute(modelo_ceba.delete().where(modelo_ceba.c.id_ceba == id))
             db.commit()
+        if proposito == 'Macho Reproductor':
+            db.execute(modelo_ceba.delete().where(modelo_ceba.c.id_ceba == id))
+            db.commit()
     itemsLevante = db.execute(modelo_levante.select()).all()
     for i in itemsLevante:
         proposito = i[5]
@@ -50,6 +53,9 @@ def eliminarduplicados(db: Session ):
             db.execute(modelo_levante.delete().where(modelo_levante.c.id_levante == idle))
             db.commit()
         if proposito == 'Ceba':
+            db.execute(modelo_levante.delete().where(modelo_levante.c.id_levante == idle))
+            db.commit()
+        if proposito == 'Macho Reproductor':
             db.execute(modelo_levante.delete().where(modelo_levante.c.id_levante == idle))
             db.commit()
 
