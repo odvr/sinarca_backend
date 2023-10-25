@@ -368,8 +368,7 @@ async def CrearProdLeche( id_bovino: str,
         consulta = db.execute(
             modelo_leche.select().where(
                 modelo_leche.columns.id_bovino == id_bovino)).first()
-        nombre_bovino = crud.crud_bovinos_inventario.CRUDBovinos.Buscar_Nombre(db=db, id_bovino=id_bovino,
-                                                                               current_user=current_user)
+        nombre_bovino = crud.bovinos_inventario.Buscar_Nombre(db=db, id_bovino=id_bovino, current_user=current_user)
 
         if consulta is None:
             ingresopleche = modelo_leche.insert().values(id_bovino=id_bovino,

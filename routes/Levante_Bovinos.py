@@ -103,8 +103,8 @@ async def CrearProdLevante(id_bovino: str,proposito:str,db: Session = Depends(ge
         consulta = db.execute(
             modelo_levante.select().where(
                 modelo_levante.columns.id_bovino == id_bovino)).first()
-        nombre_bovino = crud.crud_bovinos_inventario.CRUDBovinos.Buscar_Nombre(id_bovino=id_bovino,
-                                                                               current_user=current_user)
+
+        nombre_bovino = crud.bovinos_inventario.Buscar_Nombre(db=db, id_bovino=id_bovino, current_user=current_user)
         if consulta is None:
             ingresoplevante = modelo_levante.insert().values(id_bovino=id_bovino, proposito=proposito,usuario_id=current_user,nombre_bovino=nombre_bovino)
 
