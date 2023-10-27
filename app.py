@@ -1,7 +1,10 @@
+import os
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.staticfiles import StaticFiles
 
-
+from routes.Archivos import appArchivos
 from routes.Capacidad_Carga import capacidad_carga_rutas
 from routes.Ceba_Bovinos import Ceba_Bovinos
 from routes.Curvas_Lactancia import Curvas_Lantacia
@@ -47,6 +50,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.mount("/static", StaticFiles(directory=os.path.join(os.getcwd(), "static")), name="static")
 
 app.include_router(Endogamia)
 app.include_router(rutas_bovinos)
@@ -75,7 +79,7 @@ app.include_router(capacidad_carga_rutas)
 app.include_router(bovinos_descarte)
 app.include_router(Historial_Perdida_Terneros)
 app.include_router(Pajillas)
-
+app.include_router(appArchivos)
 
 
 

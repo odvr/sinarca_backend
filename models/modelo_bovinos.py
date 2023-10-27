@@ -42,7 +42,9 @@ modelo_bovinos_inventario = Table("bovinos", meta,
                                   Column("estado", String(300)),
                                   Column("compra_bovino", String(300)),
                                   Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")),
-                                  Column("nombre_bovino", String(300)))
+                                  Column("nombre_bovino", String(300)),
+                                  Column("ruta_fisica_foto_perfil",String(300)))
+
 
 modelo_ceba = Table("produccion_ceba", meta,
                     Column("id_ceba", Integer, primary_key=True),

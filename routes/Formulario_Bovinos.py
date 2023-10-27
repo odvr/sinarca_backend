@@ -8,8 +8,11 @@ import logging
 from datetime import date, datetime, timedelta
 from fastapi import APIRouter, Depends
 from sqlalchemy import and_
+from starlette.staticfiles import StaticFiles
 from starlette.status import HTTP_204_NO_CONTENT
-
+import os
+import uuid
+from fastapi import APIRouter, UploadFile, File
 import crud.crud_bovinos_inventario
 from Lib.Lib_eliminar_duplicados_bovinos import eliminarduplicados
 from Lib.endogamia import endogamia
@@ -50,6 +53,10 @@ def get_database_session():
         yield db
     finally:
         db.close()
+
+
+
+
 
 
 """
@@ -524,3 +531,45 @@ async def cambiar_esta_bovino(id_bovino:str,fecha_nacimiento:date,edad:int,raza:
         db.close()
 
     return Response(status_code=HTTP_204_NO_CONTENT)
+
+# Montar la carpeta de archivos estáticos
+#Formulario_Bovino.mount("/static", StaticFiles(directory="../static/uploads"), name="static")
+
+
+
+
+@Formulario_Bovino.post("/Guardar/FotoPerfil/{id_bovino}")
+async def create_user_profile(id_bovino:str,file: UploadFile = File(...),
+                                  db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)
+                                  ):
+
+    contents = await file.read()
+    # Obtiene el nombre del archivo sin la extensión
+    filename, file_extension = os.path.splitext(file.filename)
+    new_filename = f"{id_bovino}_{filename}_{uuid.uuid4().hex}{file_extension}"
+    # Genera un nuevo nombre de archivo único agregando un identificador único (UUID) al nombre original
+
+    # Ruta donde guardar el archivo
+    upload_folder = os.path.join("static", "uploads")
+    os.makedirs(upload_folder, exist_ok=True)
+    file_path = os.path.join(upload_folder, new_filename)
+
+    # Guarda el archivo en la ubicación deseada
+    with open(file_path, "wb") as f:
+        f.write(contents)
+
+    # Devuelve la URL del archivo para que el usuario pueda acceder a él
+    file_url = f"/static/uploads/{new_filename}"
+
+    db.execute(modelo_bovinos_inventario.update().values(
+
+        ruta_fisica_foto_perfil=file_url
+    ).where(
+        modelo_bovinos_inventario.c.nombre_bovino == id_bovino,modelo_bovinos_inventario.c.usuario_id == current_user))
+    db.commit()
+
+
+
+
+
+    return {"filename": new_filename, "file_url": file_url}

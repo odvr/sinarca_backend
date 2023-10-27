@@ -107,6 +107,7 @@ class Esquema_bovinos(BaseModel):
     compra_bovino: Optional[str] = None
     usuario_id:Optional[str] = None
     nombre_bovino:Optional[str] = None
+    ruta_fisica_foto_perfil: Optional[str] = None
     #Este Config La clase se utiliza para proporcionar configuraciones a Pydantic.
     class Config:
         orm_mode = True
