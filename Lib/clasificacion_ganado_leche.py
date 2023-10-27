@@ -99,11 +99,12 @@ def tipo_ganado_leche(session:Session,current_user):
                     consulta_peso_raza = session.query(modelo_orden_peso.c.peso_promedio_raza,modelo_bovinos_inventario.c.raza). \
                         join(modelo_orden_peso, modelo_bovinos_inventario.c.id_bovino == modelo_orden_peso.c.id_bovino). \
                         filter(modelo_bovinos_inventario.columns.sexo == "Hembra",
-                               modelo_orden_peso.c.raza==raza_bovino_leche).first()
+                               modelo_orden_peso.c.raza==raza_bovino_leche,
+                               modelo_orden_peso.c.usuario_id==current_user).first()
                     #si no existe un peso para su raza entonces se evaluara segun su edad
                     if consulta_peso_raza is None or consulta_peso_raza==[]:
                         #si el anaimal posee 28 o mas meses de edad sera una novilla de vientre
-                         if edad_bovino_leche >= 28:
+                         if edad_bovino_leche >= 16:
                              tipo_ganado = "Novilla de Vientre"
                              session.execute(modelo_leche.update().values(tipo_ganado=tipo_ganado). \
                                              where(modelo_leche.columns.id_bovino == id_bovino_leche))

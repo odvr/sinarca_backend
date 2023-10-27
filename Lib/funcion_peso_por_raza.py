@@ -65,7 +65,7 @@ def peso_segun_raza(session:Session,current_user):
     try:
         #obtencion de un listado de todas las razas a trabajar
         razas =  list(set(session.query(modelo_bovinos_inventario.columns.raza). \
-               where(between(modelo_bovinos_inventario.columns.edad, 24, 500)).all()))
+               where(between(modelo_bovinos_inventario.columns.edad, 24, 500)).filter(modelo_bovinos_inventario.columns.usuario_id==current_user).all()))
         #para calcular los pesos y animales por raza se implementa un bucle
         contador_raza= len(razas)
         b=0
@@ -90,7 +90,8 @@ def peso_segun_raza(session:Session,current_user):
             #esta consulta trae los bovinos vivos con edad igual o mayor a dos anos
             consulta_bovinos_peso = session.query(modelo_bovinos_inventario). \
                 where(between(modelo_bovinos_inventario.columns.edad, 24, 500)). \
-                filter(modelo_bovinos_inventario.c.estado == "Vivo").all()
+                filter(modelo_bovinos_inventario.c.estado == "Vivo",
+                       modelo_bovinos_inventario.columns.usuario_id==current_user).all()
             #se recorre la consulta
             for i in consulta_bovinos_peso:
                 # Toma el ID del bovino, este es el campo numero 0
@@ -101,8 +102,10 @@ def peso_segun_raza(session:Session,current_user):
                 raza_bovino = i[4]
                 # Toma el sexo bovino, este es el campo numero 3
                 sexo_bovino = i[3]
-                # Toma el usuario, este es el campo numero 12
+                # Toma el usuario, este es el campo numero 11
                 usuario = i[11]
+                # Toma el nombre del animal, este es el campo numero 12
+                nombre_bovino = i[12]
                 #si el bovino es macho se aplicara lo siguiente
                 if sexo_bovino=="Macho":
                     #si el promedio segun raza es una consulta vacia entonces no se realizara ningun cambio
@@ -124,7 +127,8 @@ def peso_segun_raza(session:Session,current_user):
                                                                                  consulta_peso_prom_por_raza_macho[0][
                                                                                      0],
                                                                                  diferencia=diferencia,
-                                                                                 usuario_id=usuario)
+                                                                                 usuario_id=usuario,
+                                                                                 nombre_bovino=nombre_bovino)
 
                                 session.execute(ingresoDatos)
                                 session.commit()
@@ -137,7 +141,8 @@ def peso_segun_raza(session:Session,current_user):
                                                                                   consulta_peso_prom_por_raza_macho[0][
                                                                                       0],
                                                                                   diferencia=diferencia,
-                                                                                 usuario_id=usuario). \
+                                                                                 usuario_id=usuario,
+                                                                                  nombre_bovino=nombre_bovino). \
                                                 where(modelo_orden_peso.columns.id_bovino == id_bovino_peso))
                                 session.commit()
                         else:
@@ -162,7 +167,8 @@ def peso_segun_raza(session:Session,current_user):
                                                                                  consulta_peso_prom_por_raza_hembra[0][
                                                                                      0],
                                                                                  diferencia=diferencia,
-                                                                                 usuario_id=usuario)
+                                                                                 usuario_id=usuario,
+                                                                                 nombre_bovino=nombre_bovino)
 
                                 session.execute(ingresoDatos)
                                 session.commit()
@@ -175,7 +181,8 @@ def peso_segun_raza(session:Session,current_user):
                                                                                   consulta_peso_prom_por_raza_hembra[0][
                                                                                       0],
                                                                                   diferencia=diferencia,
-                                                                                 usuario_id=usuario). \
+                                                                                 usuario_id=usuario,
+                                                                                  nombre_bovino=nombre_bovino). \
                                                 where(modelo_orden_peso.columns.id_bovino == id_bovino_peso))
                                 session.commit()
                         else:
@@ -186,7 +193,8 @@ def peso_segun_raza(session:Session,current_user):
         #el siguiente codigo elimina los bovinos cuya edad o estado sea cambiado
         consulta_animales = session.query(modelo_bovinos_inventario.c.estado,modelo_orden_peso.c.id_bovino,
                                           modelo_bovinos_inventario.c.edad).\
-            join(modelo_orden_peso,modelo_bovinos_inventario.c.id_bovino == modelo_orden_peso.c.id_bovino).all()
+            join(modelo_orden_peso,modelo_bovinos_inventario.c.id_bovino == modelo_orden_peso.c.id_bovino).\
+            filter(modelo_bovinos_inventario.columns.usuario_id==current_user).all()
         for i in consulta_animales:
             # Toma el ID del bovino en este caso es el campo 1
             idBovino = i[1]
