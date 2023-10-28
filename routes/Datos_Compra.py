@@ -108,7 +108,10 @@ async def inventario_bovinos_compra_id(id_bovino:str,db: Session = Depends(get_d
     try:
         consulta = db.execute(modelo_compra.select().where(modelo_compra.columns.id_bovino == id_bovino)).first()
 
-
+        if consulta is None:
+            raise HTTPException(status_code=404, detail="Bovino no encontrado")
+        else:
+            return consulta
     except Exception as e:
         pass
         logger.error(f'Error al obtener Bovinos de Compra: {e}')

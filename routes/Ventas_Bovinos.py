@@ -6,7 +6,7 @@ Librerias requeridas
 '''
 
 import logging
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from config.db import   get_session
 from sqlalchemy.orm import Session
 
@@ -46,14 +46,17 @@ async def inventario_bovinos_venta_id(id_bovino:str,db: Session = Depends(get_da
     try:
         consulta = db.execute(
             modelo_ventas.select().where(modelo_ventas.columns.id_bovino == id_bovino)).first()
-
+        if consulta is None:
+            raise HTTPException(status_code=404, detail="Bovino no encontrado")
+        else:
+            return consulta
     except Exception as e:
         logger.error(f'Error al obtener Bovinos de venta: {e}')
         raise
     finally:
         db.close()
 
-    return consulta
+
 
 
 @Ventas_Bovinos.get("/listar_tabla_ventas",response_model=list[esquema_modelo_ventas])

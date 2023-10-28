@@ -47,12 +47,12 @@ def calculoEdad(db: Session ):
 
 
         elif estado == "Vendido":
-            fecha_venta = list(db.execute(modelo_ventas.select().
-                                           where(modelo_ventas.columns.id_bovino == id)).first())
+            fecha_venta = db.execute(modelo_ventas.select().
+                                           where(modelo_ventas.columns.id_bovino == id)).first()
             if fecha_venta is None or fecha_venta==[]:
                 pass
             else:
-                # realiza el calculo correspondiente para calcular los meses entre fechas (edad del animal)
+               # realiza el calculo correspondiente para calcular los meses entre fechas (edad del animal)
                 Edad_Animal = (fecha_venta[4].year - fecha_nacimiento.year) * 12 + (
                             fecha_venta[4].month - fecha_nacimiento.month)
                 # actualizacion del campo en la base de datos tomando la variable ID
@@ -62,11 +62,14 @@ def calculoEdad(db: Session ):
                 db.commit()
 
         elif estado=="Muerto":
-               fecha_muerte = list(db.execute(modelo_datos_muerte.select().
-                                   where(modelo_datos_muerte.columns.id_bovino == id)).first())
+               fecha_muerte = db.execute(modelo_datos_muerte.select().
+                                   where(modelo_datos_muerte.columns.id_bovino == id)).first()
+
+
                if fecha_muerte is None or fecha_muerte==[]:
                    pass
                else:
+
                    # realiza el calculo correspondiente para calcular los meses entre fechas (edad del animal)
                    Edad_Animal = (fecha_muerte[4].year - fecha_nacimiento.year) * 12 + (
                                fecha_muerte[4].month - fecha_nacimiento.month)
@@ -75,6 +78,10 @@ def calculoEdad(db: Session ):
                        modelo_bovinos_inventario.columns.id_bovino == id))
 
                    db.commit()
+
+
+            
+
 
 
 

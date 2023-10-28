@@ -3,6 +3,7 @@
 Librerias requeridas
 @autor : odvr
 '''
+from http.client import HTTPException
 from typing import Optional
 import logging
 from datetime import date, datetime, timedelta
@@ -160,7 +161,7 @@ async def crear_bovinos(nombre_bovino:str,fecha_nacimiento:date,raza:str,sexo:st
             ingresoFechaPesaje = modelo_datos_pesaje.insert().values(id_bovino=id_bovino, fecha_pesaje=fecha_pesaje,
                                                                      peso=peso, usuario_id=current_user,
                                                                      nombre_bovino=nombre_bovino)
-            print(ingresoFechaPesaje)
+
             db.execute(ingresoFechaPesaje)
 
             db.commit()
@@ -542,7 +543,12 @@ async def cambiar_esta_bovino(id_bovino:str,fecha_nacimiento:date,edad:int,raza:
 async def create_user_profile(id_bovino:str,file: UploadFile = File(...),
                                   db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)
                                   ):
+    ConsultarNombre = db.query(modelo_bovinos_inventario).filter(
+        modelo_bovinos_inventario.columns.nombre_bovino == id_bovino,
+        modelo_bovinos_inventario.c.usuario_id == current_user).first()
 
+    print(current_user)
+    print(ConsultarNombre)
     contents = await file.read()
     # Obtiene el nombre del archivo sin la extensión
     filename, file_extension = os.path.splitext(file.filename)
@@ -561,15 +567,17 @@ async def create_user_profile(id_bovino:str,file: UploadFile = File(...),
     # Devuelve la URL del archivo para que el usuario pueda acceder a él
     file_url = f"/static/uploads/{new_filename}"
 
-    db.execute(modelo_bovinos_inventario.update().values(
+    if ConsultarNombre is None:
+        raise HTTPException(status_code=404, detail="Bovino no encontrado")
+    else:
+        Nombre_Bovino = ConsultarNombre.nombre_bovino
+        print(Nombre_Bovino)
+        db.execute(modelo_bovinos_inventario.update().values(ruta_fisica_foto_perfil=file_url).where(
+            modelo_bovinos_inventario.c.nombre_bovino == Nombre_Bovino,
+            modelo_bovinos_inventario.c.usuario_id == current_user))
+        db.commit()
+        db.close()
+        return {"filename": new_filename, "file_url": file_url}
 
-        ruta_fisica_foto_perfil=file_url
-    ).where(
-        modelo_bovinos_inventario.c.nombre_bovino == id_bovino,modelo_bovinos_inventario.c.usuario_id == current_user))
-    db.commit()
 
 
-
-
-
-    return {"filename": new_filename, "file_url": file_url}

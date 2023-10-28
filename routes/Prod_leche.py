@@ -51,7 +51,7 @@ def get_database_session():
 
 
 
-@Produccion_Leche.get("/listar_bovino_prodLeche/{id_bovino}", response_model=esquema_produccion_leche,tags=["Produccion Leche"] )
+@Produccion_Leche.get("/listar_bovino_prodLeche/{id_bovino}",response_model=esquema_produccion_leche,tags=["Produccion Leche"] )
 async def id_inventario_bovino_leche(id_bovino: str,db: Session = Depends(get_database_session),
         current_user: Esquema_Usuario = Depends(get_current_user)):
 
@@ -61,6 +61,10 @@ async def id_inventario_bovino_leche(id_bovino: str,db: Session = Depends(get_da
             modelo_leche.select().where(modelo_leche.columns.id_bovino == id_bovino)).first()
         # Cerrar la sesión
         db.close()
+        if consulta is None:
+            raise HTTPException(status_code=404, detail="Bovino no encontrado")
+        else:
+            return consulta
 
     except Exception as e:
         logger.error(f'Error al obtener Listar Produccion Leche: {e}')
@@ -68,7 +72,7 @@ async def id_inventario_bovino_leche(id_bovino: str,db: Session = Depends(get_da
     finally:
         db.close()
     # condb.commit()
-    return consulta
+
 
 
 @Produccion_Leche.get("/listar_prod_leche" , response_model=list[esquema_produccion_leche],tags=["Produccion Leche"])
