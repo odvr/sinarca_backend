@@ -83,9 +83,9 @@ async def listar_tabla_solo_hembras(db: Session = Depends(get_database_session),
 async def listar_tabla_endogamia(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
 
     try:
-        #itemsAnimalesEndogamia =  db.execute(modelo_arbol_genealogico.select()).all()
+
         itemsAnimalesEndogamia = db.query(modelo_arbol_genealogico).filter(modelo_arbol_genealogico.c.usuario_id == current_user).all()
-        print(itemsAnimalesEndogamia)
+        endogamia(condb=db)
     except Exception as e:
         logger.error(f'Error al obtener TABLA DE ENDOGAMIA: {e}')
         raise

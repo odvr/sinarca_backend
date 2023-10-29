@@ -219,7 +219,7 @@ async def crear_bovinos(nombre_bovino:str,fecha_nacimiento:date,raza:str,sexo:st
             else:
 
                 db.execute(modelo_datos_muerte.update().where(modelo_datos_muerte.c.id_bovino == id_bovino).values(
-                    estado=estado, razon_muerte=razon_muerte, fecha_muerte=fecha_muerte))
+                    estado=estado, razon_muerte=razon_muerte, fecha_muerte=fecha_muerte,nombre_bovino=nombre_bovino))
 
                 db.commit()
 
@@ -246,7 +246,7 @@ async def crear_bovinos(nombre_bovino:str,fecha_nacimiento:date,raza:str,sexo:st
                 db.execute(modelo_ventas.update().where(modelo_ventas.c.id_bovino == id_bovino).values(
                     estado=estado, numero_bono_venta=numero_bono_venta, fecha_venta=fecha_venta,
                     precio_venta=precio_venta, razon_venta=razon_venta,
-                    medio_pago=medio_pago, comprador=comprador))
+                    medio_pago=medio_pago, comprador=comprador,nombre_bovino=nombre_bovino))
                 db.commit()
 
 
@@ -393,7 +393,7 @@ async def crear_registro_muerte(id_bovino:str,estado:str,fecha_muerte:date,razon
         else:
 
             db.execute(modelo_datos_muerte.update().where(modelo_datos_muerte.c.id_bovino == id_bovino).values(
-                estado=estado,razon_muerte=razon_muerte, fecha_muerte=fecha_muerte))
+                estado=estado,razon_muerte=razon_muerte, fecha_muerte=fecha_muerte,nombre_bovino=nombre_bovino))
 
             db.commit()
 
@@ -433,7 +433,7 @@ async def CrearProdCeba(id_bovino: str,proposito:str,db: Session = Depends(get_d
         else:
 
             db.execute(modelo_ceba.update().where(modelo_ceba.c.id_bovino == id_bovino).values(
-                proposito=proposito))
+                proposito=proposito,nombre_bovino=nombre_bovino))
             db.commit()
 
 
