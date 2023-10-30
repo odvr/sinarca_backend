@@ -3,6 +3,7 @@ Librerias requeridas
 '''
 import logging
 
+import crud
 from Lib.actualizacion_peso import actualizacion_peso
 from Lib.funcion_peso_por_raza import peso_segun_raza
 # # importa la conexion de la base de datos
@@ -47,8 +48,8 @@ async def crear_fecha_pesaje(id_bovino:str,fecha_pesaje:date,peso:float,db: Sess
 
     try:
 
-
-        ingresoFechaPesaje = modelo_datos_pesaje.insert().values(id_bovino=id_bovino,fecha_pesaje=fecha_pesaje,peso=peso,usuario_id=current_user)
+        nombre_bovino = crud.bovinos_inventario.Buscar_Nombre(db=db, id_bovino=id_bovino, current_user=current_user)
+        ingresoFechaPesaje = modelo_datos_pesaje.insert().values(id_bovino=id_bovino,fecha_pesaje=fecha_pesaje,peso=peso,usuario_id=current_user,nombre_bovino=nombre_bovino)
 
 
         db.execute(ingresoFechaPesaje)
