@@ -50,7 +50,8 @@ def vientres_aptos(session:Session,current_user):
   try:
       #la siguiente consulta trae los animales hembras vacios
       consulta_vientres = session.query(modelo_leche.c.id_bovino,modelo_bovinos_inventario.c.edad,
-                                        modelo_bovinos_inventario.c.peso, modelo_bovinos_inventario.c.raza). \
+                                        modelo_bovinos_inventario.c.peso, modelo_bovinos_inventario.c.raza,
+                                        modelo_bovinos_inventario.c.nombre_bovino). \
           join(modelo_leche, modelo_bovinos_inventario.c.id_bovino==modelo_leche.c.id_bovino).\
           where(modelo_bovinos_inventario.c.estado=="Vivo").\
           filter( modelo_leche.columns.datos_prenez == "Vacia",
@@ -67,6 +68,8 @@ def vientres_aptos(session:Session,current_user):
           razaBovinoConsultaVientresAptos = i[3]
           # Toma el peso del animal en este caso es el campo 2
           pesoBovinoConsultaVientresAptos = i[2]
+          # Toma el peso del animal en este caso es el campo 2
+          nombreBovinoConsultaVientresAptos = i[4]
 
           # consulta para saber si el bovino ya existe
           consulta_existencia_bovino = session.query(modelo_vientres_aptos). \
@@ -80,14 +83,16 @@ def vientres_aptos(session:Session,current_user):
                   edad=edadBovinoConsultaVientresAptos,
                   peso=pesoBovinoConsultaVientresAptos,
                   raza=razaBovinoConsultaVientresAptos,
-                  usuario_id=current_user)
+                  usuario_id=current_user,
+                  nombre_bovino=nombreBovinoConsultaVientresAptos)
               session.execute(ingresoVientresAptos)
               session.commit()
           else:
               #si el animal ya existe actualiza sus datos
               session.execute(modelo_vientres_aptos.update().values(edad=edadBovinoConsultaVientresAptos,
                                                                     peso=pesoBovinoConsultaVientresAptos,
-                                                                    raza=razaBovinoConsultaVientresAptos). \
+                                                                    raza=razaBovinoConsultaVientresAptos,
+                                                                    nombre_bovino=nombreBovinoConsultaVientresAptos). \
                               where(modelo_vientres_aptos.columns.id_bovino == idBovinoConsultaVientresAptos))
               session.commit()
       else:

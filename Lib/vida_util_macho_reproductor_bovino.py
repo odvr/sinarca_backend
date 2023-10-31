@@ -8,7 +8,7 @@ from sqlalchemy import update
 from sqlalchemy.orm import Session
 from datetime import date, datetime, timedelta
 from models.modelo_bovinos import modelo_bovinos_inventario, modelo_macho_reproductor, modelo_vientres_aptos, \
-    modelo_indicadores
+    modelo_indicadores, modelo_leche
 import logging
 import math
 # Configuracion de la libreria para los logs de sinarca
@@ -77,9 +77,12 @@ def relacion_macho_reproductor_vientres_aptos(db: Session, current_user):
         filter(modelo_macho_reproductor.c.usuario_id==current_user).count()
 
     # consulta y conteo de vientres aptos vivos
-    cantidad_vientres_aptos = db.query(modelo_vientres_aptos).\
-        where(modelo_vientres_aptos.columns.id_vientre).\
-        filter(modelo_vientres_aptos.c.usuario_id==current_user).count()
+    cantidad_vientres_aptos = db.query(modelo_leche.c.id_bovino,modelo_bovinos_inventario.c.edad,
+                                        modelo_bovinos_inventario.c.peso, modelo_bovinos_inventario.c.raza). \
+          join(modelo_leche, modelo_bovinos_inventario.c.id_bovino==modelo_leche.c.id_bovino).\
+          where(modelo_bovinos_inventario.c.estado=="Vivo").\
+          filter(modelo_leche.columns.tipo_ganado != "Hembra de levante",
+                  modelo_leche.columns.usuario_id==current_user).count()
 
     if cantidad_vientres_aptos==0 or cantidad_vientres_aptos is None:
         relacion =0

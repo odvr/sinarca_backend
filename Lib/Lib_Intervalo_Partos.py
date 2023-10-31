@@ -69,7 +69,8 @@ def intervalo_partos(session:Session,current_user):
         #como la tabla de historial de partos puede tener un id repetido mas de una vez, se utiliza el conjunto o set
         #el set no permite elementos repetidos, por lo tanto solo nos dara un listado de id unicos
         consulta_animal_partos= set(session.query(modelo_bovinos_inventario.c.id_bovino, modelo_leche.c.id_bovino,
-                                                  modelo_bovinos_inventario.c.usuario_id). \
+                                                  modelo_bovinos_inventario.c.usuario_id,
+                                                  modelo_bovinos_inventario.c.nombre_bovino). \
             join(modelo_leche, modelo_bovinos_inventario.c.id_bovino == modelo_leche.c.id_bovino).
             filter( modelo_bovinos_inventario.c.usuario_id==current_user).all())
 
@@ -79,6 +80,8 @@ def intervalo_partos(session:Session,current_user):
             id_bovino_partos = i[0]
             # Toma el ID del usuario, este es el campo numero 2
             usuario_id = i[2]
+            # Toma el nombre del bovino, este es el campo numero 3
+            nombre_bovino = i[3]
             #la siguiente consulta permte saber si el animal existe en el registro de partos
             consulta_existencia_partos = session.query(modelo_historial_partos). \
                 filter(modelo_historial_partos.columns.id_bovino == id_bovino_partos).all()
@@ -153,14 +156,23 @@ def intervalo_partos(session:Session,current_user):
                                                                                              fecha_parto2=
                                                                                              consulta_partos[e + 1][2],
                                                                                              intervalo=intervalo_parto,
-                                                                                             usuario_id=usuario_id)
+                                                                                             usuario_id=usuario_id,
+                                                                                             nombre_bovino=nombre_bovino)
 
                         session.execute(ingresointervalo)
                         session.commit()
                         e = e + 1
-                    # si el intervalo existe entonces no se realizara ningun cambio
+                    # si el intervalo existe entonces se actualizan los datos
                     else:
-                        pass
+                        session.execute(modelo_historial_intervalo_partos.update().values(id_bovino=id_bovino_partos,
+                                                                                             fecha_parto1=
+                                                                                             consulta_partos[e][2],
+                                                                                             fecha_parto2=
+                                                                                             consulta_partos[e + 1][2],
+                                                                                             intervalo=intervalo_parto,
+                                                                                             usuario_id=usuario_id,
+                                                                                          nombre_bovino=nombre_bovino).where(modelo_historial_intervalo_partos.columns.id_bovino == id_bovino_partos).filter(modelo_historial_intervalo_partos.columns.fecha_parto1 == consulta_partos[e][2],modelo_historial_intervalo_partos.columns.fecha_parto2 == consulta_partos[e + 1][2]))
+                        session.commit()
                         e = e + 1
                 # debido a que el usuario puede alterar y eliminar las fechas de partos
                 # es necesario eliminar los intervalos que tienen las fechas antes de ser cambiadas

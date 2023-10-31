@@ -113,7 +113,7 @@ def registro_partos_animales(session: Session,current_user):
                  session.execute(modelo_historial_partos.update().values(fecha_parto=fecha_nacimiento,
                                                                          nombre_madre=nombre_bovino_madre,
                                                                          nombre_hijo=nombre_bovino). \
-                                 where(modelo_historial_partos.columns.id_bovino == id_bovino))
+                                 where(modelo_historial_partos.c.id_bovino_hijo == id_bovino))
                  session.commit()
 
      existencia_en_arbol = session.query(modelo_historial_partos).all()

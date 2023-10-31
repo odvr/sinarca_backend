@@ -9,6 +9,8 @@ import logging
 from http.client import HTTPException
 from sqlalchemy.orm import Session
 from fastapi import APIRouter, Response
+from sqlalchemy.sql.functions import current_user
+
 # importa la conexion de la base de datos
 from config.db import get_session
 # importa el esquema de los bovinos
@@ -55,13 +57,13 @@ logger.addHandler(file_handler)
 #from twilio.rest import Client
 """la siguinete funcion determina e promedio de produccion de litros de leche
 de cada animal"""
-def promedio_litros_leche(session=Session):
+def promedio_litros_leche(session:Session,current_user):
     try:
         # Realiza el join co la tabla de bovinos (solo se veran los id de los bovinos)
         # como la tabla de litros_leche puede tener un id repetido mas de una vez, se utiliza el conjunto o set
         # el set no permite elementos repetidos, por lo tanto solo nos dara un listado de id unicos
         consulta_animal_litros = set(session.query(modelo_bovinos_inventario.c.id_bovino, modelo_litros_leche.c.id_bovino). \
-            join(modelo_litros_leche,modelo_bovinos_inventario.c.id_bovino == modelo_litros_leche.c.id_bovino).all())
+            join(modelo_litros_leche,modelo_bovinos_inventario.c.id_bovino == modelo_litros_leche.c.id_bovino).filter(modelo_bovinos_inventario.c.usuario_id==current_user).all())
         # recorre el bucle
         for i in consulta_animal_litros:
             # Toma el ID del bovino, este es el campo numero 0

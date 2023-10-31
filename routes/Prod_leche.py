@@ -84,7 +84,7 @@ async def inventario_prod_leche(db: Session = Depends(get_database_session),
         peso_segun_raza(session=db,current_user=current_user)
         Edad_Primer_Parto(session=db)
         Edad_Sacrificio_Lecheras(condb=db)
-        promedio_litros_leche(session=db)
+        promedio_litros_leche(session=db,current_user=current_user)
         intervalo_partos(session=db,current_user=current_user)
         EliminarDuplicadosLeche(condb=db)
         tipo_ganado_leche(session= db,current_user=current_user)
@@ -117,7 +117,7 @@ async def inventario_prod_leche(db: Session = Depends(get_database_session),
 
     try:
 
-        litros_por_raza(session=db)
+        litros_por_raza(session=db,current_user=current_user)
 
         #itemsLeche = db.query(modelo_orden_litros).all()
         itemsLeche = db.query(modelo_orden_litros).filter(modelo_orden_litros.c.usuario_id == current_user).all()

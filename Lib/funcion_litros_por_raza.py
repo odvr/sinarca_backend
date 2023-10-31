@@ -8,6 +8,7 @@ Librerias requeridas
 import logging
 from fastapi import APIRouter, Response
 from sqlalchemy.orm import Session
+from sqlalchemy.sql.functions import current_user
 
 # importa la conexion de la base de datos
 # importa el esquema de los bovinos
@@ -42,11 +43,11 @@ logger.addHandler(file_handler)
 #from twilio.rest import Client
 
 
-def litros_por_raza(session:Session):
+def litros_por_raza(session:Session,current_user):
     try:
         #la siguiente consulta trae el listado de razas de los animales en el modulo de leche
         razas_litros_leche = list(set(session.query(modelo_bovinos_inventario.c.raza). \
-            join(modelo_leche, modelo_bovinos_inventario.c.id_bovino == modelo_leche.c.id_bovino).all()))
+            join(modelo_leche, modelo_bovinos_inventario.c.id_bovino == modelo_leche.c.id_bovino).filter(modelo_bovinos_inventario.c.usuario_id==current_user).all()))
         #para calcular los litros y animales por raza se implementa un bucle
         contador_raza= len(razas_litros_leche)
         b=0
@@ -58,14 +59,17 @@ def litros_por_raza(session:Session):
                 join(modelo_leche, modelo_bovinos_inventario.c.id_bovino == modelo_leche.c.id_bovino).\
                 where(modelo_leche.columns.promedio_litros>0).\
                 filter(modelo_bovinos_inventario.columns.raza==raza_a_trabajar,
-                       modelo_bovinos_inventario.columns.estado=="Vivo").all()
+                       modelo_bovinos_inventario.columns.estado=="Vivo",
+                       modelo_bovinos_inventario.c.usuario_id==current_user).all()
 
             if consulta_litros_prom_raza is None or consulta_litros_prom_raza==[]:
                 pass
             else:
                 animales_litros_leche = session.query(modelo_bovinos_inventario.c.raza, modelo_leche.c.id_bovino,
-                                                      modelo_leche.c.promedio_litros, modelo_bovinos_inventario.c.estado). \
-                    join(modelo_leche, modelo_bovinos_inventario.c.id_bovino == modelo_leche.c.id_bovino).all()
+                                                      modelo_leche.c.promedio_litros, modelo_bovinos_inventario.c.estado,
+                                                      modelo_bovinos_inventario.c.nombre_bovino). \
+                    join(modelo_leche, modelo_bovinos_inventario.c.id_bovino == modelo_leche.c.id_bovino).\
+                    filter(modelo_bovinos_inventario.c.usuario_id==current_user).all()
                 # recorre el bucle
                 for i in animales_litros_leche:
                     # Toma el ID del bovino, este es el campo numero 1
@@ -76,6 +80,8 @@ def litros_por_raza(session:Session):
                     raza_bovino_litros = i[0]
                     # Toma el estado del bovino, este es el campo numero 3
                     estado_bovino_litros = i[3]
+                    # Toma el nombre del bovino, este es el campo numero 4
+                    nombre_bovino_litros = i[4]
 
                     if promedio_litros_bovino is None or promedio_litros_bovino == 0:
                         session.execute(modelo_orden_litros.delete().
@@ -101,7 +107,9 @@ def litros_por_raza(session:Session):
                                                                                    litros_promedio_raza=
                                                                                    consulta_litros_prom_raza[0][0],
                                                                                    litros_promedio_animal=promedio_litros_bovino,
-                                                                                   diferencia=diferencia)
+                                                                                   diferencia=diferencia,
+                                                                                   nombre_bovino=nombre_bovino_litros,
+                                                                                   usuario_id=current_user)
 
                                 session.execute(ingresoDatos)
                                 session.commit()
@@ -112,7 +120,9 @@ def litros_por_raza(session:Session):
                                                                                     litros_promedio_raza=
                                                                                     consulta_litros_prom_raza[0][0],
                                                                                     litros_promedio_animal=promedio_litros_bovino,
-                                                                                    diferencia=diferencia). \
+                                                                                    diferencia=diferencia,
+                                                                                    nombre_bovino=nombre_bovino_litros,
+                                                                                    usuario_id=current_user). \
                                                 where(modelo_orden_litros.columns.id_bovino == id_bovino_litros))
                                 session.commit()
             b=b+1

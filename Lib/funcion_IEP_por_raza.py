@@ -57,7 +57,7 @@ def IEP_por_raza(session: Session,current_user):
     try:
        # la siguiente consulta trae el listado de razas de los animales en el modulo de leche
        razas_IEP_leche = list(set(session.query(modelo_bovinos_inventario.c.raza). \
-                join(modelo_leche,modelo_bovinos_inventario.c.id_bovino == modelo_leche.c.id_bovino).all()))
+                join(modelo_leche,modelo_bovinos_inventario.c.id_bovino == modelo_leche.c.id_bovino).filter(modelo_bovinos_inventario.c.usuario_id==current_user).all()))
        # para calcular los IEP y animales por raza se implementa un bucle
        contador_raza = len(razas_IEP_leche)
        b = 0
@@ -68,14 +68,17 @@ def IEP_por_raza(session: Session,current_user):
                                     modelo_bovinos_inventario.c.id_bovino == modelo_leche.c.id_bovino).\
                where(modelo_leche.columns.intervalo_entre_partos>0).\
                filter(modelo_bovinos_inventario.columns.raza == raza_a_trabajar,
-               modelo_bovinos_inventario.columns.estado=="Vivo").all()
+               modelo_bovinos_inventario.columns.estado=="Vivo",
+               modelo_bovinos_inventario.c.usuario_id==current_user).all()
            if consulta_IEP_prom_raza==[] or consulta_IEP_prom_raza is None:
                pass
            else:
                animales_IEP_leche = session.query(modelo_bovinos_inventario.c.raza, modelo_leche.c.id_bovino,
                                                   modelo_leche.c.intervalo_entre_partos,
-                                                  modelo_bovinos_inventario.c.estado). \
-                   join(modelo_leche, modelo_bovinos_inventario.c.id_bovino == modelo_leche.c.id_bovino).all()
+                                                  modelo_bovinos_inventario.c.estado,
+                                                  modelo_bovinos_inventario.c.nombre_bovino). \
+                   join(modelo_leche, modelo_bovinos_inventario.c.id_bovino == modelo_leche.c.id_bovino).\
+                   filter(modelo_bovinos_inventario.c.usuario_id==current_user).all()
                # recorre el bucle
                for i in animales_IEP_leche:
                    # Toma el ID del bovino, este es el campo numero 1
@@ -86,6 +89,8 @@ def IEP_por_raza(session: Session,current_user):
                    raza_bovino_IEP = i[0]
                    # Toma la estado del bovino, este es el campo numero 3
                    estado_bovino_IEP = i[3]
+                   # Toma el nombre del bovino, este es el campo numero 4
+                   nombre_bovino_IEP = i[4]
                    if promedio_IEP_bovino <= 0:
                        session.execute(modelo_orden_IEP.delete(). \
                                        where(modelo_orden_IEP.c.id_bovino == id_bovino_IEP))
@@ -107,7 +112,8 @@ def IEP_por_raza(session: Session,current_user):
                                                                            intervalo_promedio_raza=
                                                                            consulta_IEP_prom_raza[0][0],
                                                                            intervalo_promedio_animal=promedio_IEP_bovino,
-                                                                           diferencia=diferencia)
+                                                                           diferencia=diferencia,
+                                                                           nombre_bovino=nombre_bovino_IEP)
 
                            session.execute(ingresoDatos)
                            session.commit()
@@ -118,14 +124,16 @@ def IEP_por_raza(session: Session,current_user):
                                                                             intervalo_promedio_raza=
                                                                             consulta_IEP_prom_raza[0][0],
                                                                             intervalo_promedio_animal=promedio_IEP_bovino,
-                                                                            diferencia=diferencia).where(
+                                                                            diferencia=diferencia,
+                                                                            nombre_bovino=nombre_bovino_IEP).where(
                                modelo_orden_IEP.columns.id_bovino == id_bovino_IEP))
                            session.commit()
 
            b=b+1
 
        # el siguiente codigo permite eliminar cualquier animal que no este en el modulo de leche
-       consulta_animales_IEP = session.query(modelo_orden_IEP.c.id_bovino).all()
+       consulta_animales_IEP = session.query(modelo_orden_IEP.c.id_bovino).\
+           filter(modelo_orden_IEP.c.usuario_id==current_user).all()
        # recorre el bucle
        for i in consulta_animales_IEP:
            # Toma el ID del bovino, este es el campo numero 1
@@ -143,7 +151,8 @@ def IEP_por_raza(session: Session,current_user):
                                 modelo_bovinos_inventario.c.estado).join(modelo_leche,
                                 modelo_bovinos_inventario.c.id_bovino == modelo_leche.c.id_bovino). \
            where(modelo_leche.columns.intervalo_entre_partos > 0). \
-           filter(modelo_bovinos_inventario.columns.estado == "Vivo").all()
+           filter(modelo_bovinos_inventario.columns.estado == "Vivo",
+                  modelo_bovinos_inventario.c.usuario_id==current_user).all()
        if consulta_IEP_prom_hato is None or consulta_IEP_prom_hato[0][0]==0:
            pass
        else:
