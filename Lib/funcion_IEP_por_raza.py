@@ -113,7 +113,8 @@ def IEP_por_raza(session: Session,current_user):
                                                                            consulta_IEP_prom_raza[0][0],
                                                                            intervalo_promedio_animal=promedio_IEP_bovino,
                                                                            diferencia=diferencia,
-                                                                           nombre_bovino=nombre_bovino_IEP)
+                                                                           nombre_bovino=nombre_bovino_IEP,
+                                                                           usuario_id=current_user)
 
                            session.execute(ingresoDatos)
                            session.commit()
@@ -125,7 +126,8 @@ def IEP_por_raza(session: Session,current_user):
                                                                             consulta_IEP_prom_raza[0][0],
                                                                             intervalo_promedio_animal=promedio_IEP_bovino,
                                                                             diferencia=diferencia,
-                                                                            nombre_bovino=nombre_bovino_IEP).where(
+                                                                            nombre_bovino=nombre_bovino_IEP,
+                                                                            usuario_id=current_user).where(
                                modelo_orden_IEP.columns.id_bovino == id_bovino_IEP))
                            session.commit()
 
