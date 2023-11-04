@@ -27,6 +27,9 @@ def Reporte_Curvas_lactancia_Mensuales_General(session:Session):
     # Calcular el promedio mensual de litros de leche en MariaDB por cada ID de cliente
     resultados_mensuales = session.query(
         modelo_litros_leche.c.id_bovino,
+        modelo_litros_leche.c.usuario_id,
+        modelo_litros_leche.c.nombre_bovino,
+
         func.YEAR(modelo_litros_leche.c.fecha_medicion).label('anio'),
         func.MONTH(modelo_litros_leche.c.fecha_medicion).label('mes'),
         func.avg(modelo_litros_leche.c.litros_leche).label('promedio_mensual')
@@ -34,10 +37,13 @@ def Reporte_Curvas_lactancia_Mensuales_General(session:Session):
                func.MONTH(modelo_litros_leche.c.fecha_medicion)).all()
 
     for resultado in resultados_mensuales:
+        print(resultado)
         id_bovino = resultado.id_bovino
         anio = resultado.anio
         mes = resultado.mes
         promedio = resultado.promedio_mensual
+        nombre_bovino = resultado.nombre_bovino
+        usuario_id= resultado.usuario_id
 
         # Obtener la fecha y hora actual
         fecha_actual = datetime.now()
@@ -61,7 +67,9 @@ def Reporte_Curvas_lactancia_Mensuales_General(session:Session):
                 modelo_reporte_curva_lactancia_General.c.id_curva_lactancia_general == id_curva_lactancia
             ).values(
                 promedio=promedio,
-                Hora_Reporte=fecha_actual
+                Hora_Reporte=fecha_actual,
+                nombre_bovino=nombre_bovino,
+                usuario_id=usuario_id
             )
             session.execute(update_query)
             session.commit()
@@ -71,13 +79,18 @@ def Reporte_Curvas_lactancia_Mensuales_General(session:Session):
                 anio=anio,
                 mes=mes,
                 promedio=promedio,
-                Hora_Reporte=fecha_actual)
+                Hora_Reporte=fecha_actual,
+                nombre_bovino=nombre_bovino,
+                usuario_id=usuario_id
+
+
+            )
 
 
             session.execute(ingresarDatos)
             session.commit()
         else:
-            print("Co")
+            logger.error(f'Error al obtener Curvas de lactancia')
  except Exception as e:
     logger.error(f'Error al obtener Curvas de lactancia {e}')
     raise

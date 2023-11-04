@@ -9,6 +9,7 @@ from http.client import HTTPException
 from sqlalchemy import and_
 from fastapi import APIRouter, Request
 
+from Lib.Tasa_Supervivencia import tasa_supervivencia
 from Lib.perdida_Terneros import perdida_Terneros1
 from config.db import   get_session
 from crud.crud_bovinos_inventario import CRUDBovinos
@@ -423,6 +424,7 @@ async def animales_muertos(db: Session = Depends(get_database_session),current_u
 async def perdida_TernerosAPI(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
  try:
     perdida_Terneros1(db=db,current_user=current_user)
+    tasa_supervivencia(session=db,current_user=current_user)
     response= db.query(modelo_indicadores). \
         filter(
         modelo_indicadores.c.id_indicadores == current_user, modelo_indicadores.c.perdida_de_terneros).first()
