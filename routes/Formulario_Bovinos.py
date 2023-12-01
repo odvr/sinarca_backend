@@ -67,8 +67,8 @@ la clase Esquema_bovinos  recibira como base para crear el animal esto con fin d
 """
 
 
-@Formulario_Bovino.post("/crear_bovino/{nombre_bovino}/{fecha_nacimiento}/{raza}/{sexo}/{marca}/{proposito}/{mansedumbre}/{estado}/{compra_bovino}/{fecha_pesaje}/{peso}/{datos_prenez}/{ordeno}/{fecha_muerte}/{razon_muerte}/{numero_bono_venta}/{fecha_venta}/{precio_venta}/{razon_venta}/{medio_pago}/{comprador}/{numero_bono_compra}/{fecha_compra}/{precio_compra}/{razon_compra}/{medio_pago_compra}/{comprador_compras}/{id_bovino_madre}/{id_bovino_padre}/{id_registro_marca}", status_code=status.HTTP_201_CREATED,tags=["Formualario_Bovinos"])
-async def crear_bovinos(nombre_bovino:str,fecha_nacimiento:date,raza:str,sexo:str,marca:str,proposito:str,mansedumbre:str,estado:str,compra_bovino:str,fecha_pesaje:date,peso:float,datos_prenez: str, ordeno: str,fecha_muerte: date,razon_muerte:str,numero_bono_venta:str,fecha_venta:date,precio_venta:int,razon_venta:str,medio_pago:str,comprador:str,numero_bono_compra:str,fecha_compra:date,precio_compra:int,razon_compra:str,medio_pago_compra:str,comprador_compras:str,id_bovino_madre: str,id_bovino_padre:str,id_registro_marca:str, db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+@Formulario_Bovino.post("/crear_bovino/{nombre_bovino}/{fecha_nacimiento}/{raza}/{sexo}/{marca}/{proposito}/{mansedumbre}/{estado}/{compra_bovino}/{fecha_pesaje}/{peso}/{datos_prenez}/{ordeno}/{fecha_muerte}/{razon_muerte}/{numero_bono_venta}/{fecha_venta}/{precio_venta}/{razon_venta}/{medio_pago}/{comprador}/{numero_bono_compra}/{fecha_compra}/{precio_compra}/{razon_compra}/{medio_pago_compra}/{comprador_compras}/{id_bovino_madre}/{id_bovino_padre}", status_code=status.HTTP_201_CREATED,tags=["Formualario_Bovinos"])
+async def crear_bovinos(nombre_bovino:str,fecha_nacimiento:date,raza:str,sexo:str,marca:str,proposito:str,mansedumbre:str,estado:str,compra_bovino:str,fecha_pesaje:date,peso:float,datos_prenez: str, ordeno: str,fecha_muerte: date,razon_muerte:str,numero_bono_venta:str,fecha_venta:date,precio_venta:int,razon_venta:str,medio_pago:str,comprador:str,numero_bono_compra:str,fecha_compra:date,precio_compra:int,razon_compra:str,medio_pago_compra:str,comprador_compras:str,id_bovino_madre: str,id_bovino_padre:str, db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
     eliminarduplicados(db=db)
     vientres_aptos(session=db,current_user=current_user)
 
@@ -94,7 +94,7 @@ async def crear_bovinos(nombre_bovino:str,fecha_nacimiento:date,raza:str,sexo:st
                                                                 estado=estado,
                                                                 compra_bovino=compra_bovino,
                                                                 usuario_id=current_user,
-                                                                ruta_imagen_marca=id_registro_marca
+
                                                                 )
 
             result = db.execute(ingreso)
