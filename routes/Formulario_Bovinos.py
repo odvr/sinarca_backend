@@ -292,7 +292,7 @@ async def crear_bovinos(nombre_bovino:str,fecha_nacimiento:date,raza:str,sexo:st
             if id_bovino_madre == "undefined" and id_bovino_padre == "undefined":
                 pass
             else:
-                ingresoEndogamia = modelo_arbol_genealogico.insert().values(id_bovino=id_bovino,
+                ingresoEndogamia = modelo_arbol_genealogico.insert().values(id_bovino=id_bovino_ingreso,
                                                                             id_bovino_madre=id_bovino_madre,
                                                                             id_bovino_padre=id_bovino_padre,
                                                                             usuario_id=current_user
