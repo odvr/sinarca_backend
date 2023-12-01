@@ -100,6 +100,25 @@ async def listar_tabla_Partos_Animales(db: Session = Depends(get_database_sessio
     return itemsListarPartos
 
 
+@partos_bovinos.get("/listar_tabla_Historial_Partos_Unidad/{id_bovino}",response_model=list[esquema_historial_partos] )
+async def listar_tabla_Partos_Individual(id_bovino: str,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user) ):
+    try:
+        intervalo_partos(session=db,current_user=current_user)
+
+        consulta = db.execute(
+            modelo_historial_partos.select().where(modelo_historial_partos.columns.id_bovino == id_bovino)).all()
+
+        #itemsListarPartos = db.query(modelo_historial_partos).filter(modelo_historial_partos.c.usuario_id == current_user).all()
+
+    except Exception as e:
+        logger.error(f'Error al obtener TABLA DE ENDOGAMIA: {e}')
+        raise
+    finally:
+        db.close()
+    return consulta
+
+
+
 @partos_bovinos.delete("/eliminar_bovino_partos/{id_bovino}", status_code=HTTP_204_NO_CONTENT)
 async def eliminar_bovino_fecha_partos(id_bovino: str,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user) ):
 

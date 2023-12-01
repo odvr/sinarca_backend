@@ -107,6 +107,7 @@ class Esquema_bovinos(BaseModel):
     compra_bovino: Optional[str] = None
     usuario_id:Optional[str] = None
     nombre_bovino:Optional[str] = None
+    ruta_imagen_marca:Optional[str] = None
     ruta_fisica_foto_perfil: Optional[str] = None
     #Este Config La clase se utiliza para proporcionar configuraciones a Pydantic.
     class Config:
@@ -540,6 +541,17 @@ class esquema_registro_pajillas(BaseModel):
     raza: Optional[str] = None
     nombre_toro: Optional[str] = None
     productor: Optional[str] = None
+    usuario_id: Optional[str] = None
+    class Config:
+        orm_mode = True
+        env_file = ".env"
+
+
+
+class esquema_registro_marca(BaseModel):
+    id_registro_marca:int
+    nombre_marca_propietario: Optional[str] = None
+    ruta_marca: str
     usuario_id: Optional[str] = None
     class Config:
         orm_mode = True

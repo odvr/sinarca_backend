@@ -58,6 +58,26 @@ async def inventario_prod_leche_Ls_diarios(db: Session = Depends(get_database_se
         db.close()
     return itemsLeche
 
+
+@Produccion_Leche_Litros_Diarios.get("/listar_prod_leche_litros_diarios_animal/{id_bovino}",response_model=list[esquema_litros_leche])
+async def inventario_prod_leche_Ls_diarios_por_animal(id_bovino: str,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+
+    try:
+
+        #itemsLeche = db.execute(modelo_litros_leche.select()).all()
+        #itemsLeche = db.query(modelo_litros_leche).filter(modelo_litros_leche.c.usuario_id == current_user).all()
+        consulta = db.execute(
+            modelo_litros_leche.select().where(modelo_litros_leche.columns.id_bovino == id_bovino)).all()
+
+
+    except Exception as e:
+        logger.error(f'Error al obtener inventario de Produccion Leche: {e}')
+        raise
+    finally:
+        db.close()
+    return consulta
+
+
 """
 Realiza la creacion de nuevos del litros diarios en la base de datos, 
 la clase Esquema_bovinos  recibira como base para crear el animal esto con fin de realizar la consulta

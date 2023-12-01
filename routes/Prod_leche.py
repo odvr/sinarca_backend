@@ -93,6 +93,7 @@ async def inventario_prod_leche(db: Session = Depends(get_database_session),
 
 
 
+
         #itemsLeche = db.query(modelo_leche).all()
         itemsLeche = db.query(modelo_leche).filter(modelo_leche.c.usuario_id == current_user).all()
 

@@ -3,6 +3,7 @@
 el siguiente codigo realiza la creacion de las tablas que se ge
 """
 import decimal
+from datetime import datetime
 
 from pydantic.schema import Decimal
 # librerias requeridas
@@ -43,6 +44,7 @@ modelo_bovinos_inventario = Table("bovinos", meta,
                                   Column("compra_bovino", String(300)),
                                   Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")),
                                   Column("nombre_bovino", String(300)),
+                                  Column("ruta_imagen_marca", String(300)),
                                   Column("ruta_fisica_foto_perfil",String(300)))
 
 
@@ -237,6 +239,10 @@ modelo_veterinaria_comentarios = Table("Comentarios_Veterinaria", meta, Column("
                            Column("fecha_comentario", Date),
                            Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id"))
                                        )
+
+
+
+
 modelo_registro_vacunas_bovinos = Table("registro_vacunacion_bovinos", meta, Column("id_vacunacion_bovinos", Integer, primary_key=True),
                         Column("id_bovino", Integer, ForeignKey("bovinos.id_bovino")),
                         Column("fecha_registrada_usuario", Date),
@@ -369,5 +375,11 @@ modelo_registro_pajillas = Table("registro_pajillas", meta, Column("id_pajillas"
                               Column("raza", String(300)),
                               Column("nombre_toro", String(300)),
                               Column("productor", String(300)),Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
+
+
+modelo_registro_marca = Table("registro_marca", meta, Column("id_registro_marca", Integer, primary_key=True),
+                           Column("ruta_marca", String(500)),
+                           Column("nombre_marca_propietario", String(500)),
+                           Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
 
 meta.create_all(engine)

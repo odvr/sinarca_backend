@@ -23,12 +23,13 @@ from fastapi import APIRouter, Response,status
 # importa el esquema de los bovinos
 from models.modelo_bovinos import modelo_bovinos_inventario, modelo_ventas, modelo_datos_muerte, modelo_ceba, \
     modelo_carga_animal_y_consumo_agua, modelo_levante, modelo_datos_pesaje, modelo_leche, modelo_macho_reproductor, \
-    modelo_compra, modelo_arbol_genealogico
+    modelo_compra, modelo_arbol_genealogico, modelo_registro_marca
 from sqlalchemy.orm import Session
 
 from routes.Endogamia import crear_endogamia
 from routes.rutas_bovinos import get_current_user
-from schemas.schemas_bovinos import Esquema_Token, Esquema_Usuario, Esquema_bovinos, esquema_arbol_genealogico
+from schemas.schemas_bovinos import Esquema_Token, Esquema_Usuario, Esquema_bovinos, esquema_arbol_genealogico, \
+    esquema_registro_marca
 
 # Configuracion de las rutas para fash api
 Formulario_Bovino = APIRouter()
@@ -66,10 +67,9 @@ la clase Esquema_bovinos  recibira como base para crear el animal esto con fin d
 """
 
 
-@Formulario_Bovino.post("/crear_bovino/{nombre_bovino}/{fecha_nacimiento}/{raza}/{sexo}/{marca}/{proposito}/{mansedumbre}/{estado}/{compra_bovino}/{fecha_pesaje}/{peso}/{datos_prenez}/{ordeno}/{fecha_muerte}/{razon_muerte}/{numero_bono_venta}/{fecha_venta}/{precio_venta}/{razon_venta}/{medio_pago}/{comprador}/{numero_bono_compra}/{fecha_compra}/{precio_compra}/{razon_compra}/{medio_pago_compra}/{comprador_compras}/{id_bovino_madre}/{id_bovino_padre}", status_code=status.HTTP_201_CREATED,tags=["Formualario_Bovinos"])
-async def crear_bovinos(nombre_bovino:str,fecha_nacimiento:date,raza:str,sexo:str,marca:str,proposito:str,mansedumbre:str,estado:str,compra_bovino:str,fecha_pesaje:date,peso:float,datos_prenez: str, ordeno: str,fecha_muerte: date,razon_muerte:str,numero_bono_venta:str,fecha_venta:date,precio_venta:int,razon_venta:str,medio_pago:str,comprador:str,numero_bono_compra:str,fecha_compra:date,precio_compra:int,razon_compra:str,medio_pago_compra:str,comprador_compras:str,id_bovino_madre: str,id_bovino_padre:str, db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+@Formulario_Bovino.post("/crear_bovino/{nombre_bovino}/{fecha_nacimiento}/{raza}/{sexo}/{marca}/{proposito}/{mansedumbre}/{estado}/{compra_bovino}/{fecha_pesaje}/{peso}/{datos_prenez}/{ordeno}/{fecha_muerte}/{razon_muerte}/{numero_bono_venta}/{fecha_venta}/{precio_venta}/{razon_venta}/{medio_pago}/{comprador}/{numero_bono_compra}/{fecha_compra}/{precio_compra}/{razon_compra}/{medio_pago_compra}/{comprador_compras}/{id_bovino_madre}/{id_bovino_padre}/{id_registro_marca}", status_code=status.HTTP_201_CREATED,tags=["Formualario_Bovinos"])
+async def crear_bovinos(nombre_bovino:str,fecha_nacimiento:date,raza:str,sexo:str,marca:str,proposito:str,mansedumbre:str,estado:str,compra_bovino:str,fecha_pesaje:date,peso:float,datos_prenez: str, ordeno: str,fecha_muerte: date,razon_muerte:str,numero_bono_venta:str,fecha_venta:date,precio_venta:int,razon_venta:str,medio_pago:str,comprador:str,numero_bono_compra:str,fecha_compra:date,precio_compra:int,razon_compra:str,medio_pago_compra:str,comprador_compras:str,id_bovino_madre: str,id_bovino_padre:str,id_registro_marca:str, db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
     eliminarduplicados(db=db)
-
     vientres_aptos(session=db,current_user=current_user)
 
     try:
@@ -93,11 +93,14 @@ async def crear_bovinos(nombre_bovino:str,fecha_nacimiento:date,raza:str,sexo:st
                                                                 mansedumbre=mansedumbre,
                                                                 estado=estado,
                                                                 compra_bovino=compra_bovino,
-                                                                usuario_id=current_user
+                                                                usuario_id=current_user,
+                                                                ruta_imagen_marca=id_registro_marca
                                                                 )
 
             result = db.execute(ingreso)
             db.commit()
+
+
             # Obtener el ID del bovino insertado
             id_bovino = result.inserted_primary_key[0]
 
@@ -302,7 +305,21 @@ async def crear_bovinos(nombre_bovino:str,fecha_nacimiento:date,raza:str,sexo:st
             return Response(status_code=status.HTTP_201_CREATED)
 
         else:
-            return Response(status_code=status.HTTP_400_BAD_REQUEST)
+            db.execute(modelo_bovinos_inventario.update().values(
+
+                fecha_nacimiento=fecha_nacimiento,
+                raza=raza,
+                sexo=sexo,
+                peso=peso,
+                marca=marca,
+                proposito=proposito,
+                mansedumbre=mansedumbre,
+                estado=estado,
+                compra_bovino=compra_bovino
+
+            ).where(
+                modelo_bovinos_inventario.columns.id_bovino == id_bovino))
+            db.commit()
 
 
 
@@ -547,8 +564,8 @@ async def create_user_profile(id_bovino:str,file: UploadFile = File(...),
         modelo_bovinos_inventario.columns.nombre_bovino == id_bovino,
         modelo_bovinos_inventario.c.usuario_id == current_user).first()
 
-    print(current_user)
-    print(ConsultarNombre)
+
+
     contents = await file.read()
     # Obtiene el nombre del archivo sin la extensión
     filename, file_extension = os.path.splitext(file.filename)
@@ -571,13 +588,70 @@ async def create_user_profile(id_bovino:str,file: UploadFile = File(...),
         raise HTTPException(status_code=404, detail="Bovino no encontrado")
     else:
         Nombre_Bovino = ConsultarNombre.nombre_bovino
-        print(Nombre_Bovino)
+
         db.execute(modelo_bovinos_inventario.update().values(ruta_fisica_foto_perfil=file_url).where(
             modelo_bovinos_inventario.c.nombre_bovino == Nombre_Bovino,
             modelo_bovinos_inventario.c.usuario_id == current_user))
         db.commit()
         db.close()
         return {"filename": new_filename, "file_url": file_url}
+
+
+
+
+
+@Formulario_Bovino.post("/GuardarMarca/{nombre_marca_propietario}")
+async def Crear_Marca_bovino(nombre_marca_propietario:str,file: UploadFile = File(...),
+                                  db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)
+                                  ):
+
+
+
+    contents = await file.read()
+
+    hora_registro = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    # Obtiene el nombre del archivo sin la extensión
+    filename, file_extension = os.path.splitext(file.filename)
+    new_filename = f"{current_user}_{filename}_{uuid.uuid4().hex}{file_extension}"
+    # Genera un nuevo nombre de archivo único agregando un identificador único (UUID) al nombre original
+
+    # Ruta donde guardar el archivo
+    upload_folder = os.path.join("static", "uploads")
+    os.makedirs(upload_folder, exist_ok=True)
+    file_path = os.path.join(upload_folder, new_filename)
+
+    # Guarda el archivo en la ubicación deseada
+    with open(file_path, "wb") as f:
+        f.write(contents)
+
+    # Devuelve la URL del archivo para que el usuario pueda acceder a él
+    url_registro_marca = f"/static/uploads/{new_filename}"
+
+    db.execute(modelo_registro_marca.insert().values(ruta_marca=url_registro_marca,nombre_marca_propietario=nombre_marca_propietario,usuario_id=current_user))
+    db.commit()
+    db.close()
+
+    #db.modelo_registro_marca.insert().values(url_registro_marca=file_url,usuario_id=current_user)
+    #db.commit()
+
+    return {"filename": new_filename, "file_url": url_registro_marca}
+
+@Formulario_Bovino.get("/ListarMarcasImagenes", response_model=list[esquema_registro_marca],tags=["Formualario_Bovinos"])
+async def id_inventario_bovino(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+    try:
+
+        Marca = db.query(modelo_registro_marca). \
+            filter(modelo_registro_marca.c.usuario_id == current_user).all()
+
+
+
+    except Exception as e:
+
+        logger.error(f'Error al obtener Listar Unico Bovino del Inventario : {e}')
+        raise
+
+    # condb.commit()
+    return Marca
 
 
 
