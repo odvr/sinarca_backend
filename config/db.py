@@ -27,13 +27,14 @@ logger.addHandler(file_handler)
 Registra tu base de datos siguiendo los parametros en el ejemplo:
 mariadb+mariadbconnector://usuario:password@IPbasededatos:puerto/nombreBasededatos"
 """
-engine = sqlalchemy.create_engine("mariadb+mariadbconnector://root:1q2w3e4r@3.87.217.60:3306/sinarca")
+engine = sqlalchemy.create_engine("mariadb+mariadbconnector://root:t&G2aL#p9B#z@3.87.217.60:3306/sinarca")
 meta = MetaData()
 def get_session():
-    engine = sqlalchemy.create_engine("mariadb+mariadbconnector://root:1q2w3e4r@3.87.217.60:3306/sinarca")
+    engine = sqlalchemy.create_engine("mariadb+mariadbconnector://root:t&G2aL#p9B#z@3.87.217.60:3306/sinarca")
     try:
         Session = sessionmaker(bind=engine)
         session = Session()
+
         return session
     except Exception as e:
         logger.error(f'Error al Conectar la Base de datos: {e}')
