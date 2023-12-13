@@ -6,10 +6,14 @@ from Lib.Lib_Intervalo_Partos import intervalo_partos
 from Lib.Lib_eliminar_duplicados_bovinos import eliminarduplicados
 from Lib.Registro_partos import registro_partos_animales
 from Lib.clasificacion_ganado_leche import tipo_ganado_leche
+from Lib.dias_abiertos import dias_abiertos
+from Lib.endogamia import abuelo_materno, endogamia, abuela_materna, abuelo_paterno, abuela_paterna, bisabuelo_materno, \
+    bisabuelo_paterno
 from Lib.funcion_IEP_por_raza import IEP_por_raza
 from Lib.funcion_litros_leche import promedio_litros_leche
 from Lib.funcion_litros_por_raza import litros_por_raza
 from Lib.funcion_peso_por_raza import peso_segun_raza
+from Lib.palpaciones import palpaciones
 # # importa la conexion de la base de datos
 from config.db import  get_session
 # # importa el esquema de los bovinos
@@ -90,9 +94,16 @@ async def inventario_prod_leche(db: Session = Depends(get_database_session),
         tipo_ganado_leche(session= db,current_user=current_user)
         IEP_por_raza(session= db,current_user=current_user)
         registro_partos_animales(session= db,current_user=current_user)
+        dias_abiertos(session= db,current_user=current_user)
+        palpaciones(session= db,current_user=current_user)
 
-
-
+        abuelo_materno(session=db, current_user=current_user)
+        abuela_materna(session=db, current_user=current_user)
+        abuelo_paterno(session=db, current_user=current_user)
+        abuela_paterna(session=db, current_user=current_user)
+        bisabuelo_materno(session=db, current_user=current_user)
+        bisabuelo_paterno(session=db, current_user=current_user)
+        endogamia(session=db, current_user=current_user)
 
         #itemsLeche = db.query(modelo_leche).all()
         itemsLeche = db.query(modelo_leche).filter(modelo_leche.c.usuario_id == current_user).all()
@@ -138,7 +149,9 @@ def animales_no_ordeno(session:Session,current_user):
     # join, consulta y conteo de animales vivos que no son ordenados
     vacas_no_ordeno = session.query(modelo_bovinos_inventario.c.estado, modelo_leche.c.ordeno). \
         join(modelo_leche, modelo_bovinos_inventario.c.id_bovino == modelo_leche.c.id_bovino). \
-        filter(modelo_bovinos_inventario.c.estado == 'Vivo', modelo_leche.c.ordeno == 'No',
+        filter(modelo_bovinos_inventario.c.estado == 'Vivo',
+               modelo_leche.columns.tipo_ganado != "Hembra de levante",
+               modelo_leche.c.ordeno == 'No',
                modelo_bovinos_inventario.columns.usuario_id==current_user).count()
     # actualizacion de campos
     session.execute(update(modelo_indicadores).
@@ -313,6 +326,7 @@ async def vacas_vacias(db: Session = Depends(get_database_session),current_user:
         consulta_vacias = db.query(modelo_bovinos_inventario.c.estado, modelo_leche.c.datos_prenez). \
             join(modelo_leche, modelo_bovinos_inventario.c.id_bovino == modelo_leche.c.id_bovino). \
             filter(modelo_bovinos_inventario.c.estado == 'Vivo', modelo_leche.c.datos_prenez == 'Vacia',
+                   modelo_leche.columns.tipo_ganado != "Hembra de levante",
                    modelo_leche.c.usuario_id == current_user).count()
         # actualizacion del campo
         db.execute(update(modelo_indicadores).

@@ -88,8 +88,8 @@ modelo_leche = Table("produccion_leche", meta,
                      Column("intervalo_entre_partos", Float),
                      Column("tipo_ganado", String(300)),
                      Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")),
-                     Column("nombre_bovino", String(300))
-                     )
+                     Column("nombre_bovino", String(300)),
+                     Column("dias_abiertos", Integer))
 
 modelo_datos_muerte = Table("datos_muerte", meta,
                             Column("id_datos_muerte", Integer, primary_key=True),
@@ -267,7 +267,27 @@ modelo_partos = Table("partos", meta, Column("id_parto", Integer, primary_key=Tr
                       Column("fecha_estimada_prenez", Date),
                       Column("fecha_estimada_parto", Date),
                       Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")),
+                      Column("nombre_bovino", String(300)),
+                      Column("notificacion", String(300)),
+                      Column("tipo", String(300)),
+                      Column("id_reproductor", String(300)),
+                      Column("nombre_bovino_reproductor", String(300)))
+
+modelo_palpaciones = Table("palpaciones", meta, Column("id_palpacion", Integer, primary_key=True),
+                      Column("id_bovino", Integer),
+                      Column("fecha_palpacion", Date),
+                      Column("diagnostico_prenez", String(300)),
+                      Column("observaciones", String(300)),
+                      Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")),
                       Column("nombre_bovino", String(300)))
+
+modelo_dias_abiertos = Table("dias_abiertos", meta, Column("id_dias_abiertos", Integer, primary_key=True),
+                      Column("id_bovino", Integer),
+                      Column("nombre_bovino", String(300)),
+                      Column("fecha_parto", Date),
+                      Column("fecha_prenez", Date),
+                      Column("dias_abiertos", Integer),
+                      Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
 
 modelo_carga_animal_y_consumo_agua = Table("carga_animal", meta, Column("id_carga_animal", Integer, primary_key=True),
                                            Column("id_bovino", Integer, ForeignKey("bovinos.id_bovino"),unique=True),

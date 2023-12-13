@@ -17,7 +17,8 @@ from models.modelo_bovinos import modelo_bovinos_inventario, modelo_veterinaria,
     modelo_ventas, modelo_datos_muerte, \
     modelo_indicadores, modelo_ceba, modelo_macho_reproductor, modelo_carga_animal_y_consumo_agua, modelo_datos_pesaje, \
     modelo_capacidad_carga, modelo_calculadora_hectareas_pastoreo, modelo_partos, modelo_vientres_aptos, \
-    modelo_descarte,  modelo_arbol_genealogico, modelo_historial_partos, modelo_historial_intervalo_partos
+    modelo_descarte, modelo_arbol_genealogico, modelo_historial_partos, modelo_historial_intervalo_partos, \
+    modelo_palpaciones
 from schemas.schemas_bovinos import Esquema_bovinos,User, esquema_produccion_leche, esquema_produccion_levante,TokenSchema,esquema_descarte, \
     esquema_produccion_ceba
 from sqlalchemy import select, insert, values, update, bindparam, between, join, func, null, desc, asc
@@ -310,9 +311,9 @@ def fecha_aproximada_parto(session=Session):
         peso = i[3]
         # Toma el estado del animal en este caso es el campo 3
         estado = i[4]
-        #calculo de la fecha aproximada de parto (la gestacion dura paorximadamente 280 dias)
+        #calculo de la fecha aproximada de parto (la gestacion dura paorximadamente 283 dias)
         if estado=="Vivo":
-          fecha_estimada_parto = fecha_estimada_prenez + timedelta(280)
+          fecha_estimada_parto = fecha_estimada_prenez + timedelta(283)
         else:
           fecha_estimada_parto = None
         #actualizacion de campos
@@ -321,6 +322,41 @@ def fecha_aproximada_parto(session=Session):
                         where(modelo_partos.columns.id_bovino == id))
 
         session.commit()
+
+        #el siguiente codigo permite generar notificaciones
+        consulta_animales_palpaciones = session.query(modelo_palpaciones).\
+            where(between(modelo_palpaciones.columns.fecha_palpacion,(fecha_estimada_prenez),(fecha_estimada_prenez + timedelta(45)))).\
+            filter(modelo_palpaciones.columns.id_bovino == id).all()
+
+
+        if consulta_animales_palpaciones is None or consulta_animales_palpaciones==[]:
+
+            consulta_animales_palpaciones2 = session.query(modelo_palpaciones). \
+                where(modelo_palpaciones.columns.fecha_palpacion >= (fecha_estimada_prenez + timedelta(45))). \
+                filter(modelo_palpaciones.columns.id_bovino == id).all()
+
+            if consulta_animales_palpaciones2 is None or consulta_animales_palpaciones2==[]:
+                notificacion = f'Han pasado por lo menos 45 dias y no has registrado palpaciones nuevas desde la monta/inseminacion de este animal, seria recomendable que realices una palpacion'
+                session.execute(modelo_partos.update().values(notificacion=notificacion). \
+                                where(modelo_partos.columns.id_bovino == id))
+
+                session.commit()
+
+
+            else:
+                notificacion = None
+                session.execute(modelo_partos.update().values(notificacion=notificacion). \
+                                where(modelo_partos.columns.id_bovino == id))
+
+                session.commit()
+
+        else:
+            notificacion = None
+            session.execute(modelo_partos.update().values(notificacion=notificacion). \
+                            where(modelo_partos.columns.id_bovino == id))
+
+            session.commit()
+
   except Exception as e:
       logger.error(f'Error Funcion fecha_aproximada_parto: {e}')
       raise

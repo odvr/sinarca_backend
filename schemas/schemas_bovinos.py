@@ -156,6 +156,7 @@ class esquema_produccion_leche(BaseModel):
     tipo_ganado: Optional[str] = None
     usuario_id: Optional[str] = None
     nombre_bovino:Optional[str] = None
+    dias_abiertos: Optional[int] = None
     class Config:
         orm_mode = True
         env_file = ".env"
@@ -370,6 +371,38 @@ class esquema_partos(BaseModel):
     peso: Optional[int] = None
     fecha_estimada_prenez: Optional[date] = None
     fecha_estimada_parto: Optional[date] = None
+    usuario_id: Optional[str] = None
+    nombre_bovino:Optional[str] = None
+
+
+    class Config:
+        orm_mode = True
+        env_file = ".env"
+
+class esquema_palpaciones(BaseModel):
+    id_palpacion: int
+    id_bovino: int
+    fecha_palpacion: Optional[date] = None
+    diagnostico_prenez: Optional[str] = None
+    observaciones: Optional[str] = None
+    usuario_id: Optional[str] = None
+    nombre_bovino:Optional[str] = None
+    notificacion:Optional[str] = None
+    tipo:Optional[str] = None
+    id_reproductor:Optional[int] = None
+    nombre_bovino_reproductor:Optional[str] = None
+
+
+    class Config:
+        orm_mode = True
+        env_file = ".env"
+
+class esquema_dias_abiertos(BaseModel):
+    id_dias_abiertos: int
+    id_bovino: int
+    fecha_parto: Optional[date] = None
+    fecha_prenez: Optional[date] = None
+    dias_abiertos: Optional[int] = None
     usuario_id: Optional[str] = None
     nombre_bovino:Optional[str] = None
 

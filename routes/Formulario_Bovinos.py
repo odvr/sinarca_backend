@@ -16,7 +16,8 @@ import uuid
 from fastapi import APIRouter, UploadFile, File
 import crud.crud_bovinos_inventario
 from Lib.Lib_eliminar_duplicados_bovinos import eliminarduplicados
-from Lib.endogamia import endogamia
+from Lib.endogamia import endogamia, abuelo_materno, abuela_materna, abuelo_paterno, abuela_paterna, bisabuelo_materno, \
+    bisabuelo_paterno
 from Lib.funcion_vientres_aptos import vientres_aptos
 from config.db import   get_session
 from fastapi import APIRouter, Response,status
@@ -304,7 +305,13 @@ async def crear_bovinos(nombre_bovino: str, fecha_nacimiento: date, raza: str, s
 
                 db.execute(ingresoEndogamia)
                 db.commit()
-                endogamia(condb=db)
+                abuelo_materno(session=db, current_user=current_user)
+                abuela_materna(session=db, current_user=current_user)
+                abuelo_paterno(session=db, current_user=current_user)
+                abuela_paterna(session=db, current_user=current_user)
+                bisabuelo_materno(session=db, current_user=current_user)
+                bisabuelo_paterno(session=db, current_user=current_user)
+                endogamia(session=db, current_user=current_user)
 
             return Response(status_code=status.HTTP_201_CREATED)
 

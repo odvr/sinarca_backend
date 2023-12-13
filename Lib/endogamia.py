@@ -6,27 +6,17 @@ Librerias requeridas
 '''
 
 import logging
+from datetime import timedelta
 
 from fastapi import APIRouter
-from fastapi.security import OAuth2PasswordBearer
 
-# importa la conexion de la base de datos
-from sqlalchemy.orm import Session
-from sqlalchemy.sql.functions import current_user
-
-import crud
 from config import db
 # importa el esquema de los bovinos
-from models.modelo_bovinos import modelo_arbol_genealogico, modelo_bovinos_inventario
-
-oauth2_scheme = OAuth2PasswordBearer("/token")
-
-
-
-
-
-
-
+from models.modelo_bovinos import modelo_bovinos_inventario, modelo_leche, modelo_indicadores, modelo_orden_IEP, \
+    modelo_palpaciones, modelo_historial_partos, modelo_historial_intervalo_partos, modelo_dias_abiertos, \
+    modelo_arbol_genealogico
+from sqlalchemy.orm import Session
+from sqlalchemy import func, desc
 
 # Configuracion de las rutas para fash api
 rutas_bovinos = APIRouter()
@@ -50,464 +40,449 @@ logger.addHandler(file_handler)
 #pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
-"""A continuacion se muestran las funciones que determinan los lazos familiares"""
-def abuelo_materno(condb: Session):
+#from twilio.rest import Client
+
+""""A continuacion se muestran las funciones que determinan los lazos familiares"""
+
+def abuelo_materno(session: Session,current_user):
     try:
         # Realiza la consulta general de la tabla de arbol genealogico
-        consulta_bovinos = condb.execute(modelo_arbol_genealogico.select()).fetchall()
+        consulta_bovinos = session.query(modelo_arbol_genealogico).\
+            filter(modelo_arbol_genealogico.columns.usuario_id == current_user).all()
+
         # Recorre los campos de la consulta
         for i in consulta_bovinos:
-            # Toma el ID del bovino, este es el campo numero 1
-            id = i[1]
-            # Toma el ID de la madre del bovino, este es el campo numero 2
-            id_madre = i[2]
+            # Toma el nombre del bovino, este es el campo numero 14
+            nombre_bovino = i[14]
+            # Toma el nombre de la madre del bovino, este es el campo numero 15
+            nombre_bovino_madre = i[15]
+            # Toma el ID del usuario, este es el campo numero 13
+            usuario_id = i[13]
             # consulta de relaciones familiares
             # consulta padre de la madre(abuelo materno)
-            consulta_id_abuelo_materno = condb.execute(modelo_arbol_genealogico.select().
-                                            where(modelo_arbol_genealogico.columns.id_bovino == id_madre)).fetchall()
+            consulta_nombre_abuelo_materno = session.query(modelo_arbol_genealogico).\
+                filter(modelo_arbol_genealogico.columns.usuario_id==usuario_id,
+                       modelo_arbol_genealogico.columns.nombre_bovino == nombre_bovino_madre).all()
             #si no existe registro del abuelo materno entonces sera una consulta vacia (se asignara un no registro por defecto)
-            if consulta_id_abuelo_materno==[]:
+            if consulta_nombre_abuelo_materno==[]:
 
                 nombre_bovino_abuelo_materno="No registra"
                 #actualizacion del campo
-                condb.execute(modelo_arbol_genealogico.update().values(nombre_bovino_abuelo_materno=nombre_bovino_abuelo_materno).where(
-                    modelo_arbol_genealogico.columns.id_bovino == id))
-                condb.commit()
+                session.execute(modelo_arbol_genealogico.update().values(nombre_bovino_abuelo_materno=nombre_bovino_abuelo_materno).filter(modelo_arbol_genealogico.columns.nombre_bovino == nombre_bovino,modelo_arbol_genealogico.columns.usuario_id == usuario_id))
+                session.commit()
             #si existe registro del abuelo materno entonces este se actualizara en la base de datos
             else:
-                for abuelo_m in consulta_id_abuelo_materno:
-                    id_abuelo_materno = abuelo_m[3]
-                    nombre_bovino_abuelo_materno=list(condb.execute(modelo_bovinos_inventario.select().
-                        where(modelo_bovinos_inventario.columns.id_bovino == id_abuelo_materno)).first())
+                for abuelo_m in consulta_nombre_abuelo_materno:
+                    nombre_bovino_abuelo_materno = abuelo_m[16]
 
                     # actualizacion del campo
-                    condb.execute(modelo_arbol_genealogico.update().values(abuelo_materno=id_abuelo_materno,
-                                                                       nombre_bovino_abuelo_materno=nombre_bovino_abuelo_materno[12]).where(
-                            modelo_arbol_genealogico.columns.id_bovino == id))
-                    condb.commit()
+                    session.execute(modelo_arbol_genealogico.update().values(nombre_bovino_abuelo_materno=nombre_bovino_abuelo_materno).filter(modelo_arbol_genealogico.columns.nombre_bovino == nombre_bovino,modelo_arbol_genealogico.columns.usuario_id == usuario_id))
+                    session.commit()
+
     except Exception as e:
         logger.error(f'Error Funcion abuelo_materno: {e}')
         raise
-    finally:
-        condb.close()
 
 
-def abuela_materna(condb: Session):
+def abuela_materna(session: Session,current_user):
     try:
         # Realiza la consulta general de la tabla de arbol genealogico
-        consulta_bovinos = condb.execute(modelo_arbol_genealogico.select()).fetchall()
+        consulta_bovinos = session.query(modelo_arbol_genealogico).\
+            filter(modelo_arbol_genealogico.columns.usuario_id == current_user).all()
         # Recorre los campos de la consulta
         for i in consulta_bovinos:
-            # Toma el ID del bovino, este es el campo numero 1
-            id = i[1]
-            # Toma el ID de la madre del bovino, este es el campo numero 2
-            id_madre = i[2]
+            # Toma el nombre del bovino, este es el campo numero 14
+            nombre_bovino = i[14]
+            # Toma el nombre de la madre del bovino, este es el campo numero 15
+            nombre_bovino_madre = i[15]
+            # Toma el ID del usuario, este es el campo numero 13
+            usuario_id = i[13]
             # consulta de relaciones familiares
             # consulta madre de la madre(abuela materna)
-            consulta_id_abuela_materna = condb.execute(modelo_arbol_genealogico.select().
-                                                where(modelo_arbol_genealogico.columns.id_bovino == id_madre)).fetchall()
+            consulta_nombre_abuela_materna = session.query(modelo_arbol_genealogico).filter(modelo_arbol_genealogico.columns.usuario_id==usuario_id,
+                       modelo_arbol_genealogico.columns.nombre_bovino == nombre_bovino_madre).all()
             #si no existe registro de abuela materna entonces sera una consulta vacia (se asignara un no registro por defecto)
-            if consulta_id_abuela_materna==[]:
+            if consulta_nombre_abuela_materna==[]:
 
                 nombre_bovino_abuela_materna= "No registra"
                 # actualizacion del campo
-                condb.execute(modelo_arbol_genealogico.update().values(nombre_bovino_abuela_materna=nombre_bovino_abuela_materna).where(
-                    modelo_arbol_genealogico.columns.id_bovino == id))
-                condb.commit()
+                session.execute(modelo_arbol_genealogico.update().values(nombre_bovino_abuela_materna=nombre_bovino_abuela_materna).filter(modelo_arbol_genealogico.columns.nombre_bovino == nombre_bovino,modelo_arbol_genealogico.columns.usuario_id == usuario_id))
+                session.commit()
             #si existe registro de abuela materna entonces este se actualizara en la base de datos
             else:
-                for abuela_m in consulta_id_abuela_materna:
-                    id_abuela_materna = abuela_m[2]
-                    nombre_bovino_abuela_materna=list(condb.execute(modelo_bovinos_inventario.select().
-                        where(modelo_bovinos_inventario.columns.id_bovino == id_abuela_materna)).first())
+                for abuela_m in consulta_nombre_abuela_materna:
+                    nombre_bovino_abuela_materna = abuela_m[15]
                     # actualizacion del campo
-                    condb.execute(modelo_arbol_genealogico.update().values(abuela_materna=id_abuela_materna,
-                                                                       nombre_bovino_abuela_materna=nombre_bovino_abuela_materna[12]).where(
-                        modelo_arbol_genealogico.columns.id_bovino == id))
-                    condb.commit()
+                    session.execute(modelo_arbol_genealogico.update().values(nombre_bovino_abuela_materna=nombre_bovino_abuela_materna).filter(modelo_arbol_genealogico.columns.nombre_bovino == nombre_bovino,modelo_arbol_genealogico.columns.usuario_id == usuario_id))
+                    session.commit()
     except Exception as e:
         logger.error(f'Error Funcion abuela_materna: {e}')
         raise
-    finally:
-        condb.close()
 
-def abuelo_paterno(condb: Session):
+
+
+def abuelo_paterno(session: Session,current_user):
     try:
         # Realiza la consulta general de la tabla de arbol genealogico
-        consulta_bovinos = condb.execute(modelo_arbol_genealogico.select()).fetchall()
-        # Recorre los campos de la consulta
+        consulta_bovinos = session.query(modelo_arbol_genealogico).\
+            where(modelo_arbol_genealogico.columns.usuario_id == current_user).all()
         for i in consulta_bovinos:
-            # Toma el ID del bovino, este es el campo numero 1
-            id = i[1]
-            # Toma el ID del padre del bovino, este es el campo numero 3
-            id_padre = i[3]
+            # Toma el nombre del bovino, este es el campo numero 14
+            nombre_bovino = i[14]
+            # Toma el nombre de la padre del bovino, este es el campo numero 16
+            nombre_bovino_padre = i[16]
+            # Toma el ID del usuario, este es el campo numero 13
+            usuario_id = i[13]
             # consulta de relaciones familiares
             # consulta padre del padre(abuelo paterno)
-            consulta_id_abuelo_paterno = condb.execute(modelo_arbol_genealogico.select().
-                                                where(modelo_arbol_genealogico.columns.id_bovino == id_padre)).fetchall()
+            consulta_id_abuelo_paterno = session.query(modelo_arbol_genealogico).filter(modelo_arbol_genealogico.columns.usuario_id==usuario_id,
+                       modelo_arbol_genealogico.columns.nombre_bovino == nombre_bovino_padre).all()
             # si no existe registro de abuelo paterno entonces sera una consulta vacia (se asignara un no registro por defecto)
             if consulta_id_abuelo_paterno==[]:
                 nombre_bovino_abuelo_paterno = "No registra"
                 # actualizacion del campo
-                condb.execute(modelo_arbol_genealogico.update().values(nombre_bovino_abuelo_paterno=nombre_bovino_abuelo_paterno).where(
-                    modelo_arbol_genealogico.columns.id_bovino == id))
-                condb.commit()
+                session.execute(modelo_arbol_genealogico.update().values(nombre_bovino_abuelo_paterno=nombre_bovino_abuelo_paterno).filter(modelo_arbol_genealogico.columns.nombre_bovino == nombre_bovino,modelo_arbol_genealogico.columns.usuario_id == usuario_id))
+                session.commit()
             # si existe registro de abuela materna entonces este se actualizara en la base de datos
             else:
                 for abuelo_p in consulta_id_abuelo_paterno:
-                    id_padre_de_id_padre = abuelo_p[3]
-                    nombre_bovino_abuelo_paterno=list(condb.execute(modelo_bovinos_inventario.select().
-                        where(modelo_bovinos_inventario.columns.id_bovino == id_padre_de_id_padre)).first())
+                    nombre_bovino_abuelo_paterno = abuelo_p[16]
                     # actualizacion del campo
-                    condb.execute(modelo_arbol_genealogico.update().values(abuelo_paterno=id_padre_de_id_padre,
-                                                                           nombre_bovino_abuelo_paterno=nombre_bovino_abuelo_paterno[12]).where(
-                        modelo_arbol_genealogico.columns.id_bovino == id))
-                    condb.commit()
+                    session.execute(modelo_arbol_genealogico.update().values(nombre_bovino_abuelo_paterno=nombre_bovino_abuelo_paterno).filter(modelo_arbol_genealogico.columns.nombre_bovino == nombre_bovino,modelo_arbol_genealogico.columns.usuario_id == usuario_id))
+                    session.commit()
     except Exception as e:
         logger.error(f'Error Funcion abuelo_paterno: {e}')
         raise
-    finally:
-        condb.close()
 
 
-def abuela_paterna(condb: Session):
+def abuela_paterna(session: Session,current_user):
     try:
         # Realiza la consulta general de la tabla de arbol genealogico
-        consulta_bovinos = condb.execute(modelo_arbol_genealogico.select()).fetchall()
+        consulta_bovinos = session.query(modelo_arbol_genealogico).\
+            where(modelo_arbol_genealogico.columns.usuario_id == current_user).all()
         # Recorre los campos de la consulta
         for i in consulta_bovinos:
-            # Toma el ID del bovino, este es el campo numero 0
-            id = i[1]
-            # Toma el ID del padre del bovino, este es el campo numero 3
-            id_padre = i[3]
+            # Toma el nombre del bovino, este es el campo numero 1
+            nombre_bovino = i[14]
+            # Toma el nombre del padre del bovino, este es el campo numero 16
+            nombre_bovino_padre = i[16]
+            # Toma el ID del usuario, este es el campo numero 13
+            usuario_id = i[13]
             # consulta de relaciones familiares
-             # consulta padre del padre(abuelo paterno)
-            consulta_id_abuela_paterna = condb.execute(modelo_arbol_genealogico.select().
-                 where(modelo_arbol_genealogico.columns.id_bovino == id_padre)).fetchall()
+            # consulta padre del padre(abuelo paterno)
+            consulta_nombre_abuela_paterna = session.query(modelo_arbol_genealogico).filter(modelo_arbol_genealogico.columns.usuario_id==usuario_id,
+                       modelo_arbol_genealogico.columns.nombre_bovino == nombre_bovino_padre).all()
             # si no existe registro de abuela paterna entonces sera una consulta vacia (se asignara un no registro por defecto)
-            if consulta_id_abuela_paterna==[]:
+            if consulta_nombre_abuela_paterna==[]:
                 nombre_bovino_abuela_paterna = "No registra"
                 # actualizacion del campo
-                condb.execute(modelo_arbol_genealogico.update().values(nombre_bovino_abuela_paterna=nombre_bovino_abuela_paterna).where(
-                    modelo_arbol_genealogico.columns.id_bovino == id))
-                condb.commit()
+                session.execute(modelo_arbol_genealogico.update().values(nombre_bovino_abuela_paterna=nombre_bovino_abuela_paterna).filter(modelo_arbol_genealogico.columns.nombre_bovino == nombre_bovino,modelo_arbol_genealogico.columns.usuario_id == usuario_id))
+                session.commit()
             # si existe registro de abuela materna entonces este se actualizara en la base de datos
             else:
-                 for abuela_p in consulta_id_abuela_paterna:
-                       id_abuela_paterna = abuela_p[2]
-                       nombre_bovino_abuela_paterna=list(condb.execute(modelo_bovinos_inventario.select().
-                        where(modelo_bovinos_inventario.columns.id_bovino == id_abuela_paterna)).first())
+                 for abuela_p in consulta_nombre_abuela_paterna:
+                       nombre_bovino_abuela_paterna = abuela_p[15]
                        # actualizacion del campo
-                       condb.execute(modelo_arbol_genealogico.update().values(abuela_paterna=id_abuela_paterna,nombre_bovino_abuela_paterna=nombre_bovino_abuela_paterna[12]).where(
-                           modelo_arbol_genealogico.columns.id_bovino == id))
-                       condb.commit()
+                       session.execute(modelo_arbol_genealogico.update().values(nombre_bovino_abuela_paterna=nombre_bovino_abuela_paterna).filter(modelo_arbol_genealogico.columns.nombre_bovino == nombre_bovino,modelo_arbol_genealogico.columns.usuario_id == usuario_id))
+                       session.commit()
 
     except Exception as e:
         logger.error(f'Error Funcion abuela_paterna: {e}')
         raise
-    finally:
-        condb.close()
 
-def bisabuelo_materno(condb: Session):
+
+
+def bisabuelo_materno(session: Session,current_user):
     try:
         # Realiza la consulta general de la tabla de arbol genealogico
-        consulta_bovinos = condb.execute(modelo_arbol_genealogico.select()).fetchall()
-        # Recorre los campos de la consulta
+        consulta_bovinos = session.query(modelo_arbol_genealogico).\
+            where(modelo_arbol_genealogico.columns.usuario_id == current_user).all()
         for i in consulta_bovinos:
-            # Toma el ID del bovino, este es el campo numero 0
-            id = i[1]
-            # Toma el ID del abuelo paterno del bovino, este es el campo numero 6
-            id_abuelo_paterno = i[6]
+            # Toma el nombre del bovino, este es el campo numero 14
+            nombre_bovino = i[14]
+            # Toma el nombre del abuelo del bovino, este es el campo numero 19
+            nombre_bovino_abuelo_materno = i[19]
+            # Toma el ID del usuario, este es el campo numero 13
+            usuario_id = i[13]
             # consulta de relaciones familiares
             # consulta padre del padre de la madre (bisabuelo materno)
-            consulta_id_bisabuelo_materno = condb.execute(modelo_arbol_genealogico.select().
-                where(modelo_arbol_genealogico.columns.id_bovino == id_abuelo_paterno)).fetchall()
+            consulta_nombre_bisabuelo_materno = session.query(modelo_arbol_genealogico).filter(modelo_arbol_genealogico.columns.usuario_id==usuario_id,
+                       modelo_arbol_genealogico.columns.nombre_bovino == nombre_bovino_abuelo_materno).all()
             # si no existe registro de bisabuelo materno entonces sera una consulta vacia (se asignara un no registro por defecto)
-            if consulta_id_bisabuelo_materno==[]:
+            if consulta_nombre_bisabuelo_materno==[]:
                 nombre_bovino_bisabuelo_materno = "No Registra"
                 # actualizacion del campo
-                condb.execute(modelo_arbol_genealogico.update().values(
-                    nombre_bovino_bisabuelo_materno=nombre_bovino_bisabuelo_materno).where(
-                    modelo_arbol_genealogico.columns.id_bovino == id))
-                condb.commit()
+                session.execute(modelo_arbol_genealogico.update().values(
+                    nombre_bovino_bisabuelo_materno=nombre_bovino_bisabuelo_materno).filter(modelo_arbol_genealogico.columns.nombre_bovino == nombre_bovino,modelo_arbol_genealogico.columns.usuario_id == usuario_id))
+                session.commit()
             # si existe registro de bisabuelo materno entonces este se actualizara en la base de datos
             else:
-              for abuelo in consulta_id_bisabuelo_materno:
-                id_bisabuelo_materno = abuelo[3]
-                nombre_bovino_bisabuelo_materno=list(condb.execute(modelo_bovinos_inventario.select().
-                        where(modelo_bovinos_inventario.columns.id_bovino == id_bisabuelo_materno)).first())
+              for abuelo in consulta_nombre_bisabuelo_materno:
+                nombre_bovino_bisabuelo_materno = abuelo[16]
                 # actualizacion del campo
-                condb.execute(modelo_arbol_genealogico.update().values(
-                        bisabuelo_materno=id_bisabuelo_materno,
-                        nombre_bovino_bisabuelo_materno=nombre_bovino_bisabuelo_materno[12]).where(
-                        modelo_arbol_genealogico.columns.id_bovino == id))
-                condb.commit()
+                session.execute(modelo_arbol_genealogico.update().values(nombre_bovino_bisabuelo_materno=nombre_bovino_bisabuelo_materno).filter(modelo_arbol_genealogico.columns.nombre_bovino == nombre_bovino,modelo_arbol_genealogico.columns.usuario_id == usuario_id))
+                session.commit()
 
     except Exception as e:
         logger.error(f'Error Funcion endogamia: {e}')
         raise
-    finally:
-        condb.close()
 
-def biabuelo_paterno(condb: Session):
+
+
+def bisabuelo_paterno(session: Session,current_user):
     try:
         # Realiza la consulta general de la tabla de arbol genealogico
-        consulta_bovinos = condb.execute(modelo_arbol_genealogico.select()).fetchall()
-        # Recorre los campos de la consulta
+        consulta_bovinos = session.query(modelo_arbol_genealogico).\
+            where(modelo_arbol_genealogico.columns.usuario_id == current_user).all()
         for i in consulta_bovinos:
-            # Toma el ID del bovino, este es el campo numero 0
-            id = i[1]
-            # Toma el ID del abuelo paterno del bovino, este es el campo numero 3
-            id_abuelo_paterno = i[4]
+            # Toma el nombre del bovino, este es el campo numero 14
+            nombre_bovino = i[14]
+            # Toma el nombre del abuelo paterno del bovino, este es el campo numero 17
+            nombre_bovino_abuelo_paterno = i[17]
+            # Toma el ID del usuario, este es el campo numero 13
+            usuario_id = i[13]
             # consulta de relaciones familiares
             # consulta padre del padre del padre (bisabuelo paterno)
-            consulta_id_bisabuelo_paterno = condb.execute(modelo_arbol_genealogico.select().
-                where(modelo_arbol_genealogico.columns.id_bovino == id_abuelo_paterno)).fetchall()
+            consulta_nombre_bisabuelo_paterno = session.query(modelo_arbol_genealogico).filter(modelo_arbol_genealogico.columns.usuario_id==usuario_id,
+                       modelo_arbol_genealogico.columns.nombre_bovino == nombre_bovino_abuelo_paterno).all()
             # si no existe registro de bisabuelo paterno entonces sera una consulta vacia (se asignara un no registro por defecto)
-            if consulta_id_bisabuelo_paterno==[] :
+            if consulta_nombre_bisabuelo_paterno==[] :
                 nombre_bovino_bisabuelo_paterno = "No registra"
                 # actualizacion del campo
-                condb.execute(modelo_arbol_genealogico.update().values(nombre_bovino_bisabuelo_paterno=nombre_bovino_bisabuelo_paterno).where(
-                        modelo_arbol_genealogico.columns.id_bovino == id))
-                condb.commit()
+                session.execute(modelo_arbol_genealogico.update().values(nombre_bovino_bisabuelo_paterno=nombre_bovino_bisabuelo_paterno).filter(modelo_arbol_genealogico.columns.nombre_bovino == nombre_bovino,modelo_arbol_genealogico.columns.usuario_id == usuario_id))
+                session.commit()
             # si existe registro de bisabuelo paterno entonces este se actualizara en la base de datos
             else:
-                for i in consulta_id_bisabuelo_paterno:
-                    id_bisabuelo_paterno = i[3]
-                    nombre_bovino_bisabuelo_paterno=list(condb.execute(modelo_bovinos_inventario.select().
-                        where(modelo_bovinos_inventario.columns.id_bovino == id_bisabuelo_paterno)).first())
+                for i in consulta_nombre_bisabuelo_paterno:
+                    nombre_bovino_bisabuelo_paterno = i[16]
                     # actualizacion del campo
-                    condb.execute(modelo_arbol_genealogico.update().values(
-                        bisabuelo_paterno=id_bisabuelo_paterno,
-                        nombre_bovino_bisabuelo_paterno=nombre_bovino_bisabuelo_paterno[12]).where(
-                        modelo_arbol_genealogico.columns.id_bovino == id))
-                    condb.commit()
+                    session.execute(modelo_arbol_genealogico.update().values(nombre_bovino_bisabuelo_paterno=nombre_bovino_bisabuelo_paterno).filter(modelo_arbol_genealogico.columns.nombre_bovino == nombre_bovino,modelo_arbol_genealogico.columns.usuario_id == usuario_id))
+                    session.commit()
     except Exception as e:
-        logger.error(f'Error Funcion endogamia: {e}')
+        logger.error(f'Error Funcion biabuelo_paterno: {e}')
         raise
-    finally:
-        condb.close()
 
 
 """A continuacion se muestra la funcion de indice de endogamia"""
-def endogamia(condb: Session):
- #para poder realizar esta funcion correctamente, los lazos familiares y sus campos deben estar listos y llenados
- #por lo tanto se debe llamar a las funciones que establecen dichos lazos familiares
- abuelo_materno(condb=condb)
- abuela_materna(condb=condb)
- abuelo_paterno(condb=condb)
- abuela_paterna(condb=condb)
- bisabuelo_materno(condb=condb)
- biabuelo_paterno(condb=condb)
+def endogamia(session: Session,current_user):
  try:
      # Realiza la consulta general de la tabla de arbol genealogico
-     consulta_bovinos = condb.execute(modelo_arbol_genealogico.select()).fetchall()
+     consulta_id_bovinos = session.query(modelo_arbol_genealogico).\
+            where(modelo_arbol_genealogico.columns.usuario_id == current_user).all()
      # Recorre los campos de la consulta
-     for i in consulta_bovinos:
-         # Toma el ID del bovino, este es el campo numero 1
+     for i in consulta_id_bovinos:
+         # Toma el nombre del bovino, este es el campo numero 1
          id = i[1]
-         # Toma el ID del padre del bovino, este es el campo numero 3
-         id_padre = i[3]
          # Toma el ID de la madre del bovino, este es el campo numero 2
          id_madre = i[2]
-         # Toma el ID del abuelo paterno del bovino, este es el campo numero 4
-         id_abuelo_paterno = i[4]
-         # Toma el ID de la abuela paterna del bovino, este es el campo numero 5
-         id_abuela_paterna = i[5]
-         # Toma el ID del abuelo materno del bovino, este es el campo numero 6
-         id_abuelo_materno = i[6]
-         # Toma el ID de la abuela materna del bovino, este es el campo numero 7
-         id_abuela_materna = i[7]
-         # Toma el ID del bisabuelo materno del bovino, este es el campo numero 8
-         id_bisabuelo_materno = i[8]
-         # Toma el ID del bisabuelo paterno del bovino, este es el campo numero 9
-         id_bisabuelo_paterno = i[9]
-         #traemos el campo de nombre, padre y madre y lo actualizamos
-         nombre_bovino = list(condb.execute(modelo_bovinos_inventario.select().
-                           where(modelo_bovinos_inventario.columns.id_bovino == id)).first())
-         nombre_bovino_padre = list(condb.execute(modelo_bovinos_inventario.select().
-                           where(modelo_bovinos_inventario.columns.id_bovino == id_padre)).first())
-         nombre_bovino_madre= list(condb.execute(modelo_bovinos_inventario.select().
-                           where(modelo_bovinos_inventario.columns.id_bovino == id_madre)).first())
+         # Toma el ID del padre bovino, este es el campo numero 3
+         id_padre = i[3]
+         # traemos el campo de nombre, padre y madre y lo actualizamos
+         nombre_bovino = list(session.query(modelo_bovinos_inventario).where(modelo_bovinos_inventario.columns.id_bovino == id).first())
+         nombre_bovino_padre = session.query(modelo_bovinos_inventario).where(modelo_bovinos_inventario.columns.id_bovino == id_padre).first()
+         if nombre_bovino_padre is None or nombre_bovino_padre==[]:
+             nombre_pajilla= f'Pajilla {id_padre}'
+             session.execute(modelo_arbol_genealogico.update().values(nombre_bovino_padre=nombre_pajilla).filter(
+                 modelo_arbol_genealogico.columns.id_bovino == id))
+             session.commit()
+         else:
+             session.execute(modelo_arbol_genealogico.update().values(nombre_bovino_padre=nombre_bovino_padre[12]).where(
+                 modelo_arbol_genealogico.columns.id_bovino == id))
+             session.commit()
+
+         nombre_bovino_madre = list(session.query(modelo_bovinos_inventario).where(modelo_bovinos_inventario.columns.id_bovino == id_madre).first())
          # actualizacion del campo
-         condb.execute(modelo_arbol_genealogico.update().values(
+         session.execute(modelo_arbol_genealogico.update().values(
              nombre_bovino=nombre_bovino[12],
-             nombre_bovino_padre=nombre_bovino_padre[12],
              nombre_bovino_madre=nombre_bovino_madre[12]).where(
              modelo_arbol_genealogico.columns.id_bovino == id))
-         condb.commit()
+         session.commit()
+
+     # para poder realizar esta funcion correctamente, los lazos familiares y sus campos deben estar listos y llenados
+     # por lo tanto se debe llamar a las funcies que establecen dichos lazos familiares
+
+     # Realiza la consulta general de la tabla de arbol genealogico
+     consulta_bovinos = session.query(modelo_arbol_genealogico).\
+            where(modelo_arbol_genealogico.columns.usuario_id == current_user).all()
+     # Recorre los campos de la consulta
+     for i in consulta_bovinos:
+         # Toma el ID del usuario, este es el campo numero 13
+         usuario_id = i[13]
+         # Toma el nombre del bovino, este es el campo numero 14
+         nombre = i[14]
+         # Toma el nombre del padre del bovino, este es el campo numero 16
+         nombre_padre = i[16]
+         # Toma el nombre de la madre del bovino, este es el campo numero 15
+         nombre_madre = i[15]
+         # Toma el nombre del abuelo paterno del bovino, este es el campo numero 17
+         nombre_abuelo_paterno = i[17]
+         # Toma el nombre de la abuela paterna del bovino, este es el campo numero 18
+         nombre_abuela_paterna = i[18]
+         # Toma el nombre del abuelo materno del bovino, este es el campo numero 19
+         nombre_abuelo_materno = i[19]
+         # Toma el nombre de la abuela materna del bovino, este es el campo numero 20
+         nombre_abuela_materna = i[20]
+         # Toma el nombre del bisabuelo materno del bovino, este es el campo numero 21
+         nombre_bisabuelo_materno = i[21]
+         # Toma el nombre del bisabuelo paterno del bovino, este es el campo numero 22
+         nombre_bisabuelo_paterno = i[22]
          # bucle if que determina la consanguinidad
          #se debe tener en cuenta los animales con un "no registra" en algun lazo familiar
          #si el padre del bovino es el mismo abuelo materno del bovino entoces sera padre x hija:
-         if id_padre == id_abuelo_materno:
-            if id_abuelo_materno is None:
+         if nombre_padre == nombre_abuelo_materno:
+            if nombre_abuelo_materno=="No registra":
              apareamiento = "individuos no relacionados"
              porcentaje_endogamia = 0
              notificacion = "ningun grado de consanguinidad"
              # actualizacion del campo
-             condb.execute(modelo_arbol_genealogico.update().values(tipo_de_apareamiento=apareamiento,
+             session.execute(modelo_arbol_genealogico.update().values(tipo_de_apareamiento=apareamiento,
                                                                     consanguinidad=porcentaje_endogamia,
-                                                                    notificacion=notificacion).where(
-                 modelo_arbol_genealogico.columns.id_bovino == id))
-             condb.commit()
+                                                                    notificacion=notificacion).filter(modelo_arbol_genealogico.columns.nombre_bovino == nombre,modelo_arbol_genealogico.columns.usuario_id == usuario_id))
+             session.commit()
             else:
              apareamiento = "padre x hija"
              porcentaje_endogamia = 25
              notificacion = "Este individuo tiene un grado demasiado alto de consanguinidad, por favor intenta descartarlo"
              # actualizacion del campo
-             condb.execute(modelo_arbol_genealogico.update().values(tipo_de_apareamiento=apareamiento,
+             session.execute(modelo_arbol_genealogico.update().values(tipo_de_apareamiento=apareamiento,
                                                                     consanguinidad=porcentaje_endogamia,
-                                                                    notificacion=notificacion).where(
-                 modelo_arbol_genealogico.columns.id_bovino == id))
-             condb.commit()
+                                                                    notificacion=notificacion).filter(modelo_arbol_genealogico.columns.nombre_bovino == nombre,modelo_arbol_genealogico.columns.usuario_id == usuario_id))
+             session.commit()
          #si la madre del bovino es la abula paterna del bovino entonces sera hijo x madre
-         elif id_madre == id_abuela_paterna:
-             if id_abuela_paterna is None:
+         elif nombre_madre == nombre_abuela_paterna:
+             if nombre_abuela_paterna=="No registra":
                  apareamiento = "individuos no relacionados"
                  porcentaje_endogamia = 0
                  notificacion = "ningun grado de consanguinidad"
                  # actualizacion del campo
-                 condb.execute(modelo_arbol_genealogico.update().values(tipo_de_apareamiento=apareamiento,
+                 session.execute(modelo_arbol_genealogico.update().values(tipo_de_apareamiento=apareamiento,
                                                                         consanguinidad=porcentaje_endogamia,
-                                                                        notificacion=notificacion).where(
-                     modelo_arbol_genealogico.columns.id_bovino == id))
-                 condb.commit()
+                                                                        notificacion=notificacion).filter(modelo_arbol_genealogico.columns.nombre_bovino == nombre,modelo_arbol_genealogico.columns.usuario_id == usuario_id))
+                 session.commit()
              else:
               apareamiento = "hijo x madre"
               porcentaje_endogamia = 25
               notificacion = "Este individuo tiene un grado demasiado alto de consanguinidad, por favor intenta descartarlo"
               # actualizacion del campo
-              condb.execute(modelo_arbol_genealogico.update().values(tipo_de_apareamiento=apareamiento,
+              session.execute(modelo_arbol_genealogico.update().values(tipo_de_apareamiento=apareamiento,
                                                                     consanguinidad=porcentaje_endogamia,
-                                                                    notificacion=notificacion).where(
-                 modelo_arbol_genealogico.columns.id_bovino == id))
-              condb.commit()
+                                                                    notificacion=notificacion).filter(modelo_arbol_genealogico.columns.nombre_bovino == nombre,modelo_arbol_genealogico.columns.usuario_id == usuario_id))
+              session.commit()
          #si un bovino tiene los mosmos abuelos paternos y maternos entonces sera un cruce de hermanos completos
-         elif id_abuelo_paterno == id_abuelo_materno and id_abuela_paterna == id_abuela_materna:
-             if id_abuelo_materno is None or id_abuela_paterna is None:
+         elif nombre_abuelo_paterno == nombre_abuelo_materno and nombre_abuela_paterna == nombre_abuela_materna:
+             if nombre_abuelo_materno=="No registra" or nombre_abuela_paterna=="No registra":
                  apareamiento = "individuos no relacionados"
                  porcentaje_endogamia = 0
                  notificacion = "ningun grado de consanguinidad"
                  # actualizacion del campo
-                 condb.execute(modelo_arbol_genealogico.update().values(tipo_de_apareamiento=apareamiento,
+                 session.execute(modelo_arbol_genealogico.update().values(tipo_de_apareamiento=apareamiento,
                                                                         consanguinidad=porcentaje_endogamia,
-                                                                        notificacion=notificacion).where(
-                     modelo_arbol_genealogico.columns.id_bovino == id))
-                 condb.commit()
+                                                                        notificacion=notificacion).filter(modelo_arbol_genealogico.columns.nombre_bovino == nombre,modelo_arbol_genealogico.columns.usuario_id == usuario_id))
+                 session.commit()
              else:
                apareamiento = "hermanos completos"
                porcentaje_endogamia = 25
                notificacion = "Este individuo tiene un grado demasiado alto de consanguinidad, por favor intenta descartarlo"
                # actualizacion del campo
-               condb.execute(modelo_arbol_genealogico.update().values(tipo_de_apareamiento=apareamiento,
+               session.execute(modelo_arbol_genealogico.update().values(tipo_de_apareamiento=apareamiento,
                                                                     consanguinidad=porcentaje_endogamia,
-                                                                    notificacion=notificacion).where(
-                 modelo_arbol_genealogico.columns.id_bovino == id))
-               condb.commit()
+                                                                    notificacion=notificacion).filter(modelo_arbol_genealogico.columns.nombre_bovino == nombre,modelo_arbol_genealogico.columns.usuario_id == usuario_id))
+               session.commit()
          #si un bovino tiene el mismo abuelo paterno y materno o la misma abuela paterna y materna entonces es un cruce de medios hermanos
-         elif id_abuelo_paterno == id_abuelo_materno or id_abuela_paterna == id_abuela_materna:
-             if id_abuelo_paterno is None or id_abuela_paterna is None:
+         elif nombre_abuelo_paterno == nombre_abuelo_materno or nombre_abuela_paterna == nombre_abuela_materna:
+             if nombre_abuelo_paterno=="No registra" or nombre_abuela_paterna=="No registra":
                  apareamiento = "individuos no relacionados"
                  porcentaje_endogamia = 0
                  notificacion = "ningun grado de consanguinidad"
                  # actualizacion del campo
-                 condb.execute(modelo_arbol_genealogico.update().values(tipo_de_apareamiento=apareamiento,
+                 session.execute(modelo_arbol_genealogico.update().values(tipo_de_apareamiento=apareamiento,
                                                                         consanguinidad=porcentaje_endogamia,
-                                                                        notificacion=notificacion).where(
-                     modelo_arbol_genealogico.columns.id_bovino == id))
-                 condb.commit()
+                                                                        notificacion=notificacion).filter(modelo_arbol_genealogico.columns.nombre_bovino == nombre,modelo_arbol_genealogico.columns.usuario_id == usuario_id))
+                 session.commit()
              else:
                  apareamiento = "medio hermano x media hermana"
                  porcentaje_endogamia = 12.5
                  notificacion = "Este individuo tiene un grado demasiado alto de consanguinidad, por favor intenta descartarlo"
                  # actualizacion del campo
-                 condb.execute(modelo_arbol_genealogico.update().values(tipo_de_apareamiento=apareamiento,
+                 session.execute(modelo_arbol_genealogico.update().values(tipo_de_apareamiento=apareamiento,
                                                                         consanguinidad=porcentaje_endogamia,
-                                                                        notificacion=notificacion).where(
-                     modelo_arbol_genealogico.columns.id_bovino == id))
-                 condb.commit()
+                                                                        notificacion=notificacion).filter(modelo_arbol_genealogico.columns.nombre_bovino == nombre,modelo_arbol_genealogico.columns.usuario_id == usuario_id))
+                 session.commit()
 
          #si el padre del bovino es su mismo bisabuelo materno entonces sera un cruce de padre x nieta
-         elif id_padre == id_bisabuelo_materno:
-             if id_bisabuelo_materno is None:
+         elif nombre_padre == nombre_bisabuelo_materno:
+             if nombre_bisabuelo_materno == "No registra":
                  apareamiento = "individuos no relacionados"
                  porcentaje_endogamia = 0
                  notificacion = "ningun grado de consanguinidad"
                  # actualizacion del campo
-                 condb.execute(modelo_arbol_genealogico.update().values(tipo_de_apareamiento=apareamiento,
+                 session.execute(modelo_arbol_genealogico.update().values(tipo_de_apareamiento=apareamiento,
                                                                         consanguinidad=porcentaje_endogamia,
-                                                                        notificacion=notificacion).where(
-                     modelo_arbol_genealogico.columns.id_bovino == id))
-                 condb.commit()
+                                                                        notificacion=notificacion).filter(modelo_arbol_genealogico.columns.nombre_bovino == nombre,modelo_arbol_genealogico.columns.usuario_id == usuario_id))
+                 session.commit()
              else:
                  apareamiento = "padre x nieta"
                  porcentaje_endogamia = 12.5
                  notificacion = "Este individuo tiene un grado demasiado alto de consanguinidad, por favor intenta descartarlo"
                  # actualizacion del campo
-                 condb.execute(modelo_arbol_genealogico.update().values(tipo_de_apareamiento=apareamiento,
+                 session.execute(modelo_arbol_genealogico.update().values(tipo_de_apareamiento=apareamiento,
                                                                         consanguinidad=porcentaje_endogamia,
-                                                                        notificacion=notificacion).where(
-                     modelo_arbol_genealogico.columns.id_bovino == id))
-                 condb.commit()
+                                                                        notificacion=notificacion).filter(modelo_arbol_genealogico.columns.nombre_bovino == nombre,modelo_arbol_genealogico.columns.usuario_id == usuario_id))
+                 session.commit()
 
          #si el abuelo paterno del bovino es su mismo bisabuelo materno entonces sera un cruce de hijo de un padre x nieta de un padre
-         elif id_abuelo_paterno == id_bisabuelo_materno:
-             if id_abuelo_paterno is None:
+         elif nombre_abuelo_paterno == nombre_bisabuelo_materno:
+             if nombre_abuelo_paterno == "No registra":
                  apareamiento = "individuos no relacionados"
                  porcentaje_endogamia = 0
                  notificacion = "ningun grado de consanguinidad"
                  # actualizacion del campo
-                 condb.execute(modelo_arbol_genealogico.update().values(tipo_de_apareamiento=apareamiento,
+                 session.execute(modelo_arbol_genealogico.update().values(tipo_de_apareamiento=apareamiento,
                                                                         consanguinidad=porcentaje_endogamia,
-                                                                        notificacion=notificacion).where(
-                     modelo_arbol_genealogico.columns.id_bovino == id))
-                 condb.commit()
+                                                                        notificacion=notificacion).filter(modelo_arbol_genealogico.columns.nombre_bovino == nombre,modelo_arbol_genealogico.columns.usuario_id == usuario_id))
+                 session.commit()
              else:
                  apareamiento = "hijo de un padre x nieta de un padre"
                  porcentaje_endogamia = 6.25
                  notificacion = "grado aceptable de consanguinidad"
                  # actualizacion del campo
-                 condb.execute(modelo_arbol_genealogico.update().values(tipo_de_apareamiento=apareamiento,
+                 session.execute(modelo_arbol_genealogico.update().values(tipo_de_apareamiento=apareamiento,
                                                                         consanguinidad=porcentaje_endogamia,
-                                                                        notificacion=notificacion).where(
-                     modelo_arbol_genealogico.columns.id_bovino == id))
-                 condb.commit()
+                                                                        notificacion=notificacion).filter(modelo_arbol_genealogico.columns.nombre_bovino == nombre,modelo_arbol_genealogico.columns.usuario_id == usuario_id))
+                 session.commit()
 
          #si el bisabuelo paterno del bovino es su mismo bisabuelo materno entonces sera un cruce de nieto de un padre x nieta del padree
-         elif id_bisabuelo_paterno == id_bisabuelo_materno:
-             if id_bisabuelo_paterno is None and id_bisabuelo_materno is None:
+         elif nombre_bisabuelo_paterno == nombre_bisabuelo_materno:
+             if nombre_bisabuelo_paterno == "No registra" and nombre_bisabuelo_materno=="No registra":
                  apareamiento = "individuos no relacionados"
                  porcentaje_endogamia = 0
                  notificacion = "ningun grado de consanguinidad"
                  # actualizacion del campo
-                 condb.execute(modelo_arbol_genealogico.update().values(tipo_de_apareamiento=apareamiento,
+                 session.execute(modelo_arbol_genealogico.update().values(tipo_de_apareamiento=apareamiento,
                                                                         consanguinidad=porcentaje_endogamia,
-                                                                        notificacion=notificacion).where(
-                     modelo_arbol_genealogico.columns.id_bovino == id))
-                 condb.commit()
+                                                                        notificacion=notificacion).filter(modelo_arbol_genealogico.columns.nombre_bovino == nombre,modelo_arbol_genealogico.columns.usuario_id == usuario_id))
+                 session.commit()
              else:
                  apareamiento = "nieto de un padre x nieta del padre"
                  porcentaje_endogamia = 3.13
                  notificacion = "grado aceptable de consanguinidad"
                  # actualizacion del campo
-                 condb.execute(modelo_arbol_genealogico.update().values(tipo_de_apareamiento=apareamiento,
+                 session.execute(modelo_arbol_genealogico.update().values(tipo_de_apareamiento=apareamiento,
                                                                         consanguinidad=porcentaje_endogamia,
-                                                                        notificacion=notificacion).where(
-                     modelo_arbol_genealogico.columns.id_bovino == id))
-                 condb.commit()
+                                                                        notificacion=notificacion).filter(modelo_arbol_genealogico.columns.nombre_bovino == nombre,modelo_arbol_genealogico.columns.usuario_id == usuario_id))
+                 session.commit()
 
          else:
              apareamiento = "individuos no relacionados"
              porcentaje_endogamia = 0
              notificacion = "ningun grado de consanguinidad"
              # actualizacion del campo
-             condb.execute(modelo_arbol_genealogico.update().values(tipo_de_apareamiento=apareamiento,
+             session.execute(modelo_arbol_genealogico.update().values(tipo_de_apareamiento=apareamiento,
                                                                     consanguinidad=porcentaje_endogamia,
-                                                                    notificacion=notificacion).where(
-                 modelo_arbol_genealogico.columns.id_bovino == id))
-             condb.commit()
+                                                                    notificacion=notificacion).filter(modelo_arbol_genealogico.columns.nombre_bovino == nombre,modelo_arbol_genealogico.columns.usuario_id == usuario_id))
+             session.commit()
  except Exception as e:
      logger.error(f'Error Funcion endogamia: {e}')
      raise
  finally:
-    condb.close()
+    session.close()
