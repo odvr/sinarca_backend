@@ -10,13 +10,13 @@ from Lib.cuvas_lactancias import Reporte_Curvas_lactancia_Mensuales_General
 from config.db import get_session
 
 # # importa el esquema de los bovinos
-from models.modelo_bovinos import modelo_litros_leche, modelo_bovinos_inventario
+from models.modelo_bovinos import modelo_litros_leche, modelo_bovinos_inventario, modelo_palpaciones
 from fastapi import  status,  APIRouter, Response
 from datetime import date
 from starlette.status import HTTP_204_NO_CONTENT
 from fastapi import  Depends
 from routes.rutas_bovinos import get_current_user
-from schemas.schemas_bovinos import esquema_litros_leche, Esquema_Usuario
+from schemas.schemas_bovinos import esquema_litros_leche, Esquema_Usuario, esquema_palpaciones
 from sqlalchemy.orm import Session
 # Configuracion de la libreria para los logs de sinarca
 # Crea un objeto logger
@@ -76,6 +76,16 @@ async def inventario_prod_leche_Ls_diarios_por_animal(id_bovino: str,db: Session
     finally:
         db.close()
     return consulta
+
+
+"""
+Listado para el registro de palpaciones
+"""
+
+
+
+
+
 
 
 """

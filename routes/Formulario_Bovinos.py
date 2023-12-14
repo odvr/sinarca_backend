@@ -69,7 +69,7 @@ la clase Esquema_bovinos  recibira como base para crear el animal esto con fin d
 
 
 @Formulario_Bovino.post(
-    "/crear_bovino/{nombre_bovino}/{fecha_nacimiento}/{raza}/{sexo}/{marca}/{proposito}/{mansedumbre}/{estado}/{compra_bovino}/{fecha_pesaje}/{peso}/{datos_prenez}/{ordeno}/{fecha_muerte}/{razon_muerte}/{numero_bono_venta}/{fecha_venta}/{precio_venta}/{razon_venta}/{medio_pago}/{comprador}/{numero_bono_compra}/{fecha_compra}/{precio_compra}/{razon_compra}/{medio_pago_compra}/{comprador_compras}/{id_bovino_madre}/{id_bovino_padre}",
+    "/crear_bovino/{nombre_bovino}/{fecha_nacimiento}/{raza}/{sexo}/{marca}/{proposito}/{mansedumbre}/{estado}/{compra_bovino}/{fecha_pesaje}/{peso}/{datos_prenez}/{ordeno}/{fecha_muerte}/{razon_muerte}/{numero_bono_venta}/{fecha_venta}/{precio_venta}/{razon_venta}/{medio_pago}/{comprador}/{numero_bono_compra}/{fecha_compra}/{precio_compra}/{razon_compra}/{medio_pago_compra}/{comprador_compras}/{id_bovino_madre}/{id_bovino_padre}/{id_registro_marca}",
     status_code=status.HTTP_201_CREATED, tags=["Formualario_Bovinos"])
 async def crear_bovinos(nombre_bovino: str, fecha_nacimiento: date, raza: str, sexo: str, marca: str, proposito: str,
                         mansedumbre: str, estado: str, compra_bovino: str, fecha_pesaje: date, peso: float,
@@ -77,10 +77,9 @@ async def crear_bovinos(nombre_bovino: str, fecha_nacimiento: date, raza: str, s
                         fecha_venta: date, precio_venta: int, razon_venta: str, medio_pago: str, comprador: str,
                         numero_bono_compra: str, fecha_compra: date, precio_compra: int, razon_compra: str,
                         medio_pago_compra: str, comprador_compras: str, id_bovino_madre: str, id_bovino_padre: str,
-                        db: Session = Depends(get_database_session),
+                        id_registro_marca: str, db: Session = Depends(get_database_session),
                         current_user: Esquema_Usuario = Depends(get_current_user)):
     eliminarduplicados(db=db)
-
     vientres_aptos(session=db, current_user=current_user)
 
     try:
@@ -95,6 +94,7 @@ async def crear_bovinos(nombre_bovino: str, fecha_nacimiento: date, raza: str, s
         ).first()
 
         if Consulta_Nomnbres_Bovinos is None:
+            Ruta_marca = crud.bovinos_inventario.Buscar_Ruta_Fisica_Marca(db=db, id_registro_marca=id_registro_marca, current_user=current_user)
             ingreso = modelo_bovinos_inventario.insert().values(nombre_bovino=nombre_bovino,
                                                                 fecha_nacimiento=fecha_nacimiento,
                                                                 raza=raza,
@@ -104,11 +104,13 @@ async def crear_bovinos(nombre_bovino: str, fecha_nacimiento: date, raza: str, s
                                                                 mansedumbre=mansedumbre,
                                                                 estado=estado,
                                                                 compra_bovino=compra_bovino,
-                                                                usuario_id=current_user
+                                                                usuario_id=current_user,
+                                                                ruta_imagen_marca=Ruta_marca
                                                                 )
 
             result = db.execute(ingreso)
             db.commit()
+
             # Obtener el ID del bovino insertado
             id_bovino = result.inserted_primary_key[0]
 
@@ -305,23 +307,9 @@ async def crear_bovinos(nombre_bovino: str, fecha_nacimiento: date, raza: str, s
 
                 db.execute(ingresoEndogamia)
                 db.commit()
-                abuelo_materno(session=db, current_user=current_user)
-                abuela_materna(session=db, current_user=current_user)
-                abuelo_paterno(session=db, current_user=current_user)
-                abuela_paterna(session=db, current_user=current_user)
-                bisabuelo_materno(session=db, current_user=current_user)
-                bisabuelo_paterno(session=db, current_user=current_user)
-                endogamia(session=db, current_user=current_user)
+                #endogamia(condb=db)
 
             return Response(status_code=status.HTTP_201_CREATED)
-
-        else:
-            return Response(status_code=status.HTTP_400_BAD_REQUEST)
-
-
-
-
-
 
 
     except Exception as e:
@@ -329,10 +317,6 @@ async def crear_bovinos(nombre_bovino: str, fecha_nacimiento: date, raza: str, s
         raise
     finally:
         db.close()
-
-
-
-
 
 
 """

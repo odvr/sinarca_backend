@@ -3,7 +3,8 @@ from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union
 from sqlalchemy.orm import Session
 
 
-from models.modelo_bovinos import modelo_bovinos_inventario
+from models.modelo_bovinos import modelo_bovinos_inventario, modelo_registro_marca
+
 
 class CRUDBovinos:
     def __init__(self):
@@ -32,6 +33,12 @@ class CRUDBovinos:
         Nombre_Bovino = ConsultarNombre.nombre_bovino
         db.close()
         return Nombre_Bovino
-
+    def Buscar_Ruta_Fisica_Marca(self,db: Session,id_registro_marca, current_user):
+        BuscarRutaFisica = db.query(modelo_registro_marca).filter(
+            modelo_registro_marca.columns.id_registro_marca == id_registro_marca,
+            modelo_registro_marca.c.usuario_id == current_user).first()
+        Ruta_Marca = BuscarRutaFisica.ruta_marca
+        db.close()
+        return Ruta_Marca
 
 bovinos_inventario = CRUDBovinos()
