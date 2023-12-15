@@ -139,9 +139,9 @@ async def eliminar_bovino_fecha_partos(id_bovino: str,db: Session = Depends(get_
 Crear en la tabla de partos para calcular la fecha aproximada
 """
 @partos_bovinos.post(
-    "/crear_fecha_apoximada_parto/{id_bovino}/{fecha_estimada_prenez}",
+    "/crear_fecha_apoximada_parto/{id_bovino}/{fecha_estimada_prenez}/{id_bovino_padre}",
     status_code=status.HTTP_201_CREATED,)
-async def CrearFechaAproximadaParto(id_bovino: str,fecha_estimada_prenez:date,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user) ):
+async def CrearFechaAproximadaParto(id_bovino: str,fecha_estimada_prenez:date, id_bovino_padre:str, db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user) ):
     try:
         fecha_aproximada_parto(session=db)
 
@@ -153,7 +153,7 @@ async def CrearFechaAproximadaParto(id_bovino: str,fecha_estimada_prenez:date,db
 
         if consulta is None:
             ingresocalcularFechaParto = modelo_partos.insert().values(id_bovino=id_bovino,
-                                                                      fecha_estimada_prenez=fecha_estimada_prenez,usuario_id=current_user,nombre_bovino=nombre_bovino)
+                                                                      fecha_estimada_prenez=fecha_estimada_prenez,usuario_id=current_user,nombre_bovino=nombre_bovino,id_reproductor= id_bovino_padre)
 
             db.execute(ingresocalcularFechaParto)
             db.commit()
