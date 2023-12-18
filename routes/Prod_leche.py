@@ -383,10 +383,10 @@ La siguiente api crea en la tabla de leche con la llave foranea de id_bovino est
 
 
 @Produccion_Leche.post(
-    "/crear_prod_leche/{id_bovino}/{datos_prenez}/{ordeno}/{proposito}",
+    "/crear_prod_leche/{id_bovino}/{ordeno}/{proposito}",
     status_code=status.HTTP_201_CREATED)
 async def CrearProdLeche( id_bovino: str,
-                   datos_prenez: str, ordeno: str,proposito:str,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+                   ordeno: str,proposito:str,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
     eliminarduplicados(db=db)
 
     try:
@@ -398,7 +398,7 @@ async def CrearProdLeche( id_bovino: str,
 
         if consulta is None:
             ingresopleche = modelo_leche.insert().values(id_bovino=id_bovino,
-                                                          datos_prenez=datos_prenez,
+
                                                          ordeno=ordeno, proposito=proposito,usuario_id=current_user,nombre_bovino=nombre_bovino)
 
             db.execute(ingresopleche)
@@ -407,7 +407,7 @@ async def CrearProdLeche( id_bovino: str,
 
             db.execute(modelo_leche.update().where(modelo_leche.c.id_bovino == id_bovino).values(
                 id_bovino=id_bovino,
-                 datos_prenez=datos_prenez,
+
                 ordeno=ordeno, proposito=proposito))
             db.commit()
 
