@@ -371,6 +371,10 @@ class esquema_partos(BaseModel):
     peso: Optional[int] = None
     fecha_estimada_prenez: Optional[date] = None
     fecha_estimada_parto: Optional[date] = None
+    notificacion: Optional[str] = None
+    tipo: Optional[str] = None
+    id_reproductor: Optional[str] = None
+    nombre_bovino_reproductor: Optional[str] = None
     usuario_id: Optional[str] = None
     nombre_bovino:Optional[str] = None
 
