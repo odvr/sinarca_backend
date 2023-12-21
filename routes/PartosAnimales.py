@@ -139,9 +139,9 @@ async def eliminar_bovino_fecha_partos(id_bovino: str,db: Session = Depends(get_
 Crear en la tabla de partos para calcular la fecha aproximada
 """
 @partos_bovinos.post(
-    "/crear_fecha_apoximada_parto/{id_bovino}/{fecha_estimada_prenez}/{id_bovino_padre}",
+    "/crear_fecha_apoximada_parto/{id_bovino}/{fecha_estimada_prenez}/{id_bovino_padre}/{tipo_monta}",
     status_code=status.HTTP_201_CREATED,)
-async def CrearFechaAproximadaParto(id_bovino: str,fecha_estimada_prenez:date, id_bovino_padre:str, db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user) ):
+async def CrearFechaAproximadaParto(id_bovino: str,fecha_estimada_prenez:date, id_bovino_padre:str,tipo_monta:str, db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user) ):
     try:
         fecha_aproximada_parto(session=db)
 
@@ -162,7 +162,7 @@ async def CrearFechaAproximadaParto(id_bovino: str,fecha_estimada_prenez:date, i
                                                                           usuario_id=current_user,
                                                                           nombre_bovino=nombre_bovino,
                                                                           id_reproductor=id_bovino_padre,
-                                                                          nombre_bovino_reproductor=nombre_pajilla)
+                                                                          nombre_bovino_reproductor=nombre_pajilla,tipo=tipo_monta)
                 db.execute(ingresocalcularFechaParto_pajilla)
                 db.commit()
             else:
@@ -174,8 +174,8 @@ async def CrearFechaAproximadaParto(id_bovino: str,fecha_estimada_prenez:date, i
                 db.commit()
 
         else:
-            db.execute(modelo_partos.update().where(modelo_partos.c.id_bovino == id_bovino).values(
-                            fecha_estimada_prenez=fecha_estimada_prenez))
+            db.execute(modelo_partos.update().where(modelo_partos.c.id_bovino == id_bovino).values(fecha_estimada_prenez=fecha_estimada_prenez))
+
             db.commit()
 
 
