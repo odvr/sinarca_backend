@@ -149,15 +149,29 @@ async def CrearFechaAproximadaParto(id_bovino: str,fecha_estimada_prenez:date, i
             modelo_partos.select().where(
                 modelo_partos.columns.id_bovino == id_bovino)).first()
         """Busca el Nombre del Bovino"""
-        nombre_bovino = crud.bovinos_inventario.Buscar_Nombre(db=db, id_bovino=id_bovino, current_user=current_user)
-        nombre_bovino_repro = crud.bovinos_inventario.Buscar_Nombre(db=db, id_bovino=id_bovino_padre, current_user=current_user)
 
+
+        nombre_bovino = crud.bovinos_inventario.Buscar_Nombre(db=db, id_bovino=id_bovino, current_user=current_user)
         if consulta is None:
-            ingresocalcularFechaParto = modelo_partos.insert().values(id_bovino=id_bovino,
+            nombre_bovino_repro = crud.bovinos_inventario.Buscar_Nombre(db=db, id_bovino=id_bovino_padre,
+                                                                        current_user=current_user)
+            if nombre_bovino_repro is None:
+                nombre_pajilla = crud.bovinos_inventario.Buscar_Nombre_Pajilla(db=db, Codigo_toro_pajilla=id_bovino_padre,current_user=current_user)
+                ingresocalcularFechaParto_pajilla = modelo_partos.insert().values(id_bovino=id_bovino,
+                                                                          fecha_estimada_prenez=fecha_estimada_prenez,
+                                                                          usuario_id=current_user,
+                                                                          nombre_bovino=nombre_bovino,
+                                                                          id_reproductor=id_bovino_padre,
+                                                                          nombre_bovino_reproductor=nombre_pajilla)
+                db.execute(ingresocalcularFechaParto_pajilla)
+                db.commit()
+            else:
+
+                ingresocalcularFechaParto = modelo_partos.insert().values(id_bovino=id_bovino,
                                                                       fecha_estimada_prenez=fecha_estimada_prenez,usuario_id=current_user,nombre_bovino=nombre_bovino,id_reproductor= id_bovino_padre,nombre_bovino_reproductor=nombre_bovino_repro)
 
-            db.execute(ingresocalcularFechaParto)
-            db.commit()
+                db.execute(ingresocalcularFechaParto)
+                db.commit()
 
         else:
             db.execute(modelo_partos.update().where(modelo_partos.c.id_bovino == id_bovino).values(
