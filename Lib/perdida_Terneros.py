@@ -17,7 +17,7 @@ from models.modelo_bovinos import modelo_bovinos_inventario, modelo_datos_muerte
     modelo_indicadores,modelo_historial_perdida_terneros
 
 
-from sqlalchemy import update, between,  asc
+from sqlalchemy import update, between, asc, desc
 from datetime import  datetime
 
 from sqlalchemy.orm import Session
@@ -160,7 +160,7 @@ def perdida_Terneros1(db: Session,current_user):
 
      #actualizacion del valor mas actual en ela tabla de indicadores
      consulta_ultimo_periodo = db.query(modelo_historial_perdida_terneros.c.perdida).\
-         group_by(asc(modelo_historial_perdida_terneros.c.perdida)).\
+         group_by(desc(modelo_historial_perdida_terneros.c.periodo)).\
          filter(modelo_historial_perdida_terneros.c.usuario_id==current_user).all()
 
      db.execute(update(modelo_indicadores).

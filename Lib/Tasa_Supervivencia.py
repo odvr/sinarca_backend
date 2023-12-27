@@ -146,7 +146,7 @@ def tasa_supervivencia(session:Session,current_user):
      # el siguiente codigo permite actualizar los periodos si se cambia la primer fecha de muerte
      if consulta_primer_muerte is None or consulta_primer_muerte==[]:
          session.execute(modelo_historial_supervivencia.delete().
-                         where(modelo_historial_supervivencia.c.periodo!=datetime.now().year).
+                         where(modelo_historial_supervivencia.c.periodo!=(datetime.now().year)).
                          filter(modelo_historial_supervivencia.columns.usuario_id==current_user))
          session.commit()
      else:
@@ -163,7 +163,7 @@ def tasa_supervivencia(session:Session,current_user):
 
      #actualizacion del valor mas actual en ela tabla de indicadores
      consulta_ultimo_periodo = session.query(modelo_historial_supervivencia.c.supervivencia).\
-         group_by(asc(modelo_historial_supervivencia.c.supervivencia)).\
+         group_by(desc(modelo_historial_supervivencia.c.periodo)).\
          filter(modelo_historial_supervivencia.columns.usuario_id==current_user).all()
 
      session.execute(update(modelo_indicadores).
