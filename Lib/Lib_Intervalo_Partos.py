@@ -319,26 +319,27 @@ def fecha_aproximada_parto(session=Session):
         #actualizacion de campos
         session.execute(modelo_partos.update().values(fecha_estimada_parto=fecha_estimada_parto,edad=edad,
                                                       peso=peso). \
-                        where(modelo_partos.columns.id_bovino == id))
+                        where(modelo_partos.columns.id_bovino == id).filter(modelo_partos.columns.fecha_estimada_prenez==fecha_estimada_prenez))
 
         session.commit()
 
         #el siguiente codigo permite generar notificaciones
-        consulta_animales_palpaciones = session.query(modelo_palpaciones).\
-            where(between(modelo_palpaciones.columns.fecha_palpacion,(fecha_estimada_prenez),(fecha_estimada_prenez + timedelta(45)))).\
-            filter(modelo_palpaciones.columns.id_bovino == id).all()
+        diferencia= (datetime.today().year - fecha_estimada_prenez.year) * 12 + (datetime.today().month - fecha_estimada_prenez.month) *30.4 + (datetime.today().day-fecha_estimada_prenez.day)
+        if diferencia <45:
+            notificacion = None
+            session.execute(modelo_partos.update().values(notificacion=notificacion). \
+                            where(modelo_partos.columns.id_bovino == id).filter(modelo_partos.columns.fecha_estimada_prenez==fecha_estimada_prenez))
 
-
-        if consulta_animales_palpaciones is None or consulta_animales_palpaciones==[]:
-
-            consulta_animales_palpaciones2 = session.query(modelo_palpaciones). \
-                where(modelo_palpaciones.columns.fecha_palpacion >= (fecha_estimada_prenez + timedelta(45))). \
+            session.commit()
+        else:
+            consulta_animales_palpaciones = session.query(modelo_palpaciones). \
+                where(modelo_palpaciones.columns.fecha_palpacion >= (fecha_estimada_prenez)). \
                 filter(modelo_palpaciones.columns.id_bovino == id).all()
 
-            if consulta_animales_palpaciones2 is None or consulta_animales_palpaciones2==[]:
+            if consulta_animales_palpaciones is None or consulta_animales_palpaciones==[]:
                 notificacion = f'Han pasado por lo menos 45 dias y no has registrado palpaciones nuevas desde la monta/inseminacion de este animal, seria recomendable que realices una palpacion'
                 session.execute(modelo_partos.update().values(notificacion=notificacion). \
-                                where(modelo_partos.columns.id_bovino == id))
+                                where(modelo_partos.columns.id_bovino == id).filter(modelo_partos.columns.fecha_estimada_prenez==fecha_estimada_prenez))
 
                 session.commit()
 
@@ -346,16 +347,10 @@ def fecha_aproximada_parto(session=Session):
             else:
                 notificacion = None
                 session.execute(modelo_partos.update().values(notificacion=notificacion). \
-                                where(modelo_partos.columns.id_bovino == id))
+                                where(modelo_partos.columns.id_bovino == id).filter(modelo_partos.columns.fecha_estimada_prenez==fecha_estimada_prenez))
 
                 session.commit()
 
-        else:
-            notificacion = None
-            session.execute(modelo_partos.update().values(notificacion=notificacion). \
-                            where(modelo_partos.columns.id_bovino == id))
-
-            session.commit()
 
   except Exception as e:
       logger.error(f'Error Funcion fecha_aproximada_parto: {e}')
