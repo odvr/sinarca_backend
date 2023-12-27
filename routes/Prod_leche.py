@@ -18,12 +18,13 @@ from Lib.palpaciones import palpaciones
 from config.db import  get_session
 # # importa el esquema de los bovinos
 from models.modelo_bovinos import modelo_leche, modelo_bovinos_inventario, \
-    modelo_indicadores, modelo_orden_litros
+    modelo_indicadores, modelo_orden_litros, modelo_dias_abiertos
 from fastapi import  status,  APIRouter, Response
 from datetime import date,  timedelta
 from routes.rutas_bovinos import get_current_user
 from sqlalchemy import update
-from schemas.schemas_bovinos import esquema_produccion_leche, esquema_orden_litros, Esquema_Usuario
+from schemas.schemas_bovinos import esquema_produccion_leche, esquema_orden_litros, Esquema_Usuario, \
+    esquema_dias_abiertos
 from fastapi import  Depends,HTTPException
 from sqlalchemy.orm import Session
 # Configuracion de la libreria para los logs de sinarca
@@ -429,6 +430,30 @@ async def CrearProdLeche( id_bovino: str,
 
 
 
+
+
+
+@Produccion_Leche.get("/listar_Historial_Dias_Abiertos/{id_bovino}",response_model=list[esquema_dias_abiertos])
+async def Listar_Historial_Dias_Abiertos(id_bovino: str,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+
+    try:
+        consulta = db.execute(
+            modelo_dias_abiertos.select().where(modelo_dias_abiertos.columns.id_bovino == id_bovino)).all()
+        palpaciones(session=db, current_user=current_user)
+
+
+    except Exception as e:
+        logger.error(f'Error al obtener inventario de Dias Abiertos: {e}')
+        raise
+    finally:
+        db.close()
+    return consulta
+
+
+
+
+
+
 """ Librerias """
 
 
@@ -570,5 +595,4 @@ def EliminarDuplicadosLeche(condb:Session):
             condb.commit()
 
 
-"""esta funcion calcula el porcentaje de vacas que se encuentran preñadas"""
 
