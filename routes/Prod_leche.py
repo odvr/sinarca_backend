@@ -443,7 +443,7 @@ async def Listar_Historial_Dias_Abiertos(id_bovino: str,db: Session = Depends(ge
 
 
     except Exception as e:
-        logger.error(f'Error al obtener inventario de Dias Abiertos: {e}')
+        logger.error(f'Error al obtener sinventario de Dias Abiertos: {e}')
         raise
     finally:
         db.close()
