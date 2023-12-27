@@ -144,6 +144,7 @@ Crear en la tabla de partos para calcular la fecha aproximada
 async def CrearFechaAproximadaParto(id_bovino: str,fecha_estimada_prenez:date, id_bovino_padre:str,tipo_monta:str, db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user) ):
     try:
         fecha_aproximada_parto(session=db)
+        intervalo_partos(session=db, current_user=current_user)
 
         consulta = db.execute(
             modelo_partos.select().where(
@@ -200,6 +201,7 @@ async def listar_fecha_parto(db: Session = Depends(get_database_session),current
 
     try:
         fecha_aproximada_parto(session=db)
+        intervalo_partos(session=db, current_user=current_user)
 
         #listar_fecha_estimada_parto = db.execute(modelo_partos.select()).all()
         listar_fecha_estimada_parto = db.query(modelo_partos).filter(modelo_partos.c.usuario_id == current_user).all()

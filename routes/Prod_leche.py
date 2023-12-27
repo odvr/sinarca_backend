@@ -104,6 +104,7 @@ async def inventario_prod_leche(db: Session = Depends(get_database_session),
         bisabuelo_materno(session=db, current_user=current_user)
         bisabuelo_paterno(session=db, current_user=current_user)
         endogamia(session=db, current_user=current_user)
+        intervalo_partos(session=db, current_user=current_user)
 
         #itemsLeche = db.query(modelo_leche).all()
         itemsLeche = db.query(modelo_leche).filter(modelo_leche.c.usuario_id == current_user).all()

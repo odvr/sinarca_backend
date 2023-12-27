@@ -87,24 +87,31 @@ async def listar_reproductor(db: Session = Depends(get_database_session),current
 Crear Macho Reproductor
 """
 @ReproductorRutas.post(
-    "/crear_reproductor/{id_bovino}",
+    "/crear_reproductor/{id_bovino}/{proposito}",
     status_code=status.HTTP_201_CREATED)
-async def CrearReproductor(id_bovino: str,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+async def CrearReproductor(id_bovino: str,proposito:str,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
-        consulta = db.execute(
-            modelo_macho_reproductor.select().where(
-                modelo_macho_reproductor.columns.id_bovino == id_bovino)).first()
-        nombre_bovino = crud.bovinos_inventario.Buscar_Nombre(db=db, id_bovino=id_bovino, current_user=current_user)
-        if consulta is None:
-            CrearMacho = modelo_macho_reproductor.insert().values(id_bovino=id_bovino,usuario_id=current_user,nombre_bovino=nombre_bovino)
 
-            db.execute(CrearMacho)
-            db.commit()
+        if proposito == "Macho Reproductor":
+            consulta = db.execute(
+                modelo_macho_reproductor.select().where(
+                    modelo_macho_reproductor.columns.id_bovino == id_bovino)).first()
+            nombre_bovino = crud.bovinos_inventario.Buscar_Nombre(db=db, id_bovino=id_bovino, current_user=current_user)
+            if consulta is None:
+                CrearMacho = modelo_macho_reproductor.insert().values(id_bovino=id_bovino, usuario_id=current_user,
+                                                                      nombre_bovino=nombre_bovino)
+
+                db.execute(CrearMacho)
+                db.commit()
+            else:
+
+                db.execute(
+                    modelo_macho_reproductor.update().where(modelo_macho_reproductor.c.id_bovino == id_bovino).values(
+                        id_bovino=id_bovino))
+                db.commit()
+
         else:
-
-            db.execute(modelo_macho_reproductor.update().where(modelo_macho_reproductor.c.id_bovino == id_bovino).values(
-                id_bovino=id_bovino))
-            db.commit()
+            pass
 
 
 

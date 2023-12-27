@@ -73,7 +73,7 @@ def get_database_session():
 
 
 # Configuración
-ACCESS_TOKEN_EXPIRE_MINUTES = 500000  # 30 minutes
+ACCESS_TOKEN_EXPIRE_MINUTES = 30  # 30 minutes
 ALGORITHM = "HS256"
 JWT_SECRET_KEY = "1q2w3e4r"
 
