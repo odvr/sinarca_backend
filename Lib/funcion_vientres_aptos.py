@@ -107,7 +107,7 @@ def vientres_aptos(session:Session,current_user):
 
           consulta_prenez= session.query(modelo_leche). \
               where(modelo_leche.c.id_bovino == idBov).\
-              filter( modelo_leche.columns.datos_prenez == "Prenada").all()
+              filter( modelo_leche.columns.datos_prenez == "Preñada").all()
 
           if consulta_prenez != []:
               session.execute(modelo_vientres_aptos.delete(). \

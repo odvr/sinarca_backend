@@ -356,7 +356,7 @@ async def vacas_prenadas_calcular(db: Session = Depends(get_database_session),
 
     consulta_prenadas = db.query(modelo_bovinos_inventario.c.estado, modelo_leche.c.datos_prenez,modelo_bovinos_inventario.c.usuario_id). \
         join(modelo_leche, modelo_bovinos_inventario.c.id_bovino == modelo_leche.c.id_bovino). \
-        filter(modelo_bovinos_inventario.c.estado == 'Vivo', modelo_leche.c.datos_prenez == 'Prenada',
+        filter(modelo_bovinos_inventario.c.estado == 'Vivo', modelo_leche.c.datos_prenez == 'Preñada',
                modelo_leche.c.usuario_id==current_user).count()
     # actualizacion del campo
     db.execute(update(modelo_indicadores).
