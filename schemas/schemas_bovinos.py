@@ -588,7 +588,7 @@ class esquema_registro_pajillas(BaseModel):
 class esquema_registro_marca(BaseModel):
     id_registro_marca:int
     nombre_marca_propietario: Optional[str] = None
-    ruta_marca: str
+    ruta_marca:Optional[str] = None
     usuario_id: Optional[str] = None
     class Config:
         orm_mode = True

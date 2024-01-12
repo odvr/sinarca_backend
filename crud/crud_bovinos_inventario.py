@@ -44,11 +44,23 @@ class CRUDBovinos:
         db.close()
         return Nombre_Bovino_pajilla
     def Buscar_Ruta_Fisica_Marca(self,db: Session,id_registro_marca, current_user):
-        BuscarRutaFisica = db.query(modelo_registro_marca).filter(
-            modelo_registro_marca.columns.id_registro_marca == id_registro_marca,
-            modelo_registro_marca.c.usuario_id == current_user).first()
-        Ruta_Marca = BuscarRutaFisica.ruta_marca
-        db.close()
-        return Ruta_Marca
+
+        try:
+            BuscarRutaFisica = db.query(modelo_registro_marca).filter(
+                modelo_registro_marca.columns.id_registro_marca == id_registro_marca,
+                modelo_registro_marca.c.usuario_id == current_user).first()
+
+            # Manejar el caso en que BuscarRutaFisica sea None
+            if BuscarRutaFisica is None:
+                return None  # o cualquier valor predeterminado que desees
+
+            Ruta_Marca = BuscarRutaFisica.ruta_marca
+            db.close()
+
+            return Ruta_Marca
+        except AttributeError as e:
+            # Manejar la excepción de AttributeError
+
+            return None  # o cualquier valor predeterminado que desees
 
 bovinos_inventario = CRUDBovinos()
