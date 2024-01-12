@@ -42,15 +42,9 @@ def eliminacionBovino(id_bov_eliminar,session: Session):
   try:
       #consulta de id de parametro en la base de datos
       #consulta de bovino en la tabla de inventario
-      consulta_bovino_inventario = session.query(modelo_bovinos_inventario).\
-          filter( modelo_bovinos_inventario.c.id_bovino==id_bov_eliminar).all()
-      #si el id ya no existe entonces no se hara cambios
-      if consulta_bovino_inventario ==[]:
-          pass
-      #caso contrario se eliminara de la tabla
-      else:
-          session.execute(modelo_bovinos_inventario.delete().where(modelo_bovinos_inventario.c.id_bovino == id_bov_eliminar))
-          session.commit()
+      """
+      
+    """
 
       #consulta de bovino en la tabla de produccion leche
       consulta_bovino_leche = session.query(modelo_leche).\
@@ -317,6 +311,21 @@ def eliminacionBovino(id_bov_eliminar,session: Session):
           session.commit()
 
       session.commit()
+
+      consulta_bovino_inventario = session.query(modelo_bovinos_inventario). \
+          filter(modelo_bovinos_inventario.c.id_bovino == id_bov_eliminar).all()
+      # si el id ya no existe entonces no se hara cambios
+      if consulta_bovino_inventario == []:
+          pass
+      # caso contrario se eliminara de la tabla
+      else:
+          session.execute(
+              modelo_bovinos_inventario.delete().where(modelo_bovinos_inventario.c.id_bovino == id_bov_eliminar))
+          session.commit()
+
+
+
+
   except Exception as e:
       logger.error(f'Error Funcion eliminacionBovino:{e}')
       raise
