@@ -14,7 +14,7 @@ from config import db
 # importa el esquema de los bovinos
 from models.modelo_bovinos import modelo_bovinos_inventario, modelo_leche, modelo_indicadores, modelo_orden_IEP, \
     modelo_palpaciones, modelo_historial_partos, modelo_historial_intervalo_partos, modelo_dias_abiertos, \
-    modelo_arbol_genealogico
+    modelo_arbol_genealogico, modelo_registro_pajillas
 from sqlalchemy.orm import Session
 from sqlalchemy import func, desc
 
@@ -277,15 +277,24 @@ def endogamia(session: Session,current_user):
          id_madre = i[2]
          # Toma el ID del padre bovino, este es el campo numero 3
          id_padre = i[3]
+         # Toma si el anial es de inseminacion o no, este es el campo numero 23
+         inseminacion = i[23]
+
          # traemos el campo de nombre, padre y madre y lo actualizamos
          nombre_bovino = list(session.query(modelo_bovinos_inventario).where(modelo_bovinos_inventario.columns.id_bovino == id).first())
-         nombre_bovino_padre = session.query(modelo_bovinos_inventario).where(modelo_bovinos_inventario.columns.id_bovino == id_padre).first()
-         if nombre_bovino_padre is None or nombre_bovino_padre==[]:
-             nombre_pajilla= f'Pajilla {id_padre}'
+         if inseminacion=="Si":
+             pajilla = session.query(modelo_registro_pajillas).where(
+                 modelo_registro_pajillas.columns.id_pajillas == id_padre).\
+                 filter(modelo_registro_pajillas.columns.usuario_id == current_user).first()
+             print(pajilla)
+             nombre_pajilla= f'Pajilla {pajilla[1]} ({pajilla[3]})'
              session.execute(modelo_arbol_genealogico.update().values(nombre_bovino_padre=nombre_pajilla).filter(
                  modelo_arbol_genealogico.columns.id_bovino == id))
              session.commit()
          else:
+             nombre_bovino_padre = session.query(modelo_bovinos_inventario).where(
+                 modelo_bovinos_inventario.columns.id_bovino == id_padre).first()
+
              session.execute(modelo_arbol_genealogico.update().values(nombre_bovino_padre=nombre_bovino_padre[12]).where(
                  modelo_arbol_genealogico.columns.id_bovino == id))
              session.commit()
