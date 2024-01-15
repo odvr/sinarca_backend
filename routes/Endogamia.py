@@ -86,13 +86,14 @@ async def listar_tabla_endogamia(db: Session = Depends(get_database_session),cur
     try:
 
         itemsAnimalesEndogamia = db.query(modelo_arbol_genealogico).filter(modelo_arbol_genealogico.c.usuario_id == current_user).all()
-        endogamia(session=db,current_user=current_user)
+
         abuelo_materno(session=db, current_user=current_user)
         abuela_materna(session=db, current_user=current_user)
         abuelo_paterno(session=db, current_user=current_user)
         abuela_paterna(session=db, current_user=current_user)
         bisabuelo_materno(session=db, current_user=current_user)
         bisabuelo_paterno(session=db, current_user=current_user)
+        endogamia(session=db, current_user=current_user)
 
     except Exception as e:
         logger.error(f'Error al obtener TABLA DE ENDOGAMIA: {e}')
