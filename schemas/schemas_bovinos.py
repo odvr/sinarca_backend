@@ -196,6 +196,7 @@ class esquema_arbol_genealogico(BaseModel):
     nombre_bovino_abuela_materna:Optional[str] = None
     nombre_bovino_bisabuelo_materno:Optional[str] = None
     nombre_bovino_bisabuelo_paterno:Optional[str] = None
+    inseminacion: Optional[str] = None
 
     class Config:
         orm_mode = True

@@ -124,7 +124,8 @@ modelo_arbol_genealogico = Table("arbol_genealogico", meta,
                                  Column("nombre_bovino_abuelo_materno", String(300)),
                                  Column("nombre_bovino_abuela_materna", String(300)),
                                  Column("nombre_bovino_bisabuelo_materno", String(300)),
-                                 Column("nombre_bovino_bisabuelo_paterno", String(300))
+                                 Column("nombre_bovino_bisabuelo_paterno", String(300)),
+                                 Column("inseminacion", String(300))
                                  )
 """modelo para indicadores"""
 modelo_indicadores = Table("indicadores", meta, Column("id_indicadores", String(300), primary_key=True),
