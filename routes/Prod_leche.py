@@ -92,7 +92,7 @@ async def inventario_prod_leche(db: Session = Depends(get_database_session),
         promedio_litros_leche(session=db,current_user=current_user)
         intervalo_partos(session=db,current_user=current_user)
         EliminarDuplicadosLeche(condb=db)
-        tipo_ganado_leche(session= db,current_user=current_user)
+
         IEP_por_raza(session= db,current_user=current_user)
         registro_partos_animales(session= db,current_user=current_user)
         dias_abiertos(session= db,current_user=current_user)
@@ -106,6 +106,7 @@ async def inventario_prod_leche(db: Session = Depends(get_database_session),
         bisabuelo_paterno(session=db, current_user=current_user)
         endogamia(session=db, current_user=current_user)
         intervalo_partos(session=db, current_user=current_user)
+        tipo_ganado_leche(session=db, current_user=current_user)
 
         #itemsLeche = db.query(modelo_leche).all()
         itemsLeche = db.query(modelo_leche).filter(modelo_leche.c.usuario_id == current_user).all()
