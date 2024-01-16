@@ -169,7 +169,7 @@ async def CrearFechaAproximadaParto(id_bovino: str,fecha_estimada_prenez:date, i
             else:
 
                 ingresocalcularFechaParto = modelo_partos.insert().values(id_bovino=id_bovino,
-                                                                      fecha_estimada_prenez=fecha_estimada_prenez,usuario_id=current_user,nombre_bovino=nombre_bovino,id_reproductor= id_bovino_padre,nombre_bovino_reproductor=nombre_bovino_repro)
+                                                                      fecha_estimada_prenez=fecha_estimada_prenez,usuario_id=current_user,nombre_bovino=nombre_bovino,id_reproductor= id_bovino_padre,nombre_bovino_reproductor=nombre_bovino_repro,tipo=tipo_monta)
 
                 db.execute(ingresocalcularFechaParto)
                 db.commit()
