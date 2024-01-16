@@ -324,7 +324,7 @@ def fecha_aproximada_parto(session=Session):
         session.commit()
 
         #el siguiente codigo permite generar notificaciones
-        diferencia= (datetime.today().year - fecha_estimada_prenez.year) * 12 + (datetime.today().month - fecha_estimada_prenez.month) *30.4 + (datetime.today().day-fecha_estimada_prenez.day)
+        diferencia=(date.today()-fecha_estimada_prenez).days
         if diferencia <45:
             notificacion = None
             session.execute(modelo_partos.update().values(notificacion=notificacion). \
