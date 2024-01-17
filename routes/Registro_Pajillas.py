@@ -12,6 +12,7 @@ from fastapi import APIRouter, Depends
 from Lib.Lib_Calcular_Edad_Bovinos import calculoEdad
 from Lib.Lib_eliminar_duplicados_bovinos import eliminarduplicados
 from Lib.actualizacion_peso import actualizacion_peso
+from Lib.eliminacion_pajillas import eliminacion_pajilla
 from Lib.vida_util_macho_reproductor_bovino import vida_util_macho_reproductor
 from config.db import   get_session
 # importa el esquema de los bovinos
@@ -89,8 +90,7 @@ async def listar_tabla_pajillas(db: Session = Depends(get_database_session),curr
 async def eliminar_pajilla(id_pajillas: int,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user) ):
 
     try:
-        db.execute(modelo_registro_pajillas.delete().where(modelo_registro_pajillas.c.id_pajillas == id_pajillas))
-        db.commit()
+        eliminacion_pajilla(id_pajillas,session=db)
         # retorna un estado de no contenido
         return
 
