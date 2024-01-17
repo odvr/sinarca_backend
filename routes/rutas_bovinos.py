@@ -153,7 +153,8 @@ async def create_user(data: Esquema_Usuario,db: Session = Depends(get_database_s
         )
 
     ingreso = modelo_usuarios.insert().values(usuario_id=data.usuario_id,
-        hashed_password=get_hashed_password(data.hashed_password)
+        hashed_password=get_hashed_password(data.hashed_password),nombre_predio=data.nombre_predio,correo_electronico=data.correo_electronico,telefono=data.telefono,ubicacion_predio=data.ubicacion_predio,nombre_apellido=data.nombre_apellido
+
         )
     # Crea el registro en el Indicador del usuario
     CrearIndicadores = crud.crear_indicadores.Crear_indicadores_db(db=db, current_user=data.usuario_id)
@@ -169,6 +170,22 @@ async def create_user(data: Esquema_Usuario,db: Session = Depends(get_database_s
     return user
 
 '''+++++++++++++++++++++++++++++++++++++++++++++++++++++++++'''
+
+
+
+@rutas_bovinos.get("/Buscar_usuario_Conectado",tags=["dashboard"],response_model=list[Esquema_Usuario])
+async def BuscarUsuario(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+  try:
+    Buscar = crud.bovinos_inventario.Buscar_Usuario_Conectado(db=db,current_user=current_user)
+    return Buscar
+  except Exception as e:
+      logger.error(f'Error Al Intentar Buscar el Usuario: {e}')
+      raise
+  finally:
+      db.close()
+
+
+
 
 
 @rutas_bovinos.get("/Calcular_animales_levante",tags=["dashboard"])

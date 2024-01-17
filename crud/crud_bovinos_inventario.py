@@ -3,7 +3,8 @@ from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union
 from sqlalchemy.orm import Session
 
 
-from models.modelo_bovinos import modelo_bovinos_inventario, modelo_registro_marca, modelo_registro_pajillas
+from models.modelo_bovinos import modelo_bovinos_inventario, modelo_registro_marca, modelo_registro_pajillas, \
+    modelo_usuarios
 
 
 class CRUDBovinos:
@@ -58,6 +59,25 @@ class CRUDBovinos:
             db.close()
 
             return Ruta_Marca
+        except AttributeError as e:
+            # Manejar la excepción de AttributeError
+
+            return None  # o cualquier valor predeterminado que desees
+
+    def Buscar_Usuario_Conectado(self,db: Session, current_user):
+
+        try:
+            Buscar_Datos_usuario = db.query(modelo_usuarios).filter(
+                modelo_usuarios.c.usuario_id == current_user).all()
+
+            # Manejar el caso en que Buscar_Datos_usuario sea None
+            if Buscar_Datos_usuario is None:
+                return None  # o cualquier valor predeterminado que desees
+
+
+            db.close()
+
+            return Buscar_Datos_usuario
         except AttributeError as e:
             # Manejar la excepción de AttributeError
 

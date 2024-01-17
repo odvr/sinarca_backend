@@ -18,7 +18,13 @@ from sqlalchemy.types import Integer, Text, String, DateTime
 
 
 modelo_usuarios = Table("usuarios", meta, Column("id_usuario", Integer, primary_key=True, unique=True, index=True),
-                     Column("usuario_id", String(300), unique=True, index=True), Column("hashed_password", String(300)))
+                     Column("usuario_id", String(300), unique=True, index=True),
+                     Column("hashed_password", String(300)),
+                     Column("nombre_predio", String(300)),
+                     Column("correo_electronico", String(300)),
+                     Column("telefono", String(300)),
+                     Column("ubicacion_predio", String(300)),
+                     Column("nombre_apellido", String(300)))
 
 
 

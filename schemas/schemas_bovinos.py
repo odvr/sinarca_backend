@@ -20,6 +20,11 @@ class Esquema_Usuario(BaseModel):
     id_usuario : int
     usuario_id :str
     hashed_password: str
+    nombre_predio: Optional[str]
+    correo_electronico: Optional[str]
+    telefono: Optional[str]
+    ubicacion_predio: Optional[str]
+    nombre_apellido: Optional[str]
 
     class Config:
         orm_mode = True
