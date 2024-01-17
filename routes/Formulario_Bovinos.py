@@ -308,8 +308,9 @@ async def crear_bovinos(nombre_bovino: str, fecha_nacimiento: date, raza: str, s
                 db.execute(ingresoEndogamia)
                 db.commit()
                 #endogamia(condb=db)
-
             return Response(status_code=status.HTTP_201_CREATED)
+        else:
+            return Response(status_code=status.HTTP_409_CONFLICT)
 
 
     except Exception as e:
