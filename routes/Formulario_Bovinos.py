@@ -501,6 +501,9 @@ async def cambiar_esta_bovino(id_bovino:str,fecha_nacimiento:date,edad:int,raza:
     try:
 
 
+
+
+
         db.execute(modelo_bovinos_inventario.update().values(
 
 
@@ -566,8 +569,13 @@ async def create_user_profile(id_bovino:str,file: UploadFile = File(...),
     # Devuelve la URL del archivo para que el usuario pueda acceder a él
     file_url = f"/static/uploads/{new_filename}"
 
+    Buscar_Datos_Foto_Perfil = crud.bovinos_inventario.Buscar_Ruta_Foto_Perfil(db=db, id_bovino=id_bovino,
+                                                                               current_user=current_user)
+
     if ConsultarNombre is None:
         raise HTTPException(status_code=404, detail="Bovino no encontrado")
+
+
     else:
         Nombre_Bovino = ConsultarNombre.nombre_bovino
 
@@ -577,6 +585,73 @@ async def create_user_profile(id_bovino:str,file: UploadFile = File(...),
         db.commit()
         db.close()
         return {"filename": new_filename, "file_url": file_url}
+
+""" 
+API Que realiza el cambio de la foto de Perfil
+"""
+
+
+@Formulario_Bovino.post("/GuardarCambiar/FotoPerfil/{id_bovino}")
+async def CambiarFotoPerfilBovino(id_bovino: str, file: UploadFile = File(...),
+                              db: Session = Depends(get_database_session),
+                              current_user: Esquema_Usuario = Depends(get_current_user)
+                              ):
+    ConsultarNombre = db.query(modelo_bovinos_inventario).filter(
+        modelo_bovinos_inventario.columns.id_bovino == id_bovino,
+        modelo_bovinos_inventario.c.usuario_id == current_user).first()
+    Buscar_Datos_Foto_Perfil = crud.bovinos_inventario.Buscar_Ruta_Foto_Perfil(db=db, id_bovino=id_bovino,
+                                                                               current_user=current_user)
+    if ConsultarNombre is None:
+        raise HTTPException(status_code=404, detail="Bovino no encontrado")
+
+
+    if Buscar_Datos_Foto_Perfil is None:
+        pass
+
+    else:
+
+        contents = await file.read()
+        # Obtiene el nombre del archivo sin la extensión
+        filename, file_extension = os.path.splitext(file.filename)
+        # Genera un nuevo nombre de archivo único agregando un identificador único (UUID) al nombre original
+        new_filename = f"{id_bovino}_{filename}_{uuid.uuid4().hex}{file_extension}"
+
+        # Ruta donde guardar el archivo
+        upload_folder = os.path.join("static", "uploads")
+        os.makedirs(upload_folder, exist_ok=True)
+        file_path = os.path.join(upload_folder, new_filename)
+
+        # Guarda el archivo en la ubicación deseada
+        with open(file_path, "wb") as f:
+            f.write(contents)
+
+        # Devuelve la URL del archivo para que el usuario pueda acceder a él
+        file_url = f"/static/uploads/{new_filename}"
+
+        Nombre_Bovino = ConsultarNombre.nombre_bovino
+
+        db.execute(modelo_bovinos_inventario.update().values(ruta_fisica_foto_perfil=file_url).where(
+            modelo_bovinos_inventario.c.nombre_bovino == Nombre_Bovino,
+            modelo_bovinos_inventario.c.usuario_id == current_user))
+
+        db.commit()
+        db.close()
+        """ Busca la Ruta de la anterior Foto de Perfil y la Elimina """
+
+        try:
+             os.remove(Buscar_Datos_Foto_Perfil)
+
+        except FileNotFoundError:
+            pass
+
+
+
+        return {"filename": new_filename, "file_url": file_url}
+
+
+
+
+
 
 
 

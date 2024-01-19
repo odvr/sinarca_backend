@@ -64,6 +64,28 @@ class CRUDBovinos:
 
             return None  # o cualquier valor predeterminado que desees
 
+
+    def Buscar_Ruta_Foto_Perfil(self,db: Session,id_bovino, current_user):
+
+        try:
+            BuscarRutaFisicaFotoPerfil = db.query(modelo_bovinos_inventario).filter(
+                modelo_bovinos_inventario.columns.id_bovino == id_bovino,
+                modelo_bovinos_inventario.c.usuario_id == current_user).first()
+
+            # Manejar el caso en que BuscarRutaFisica sea None
+            if BuscarRutaFisicaFotoPerfil is None:
+                return None  # o cualquier valor predeterminado que desees
+
+            Ruta_Marca = BuscarRutaFisicaFotoPerfil.ruta_fisica_foto_perfil
+            db.close()
+
+            return Ruta_Marca
+        except AttributeError as e:
+            # Manejar la excepción de AttributeError
+
+            return None  # o cualquier valor predeterminado que desees
+
+
     def Buscar_Usuario_Conectado(self,db: Session, current_user):
 
         try:
