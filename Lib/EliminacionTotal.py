@@ -68,6 +68,40 @@ def eliminacionBovino(id_bov_eliminar,session: Session):
           session.execute(modelo_arbol_genealogico.delete().where(modelo_arbol_genealogico.c.id_bovino == id_bov_eliminar))
           session.commit()
 
+      #consulta de bovino en la tabla de arbol genealogico
+      consulta_bovino_arbol_padre = session.query(modelo_arbol_genealogico).\
+          filter(modelo_arbol_genealogico.c.id_bovino_padre==id_bov_eliminar).all()
+      #si el id ya no existe entonces no se hara cambios
+      if consulta_bovino_arbol_padre ==[]:
+          pass
+      #caso contrario se eliminara de la tabla
+      else:
+          session.execute(modelo_arbol_genealogico.delete().where(modelo_arbol_genealogico.c.id_bovino_padre == id_bov_eliminar))
+          session.commit()
+
+
+      #consulta de bovino en la tabla de arbol genealogico
+      consulta_bovino_arbol_madre = session.query(modelo_arbol_genealogico).\
+          filter(modelo_arbol_genealogico.c.id_bovino_madre==id_bov_eliminar).all()
+      #si el id ya no existe entonces no se hara cambios
+      if consulta_bovino_arbol_madre ==[]:
+          pass
+      #caso contrario se eliminara de la tabla
+      else:
+          session.execute(modelo_arbol_genealogico.delete().where(modelo_arbol_genealogico.c.id_bovino_madre == id_bov_eliminar))
+          session.commit()
+
+      #consulta de bovino en la tabla de registro de montas
+      consulta_bovino_montas = session.query(modelo_partos).\
+          filter(modelo_partos.c.id_reproductor==id_bov_eliminar).all()
+      #si el id ya no existe entonces no se hara cambios
+      if consulta_bovino_montas ==[]:
+          pass
+      #caso contrario se eliminara de la tabla
+      else:
+          session.execute(modelo_partos.delete().where(modelo_partos.c.id_reproductor == id_bov_eliminar))
+          session.commit()
+
       # consulta de bovino en la tabla de muertes
       consulta_bovino_muerte = session.query(modelo_datos_muerte). \
               filter(modelo_datos_muerte.c.id_bovino == id_bov_eliminar).all()
