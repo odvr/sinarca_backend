@@ -37,7 +37,7 @@ file_handler.setFormatter(formatter)
 # Agrega el manejador de archivo al logger
 logger.addHandler(file_handler)
 
-"""la siguiente funcion tiene como objetivo eliminar el bovino que se desee"""
+"""la siguiente funcion tiene como objetivo eliminar el bovino que se desee:"""
 def eliminacionBovino(id_bov_eliminar,session: Session):
   try:
       #consulta de id de parametro en la base de datos
