@@ -3,6 +3,7 @@ from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union
 from sqlalchemy.orm import Session
 
 
+
 from models.modelo_bovinos import modelo_bovinos_inventario, modelo_registro_marca, modelo_registro_pajillas, \
     modelo_usuarios
 
@@ -39,7 +40,7 @@ class CRUDBovinos:
             return Nombre_Bovino
     def Buscar_Nombre_Pajilla(self,db: Session,Codigo_toro_pajilla, current_user):
         ConsultarNombre_pajilla = db.query(modelo_registro_pajillas).filter(
-            modelo_registro_pajillas.columns.Codigo_toro_pajilla == Codigo_toro_pajilla,
+            modelo_registro_pajillas.columns.id_pajillas == Codigo_toro_pajilla,
             modelo_registro_pajillas.c.usuario_id == current_user).first()
         Nombre_Bovino_pajilla = f'Pajilla {Codigo_toro_pajilla} ({(ConsultarNombre_pajilla.nombre_toro)})'
         db.close()
@@ -104,5 +105,15 @@ class CRUDBovinos:
             # Manejar la excepción de AttributeError
 
             return None  # o cualquier valor predeterminado que desees
+
+
+    def VerificarConsultaDatosFotoPerfilBovino(self,Buscar_Datos_Foto_Perfil,Rutabase):
+        if not Buscar_Datos_Foto_Perfil:
+            Consulta = "ConsultaVacia"
+            return Consulta
+        else:
+            RutasUnidas = Rutabase + Buscar_Datos_Foto_Perfil
+
+            return RutasUnidas
 
 bovinos_inventario = CRUDBovinos()
