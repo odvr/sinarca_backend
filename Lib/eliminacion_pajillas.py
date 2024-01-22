@@ -8,7 +8,7 @@ import logging
 from sqlalchemy.orm import Session
 
 # importa el esquema de los bovinos
-from models.modelo_bovinos import modelo_arbol_genealogico, modelo_registro_pajillas
+from models.modelo_bovinos import modelo_arbol_genealogico, modelo_registro_pajillas, modelo_partos
 
 '''***********'''
 from passlib.context import CryptContext
@@ -40,11 +40,31 @@ def eliminacion_pajilla(id_pajilla_eliminar, session: Session):
         if consulta_pajilla is None:
             pass
         else:
-            session.execute(modelo_arbol_genealogico.delete().where(modelo_arbol_genealogico.c.id_bovino_padre == id_pajilla_eliminar).filter(modelo_arbol_genealogico.c.inseminacion=="Si"))
 
             session.execute(modelo_registro_pajillas.delete().where(modelo_registro_pajillas.c.id_pajillas == id_pajilla_eliminar))
 
             session.commit()
+
+        consulta_pajilla_arbol=session.query(modelo_arbol_genealogico).\
+          filter(modelo_arbol_genealogico.c.id_bovino_padre==id_pajilla_eliminar,modelo_arbol_genealogico.c.inseminacion=="Si").all()
+
+        if consulta_pajilla_arbol is None:
+            pass
+        else:
+            session.execute(modelo_arbol_genealogico.delete().where(modelo_arbol_genealogico.c.id_bovino_padre == id_pajilla_eliminar).filter(modelo_arbol_genealogico.c.inseminacion=="Si"))
+            session.commit()
+
+        consulta_pajilla_monta = session.query(modelo_partos).\
+          filter(modelo_partos.c.id_reproductor==id_pajilla_eliminar,modelo_partos.c.tipo=="Inseminación").all()
+
+        if consulta_pajilla_monta is None:
+            pass
+        else:
+            session.execute(modelo_partos.delete().where(modelo_partos.c.id_reproductor == id_pajilla_eliminar).filter(
+                modelo_partos.c.tipo == "Inseminación"))
+            session.commit()
+
+
 
 
     except Exception as e:

@@ -42,7 +42,7 @@ class CRUDBovinos:
         ConsultarNombre_pajilla = db.query(modelo_registro_pajillas).filter(
             modelo_registro_pajillas.columns.id_pajillas == Codigo_toro_pajilla,
             modelo_registro_pajillas.c.usuario_id == current_user).first()
-        Nombre_Bovino_pajilla = f'Pajilla {Codigo_toro_pajilla} ({(ConsultarNombre_pajilla.nombre_toro)})'
+        Nombre_Bovino_pajilla = f'Pajilla {ConsultarNombre_pajilla.Codigo_toro_pajilla} ({(ConsultarNombre_pajilla.nombre_toro)})'
         db.close()
         return Nombre_Bovino_pajilla
     def Buscar_Ruta_Fisica_Marca(self,db: Session,id_registro_marca, current_user):
