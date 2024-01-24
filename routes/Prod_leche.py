@@ -131,6 +131,7 @@ async def inventario_prod_leche(db: Session = Depends(get_database_session),
         current_user: Esquema_Usuario = Depends(get_current_user)):
 
     try:
+        promedio_litros_leche(session=db, current_user=current_user)
 
         litros_por_raza(session=db,current_user=current_user)
 

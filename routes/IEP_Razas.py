@@ -5,7 +5,10 @@ Librerias requeridas
 import logging
 
 from sqlalchemy.orm import Session
+
+from Lib.Lib_Intervalo_Partos import intervalo_partos
 from Lib.funcion_IEP_por_raza import IEP_por_raza
+from Lib.funcion_litros_leche import promedio_litros_leche
 # # importa la conexion de la base de datos
 from config.db import   get_session
 from sqlalchemy.orm import Session
@@ -41,7 +44,11 @@ def get_database_session():
 @IEP_Razas.get("/Tabla_iep_por_raza",response_model=list[esquema_orden_IEP] )
 async def listar_tabla_IEP_Razas(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
+
+
+        intervalo_partos(session=db, current_user=current_user)
         IEP_por_raza(session=db,current_user=current_user)
+
         itemsListarIntevaloPartos = db.execute(modelo_orden_IEP.select()).all()
 
     except Exception as e:

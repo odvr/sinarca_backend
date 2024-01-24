@@ -19,7 +19,7 @@ from Lib.Lib_eliminar_duplicados_bovinos import eliminarduplicados
 from Lib.endogamia import endogamia, abuelo_materno, abuela_materna, abuelo_paterno, abuela_paterna, bisabuelo_materno, \
     bisabuelo_paterno
 from Lib.funcion_vientres_aptos import vientres_aptos
-from config.db import   get_session
+from config.db import   get_session,Rutabase
 from fastapi import APIRouter, Response,status
 # importa el esquema de los bovinos
 from models.modelo_bovinos import modelo_bovinos_inventario, modelo_ventas, modelo_datos_muerte, modelo_ceba, \
@@ -496,31 +496,50 @@ async def id_inventario_bovino(id_bovino: str,db: Session = Depends(get_database
 '''
 La siguiente funcion realiza la actualizacion completa de la tabla de bovinos para cambiar los registros
 '''
-@Formulario_Bovino.put("/cambiar_datos_bovino/{id_bovino}/{fecha_nacimiento}/{edad}/{raza}/{sexo}/{peso}/{marca}/{proposito}/{mansedumbre}/{estado}/{compra_bovino}", status_code=status.HTTP_201_CREATED)
-async def cambiar_esta_bovino(id_bovino:str,fecha_nacimiento:date,edad:int,raza:str,sexo:str,peso:float,marca:str,proposito:str,mansedumbre:str,estado:str,compra_bovino:str,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+@Formulario_Bovino.put("/cambiar_datos_bovino/{id_bovino}/{fecha_nacimiento}/{edad}/{raza}/{sexo}/{peso}/{marca}/{proposito}/{mansedumbre}/{estado}/{compra_bovino}/{ruta_imagen_marca}", status_code=status.HTTP_201_CREATED)
+async def cambiar_esta_bovino(id_bovino:str,fecha_nacimiento:date,edad:int,raza:str,sexo:str,peso:float,marca:str,proposito:str,mansedumbre:str,estado:str,compra_bovino:str,ruta_imagen_marca:str,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
 
+        """Busca la ruta fisica del path de la foto Marca ya que desde el frondEnd Se envia el ID de la tabla"""
+        Ruta_marca = crud.bovinos_inventario.Buscar_Ruta_Fisica_Marca(db=db, id_registro_marca=ruta_imagen_marca,
+                                                                      current_user=current_user)
 
+        if ruta_imagen_marca == "null":
+            db.execute(modelo_bovinos_inventario.update().values(
 
+                fecha_nacimiento=fecha_nacimiento,
+                edad=edad,
+                raza=raza,
+                sexo=sexo,
+                peso=peso,
+                marca=marca,
+                proposito=proposito,
+                mansedumbre=mansedumbre,
+                estado=estado,
+                compra_bovino=compra_bovino,
 
-
-        db.execute(modelo_bovinos_inventario.update().values(
-
-
-            fecha_nacimiento=fecha_nacimiento,
-            edad=edad,
-            raza=raza,
-            sexo=sexo,
-            peso=peso,
-            marca=marca,
-            proposito=proposito,
-            mansedumbre=mansedumbre,
-            estado=estado,
-            compra_bovino=compra_bovino
 
             ).where(
-            modelo_bovinos_inventario.columns.id_bovino == id_bovino))
-        db.commit()
+                modelo_bovinos_inventario.columns.id_bovino == id_bovino))
+            db.commit()
+        else:
+            db.execute(modelo_bovinos_inventario.update().values(
+
+                fecha_nacimiento=fecha_nacimiento,
+                edad=edad,
+                raza=raza,
+                sexo=sexo,
+                peso=peso,
+                marca=marca,
+                proposito=proposito,
+                mansedumbre=mansedumbre,
+                estado=estado,
+                compra_bovino=compra_bovino,
+                ruta_imagen_marca=Ruta_marca
+
+            ).where(
+                modelo_bovinos_inventario.columns.id_bovino == id_bovino))
+            db.commit()
 
             # Retorna una consulta con el id actualizado
             #resultado_actualizado = condb.execute(
@@ -601,52 +620,89 @@ async def CambiarFotoPerfilBovino(id_bovino: str, file: UploadFile = File(...),
         modelo_bovinos_inventario.c.usuario_id == current_user).first()
     Buscar_Datos_Foto_Perfil = crud.bovinos_inventario.Buscar_Ruta_Foto_Perfil(db=db, id_bovino=id_bovino,
                                                                                current_user=current_user)
-    if ConsultarNombre is None:
-        raise HTTPException(status_code=404, detail="Bovino no encontrado")
 
 
-    if Buscar_Datos_Foto_Perfil is None:
-        pass
-
-    else:
-
-        contents = await file.read()
-        # Obtiene el nombre del archivo sin la extensión
-        filename, file_extension = os.path.splitext(file.filename)
-        # Genera un nuevo nombre de archivo único agregando un identificador único (UUID) al nombre original
-        new_filename = f"{id_bovino}_{filename}_{uuid.uuid4().hex}{file_extension}"
-
-        # Ruta donde guardar el archivo
-        upload_folder = os.path.join("static", "uploads")
-        os.makedirs(upload_folder, exist_ok=True)
-        file_path = os.path.join(upload_folder, new_filename)
-
-        # Guarda el archivo en la ubicación deseada
-        with open(file_path, "wb") as f:
-            f.write(contents)
-
-        # Devuelve la URL del archivo para que el usuario pueda acceder a él
-        file_url = f"/static/uploads/{new_filename}"
-
-        Nombre_Bovino = ConsultarNombre.nombre_bovino
-
-        db.execute(modelo_bovinos_inventario.update().values(ruta_fisica_foto_perfil=file_url).where(
-            modelo_bovinos_inventario.c.nombre_bovino == Nombre_Bovino,
-            modelo_bovinos_inventario.c.usuario_id == current_user))
-
-        db.commit()
-        db.close()
-        """ Busca la Ruta de la anterior Foto de Perfil y la Elimina """
-
-        try:
-             os.remove(Buscar_Datos_Foto_Perfil)
-
-        except FileNotFoundError:
-            pass
+    Buscar = crud.bovinos_inventario.VerificarConsultaDatosFotoPerfilBovino(Buscar_Datos_Foto_Perfil=Buscar_Datos_Foto_Perfil,Rutabase=Rutabase)
 
 
 
-        return {"filename": new_filename, "file_url": file_url}
+
+    try:
+        while Buscar:
+            if ConsultarNombre is None:
+                raise HTTPException(status_code=404, detail="Bovino no encontrado")
+
+            if Buscar == "ConsultaVacia":
+
+                contents = await file.read()
+                # Obtiene el nombre del archivo sin la extensión
+                filename, file_extension = os.path.splitext(file.filename)
+                # Genera un nuevo nombre de archivo único agregando un identificador único (UUID) al nombre original
+                new_filename = f"{id_bovino}_{filename}_{uuid.uuid4().hex}{file_extension}"
+
+                # Ruta donde guardar el archivo
+                upload_folder = os.path.join("static", "uploads")
+                os.makedirs(upload_folder, exist_ok=True)
+                file_path = os.path.join(upload_folder, new_filename)
+
+                # Guarda el archivo en la ubicación deseada
+                with open(file_path, "wb") as f:
+                    f.write(contents)
+
+                # Devuelve la URL del archivo para que el usuario pueda acceder a él
+                file_url = f"/static/uploads/{new_filename}"
+
+                Nombre_Bovino = ConsultarNombre.nombre_bovino
+                print(Nombre_Bovino)
+
+                db.execute(modelo_bovinos_inventario.update().values(ruta_fisica_foto_perfil=file_url).where(
+                    modelo_bovinos_inventario.c.nombre_bovino == Nombre_Bovino,
+                    modelo_bovinos_inventario.c.usuario_id == current_user))
+
+                db.commit()
+                db.close()
+
+                return {"filename": new_filename, "file_url": file_url}
+                break
+
+            else:
+                # print(RutasUnidas) os.path.isfile(RutasUnidas) and Buscar_Datos_Foto_Perfil != None
+                os.remove(Buscar)
+
+                contents = await file.read()
+                # Obtiene el nombre del archivo sin la extensión
+                filename, file_extension = os.path.splitext(file.filename)
+                # Genera un nuevo nombre de archivo único agregando un identificador único (UUID) al nombre original
+                new_filename = f"{id_bovino}_{filename}_{uuid.uuid4().hex}{file_extension}"
+
+                # Ruta donde guardar el archivo
+                upload_folder = os.path.join("static", "uploads")
+                os.makedirs(upload_folder, exist_ok=True)
+                file_path = os.path.join(upload_folder, new_filename)
+
+                # Guarda el archivo en la ubicación deseada
+                with open(file_path, "wb") as f:
+                    f.write(contents)
+
+                # Devuelve la URL del archivo para que el usuario pueda acceder a él
+                file_url = f"/static/uploads/{new_filename}"
+
+                Nombre_Bovino = ConsultarNombre.nombre_bovino
+
+                db.execute(modelo_bovinos_inventario.update().values(ruta_fisica_foto_perfil=file_url).where(
+                    modelo_bovinos_inventario.c.nombre_bovino == Nombre_Bovino,
+                    modelo_bovinos_inventario.c.usuario_id == current_user))
+
+                db.commit()
+                db.close()
+
+                return {"filename": new_filename, "file_url": file_url}
+
+                break
+
+    except FileNotFoundError and NotADirectoryError as e:
+        logger.error("Nose pudo Cargar Imagen "+ e)
+
 
 
 
