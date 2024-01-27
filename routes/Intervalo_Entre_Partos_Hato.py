@@ -66,7 +66,10 @@ def get_database_session():
 @Intervalo_Entre_Partos_Hato.get("/listar_Intevalo_entre_Partos_Hato")
 async def listar_tabla_intervalo_entre_partos(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
-        response = db.query(modelo_indicadores).where(modelo_indicadores.c.IEP_hato).first()
+        #response = db.query(modelo_indicadores).where(modelo_indicadores.c.IEP_hato).first()
+        response = db.query(modelo_indicadores). \
+            filter(
+            modelo_indicadores.c.id_indicadores == current_user, modelo_indicadores.c.IEP_hato).first()
 
         if response:
             itemsintervalo_entre_partos = response[28]
