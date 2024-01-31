@@ -599,3 +599,15 @@ class esquema_registro_marca(BaseModel):
     class Config:
         orm_mode = True
         env_file = ".env"
+
+
+class esquema_parametros_levante_ceba(BaseModel):
+    id_parametros: int
+    peso_levante: Optional[int] = None
+    edad_levante: Optional[int] = None
+    peso_ceba: Optional[int] = None
+    edad_ceba: Optional[int] = None
+    usuario_id: Optional[str] = None
+    class Config:
+        orm_mode = True
+        env_file = ".env"

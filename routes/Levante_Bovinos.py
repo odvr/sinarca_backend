@@ -55,7 +55,7 @@ Lista los animales en Levante
 
 @Levante_Bovinos.get("/listar_prod_levante",response_model=list[esquema_produccion_levante])
 async def inventario_levante(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
-    Estado_Optimo_Levante(db=db)
+    Estado_Optimo_Levante(db=db,current_user=current_user)
     eliminarduplicados(db=db)
 
 

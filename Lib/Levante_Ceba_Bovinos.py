@@ -1,4 +1,4 @@
-from models.modelo_bovinos import modelo_bovinos_inventario, modelo_levante, modelo_ceba
+from models.modelo_bovinos import modelo_bovinos_inventario, modelo_levante, modelo_ceba, modelo_parametros_levante_ceba
 import logging
 from sqlalchemy.orm import Session
 # Crea un objeto logger
@@ -13,8 +13,13 @@ file_handler.setFormatter(formatter)
 # Agrega el manejador de archivo al logger
 logger.addHandler(file_handler)
 
-def Estado_Optimo_Levante(db: Session ):
+def Estado_Optimo_Levante(db: Session,current_user ):
   try:
+
+    consulta_parametros = db.execute(modelo_parametros_levante_ceba.select().
+                        where(modelo_parametros_levante_ceba.columns.usuario_id==current_user)).first()
+    print(consulta_parametros)
+
     consulta_levante = db.execute(modelo_bovinos_inventario.select().
                         where(modelo_bovinos_inventario.columns.proposito=="Levante")).fetchall()
     # Recorre los campos de la consulta
@@ -29,18 +34,33 @@ def Estado_Optimo_Levante(db: Session ):
         estado = i[9]
         # bucle if que determina si cumple con el estado optimo o no y el porque no cumple
         if estado=="Vivo":
-          if peso >= 140 and edad in range(8, 13):
-            estado_levante = "Estado Optimo"
-          elif peso < 140 and edad in range(8, 13):
-            estado_levante = "Estado NO Optimo, este animal tiene un peso menor a 140 kilos"
-          elif peso < 140 and edad < 8:
-            estado_levante = "Estado NO Optimo, este animal tiene un peso menor a 140 kilos y menos de 8 meses de edad"
-          elif peso < 140 and edad > 12:
-            estado_levante = "Estado NO Optimo, este animal tiene un peso menor a 140 kilos y mas de 12 meses de edad, considera descartarlo"
-          elif peso >= 140 and edad < 8:
-            estado_levante = "Estado NO Optimo, este animal tiene menos de 8 meses de edad"
-          else:
-            estado_levante = "Estado NO Optimo, este animal tiene una edad mayor a 12 meses, considera pasarlo a ceba"
+            if consulta_parametros is None or consulta_parametros[1] is None:
+                if peso >= 140 and edad in range(8, 13):
+                    estado_levante = "Estado Optimo"
+                elif peso < 140 and edad in range(8, 13):
+                    estado_levante = "Estado NO Optimo, este animal tiene un peso menor a 140 kilos"
+                elif peso < 140 and edad < 8:
+                    estado_levante = "Estado NO Optimo, este animal tiene un peso menor a 140 kilos y menos de 8 meses de edad"
+                elif peso < 140 and edad > 12:
+                    estado_levante = "Estado NO Optimo, este animal tiene un peso menor a 140 kilos y mas de 12 meses de edad, considera descartarlo"
+                elif peso >= 140 and edad < 8:
+                    estado_levante = "Estado NO Optimo, este animal tiene menos de 8 meses de edad"
+                else:
+                    estado_levante = "Estado NO Optimo, este animal tiene una edad mayor a 12 meses, considera pasarlo a ceba"
+            else:
+                peso_levante = consulta_parametros[1]
+                edad_levante = consulta_parametros[2]
+                if peso >= peso_levante and edad <= edad_levante:
+                    estado_levante = "Estado Optimo"
+                elif peso < peso_levante and edad <= edad_levante:
+                    estado_levante = f'Estado NO Optimo, este animal tiene un peso menor a {peso_levante} kilos'
+                elif peso < peso_levante and edad < edad_levante:
+                    estado_levante = f'Estado NO Optimo, este animal tiene un peso menor a {peso_levante} kilos'
+                elif peso < peso_levante and edad >= edad_levante:
+                    estado_levante = f'Estado NO Optimo, este animal tiene un peso menor a {peso_levante} kilos y mas de {edad_levante} meses de edad, considera descartarlo'
+                else:
+                    estado_levante = f"Estado NO Optimo, este animal tiene una edad mayor a {edad_levante} meses"
+
         elif estado=="Muerto":
             estado_levante= "Este animal esta Muerto, no se puede calcular su estado"
         else:
@@ -67,8 +87,13 @@ que dicta si la condicion es o no optima
 
 
 
-def Estado_Optimo_Ceba(db: Session):
+def Estado_Optimo_Ceba(db: Session,current_user):
   try:
+
+    consulta_parametros = db.execute(modelo_parametros_levante_ceba.select().
+                        where(modelo_parametros_levante_ceba.columns.usuario_id==current_user)).first()
+
+
     consulta_ceba = db.execute(modelo_bovinos_inventario.select().
                         where(modelo_bovinos_inventario.columns.proposito=="Ceba")).fetchall()
     # Recorre los campos de la consulta
@@ -83,16 +108,34 @@ def Estado_Optimo_Ceba(db: Session):
         estado = i[9]
     # bucle if que determina si cumple con el estado optimo o no y el porque no cumple
         if estado == "Vivo":
-          if peso >= 350 and edad in range(24, 37):
-            estado_ceba = "Estado Optimo"
-          elif peso < 350 and edad in range(24, 37):
-            estado_ceba = "Estado NO Optimo, este animal tiene un peso menor a 350 kilos"
-          elif peso >= 350 and edad < 24:
-             estado_ceba = "Estado NO Optimo, este animal tiene menos de 24 meses de edad"
-          elif peso < 350 and edad < 24:
-            estado_ceba = "Estado NO Optimo, este animal tiene menos de 24 meses de edad y menos de 350 kilos"
-          else:
-            estado_ceba = "Estado NO Optimo, este animal tiene una edad mayor a 36 meses"
+            if consulta_parametros is None or consulta_parametros[3] is None:
+                if peso >= 350 and edad in range(24, 37):
+                    estado_ceba = "Estado Optimo"
+                elif peso < 350 and edad in range(24, 37):
+                    estado_ceba = "Estado NO Optimo, este animal tiene un peso menor a 350 kilos"
+                elif peso >= 350 and edad < 24:
+                    estado_ceba = "Estado NO Optimo, este animal tiene menos de 24 meses de edad"
+                elif peso < 350 and edad < 24:
+                    estado_ceba = "Estado NO Optimo, este animal tiene menos de 24 meses de edad y menos de 350 kilos"
+                else:
+                    estado_ceba = "Estado NO Optimo, este animal tiene una edad mayor a 36 meses"
+            else:
+                peso_ceba = consulta_parametros[3]
+                edad_ceba = consulta_parametros[4]
+                if peso >= peso_ceba and edad <=edad_ceba:
+                    estado_ceba = "Estado Optimo"
+                elif peso < peso_ceba and edad <=edad_ceba:
+                    estado_ceba = f"Estado NO Optimo, este animal tiene un peso menor a {peso_ceba} kilos"
+                elif peso < peso_ceba and edad >edad_ceba:
+                    estado_ceba = f"Estado NO Optimo, este animal tiene un peso menor a {peso_ceba} kilos y una edad mayor a {edad_ceba} meses"
+                elif peso >= peso_ceba and edad < edad_ceba:
+                    estado_ceba = "Estado Optimo"
+                elif peso < peso_ceba and edad < edad_ceba:
+                    estado_ceba = f"Estado NO Optimo, este animal tiene un peso menor a {peso_ceba} kilos"
+                elif peso >= peso_ceba and edad > edad_ceba:
+                    estado_ceba = f"Estado NO Optimo, este animal tiene una edad mayor a {edad_ceba} meses"
+                else:
+                    estado_ceba = f"Estado NO Optimo, este animal tiene una edad mayor a {edad_ceba} meses"
         elif estado=="Muerto":
             estado_ceba= "Este animal esta Muerto, no se puede calcular su estado"
         else:

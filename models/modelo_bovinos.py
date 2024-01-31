@@ -409,4 +409,11 @@ modelo_registro_marca = Table("registro_marca", meta, Column("id_registro_marca"
                            Column("nombre_marca_propietario", String(500)),
                            Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
 
+modelo_parametros_levante_ceba = Table("parametros_levante_ceba", meta, Column("id_parametros", Integer, primary_key=True),
+                           Column("peso_levante", Integer),
+                           Column("edad_levante", Integer),
+                           Column("peso_ceba", Integer),
+                           Column("edad_ceba", Integer),
+                           Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
+
 meta.create_all(engine)

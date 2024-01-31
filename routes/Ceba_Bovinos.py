@@ -53,7 +53,7 @@ def get_database_session():
 @Ceba_Bovinos.get("/listar_prod_ceba",response_model=list[esquema_produccion_ceba] )
 async def inventario_ceba(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
     #llamdo de la funcion para calcular
-    Estado_Optimo_Ceba(db=db)
+    Estado_Optimo_Ceba(db=db,current_user=current_user)
     eliminarduplicados(db=db)
 
     #tasa_supervivencia(session=Session, current_user=current_user)
