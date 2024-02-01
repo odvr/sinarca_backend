@@ -16,14 +16,14 @@ from Lib.Lib_eliminar_duplicados_bovinos import eliminarduplicados
 from config.db import get_session
 # # importa el esquema de los bovinos
 from models.modelo_bovinos import modelo_historial_partos, modelo_partos, modelo_levante, modelo_bovinos_inventario, \
-    modelo_indicadores
+    modelo_indicadores, modelo_parametros_levante_ceba
 from datetime import date
 from fastapi import APIRouter, Response
 from fastapi import  status
 from starlette.status import HTTP_204_NO_CONTENT
 from fastapi import  Depends
 from routes.rutas_bovinos import get_current_user
-from schemas.schemas_bovinos import esquema_produccion_levante, Esquema_Usuario
+from schemas.schemas_bovinos import esquema_produccion_levante, Esquema_Usuario, esquema_parametros_levante_ceba
 from routes.rutas_bovinos import get_current_user
 # Configuracion de la libreria para los logs de sinarca
 # Crea un objeto logger
@@ -127,3 +127,64 @@ async def CrearProdLevante(id_bovino: str,proposito:str,db: Session = Depends(ge
         db.close()
 
     return Response(status_code=status.HTTP_201_CREATED)
+
+
+
+"""
+Crea los parametros de levante de acuerdo a los criterios del usuario
+
+"""
+
+
+@Levante_Bovinos.post(
+    "/Crear_Paremetros_Levante/{ParametrizacionEdadLevante}/{ParametrizacionPesoLevante}",
+    status_code=status.HTTP_201_CREATED)
+async def CrearParametrosLevante(ParametrizacionEdadLevante: int,ParametrizacionPesoLevante:int,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+
+
+    try:
+
+
+        consulta = db.execute(
+            modelo_parametros_levante_ceba.select().where(
+                modelo_parametros_levante_ceba.columns.usuario_id == current_user)).first()
+
+
+        if consulta is None:
+            ingresoparametros = modelo_parametros_levante_ceba.insert().values(edad_levante=ParametrizacionEdadLevante, peso_levante=ParametrizacionPesoLevante,usuario_id=current_user)
+
+            db.execute(ingresoparametros)
+            db.commit()
+
+        else:
+
+            db.execute(modelo_parametros_levante_ceba.update().where(modelo_parametros_levante_ceba.c.usuario_id == current_user).values(
+                edad_levante=ParametrizacionEdadLevante, peso_levante=ParametrizacionPesoLevante))
+            db.commit()
+
+
+
+    except Exception as e:
+        logger.error(f'Error al Crear Bovino para la tabla de Produccion de Levante: {e}')
+        raise
+    finally:
+        db.close()
+
+    return Response(status_code=status.HTTP_201_CREATED)
+
+
+
+
+@Levante_Bovinos.get("/listar_datos_levante",response_model=list[esquema_parametros_levante_ceba],tags=["Levante"] )
+async def ListarParametrosLevante(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+
+    try:
+        ListarParametrosLevante = db.query(modelo_parametros_levante_ceba). \
+            filter( modelo_parametros_levante_ceba.c.peso_levante,modelo_parametros_levante_ceba.c.edad_levante,modelo_parametros_levante_ceba.c.usuario_id == current_user).all()
+
+        return ListarParametrosLevante
+    except Exception as e:
+        logger.error(f'Error al obtener TABLA Parametros de LEVANTE: {e}')
+        raise
+    finally:
+        db.close()

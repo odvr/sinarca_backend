@@ -44,11 +44,11 @@ def get_session():
 """
 Se incluye la ruta base para realizar la eliminación del path fisico de las Imagenes de Perfil
 Ejemplo Windowns Rutabase = "C:/Users/ovega/Desktop/Gana/Ganaderia_Sinarca/sinarca_backend"
+Ejemplo Linux Rutabase = "/app"
 
 """
 
-Rutabase = "C:/Users/ovega/Desktop/Gana/Ganaderia_Sinarca/sinarca_backend"
-
+Rutabase = "/app"
 
 
 
