@@ -286,18 +286,27 @@ def endogamia(session: Session,current_user):
              pajilla = session.query(modelo_registro_pajillas).where(
                  modelo_registro_pajillas.columns.id_pajillas == id_padre).\
                  filter(modelo_registro_pajillas.columns.usuario_id == current_user).first()
-             print(pajilla)
-             nombre_pajilla= f'Pajilla {pajilla[1]} ({pajilla[3]})'
-             session.execute(modelo_arbol_genealogico.update().values(nombre_bovino_padre=nombre_pajilla).filter(
-                 modelo_arbol_genealogico.columns.id_bovino == id))
-             session.commit()
+             try:
+                 nombre_pajilla= f'Pajilla {pajilla[1]} ({pajilla[3]})'
+                 session.execute(modelo_arbol_genealogico.update().values(nombre_bovino_padre=nombre_pajilla).filter(
+                     modelo_arbol_genealogico.columns.id_bovino == id))
+                 session.commit()
+             except Exception as e:
+                 logger.error(f'AL CONSULTAR PAJILLAS nombre_pajilla : {e}')
+                 raise
          else:
-             nombre_bovino_padre = session.query(modelo_bovinos_inventario).where(
-                 modelo_bovinos_inventario.columns.id_bovino == id_padre).first()
 
-             session.execute(modelo_arbol_genealogico.update().values(nombre_bovino_padre=nombre_bovino_padre[12]).where(
-                 modelo_arbol_genealogico.columns.id_bovino == id))
-             session.commit()
+             try:
+                 nombre_bovino_padre = session.query(modelo_bovinos_inventario).where(
+                     modelo_bovinos_inventario.columns.id_bovino == id_padre).first()
+
+                 session.execute(
+                     modelo_arbol_genealogico.update().values(nombre_bovino_padre=nombre_bovino_padre[12]).where(
+                         modelo_arbol_genealogico.columns.id_bovino == id))
+                 session.commit()
+             except Exception as e:
+                logger.error(f'AL CONSULTAR INCENTARIO modelo_bovinos_inventario : {e}')
+                raise
 
          nombre_bovino_madre = list(session.query(modelo_bovinos_inventario).where(modelo_bovinos_inventario.columns.id_bovino == id_madre).first())
          # actualizacion del campo
