@@ -4,20 +4,19 @@ Librerias requeridas
 import logging
 
 import crud
-from Lib.Lib_Intervalo_Partos import intervalo_partos
-from Lib.cuvas_lactancias import Reporte_Curvas_lactancia_Mensuales_General
+from typing import Annotated
 from Lib.palpaciones import palpaciones
 # # importa la conexion de la base de datos
 from config.db import get_session
-
+from fastapi import Form
 # # importa el esquema de los bovinos
-from models.modelo_bovinos import modelo_litros_leche, modelo_bovinos_inventario, modelo_palpaciones
-from fastapi import  status,  APIRouter, Response
+from models.modelo_bovinos import modelo_palpaciones
+from fastapi import  status,  APIRouter, Response,Request
 from datetime import date
 from starlette.status import HTTP_204_NO_CONTENT
 from fastapi import  Depends
 from routes.rutas_bovinos import get_current_user
-from schemas.schemas_bovinos import esquema_litros_leche, Esquema_Usuario, esquema_palpaciones
+from schemas.schemas_bovinos import  Esquema_Usuario, esquema_palpaciones
 from sqlalchemy.orm import Session
 # Configuracion de la libreria para los logs de sinarca
 # Crea un objeto logger
@@ -81,14 +80,16 @@ async def listado_palpaciones_animal(id_bovino: str,db: Session = Depends(get_da
 """
 Crea los Registros de Palpaciones
 """
+@Palpaciones_Bovinos.post("/Crear_Registro_Palpaciones_bovino", status_code=status.HTTP_201_CREATED)
 
-
-@Palpaciones_Bovinos.post("/Crear_Registro_Palpaciones_bovino/{id_bovino}/{fecha_palpacion}/{diagnostico_prenez}/{observaciones}", status_code=status.HTTP_201_CREATED)
-async def crear_registro_listros_diarios(id_bovino:str,fecha_palpacion:date,diagnostico_prenez:str,observaciones:str,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user) ):
-
+async def crear_registro_listros_diarios(id_bovino: str = Form(...),
+                                        fecha_palpacion: date = Form(...),
+                                        diagnostico_prenez: str = Form(...),
+                                        observaciones: str = Form(...),
+                                        db: Session = Depends(get_database_session),
+                                        current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
 
-        palpaciones(session=db, current_user=current_user)
         "Clase para Buscar El Nombre de los Bovinos"
         Nombre_Bovino = crud.bovinos_inventario.Buscar_Nombre(db=db, id_bovino=id_bovino, current_user=current_user)
 
