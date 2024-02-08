@@ -584,6 +584,10 @@ class esquema_registro_pajillas(BaseModel):
     raza: Optional[str] = None
     nombre_toro: Optional[str] = None
     productor: Optional[str] = None
+    unidades: Optional[int] = None
+    precio: Optional[int] = None
+    nombre_canastilla: Optional[str] = None
+    id_canastilla: Optional[int] = None
     usuario_id: Optional[str] = None
     class Config:
         orm_mode = True
@@ -607,6 +611,16 @@ class esquema_parametros_levante_ceba(BaseModel):
     edad_levante: Optional[int] = None
     peso_ceba: Optional[int] = None
     edad_ceba: Optional[int] = None
+    usuario_id: Optional[str] = None
+    class Config:
+        orm_mode = True
+        env_file = ".env"
+
+
+class esquema_canastillas(BaseModel):
+    id_canastilla: int
+    nombre_canastilla: Optional[str] = None
+    unidades_disponibles: Optional[str] = None
     usuario_id: Optional[str] = None
     class Config:
         orm_mode = True

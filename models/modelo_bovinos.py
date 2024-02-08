@@ -401,7 +401,12 @@ modelo_registro_pajillas = Table("registro_pajillas", meta, Column("id_pajillas"
                               Column("Codigo_toro_pajilla", String(300)),
                               Column("raza", String(300)),
                               Column("nombre_toro", String(300)),
-                              Column("productor", String(300)),Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
+                              Column("productor", String(300)),
+                              Column("unidades", Integer),
+                              Column("precio", Integer),
+                              Column("nombre_canastilla", String(300)),
+                              Column("id_canastilla", Integer, ForeignKey("canatillas.id_canastilla")),
+                              Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
 
 
 modelo_registro_marca = Table("registro_marca", meta, Column("id_registro_marca", Integer, primary_key=True),
@@ -414,6 +419,11 @@ modelo_parametros_levante_ceba = Table("parametros_levante_ceba", meta, Column("
                            Column("edad_levante", Integer),
                            Column("peso_ceba", Integer),
                            Column("edad_ceba", Integer),
+                           Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
+
+modelo_canastillas = Table("canastillas", meta, Column("id_canastilla", Integer, primary_key=True),
+                           Column("nombre_canastilla", String(300)),
+                           Column("unidades_disponibles", Integer),
                            Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
 
 meta.create_all(engine)
