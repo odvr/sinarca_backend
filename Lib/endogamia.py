@@ -305,7 +305,7 @@ def endogamia(session: Session,current_user):
                          modelo_arbol_genealogico.columns.id_bovino == id))
                  session.commit()
              except Exception as e:
-                logger.error(f'AL CONSULTAR INCENTARIO modelo_bovinos_inventario : {e}')
+                logger.error(f'AL CONSULTAR INCENTARIO modelo_bovinos_inventario : {e} ')
                 raise
 
          nombre_bovino_madre = list(session.query(modelo_bovinos_inventario).where(modelo_bovinos_inventario.columns.id_bovino == id_madre).first())

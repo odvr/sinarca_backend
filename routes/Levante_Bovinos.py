@@ -179,6 +179,7 @@ async def CrearParametrosLevante(ParametrizacionEdadLevante: int,Parametrizacion
 async def ListarParametrosLevante(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
 
     try:
+        Estado_Optimo_Levante(db=db, current_user=current_user)
         ListarParametrosLevante = db.query(modelo_parametros_levante_ceba). \
             filter( modelo_parametros_levante_ceba.c.peso_levante,modelo_parametros_levante_ceba.c.edad_levante,modelo_parametros_levante_ceba.c.usuario_id == current_user).all()
 
