@@ -4,9 +4,11 @@ Librerias requeridas
 '''
 
 import logging
-from fastapi import Form
+from fastapi import Form,Response
 from fastapi import APIRouter, Depends
-from Lib.canastillas_pajillas import nombre_canastilla, conteo_pajillas
+from starlette.status import HTTP_204_NO_CONTENT
+
+from Lib.canastillas_pajillas import nombre_canastilla, conteo_pajillas, eliminacion_canastilla
 from Lib.eliminacion_pajillas import eliminacion_pajilla
 
 from config.db import   get_session
@@ -164,6 +166,21 @@ async def inventario_Canastillas(db: Session = Depends(get_database_session),cur
 
     return items
 
+@Pajillas.delete("/eliminar_Canastilla/{id_canastilla}", status_code=HTTP_204_NO_CONTENT)
+async def eliminar_Canastilla(id_canastilla: int,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user) ):
 
+    try:
+        eliminacion_canastilla(id_canastilla_eliminar=id_canastilla,session=db)
+
+
+
+    except Exception as e:
+        logger.error(f'Error al Intentar Eliminar Canastilla: {e}')
+        raise
+    finally:
+        db.close()
+
+    # retorna un estado de no contenido
+    return Response(status_code=HTTP_204_NO_CONTENT)
 
 
