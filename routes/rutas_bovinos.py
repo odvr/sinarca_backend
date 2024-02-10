@@ -220,7 +220,7 @@ async def animales_ceba(db: Session = Depends(get_database_session),current_user
     db.execute(update(modelo_indicadores).
                     where(modelo_indicadores.c.id_indicadores == current_user).
                     values(animales_ceba=prop_ceba))
-    logger.info(f'Funcion animales_ceba {prop_ceba} ')
+
     db.commit()
     db.close()
   except Exception as e:
@@ -272,7 +272,7 @@ async def animales_edad_9_12(db: Session = Depends(get_database_session),current
     db.execute(update(modelo_indicadores).
                     where(modelo_indicadores.c.id_indicadores == current_user).
                     values(animales_rango_edades_9_12=edades_9_12))
-    logger.info(f'Funcion animales_edad_9_12 {edades_9_12} ')
+
     db.commit()
     db.close()
   except Exception as e:
@@ -298,7 +298,7 @@ async def animales_edad_12_24(db: Session = Depends(get_database_session),curren
     db.execute(update(modelo_indicadores).
                     where(modelo_indicadores.c.id_indicadores == current_user).
                     values(animales_rango_edades_12_24=edades_12_24))
-    logger.info(f'Funcion animales_edad_12_24 {edades_12_24} ')
+
     db.commit()
     db.close()
  except Exception as e:
@@ -324,7 +324,7 @@ async def animales_edad_24_36(db: Session = Depends(get_database_session),curren
         db.execute(update(modelo_indicadores).
                     where(modelo_indicadores.c.id_indicadores == current_user).
                     values(animales_rango_edades_24_36=edades_24_36))
-        logger.info(f'Función animales_edad_24_36 {edades_24_36} ')
+
         db.commit()
         return edades_24_36
     except Exception as e:
@@ -346,7 +346,7 @@ async def animales_edad_mayor_a_36(db: Session = Depends(get_database_session),c
     db.execute(update(modelo_indicadores).
                     where(modelo_indicadores.c.id_indicadores == current_user).
                     values(animales_rango_edades_mayor_36=edades_mayor_36))
-    logger.info(f'Funcion animales_edad_mayor_a_36 {edades_mayor_36} ')
+
     db.commit()
   except Exception as e:
       logger.error(f'Error Funcion animales_edad_mayor_a_36: {e}')
@@ -366,7 +366,7 @@ async def animales_sexo_macho(db: Session = Depends(get_database_session),curren
     db.execute(update(modelo_indicadores).
                     where(modelo_indicadores.c.id_indicadores == current_user).
                     values(machos=machos))
-    logger.info(f'Funcion animales_sexo_macho {machos} ')
+
     db.commit()
     db.close()
   except Exception as e:
@@ -387,7 +387,7 @@ async def animales_sexo_hembra(db: Session = Depends(get_database_session),curre
     db.execute(update(modelo_indicadores).
                     where(modelo_indicadores.c.id_indicadores == current_user).
                     values(hembras=hembras))
-    logger.info(f'Funcion animales_sexo_hembra {hembras} ')
+
     db.commit()
     db.close()
   except Exception as e:

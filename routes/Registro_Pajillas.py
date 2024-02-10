@@ -75,7 +75,7 @@ async def crear_registro_pajilla(Codigo_toro_pajilla:str= Form(...),raza:str= Fo
 async def editar_registro_pajilla(id_pajillas:int= Form(...), unidades:Optional[int] = Form(None), precio:Optional[int] = Form(None),id_canastilla:Optional[int] = Form(None), db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
 
     try:
-        print(id_canastilla)
+
 
         db.execute(modelo_registro_pajillas.update().values( usuario_id=current_user,unidades=unidades,precio=precio,id_canastilla=id_canastilla).where(modelo_registro_pajillas.columns.id_pajillas == id_pajillas))
         db.commit()
