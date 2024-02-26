@@ -157,111 +157,45 @@ def capacidad_carga(session:Session,current_user):
   try:
     # consulta del resultado del aforo
     consulta_aforo = session.query(modelo_capacidad_carga). \
-          where(modelo_capacidad_carga.c.id_capacidad == current_user).all()
+          where(modelo_capacidad_carga.c.usuario_id == current_user).all()
     for i in consulta_aforo:
         # Toma el resultado del aforo (campo 1)
         # el aforo determina cuantos kilogramos de materia seca produce un metro cuadrado de pasto en el predio
         aforo = i[1]
+        # Toma el id del poteror o aforo realizado (campo)
+        id_capacidad = i[0]
         # Toma la cantidad de hectareas que posee el usuario(campo 2)
         hectareas_predio = i[2]
-        # Toma el tipo de muestra el usuario(campo 3)
-        tipo_aforo = i[3]
-        # consulta de sumatoria de las unidades animales
-        if aforo is None or aforo==0:
-            interpertacion_capacidad = "No posees aforos registrados hasta el momento"
-            carga_animal_recomendada = 0
-            carga_animal_usuario = 0
-            aforo_defecto=0
-            hectareas_defecto=0
-            tipo_de_muestra_defecto="Sin seleccionar"
-            session.execute(modelo_capacidad_carga.update().values(medicion_aforo=aforo_defecto,
-                                                                   tipo_de_muestra=tipo_de_muestra_defecto,
-                                                                    hectareas_predio=hectareas_defecto,
-                                                                   capacidad_carga=interpertacion_capacidad,
-                                                                   carga_animal_recomendada=carga_animal_recomendada,
-                                                                   carga_animal_usuario=carga_animal_usuario). \
-                            where(modelo_capacidad_carga.columns.id_capacidad == current_user))
-            session.commit()
-        elif hectareas_predio is None or hectareas_predio==0:
-            interpertacion_capacidad = "No posees aforos registrados hasta el momento"
-            carga_animal_recomendada = 0
-            carga_animal_usuario = 0
-            aforo_defecto=0
-            hectareas_defecto=0
-            tipo_de_muestra_defecto="Sin seleccionar"
-            session.execute(modelo_capacidad_carga.update().values(medicion_aforo=aforo_defecto,
-                                                                   tipo_de_muestra=tipo_de_muestra_defecto,
-                                                                    hectareas_predio=hectareas_defecto,
-                                                                   capacidad_carga=interpertacion_capacidad,
-                                                                   carga_animal_recomendada=carga_animal_recomendada,
-                                                                   carga_animal_usuario=carga_animal_usuario). \
-                            where(modelo_capacidad_carga.columns.id_capacidad == current_user))
-            session.commit()
-        elif tipo_aforo is None:
-            interpertacion_capacidad = "No posees aforos registrados hasta el momento"
-            carga_animal_recomendada = 0
-            carga_animal_usuario = 0
-            aforo_defecto=0
-            hectareas_defecto=0
-            tipo_de_muestra_defecto="Sin seleccionar"
-            session.execute(modelo_capacidad_carga.update().values(medicion_aforo=aforo_defecto,
-                                                                   tipo_de_muestra=tipo_de_muestra_defecto,
-                                                                    hectareas_predio=hectareas_defecto,
-                                                                   capacidad_carga=interpertacion_capacidad,
-                                                                   carga_animal_recomendada=carga_animal_recomendada,
-                                                                   carga_animal_usuario=carga_animal_usuario). \
-                            where(modelo_capacidad_carga.columns.id_capacidad == current_user))
-            session.commit()
-        else:
-            consulta_unidades_animales_usuario = session.query(
-                func.sum(modelo_carga_animal_y_consumo_agua.columns.valor_unidad_animal)).\
-                filter(modelo_capacidad_carga.columns.usuario_id == current_user).all()
-            for i in consulta_unidades_animales_usuario:
-                # Toma la totalidad de unidades animales en este caso es el campo 0
-                total_unidades_animales = i[0]
-                # se calula la carga animal (Unidades animales por hectarea) del usuario
-                carga_animal_usuario = total_unidades_animales / hectareas_predio
-                # determinacion de produccion de pasto por hectarea
-                # conversion de hectareas del predio a metros cuadrados
-                metros_predio = hectareas_predio * 10000
-                # dependiendo de la seleccion de tipo de muestra o aforo varia el calculo de la capacidad de carga
-                if tipo_aforo == "Pasto recien cortado":
-                    # determinacion de la materia seca
-                    # el porcentaje de humedad del pasto es 80% (tiene un 20% de materia seca)
-                    materia_seca_por_metro_cuadrado = 0.2 * aforo
-                    produccion_materia_seca = materia_seca_por_metro_cuadrado * metros_predio
-                    # determinacion de la cantidad de unidades animales que esta produccion puede mantener al dia
-                    # una unidad animal puede consumir hasta 16 kilos de materia seca al dia
-                    capacidad_unidades_animales_dia = round((produccion_materia_seca / 16), 2)
-                    interpertacion_capacidad = f'con tus hectareas de pasto, puedes mantener hasta {capacidad_unidades_animales_dia} unidades animales'
-                    # calculo de carga animal recomendada (cuentas unidades animales puede soportar una hectarea)
-                    materia_seca_por_hectarea = materia_seca_por_metro_cuadrado * 10000
-                    carga_animal_recomendada = materia_seca_por_hectarea / 16
-                    # actualizacion de campos
-                    session.execute(modelo_capacidad_carga.update().values(capacidad_carga=interpertacion_capacidad,
-                                                                           carga_animal_recomendada=carga_animal_recomendada,
-                                                                           carga_animal_usuario=carga_animal_usuario). \
-                                    where(modelo_capacidad_carga.columns.id_capacidad == current_user))
-                    session.commit()
+        # Toma el periodo de ocupacion
+        periodo_de_ocupacion = i[3]
 
-                elif tipo_aforo == "Materia seca":
-                    # determinacion de la materia seca
-                    # al tratarse de paso seco, la materia seca sera el mismo pasto seco
-                    materia_seca_por_metro_cuadrado = aforo
-                    produccion_materia_seca = materia_seca_por_metro_cuadrado * metros_predio
-                    # determinacion de la cantidad de unidades animales que esta produccion puede mantener al dia
-                    # una unidad animal puede consumir hasta 16 kilos de materia seca al dia
-                    capacidad_unidades_animales_dia = round((produccion_materia_seca / 16), 2)
-                    interpertacion_capacidad = f'con tus hectareas de pasto, puedes mantener hasta {capacidad_unidades_animales_dia} unidades animales'
-                    # calculo de carga animal recomendada (cuentas unidades animales puede soportar una hectarea)
-                    materia_seca_por_hectarea = materia_seca_por_metro_cuadrado * 10000
-                    carga_animal_recomendada = materia_seca_por_hectarea / 16
-                    # actualizacion de campos
-                    session.execute(modelo_capacidad_carga.update().values(capacidad_carga=interpertacion_capacidad,
-                                                                           carga_animal_recomendada=carga_animal_recomendada,
-                                                                           carga_animal_usuario=carga_animal_usuario). \
-                                    where(modelo_capacidad_carga.columns.id_capacidad == current_user))
-                    session.commit()
+        #se convierten las hectareas a metros
+        metros_predio=hectareas_predio*10000
+
+        #se calcula la disponibilidad se forraje (se obtienen en Kg por metro cuadrado).
+        #adicionalmente se utliza un factor de uso del 60% (solo se tuliza 60% del pasto)
+        #pues se pierde pasto por zonas de descanso, excretas, pisadas, etc..
+
+        factor_uso=0.6
+        forraje_verde_disponible=(metros_predio*(aforo/1000))*factor_uso
+
+        #se conoce que una nimal come entre el 12 al 15% de su pso vivo en forraje
+        #un vaca de 400 kilos comeria entre 48 a 60 kilos de forraje verde al dia
+        #se utiliza un promedrio de 54 kg
+
+        consumo_promedio=54
+
+        #obtenemos la capacidad de carga
+        capacidad_carga_animal_ajustada=(forraje_verde_disponible/consumo_promedio)/periodo_de_ocupacion
+
+        #se obtiene una interpretacion
+        interpretacion=f'Con tus {hectareas_predio} hectareas, puedes mantener hasta {round(capacidad_carga_animal_ajustada,2)} unidades animales (1 unidad animal=400 kg) durante {periodo_de_ocupacion} dia(s) de ocupacion'
+
+        # actualizacion de campos
+        session.execute(modelo_capacidad_carga.update().values(interpretacion=interpretacion,
+                                                               carga_animal_usuario=round(capacidad_carga_animal_ajustada,2)). \
+                        where(modelo_capacidad_carga.columns.id_capacidad == id_capacidad))
+        session.commit()
   except Exception as e:
       logger.error(f'Error Funcion capacidad_carga: {e}')
       raise

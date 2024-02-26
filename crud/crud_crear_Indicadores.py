@@ -26,13 +26,6 @@ class Crear_Indicadores:
         db.commit()
         db.close()
         return ingreso
-    def Crear_indicadores_capacidad_carga(self, db: Session, current_user):
-        ingreso = modelo_capacidad_carga.insert().values(id_capacidad=current_user )
-        db.commit()
-        db.close()
-        return ingreso
-
-
 
 
 crear_indicadores = Crear_Indicadores()

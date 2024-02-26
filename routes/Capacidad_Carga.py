@@ -86,16 +86,19 @@ async def listar_carga_animales(db: Session = Depends(get_database_session),curr
 
 
 @capacidad_carga_rutas.post("/crear_capacidad_carga/{medicion_aforo}/{hectareas_predio}/{tipo_de_muestra}", status_code=status.HTTP_201_CREATED)
-async def crear_capacidad_carga(medicion_aforo: float,hectareas_predio :float,tipo_de_muestra:str,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+async def crear_capacidad_carga(medicion_aforo: float,hectareas_predio :float,periodo_ocupacion:int,nombre_potrero:str,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
 
 
     try:
 
+        ingresoCapacidad = modelo_capacidad_carga.insert().values(medicion_aforo=medicion_aforo,
+                                                                  hectareas_predio=hectareas_predio,
+                                                                  periodo_ocupacion=periodo_ocupacion,
+                                                                  nombre_potrero=nombre_potrero,
+                                                                  usuario_id=current_user)
 
-        hectareas_forraje = update(modelo_capacidad_carga).where(modelo_capacidad_carga.c.id_capacidad == current_user).values(
-            medicion_aforo=medicion_aforo,hectareas_predio=hectareas_predio,tipo_de_muestra=tipo_de_muestra,usuario_id=current_user)
-        db.execute(hectareas_forraje)
-        db.commit()
+
+        db.execute(ingresoCapacidad)
         carga_animal(session=db,current_user=current_user)
         capacidad_carga(session=db,current_user=current_user)
 
