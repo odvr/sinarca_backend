@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 import logging
 
 from Lib.actualizacion_peso import actualizacion_peso
-from Lib.carga_animal_capacidad_carga import carga_animal,capacidad_carga
+from Lib.carga_animal_capacidad_carga import carga_animal, capacidad_carga, eliminacion_capacidad_carga
 # # importa la conexion de la base de datos
 from config.db import get_session
 # # importa el esquema de los bovinos
@@ -85,17 +85,20 @@ async def listar_carga_animales(db: Session = Depends(get_database_session),curr
 
 
 
-@capacidad_carga_rutas.post("/crear_capacidad_carga/{medicion_aforo}/{hectareas_predio}/{tipo_de_muestra}", status_code=status.HTTP_201_CREATED)
-async def crear_capacidad_carga(medicion_aforo: float,hectareas_predio :float,tipo_de_muestra:str,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+@capacidad_carga_rutas.post("/crear_capacidad_carga/{medicion_aforo}/{hectareas_predio}/{periodo_ocupacion}", status_code=status.HTTP_201_CREATED)
+async def crear_capacidad_carga(medicion_aforo: float,hectareas_predio :float,periodo_ocupacion:int,nombre_potrero:str,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
 
 
     try:
 
+        ingresoCapacidad = modelo_capacidad_carga.insert().values(medicion_aforo=medicion_aforo,
+                                                                  hectareas_predio=hectareas_predio,
+                                                                  periodo_ocupacion=periodo_ocupacion,
+                                                                  nombre_potrero=nombre_potrero,
+                                                                  usuario_id=current_user)
 
-        hectareas_forraje = update(modelo_capacidad_carga).where(modelo_capacidad_carga.c.id_capacidad == current_user).values(
-            medicion_aforo=medicion_aforo,hectareas_predio=hectareas_predio,tipo_de_muestra=tipo_de_muestra,usuario_id=current_user)
-        db.execute(hectareas_forraje)
-        db.commit()
+
+        db.execute(ingresoCapacidad)
         carga_animal(session=db,current_user=current_user)
         capacidad_carga(session=db,current_user=current_user)
 
@@ -106,3 +109,19 @@ async def crear_capacidad_carga(medicion_aforo: float,hectareas_predio :float,ti
         db.close()
 
     return Response(status_code=status.HTTP_201_CREATED)
+
+
+
+@capacidad_carga_rutas.delete("/eliminar_capacidad_carga/{id_capacidad_eliminar}")
+async def eliminar_capacidad_carga(id_capacidad_eliminar: int,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user) ):
+
+    try:
+        eliminacion_capacidad_carga(id_capacidad_eliminar,session=db)
+        # retorna un estado de no contenido
+        return
+
+    except Exception as e:
+        logger.error(f'Error al Intentar eliminar capacidad de carga: {e}')
+        raise
+    finally:
+        db.close()

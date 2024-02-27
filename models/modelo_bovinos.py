@@ -306,15 +306,14 @@ modelo_carga_animal_y_consumo_agua = Table("carga_animal", meta, Column("id_carg
                                            Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")),
                                            Column("nombre_bovino", String(300)))
 
-modelo_capacidad_carga = Table("capacidad_carga", meta, Column("id_capacidad", String(300), primary_key=True),
+modelo_capacidad_carga = Table("capacidad_carga", meta, Column("id_capacidad", Integer, primary_key=True),
                                Column("medicion_aforo", Float),
                                Column("hectareas_predio", Float),
-                               Column("tipo_de_muestra", String(300)),
-                               Column("carga_animal_recomendada", Float),
-                               Column("capacidad_carga", String(300)),
+                               Column("periodo_ocupacion", Integer),
                                Column("carga_animal_usuario", Float),
                                Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")),
-                               Column("nombre_bovino", String(300)))
+                               Column("nombre_potrero", String(300)),
+                               Column("interpretacion", String(300)))
 
 modelo_calculadora_hectareas_pastoreo = Table("pastoreo", meta, Column("id_pastoreo", Integer, primary_key=True),
                                               Column("id_bovino", Integer, ForeignKey("bovinos.id_bovino")),
