@@ -201,3 +201,24 @@ def capacidad_carga(session:Session,current_user):
       raise
   finally:
       session.close()
+
+
+"la siguiente funcione tiene como objetivo eliminar un registro de capacidad de carga"
+
+def eliminacion_capacidad_carga(id_capacidad_eliminar, session: Session):
+    try:
+        consulta_capacidad=session.query(modelo_capacidad_carga).\
+          filter(modelo_capacidad_carga.c.id_capacidad==id_capacidad_eliminar).all()
+        if consulta_capacidad is None:
+            pass
+        else:
+
+            session.execute(modelo_capacidad_carga.delete().where(modelo_capacidad_carga.c.id_capacidad==id_capacidad_eliminar))
+
+            session.commit()
+
+    except Exception as e:
+        logger.error(f'Error Funcion eliminacion_capacidad_carga:{e}')
+        raise
+    finally:
+        session.close()
