@@ -12,8 +12,9 @@ ADD COLUMN nombre_potrero VARCHAR(300);
 ADD COLUMN interpretacion VARCHAR(300);
 
 /* Ajustes para tabla de capacidad de carga (se cambia id de string a entero)*/
-ALTER TABLE `capacidad_carga`
-	CHANGE COLUMN `id_capacidad` `id_capacidad` INT(255) NOT NULL AUTO_INCREMENT FIRST;
+ALTER TABLE capacidad_carga DROP COLUMN id_capacidad;
+ALTER TABLE capacidad_carga ADD id_capacidad INT AUTO_INCREMENT PRIMARY KEY FIRST;
+
 
 
 
