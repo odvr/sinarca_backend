@@ -425,4 +425,19 @@ modelo_canastillas = Table("canastillas", meta, Column("id_canastilla", Integer,
                            Column("unidades_disponibles", Integer),
                            Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
 
+modelo_registro_celos = Table("registro_celos", meta, Column("id_celo", Integer, primary_key=True),
+                               Column("id_bovino", Integer),
+                               Column("nombre_bovino", String(300)),
+                               Column("fecha_celo", Date),
+                               Column("observaciones", String(300)),
+                               Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
+
+modelo_tasas_concepcion = Table("tasas_concepcion", meta, Column("id_tasa", Integer, primary_key=True),
+                               Column("id_bovino", Integer),
+                               Column("nombre_bovino", String(300)),
+                               Column("servicios_concepcion", Integer),
+                               Column("fecha_prenez", Date),
+                               Column("tasa_concepcion", Float),
+                               Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
+
 meta.create_all(engine)

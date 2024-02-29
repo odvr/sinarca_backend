@@ -624,3 +624,27 @@ class esquema_canastillas(BaseModel):
     class Config:
         orm_mode = True
         env_file = ".env"
+
+
+class esquema_registro_celos(BaseModel):
+    id_celo: int
+    id_bovino: int
+    nombre_bovino: Optional[str] = None
+    fecha_celo: date
+    observaciones: str
+    usuario_id: Optional[str] = None
+    class Config:
+        orm_mode = True
+        env_file = ".env"
+
+class esquema_tasas_concepcion(BaseModel):
+    id_tasa: int
+    id_bovino: int
+    nombre_bovino: Optional[str] = None
+    servicios_concepcion: int
+    fecha_prenez: date
+    tasa_concepcion: Optional[float] = None
+    usuario_id: Optional[str] = None
+    class Config:
+        orm_mode = True
+        env_file = ".env"
