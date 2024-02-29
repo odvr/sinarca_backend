@@ -35,6 +35,7 @@ from routes.IEP_Razas import IEP_Razas
 from routes.IntevaloPartos import IntevaloPartos
 from routes.Registro_Litros_Diarios import Produccion_Leche_Litros_Diarios
 from routes.Veterinaria import Veterinaria
+from routes.registro_celos import registro_celos_rutas
 
 '''
 CORS o "intercambio de recursos de origen cruzado"se refiere a las situaciones 
@@ -85,6 +86,7 @@ app.include_router(Pajillas)
 app.include_router(appArchivos)
 app.include_router(Palpaciones_Bovinos)
 app.include_router(Historial_Tasa_Supervivencia)
+app.include_router(registro_celos_rutas)
 
 
 
