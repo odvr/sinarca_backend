@@ -143,63 +143,43 @@ Crear en la tabla de partos para calcular la fecha aproximada
     status_code=status.HTTP_201_CREATED,)
 async def CrearFechaAproximadaParto(id_bovino: str,fecha_estimada_prenez:date, id_bovino_padre:str,tipo_monta:str, db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user) ):
     try:
-        fecha_aproximada_parto(session=db)
-        intervalo_partos(session=db, current_user=current_user)
 
-        consulta = db.execute(
-            modelo_partos.select().where(
-                modelo_partos.columns.id_bovino == id_bovino)).first()
         """Busca el Nombre del Bovino"""
 
 
         nombre_bovino = crud.bovinos_inventario.Buscar_Nombre(db=db, id_bovino=id_bovino, current_user=current_user)
 
+        if tipo_monta == "Inseminación":
+            nombre_pajilla = crud.bovinos_inventario.Buscar_Nombre_Pajilla(db=db,
+                                                                           Codigo_toro_pajilla=id_bovino_padre,
+                                                                           current_user=current_user)
 
-        if consulta is None:
-
-            if tipo_monta=="Inseminación":
-                nombre_pajilla = crud.bovinos_inventario.Buscar_Nombre_Pajilla(db=db,
-                                                                               Codigo_toro_pajilla=id_bovino_padre,
-                                                                               current_user=current_user)
-
-                ingresocalcularFechaParto_pajilla = modelo_partos.insert().values(id_bovino=id_bovino,
-                                                                          fecha_estimada_prenez=fecha_estimada_prenez,
-                                                                          usuario_id=current_user,
-                                                                          nombre_bovino=nombre_bovino,
-                                                                          id_reproductor=id_bovino_padre,
-                                                                          nombre_bovino_reproductor=nombre_pajilla,tipo=tipo_monta)
-                db.execute(ingresocalcularFechaParto_pajilla)
-                db.commit()
-            else:
-                nombre_bovino_repro = crud.bovinos_inventario.Buscar_Nombre(db=db, id_bovino=id_bovino_padre,
-                                                                            current_user=current_user)
-
-                ingresocalcularFechaParto = modelo_partos.insert().values(id_bovino=id_bovino,
-                                                                      fecha_estimada_prenez=fecha_estimada_prenez,usuario_id=current_user,nombre_bovino=nombre_bovino,id_reproductor= id_bovino_padre,nombre_bovino_reproductor=nombre_bovino_repro,tipo=tipo_monta)
-
-                db.execute(ingresocalcularFechaParto)
-                db.commit()
-
+            ingresocalcularFechaParto_pajilla = modelo_partos.insert().values(id_bovino=id_bovino,
+                                                                              fecha_estimada_prenez=fecha_estimada_prenez,
+                                                                              usuario_id=current_user,
+                                                                              nombre_bovino=nombre_bovino,
+                                                                              id_reproductor=id_bovino_padre,
+                                                                              nombre_bovino_reproductor=nombre_pajilla,
+                                                                              tipo=tipo_monta)
+            db.execute(ingresocalcularFechaParto_pajilla)
+            db.commit()
         else:
-            if tipo_monta == "Inseminación":
-                nombre_pajilla = crud.bovinos_inventario.Buscar_Nombre_Pajilla(db=db,
-                                                                               Codigo_toro_pajilla=id_bovino_padre,
-                                                                               current_user=current_user)
-                db.execute(modelo_partos.update().where(modelo_partos.c.id_bovino == id_bovino).values(
-                    fecha_estimada_prenez=fecha_estimada_prenez, usuario_id=current_user, nombre_bovino=nombre_bovino,
-                    id_reproductor=id_bovino_padre, nombre_bovino_reproductor=nombre_pajilla, tipo=tipo_monta))
-                db.commit()
+            nombre_bovino_repro = crud.bovinos_inventario.Buscar_Nombre(db=db, id_bovino=id_bovino_padre,
+                                                                        current_user=current_user)
 
-            else:
-                nombre_bovino_repro = crud.bovinos_inventario.Buscar_Nombre(db=db, id_bovino=id_bovino_padre,
-                                                                            current_user=current_user)
-                db.execute(modelo_partos.update().where(modelo_partos.c.id_bovino == id_bovino).values(
-                    fecha_estimada_prenez=fecha_estimada_prenez, usuario_id=current_user, nombre_bovino=nombre_bovino,
-                    id_reproductor=id_bovino_padre, nombre_bovino_reproductor=nombre_bovino_repro, tipo=tipo_monta))
-                db.commit()
+            ingresocalcularFechaParto = modelo_partos.insert().values(id_bovino=id_bovino,
+                                                                      fecha_estimada_prenez=fecha_estimada_prenez,
+                                                                      usuario_id=current_user,
+                                                                      nombre_bovino=nombre_bovino,
+                                                                      id_reproductor=id_bovino_padre,
+                                                                      nombre_bovino_reproductor=nombre_bovino_repro,
+                                                                      tipo=tipo_monta)
 
+            db.execute(ingresocalcularFechaParto)
+            db.commit()
 
-
+        fecha_aproximada_parto(session=db)
+        intervalo_partos(session=db, current_user=current_user)
 
 
     except Exception as e:

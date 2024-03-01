@@ -295,22 +295,23 @@ def fecha_aproximada_parto(session=Session):
   try:
     # join de tablas
 
-
-    consulta_vacas = session.query(modelo_partos.c.id_bovino,modelo_partos.c.fecha_estimada_prenez, modelo_bovinos_inventario.c.edad,
+    consulta_vacas = session.query(modelo_partos.c.id_parto,modelo_partos.c.id_bovino,modelo_partos.c.fecha_estimada_prenez, modelo_bovinos_inventario.c.edad,
                                      modelo_bovinos_inventario.c.peso, modelo_bovinos_inventario.c.estado). \
         join(modelo_partos,modelo_partos.c.id_bovino == modelo_bovinos_inventario.c.id_bovino).all()
     #recorrer los campos
     for i in consulta_vacas:
-        # Toma el ID del bovino en este caso es el campo 0
-        id = i[0]
-        # Toma la edad del animal en este caso es el campo 1
-        fecha_estimada_prenez = i[1]
-        # Toma la edad del animal en este caso es el campo 1
-        edad = i[2]
-        # Toma el peso del animal en este caso es el campo 2
-        peso = i[3]
-        # Toma el estado del animal en este caso es el campo 3
-        estado = i[4]
+        # Toma el ID de la monta en este caso es el campo 0
+        id_monta = i[0]
+        # Toma el ID del bovino en este caso es el campo 1
+        id = i[1]
+        # Toma la edad del animal en este caso es el campo 2
+        fecha_estimada_prenez = i[2]
+        # Toma la edad del animal en este caso es el campo 3
+        edad = i[3]
+        # Toma el peso del animal en este caso es el campo 4
+        peso = i[4]
+        # Toma el estado del animal en este caso es el campo 5
+        estado = i[5]
         #calculo de la fecha aproximada de parto (la gestacion dura paorximadamente 283 dias)
         if estado=="Vivo":
           fecha_estimada_parto = fecha_estimada_prenez + timedelta(283)
@@ -319,7 +320,7 @@ def fecha_aproximada_parto(session=Session):
         #actualizacion de campos
         session.execute(modelo_partos.update().values(fecha_estimada_parto=fecha_estimada_parto,edad=edad,
                                                       peso=peso). \
-                        where(modelo_partos.columns.id_bovino == id).filter(modelo_partos.columns.fecha_estimada_prenez==fecha_estimada_prenez))
+                        where(modelo_partos.columns.id_bovino == id).filter(modelo_partos.columns.id_parto==id_monta))
 
         session.commit()
 
@@ -328,7 +329,7 @@ def fecha_aproximada_parto(session=Session):
         if diferencia <45:
             notificacion = None
             session.execute(modelo_partos.update().values(notificacion=notificacion). \
-                            where(modelo_partos.columns.id_bovino == id).filter(modelo_partos.columns.fecha_estimada_prenez==fecha_estimada_prenez))
+                            where(modelo_partos.columns.id_bovino == id).filter(modelo_partos.columns.id_parto==id_monta))
 
             session.commit()
         else:
@@ -339,7 +340,7 @@ def fecha_aproximada_parto(session=Session):
             if consulta_animales_palpaciones is None or consulta_animales_palpaciones==[]:
                 notificacion = f'Han pasado por lo menos 45 dias y no has registrado palpaciones nuevas desde la monta/inseminacion de este animal, seria recomendable que realices una palpacion'
                 session.execute(modelo_partos.update().values(notificacion=notificacion). \
-                                where(modelo_partos.columns.id_bovino == id).filter(modelo_partos.columns.fecha_estimada_prenez==fecha_estimada_prenez))
+                                where(modelo_partos.columns.id_bovino == id).filter(modelo_partos.columns.id_parto==id_monta))
 
                 session.commit()
 
@@ -347,7 +348,7 @@ def fecha_aproximada_parto(session=Session):
             else:
                 notificacion = None
                 session.execute(modelo_partos.update().values(notificacion=notificacion). \
-                                where(modelo_partos.columns.id_bovino == id).filter(modelo_partos.columns.fecha_estimada_prenez==fecha_estimada_prenez))
+                                where(modelo_partos.columns.id_bovino == id).filter(modelo_partos.columns.id_parto==id_monta))
 
                 session.commit()
 
