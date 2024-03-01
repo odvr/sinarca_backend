@@ -3,8 +3,10 @@ Librerias requeridas
 '''
 import logging
 from datetime import date
+from typing import Optional
 
-from fastapi import Depends
+from fastapi import Form,Response
+from fastapi import APIRouter, Depends
 from fastapi import status, APIRouter, Response
 from sqlalchemy.orm import Session
 from starlette.status import HTTP_204_NO_CONTENT
@@ -40,18 +42,21 @@ def get_database_session():
         db.close()
 
 
-@registro_celos_rutas.post("/crear_registro_celos/{id_bovino}/{fecha_celo}/{observaciones}", status_code=status.HTTP_201_CREATED)
-async def crear_registro_celos(id_bovino: int,fecha_celo :date,observaciones:str,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+@registro_celos_rutas.post("/crear_registro_celos", status_code=status.HTTP_201_CREATED)
+async def crear_registro_celos(id_bovino: int= Form(...),fecha_celo :date= Form(...),observaciones:str= Form(...),servicio:str= Form(...),id_servicio:Optional[int] = Form(None),db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
 
 
     try:
         nombre_bovino=crud.bovinos_inventario.Buscar_Nombre(db=db,id_bovino=id_bovino,current_user=current_user)
 
+
         ingresoCelo = modelo_registro_celos.insert().values(id_bovino=id_bovino,
                                                                   fecha_celo=fecha_celo,
                                                                   observaciones=observaciones,
+                                                                  servicio=servicio,
+                                                                  id_servicio=id_servicio,
                                                                   usuario_id=current_user,
-                                                                   nombre_bovino=nombre_bovino)
+                                                                  nombre_bovino=nombre_bovino)
 
 
         db.execute(ingresoCelo)

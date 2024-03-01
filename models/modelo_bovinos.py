@@ -268,7 +268,7 @@ modelo_descarte = Table("descarte", meta, Column("id_descarte", Integer, primary
                         Column("nombre_bovino", String(300)))
 
 modelo_partos = Table("partos", meta, Column("id_parto", Integer, primary_key=True),
-                      Column("id_bovino", Integer,ForeignKey("bovinos.id_bovino")),
+                      Column("id_bovino", Integer),
                       Column("edad", Integer),
                       Column("peso", Float),
                       Column("fecha_estimada_prenez", Date),
@@ -430,6 +430,8 @@ modelo_registro_celos = Table("registro_celos", meta, Column("id_celo", Integer,
                                Column("nombre_bovino", String(300)),
                                Column("fecha_celo", Date),
                                Column("observaciones", String(300)),
+                               Column("servicio", String(300)),
+                               Column("id_servicio", Integer, ForeignKey("partos.id_parto")),
                                Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
 
 modelo_tasas_concepcion = Table("tasas_concepcion", meta, Column("id_tasa", Integer, primary_key=True),

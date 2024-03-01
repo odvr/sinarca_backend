@@ -632,6 +632,8 @@ class esquema_registro_celos(BaseModel):
     nombre_bovino: Optional[str] = None
     fecha_celo: date
     observaciones: str
+    servicio:Optional[str] = None
+    id_servicio: Optional[int] = None
     usuario_id: Optional[str] = None
     class Config:
         orm_mode = True
