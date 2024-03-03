@@ -16,7 +16,7 @@ from models.modelo_bovinos import modelo_bovinos_inventario, modelo_veterinaria,
     modelo_descarte, modelo_arbol_genealogico, modelo_historial_intervalo_partos, modelo_litros_leche, modelo_orden_IEP, \
     modelo_orden_litros, \
     modelo_orden_peso, modelo_historial_partos, modelo_carga_animal_y_consumo_agua, modelo_veterinaria_evoluciones, \
-    modelo_datos_pesaje, modelo_compra, modelo_palpaciones
+    modelo_datos_pesaje, modelo_compra, modelo_palpaciones, modelo_registro_celos
 
 '''***********'''
 from passlib.context import CryptContext
@@ -90,6 +90,19 @@ def eliminacionBovino(id_bov_eliminar,session: Session):
       else:
           session.execute(modelo_arbol_genealogico.delete().where(modelo_arbol_genealogico.c.id_bovino_madre == id_bov_eliminar))
           session.commit()
+
+
+      #consulta de bovino en la tabla de registro de celos
+      consulta_bovino_celos = session.query(modelo_registro_celos).\
+          filter(modelo_registro_celos.c.id_bovino==id_bov_eliminar).all()
+      #si el id ya no existe entonces no se hara cambios
+      if consulta_bovino_celos ==[]:
+          pass
+      #caso contrario se eliminara de la tabla
+      else:
+          session.execute(modelo_registro_celos.delete().where(modelo_registro_celos.c.id_bovino == id_bov_eliminar))
+          session.commit()
+
 
       #consulta de bovino en la tabla de registro de montas
       consulta_bovino_montas = session.query(modelo_partos).\
