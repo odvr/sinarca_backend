@@ -13,7 +13,8 @@ from sqlalchemy.orm import Session
 from Lib.Registro_partos import registro_partos_animales
 from config.db import get_session
 # # importa el esquema de los bovinos
-from models.modelo_bovinos import modelo_historial_partos, modelo_partos, modelo_bovinos_inventario
+from models.modelo_bovinos import modelo_historial_partos, modelo_partos, modelo_bovinos_inventario, \
+    modelo_registro_celos
 from datetime import date
 from fastapi import APIRouter, Response
 from fastapi import  status
@@ -119,11 +120,18 @@ async def listar_tabla_Partos_Individual(id_bovino: str,db: Session = Depends(ge
 
 
 
-@partos_bovinos.delete("/eliminar_bovino_partos/{id_bovino}", status_code=HTTP_204_NO_CONTENT)
-async def eliminar_bovino_fecha_partos(id_bovino: str,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user) ):
+@partos_bovinos.delete("/eliminar_bovino_partos/{id_parto}", status_code=HTTP_204_NO_CONTENT)
+async def eliminar_bovino_fecha_partos(id_parto: str,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user) ):
 
     try:
-        db.execute(modelo_partos.delete().where(modelo_partos.c.id_bovino == id_bovino))
+        consulta_servicio = db.query(modelo_registro_celos).filter(
+            modelo_registro_celos.c.id_servicio == id_parto).all()
+        if consulta_servicio is None:
+            pass
+        else:
+            db.execute(modelo_registro_celos.delete().where(modelo_registro_celos.c.id_servicio == id_parto))
+            db.commit()
+        db.execute(modelo_partos.delete().where(modelo_partos.c.id_parto == id_parto))
         db.commit()
 
     except Exception as e:

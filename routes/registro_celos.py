@@ -16,9 +16,9 @@ import crud
 from config.db import get_session
 from crud import crud_bovinos_inventario
 # # importa el esquema de los bovinos
-from models.modelo_bovinos import modelo_registro_celos
+from models.modelo_bovinos import modelo_registro_celos, modelo_partos
 from routes.rutas_bovinos import get_current_user
-from schemas.schemas_bovinos import Esquema_Usuario, esquema_registro_celos
+from schemas.schemas_bovinos import Esquema_Usuario, esquema_registro_celos, esquema_partos
 
 # Configuracion de la libreria para los logs de sinarca
 # Crea un objeto logger
@@ -106,3 +106,23 @@ async def eliminar_celo_bovino(id_celo: str,db: Session = Depends(get_database_s
 
     # retorna un estado de no contenido
     return Response(status_code=HTTP_204_NO_CONTENT)
+
+
+
+
+
+
+
+@registro_celos_rutas.get("/listar_sevcios_Animal_Unidad/{id_servicio}",response_model=list[esquema_partos] )
+async def listar_sevicios_animal_Unidad(id_servicio:int,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+
+    try:
+
+        listar_fecha_estimada_parto = db.query(modelo_partos).filter(modelo_partos.c.usuario_id == current_user,modelo_partos.c.id_parto == id_servicio).all()
+
+    except Exception as e:
+        logger.error(f'Error al obtener inventario de Fecha de Parto: {e}')
+        raise
+    finally:
+        db.close()
+    return listar_fecha_estimada_parto
