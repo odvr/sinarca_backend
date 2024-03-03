@@ -147,27 +147,40 @@ def get_hashed_password(password: str) -> str:
 async def create_user(data: Esquema_Usuario,db: Session = Depends(get_database_session)):
     user = db.execute(modelo_usuarios.select().where(modelo_usuarios.columns.usuario_id == data.usuario_id)).first()
     if user is not None:
-            raise HTTPException(
+        raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="User with this email already exist"
+            detail="Lo siento este Usuario Ya existe =("
         )
+
+    FechaDeRegistro=datetime.now()
 
     ingreso = modelo_usuarios.insert().values(usuario_id=data.usuario_id,
-        hashed_password=get_hashed_password(data.hashed_password),nombre_predio=data.nombre_predio,correo_electronico=data.correo_electronico,telefono=data.telefono,ubicacion_predio=data.ubicacion_predio,nombre_apellido=data.nombre_apellido
+                                              hashed_password=get_hashed_password(data.hashed_password),
+                                              nombre_predio=data.nombre_predio,
+                                              correo_electronico=data.correo_electronico, telefono=data.telefono,
+                                              ubicacion_predio=data.ubicacion_predio,
+                                              nombre_apellido=data.nombre_apellido,
+                                              fecha_de_registro=FechaDeRegistro
 
-        )
+                                              )
     # Crea el registro en el Indicador del usuario
     CrearIndicadores = crud.crear_indicadores.Crear_indicadores_db(db=db, current_user=data.usuario_id)
     # Crea el registro en el Capacidad de carga
-    CrearIndicadoresCapacidadCarga = crud.crear_indicadores.Crear_indicadores_capacidad_carga(db=db, current_user=data.usuario_id)
-
+    # CrearIndicadoresCapacidadCarga = crud.crear_indicadores.Crear_indicadores_capacidad_carga(db=db,current_user=data.usuario_id)
 
     db.execute(ingreso)
     db.execute(CrearIndicadores)
-    db.execute(CrearIndicadoresCapacidadCarga)
+    # db.execute(CrearIndicad   oresCapacidadCarga)
+    # Obtener el nuevo usuario de la base de datos
+
     db.commit()
+    user = data.usuario_id
+
 
     return user
+
+
+
 
 '''+++++++++++++++++++++++++++++++++++++++++++++++++++++++++'''
 

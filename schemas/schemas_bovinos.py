@@ -17,7 +17,7 @@ from sqlalchemy.orm import sessionmaker
 #pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 class Esquema_Usuario(BaseModel):
-    id_usuario : int
+    id_usuario : Optional[int]
     usuario_id :str
     hashed_password: str
     nombre_predio: Optional[str]
@@ -25,6 +25,7 @@ class Esquema_Usuario(BaseModel):
     telefono: Optional[str]
     ubicacion_predio: Optional[str]
     nombre_apellido: Optional[str]
+    fecha_de_registro: Optional[date]
 
     class Config:
         orm_mode = True

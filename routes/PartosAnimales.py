@@ -213,6 +213,21 @@ async def listar_fecha_parto(db: Session = Depends(get_database_session),current
     return listar_fecha_estimada_parto
 
 
+@partos_bovinos.get("/listar_sevcios_Animal/{id_bovino}",response_model=list[esquema_partos] )
+async def listar_sevicios_animal(id_bovino:int,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+
+    try:
+
+        listar_fecha_estimada_parto = db.query(modelo_partos).filter(modelo_partos.c.usuario_id == current_user,modelo_partos.c.id_bovino == id_bovino).all()
+
+    except Exception as e:
+        logger.error(f'Error al obtener inventario de Fecha de Parto: {e}')
+        raise
+    finally:
+        db.close()
+    return listar_fecha_estimada_parto
+
+
 
 @partos_bovinos.delete("/eliminar_registro_Partos_Bovinos/{id_parto}")
 async def eliminar_Parto_Bovinos(id_parto: int,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user) ):
