@@ -16,7 +16,7 @@ from models.modelo_bovinos import modelo_bovinos_inventario, modelo_veterinaria,
     modelo_descarte, modelo_arbol_genealogico, modelo_historial_intervalo_partos, modelo_litros_leche, modelo_orden_IEP, \
     modelo_orden_litros, \
     modelo_orden_peso, modelo_historial_partos, modelo_carga_animal_y_consumo_agua, modelo_veterinaria_evoluciones, \
-    modelo_datos_pesaje, modelo_compra, modelo_palpaciones, modelo_registro_celos
+    modelo_datos_pesaje, modelo_compra, modelo_palpaciones, modelo_registro_celos, modelo_registro_vacunas_bovinos
 
 '''***********'''
 from passlib.context import CryptContext
@@ -125,6 +125,19 @@ def eliminacionBovino(id_bov_eliminar,session: Session):
       else:
           session.execute(modelo_datos_muerte.delete().where(modelo_datos_muerte.c.id_bovino == id_bov_eliminar))
           session.commit()
+
+
+      # consulta de bovino en la tabla de vacunaciones
+      consulta_bovino_vacuna = session.query(modelo_registro_vacunas_bovinos). \
+              filter(modelo_registro_vacunas_bovinos.c.id_bovino == id_bov_eliminar).all()
+      # si el id ya no existe entonces no se hara cambios
+      if consulta_bovino_vacuna == []:
+          pass
+      # caso contrario se eliminara de la tabla
+      else:
+          session.execute(modelo_registro_vacunas_bovinos.delete().where(modelo_registro_vacunas_bovinos.c.id_bovino == id_bov_eliminar))
+          session.commit()
+
 
       #consulta de bovino en la tabla de descarte
       consulta_bovino_descarte = session.query(modelo_descarte).\
