@@ -130,6 +130,7 @@ class esquema_produccion_ceba(BaseModel):
     estado_optimo_ceba: Optional[str] = None
     usuario_id: Optional[str] = None
     nombre_bovino:Optional[str] = None
+    ganancia_media_diaria: Optional[float] = None
     class Config:
         orm_mode = True
         env_file = ".env"
@@ -143,6 +144,7 @@ class esquema_produccion_levante(BaseModel):
     estado_optimo_levante : Optional[str] = None
     usuario_id: Optional[str] = None
     nombre_bovino:Optional[str] = None
+    ganancia_media_diaria:Optional[float] = None
 
     class Config:
         orm_mode = True

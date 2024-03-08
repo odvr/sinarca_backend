@@ -5,6 +5,8 @@ Librerias requeridas
 import logging
 import json
 from sqlalchemy import update
+
+from Lib.Ganancia_peso import ganancia_peso_ceba
 from Lib.Levante_Ceba_Bovinos import Estado_Optimo_Levante, Estado_Optimo_Ceba
 from Lib.Lib_Intervalo_Partos import intervalo_partos, fecha_aproximada_parto
 # # importa la conexion de la base de datos
@@ -55,6 +57,7 @@ def get_database_session():
 async def inventario_ceba(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
     #llamdo de la funcion para calcular
     Estado_Optimo_Ceba(db=db,current_user=current_user)
+    ganancia_peso_ceba(session=db,current_user=current_user)
     eliminarduplicados(db=db)
 
     #tasa_supervivencia(session=Session, current_user=current_user)

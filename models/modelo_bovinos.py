@@ -64,7 +64,8 @@ modelo_ceba = Table("produccion_ceba", meta,
                     Column("proposito", String(300)),
                     Column("estado_optimo_ceba", String(300)),
                     Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")),
-                    Column("nombre_bovino", String(300))
+                    Column("nombre_bovino", String(300)),
+                    Column("ganancia_media_diaria", Float)
                     )
 
 
@@ -78,7 +79,8 @@ modelo_levante = Table("produccion_levante", meta,
                        Column("proposito", String(300)),
                        Column("estado_optimo_levante", String(300)),
                        Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")),
-                       Column("nombre_bovino", String(300))
+                       Column("nombre_bovino", String(300)),
+                       Column("ganancia_media_diaria", Float)
                        )
 
 modelo_leche = Table("produccion_leche", meta,

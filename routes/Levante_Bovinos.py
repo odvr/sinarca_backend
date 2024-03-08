@@ -7,6 +7,7 @@ import json
 from sqlalchemy import update
 
 import crud
+from Lib.Ganancia_peso import ganancia_peso_levante
 from Lib.Levante_Ceba_Bovinos import Estado_Optimo_Levante
 from Lib.Lib_Intervalo_Partos import intervalo_partos, fecha_aproximada_parto
 # # importa la conexion de la base de datos
@@ -56,6 +57,7 @@ Lista los animales en Levante
 @Levante_Bovinos.get("/listar_prod_levante",response_model=list[esquema_produccion_levante])
 async def inventario_levante(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
     Estado_Optimo_Levante(db=db,current_user=current_user)
+    ganancia_peso_levante(session=db,current_user=current_user)
     eliminarduplicados(db=db)
 
 
