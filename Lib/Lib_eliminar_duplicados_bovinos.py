@@ -6,7 +6,8 @@
 
 from sqlalchemy.orm import Session
 from datetime import date, datetime, timedelta
-from models.modelo_bovinos import modelo_bovinos_inventario, modelo_ceba, modelo_levante, modelo_datos_muerte
+from models.modelo_bovinos import modelo_bovinos_inventario, modelo_ceba, modelo_levante, modelo_datos_muerte, \
+    modelo_compra
 import logging
 # Configuracion de la libreria para los logs de sinarca
 # Crea un objeto logger
@@ -65,6 +66,18 @@ def eliminarduplicados(db: Session ):
         id = MuestesDatos[0]
         if estado != 'Muerto':
             db.execute(modelo_datos_muerte.delete().where(modelo_datos_muerte.c.id_datos_muerte == id))
+            db.commit()
+        else:
+            pass
+
+    itemsCompra = db.execute(modelo_bovinos_inventario.select()).all()
+    for Compra in itemsCompra:
+        AnimalComprado = Compra[10]
+        idCompra = Compra[0]
+
+
+        if AnimalComprado != 'Si':
+            db.execute(modelo_compra.delete().where(modelo_compra.c.id_bovino == idCompra))
             db.commit()
         else:
             pass
