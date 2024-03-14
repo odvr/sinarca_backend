@@ -79,7 +79,7 @@ async def Animales_Optimo_Levante(db: Session = Depends(get_database_session),cu
     levante_optimo = db.query(modelo_bovinos_inventario.c.estado, modelo_levante.c.estado_optimo_levante). \
         join(modelo_levante, modelo_bovinos_inventario.c.id_bovino == modelo_levante.c.id_bovino). \
         filter(modelo_bovinos_inventario.c.estado == 'Vivo',
-               modelo_levante.c.estado_optimo_levante == "Estado Optimo").count()
+               modelo_levante.c.estado_optimo_levante == "Estado Optimo",modelo_bovinos_inventario.c.usuario_id == current_user).count()
     # actualizacion de campos
     db.execute(update(modelo_indicadores).
                     where(modelo_indicadores.c.id_indicadores == current_user).
