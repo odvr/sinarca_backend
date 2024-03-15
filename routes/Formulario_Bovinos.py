@@ -69,7 +69,7 @@ la clase Esquema_bovinos  recibira como base para crear el animal esto con fin d
 
 
 @Formulario_Bovino.post(
-    "/crear_bovino/{nombre_bovino}/{fecha_nacimiento}/{raza}/{sexo}/{marca}/{proposito}/{mansedumbre}/{estado}/{compra_bovino}/{fecha_pesaje}/{peso}/{ordeno}/{fecha_muerte}/{razon_muerte}/{numero_bono_venta}/{fecha_venta}/{precio_venta}/{razon_venta}/{medio_pago}/{comprador}/{numero_bono_compra}/{fecha_compra}/{precio_compra}/{razon_compra}/{medio_pago_compra}/{comprador_compras}/{id_bovino_madre}/{id_bovino_padre}/{id_registro_marca}",
+    "/crear_bovino/{nombre_bovino}/{fecha_nacimiento}/{raza}/{sexo}/{marca}/{proposito}/{mansedumbre}/{estado}/{compra_bovino}/{fecha_pesaje}/{peso}/{ordeno}/{fecha_muerte}/{razon_muerte}/{numero_bono_venta}/{fecha_venta}/{precio_venta}/{razon_venta}/{medio_pago}/{comprador}/{numero_bono_compra}/{fecha_compra}/{precio_compra}/{razon_compra}/{medio_pago_compra}/{comprador_compras}/{id_bovino_madre}/{id_bovino_padre}/{id_registro_marca}/{registroIngresoHato}",
     status_code=status.HTTP_201_CREATED, tags=["Formualario_Bovinos"])
 async def crear_bovinos(nombre_bovino: str, fecha_nacimiento: date, raza: str, sexo: str, marca: str, proposito: str,
                         mansedumbre: str, estado: str, compra_bovino: str, fecha_pesaje: date, peso: float,
@@ -77,7 +77,7 @@ async def crear_bovinos(nombre_bovino: str, fecha_nacimiento: date, raza: str, s
                         fecha_venta: date, precio_venta: int, razon_venta: str, medio_pago: str, comprador: str,
                         numero_bono_compra: str, fecha_compra: date, precio_compra: int, razon_compra: str,
                         medio_pago_compra: str, comprador_compras: str, id_bovino_madre: str, id_bovino_padre: str,
-                        id_registro_marca: str, db: Session = Depends(get_database_session),
+                        id_registro_marca: str,registroIngresoHato: Optional[date] = None, db: Session = Depends(get_database_session),
                         current_user: Esquema_Usuario = Depends(get_current_user)):
     eliminarduplicados(db=db)
     vientres_aptos(session=db, current_user=current_user)
@@ -92,9 +92,16 @@ async def crear_bovinos(nombre_bovino: str, fecha_nacimiento: date, raza: str, s
                 )
             )
         ).first()
-
+        """
+        Si el bovino no se encuentra lo registra
+        """
         if Consulta_Nomnbres_Bovinos is None:
+            if registroIngresoHato == "2000-01-01":
+                registroIngresoHato= "null"
+
+            FechaDeRegistroBovino = datetime.now()
             Ruta_marca = crud.bovinos_inventario.Buscar_Ruta_Fisica_Marca(db=db, id_registro_marca=id_registro_marca, current_user=current_user)
+
             ingreso = modelo_bovinos_inventario.insert().values(nombre_bovino=nombre_bovino,
                                                                 fecha_nacimiento=fecha_nacimiento,
                                                                 raza=raza,
@@ -105,7 +112,9 @@ async def crear_bovinos(nombre_bovino: str, fecha_nacimiento: date, raza: str, s
                                                                 estado=estado,
                                                                 compra_bovino=compra_bovino,
                                                                 usuario_id=current_user,
-                                                                ruta_imagen_marca=Ruta_marca
+                                                                ruta_imagen_marca=Ruta_marca,
+                                                                fecha_de_ingreso_hato=registroIngresoHato,
+                                                                fecha_de_ingreso_sistema = FechaDeRegistroBovino
                                                                 )
 
             result = db.execute(ingreso)
@@ -496,8 +505,8 @@ async def id_inventario_bovino(id_bovino: str,db: Session = Depends(get_database
 '''
 La siguiente funcion realiza la actualizacion completa de la tabla de bovinos para cambiar los registros
 '''
-@Formulario_Bovino.put("/cambiar_datos_bovino/{id_bovino}/{fecha_nacimiento}/{edad}/{raza}/{sexo}/{peso}/{marca}/{proposito}/{mansedumbre}/{estado}/{compra_bovino}/{ruta_imagen_marca}", status_code=status.HTTP_201_CREATED)
-async def cambiar_esta_bovino(id_bovino:str,fecha_nacimiento:date,edad:int,raza:str,sexo:str,peso:float,marca:str,proposito:str,mansedumbre:str,estado:str,compra_bovino:str,ruta_imagen_marca:str,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+@Formulario_Bovino.put("/cambiar_datos_bovino/{id_bovino}/{fecha_nacimiento}/{edad}/{raza}/{sexo}/{peso}/{marca}/{proposito}/{mansedumbre}/{estado}/{compra_bovino}/{ruta_imagen_marca}/{fecha_de_ingreso_hato}", status_code=status.HTTP_201_CREATED)
+async def cambiar_esta_bovino(id_bovino:str,fecha_nacimiento:date,edad:int,raza:str,sexo:str,peso:float,marca:str,proposito:str,mansedumbre:str,estado:str,compra_bovino:str,ruta_imagen_marca:str,fecha_de_ingreso_hato:date,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
 
         """Busca la ruta fisica del path de la foto Marca ya que desde el frondEnd Se envia el ID de la tabla"""
@@ -517,6 +526,7 @@ async def cambiar_esta_bovino(id_bovino:str,fecha_nacimiento:date,edad:int,raza:
                 mansedumbre=mansedumbre,
                 estado=estado,
                 compra_bovino=compra_bovino,
+                fecha_de_ingreso_hato=fecha_de_ingreso_hato
 
 
             ).where(
@@ -535,7 +545,8 @@ async def cambiar_esta_bovino(id_bovino:str,fecha_nacimiento:date,edad:int,raza:
                 mansedumbre=mansedumbre,
                 estado=estado,
                 compra_bovino=compra_bovino,
-                ruta_imagen_marca=Ruta_marca
+                ruta_imagen_marca=Ruta_marca,
+                fecha_de_ingreso_hato=fecha_de_ingreso_hato
 
             ).where(
                 modelo_bovinos_inventario.columns.id_bovino == id_bovino))

@@ -26,6 +26,16 @@ logger.addHandler(file_handler)
 
 
 """
+Configuaración del Correo
+"""
+
+remitente = 'rutaganadera.co@gmail.com'
+password = 'ppxg ldje ckty ktmd'
+servidor_smtp = 'smtp.gmail.com'
+puerto_smtp = 587
+
+
+"""
 Registra tu base de datos siguiendo los parametros en el ejemplo:
 mariadb+mariadbconnector://usuario:password@IPbasededatos:puerto/nombreBasededatos"
 """
