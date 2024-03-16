@@ -25,7 +25,9 @@ modelo_usuarios = Table("usuarios", meta, Column("id_usuario", Integer, primary_
                      Column("telefono", String(300)),
                      Column("ubicacion_predio", String(300)),
                      Column("nombre_apellido", String(300)),
-                     Column("fecha_de_registro", Date))
+                     Column("fecha_de_registro", Date),
+                     Column("ultimo_login", Date)
+                        )
 
 
 

@@ -110,7 +110,10 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = 
     access_token = create_access_token(
         data={"sub": form_data.username}, expires_delta=access_token_expires
     )
-    # Almacena el token en la variable de sesión del backend (en este ejemplo, estamos usando FastAPI Session)
+    # Registra el último inicio de sesión del usuario en la base de datos
+    db.execute(modelo_usuarios.update().where(modelo_usuarios.c.usuario_id == form_data.username).values(
+        ultimo_login=datetime.now()))
+    db.commit()
 
     return {"access_token": access_token, "token_type": "bearer"}
 

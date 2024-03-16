@@ -26,6 +26,7 @@ class Esquema_Usuario(BaseModel):
     ubicacion_predio: Optional[str]
     nombre_apellido: Optional[str]
     fecha_de_registro: Optional[date]
+    ultimo_login: Optional[date]
 
     class Config:
         orm_mode = True
