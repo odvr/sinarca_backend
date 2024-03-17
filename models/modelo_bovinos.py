@@ -450,4 +450,15 @@ modelo_tasas_concepcion = Table("tasas_concepcion", meta, Column("id_tasa", Inte
                                Column("tasa_concepcion", Float),
                                Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
 
+modelo_ganancia_historica_peso = Table("ganancia_historica_peso", meta, Column("id_ganancia", Integer, primary_key=True),
+                               Column("id_bovino", Integer),
+                               Column("nombre_bovino", String(300)),
+                               Column("peso_anterior", Float),
+                               Column("peso_posterior", Float),
+                               Column("fecha_anterior", Date),
+                               Column("fecha_posterior", Date),
+                               Column("dias", Integer),
+                               Column("ganancia_diaria_media", Float),
+                               Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
+
 meta.create_all(engine)

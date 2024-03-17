@@ -656,3 +656,20 @@ class esquema_tasas_concepcion(BaseModel):
     class Config:
         orm_mode = True
         env_file = ".env"
+
+
+
+class esquema_ganancia_historica_peso(BaseModel):
+    id_ganancia: int
+    id_bovino: int
+    nombre_bovino: Optional[str] = None
+    peso_anterior: Optional[float] = None
+    peso_posterior: Optional[float] = None
+    fecha_anterior: date
+    fecha_posterior: date
+    dias: int
+    ganancia_diaria_media: float
+    usuario_id: Optional[str] = None
+    class Config:
+        orm_mode = True
+        env_file = ".env"

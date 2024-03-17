@@ -68,11 +68,12 @@ async def crear_fecha_pesaje(id_bovino:str,fecha_pesaje:date,peso:float,db: Sess
 async def Eliminar_Re(id_pesaje: str,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
 
+
         db.execute(modelo_datos_pesaje.delete().where(modelo_datos_pesaje.c.id_pesaje == id_pesaje))
         db.commit()
 
     except Exception as e:
-        logger.error(f'Error al intentar Eliminar Registro de Arbol Genialogico: {e}')
+        logger.error(f'Error al intentar Eliminar_Registro_Peso: {e}')
         raise
     finally:
         db.close()
