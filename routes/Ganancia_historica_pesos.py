@@ -38,7 +38,7 @@ def get_database_session():
         db.close()
 
 @Ganancia_historica_rutas.get("/listar_tabla_ganancias_historicas_pesos",response_model=list[esquema_ganancia_historica_peso] )
-async def listar_tabla_Intervalo_Partos(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+async def listar_tabla_ganancias_historicas_pesos(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
         ganancia_peso_historica(session=db,current_user=current_user)
         itemsListarGananciasPesos = db.query(modelo_ganancia_historica_peso).filter(modelo_ganancia_historica_peso.c.usuario_id == current_user).all()
