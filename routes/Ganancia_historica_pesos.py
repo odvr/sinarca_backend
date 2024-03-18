@@ -37,16 +37,16 @@ def get_database_session():
     finally:
         db.close()
 
-@Ganancia_historica_rutas.get("/listar_tabla_ganancias_historicas_pesos",response_model=list[esquema_ganancia_historica_peso] )
-async def listar_tabla_ganancias_historicas_pesos(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+@Ganancia_historica_rutas.get("/listar_tabla_ganancias_historicas_pesos/{idBovino}",response_model=list[esquema_ganancia_historica_peso] )
+async def listar_tabla_ganancias_historicas_pesos(idBovino: int, db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
         ganancia_peso_historica(session=db,current_user=current_user)
-        itemsListarGananciasPesos = db.query(modelo_ganancia_historica_peso).filter(modelo_ganancia_historica_peso.c.usuario_id == current_user).all()
-
+        itemsListarGananciasPesos = db.query(modelo_ganancia_historica_peso).filter(modelo_ganancia_historica_peso.c.usuario_id == current_user,modelo_ganancia_historica_peso.c.id_bovino == idBovino).all()
+        return itemsListarGananciasPesos
     except Exception as e:
         logger.error(f'Error al obtener listar_tabla_ganancias_historicas_pesos: {e}')
         raise
     finally:
         db.close()
-    return itemsListarGananciasPesos
+
 
