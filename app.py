@@ -37,6 +37,7 @@ from routes.Registro_Litros_Diarios import Produccion_Leche_Litros_Diarios
 from routes.Veterinaria import Veterinaria
 from routes.registro_celos import registro_celos_rutas
 from routes.Ganancia_historica_pesos import Ganancia_historica_rutas
+from routes.Natalidad_y_Paricion_real import natalidad_paricion_real_rutas
 
 '''
 CORS o "intercambio de recursos de origen cruzado"se refiere a las situaciones 
@@ -89,6 +90,7 @@ app.include_router(Palpaciones_Bovinos)
 app.include_router(Historial_Tasa_Supervivencia)
 app.include_router(registro_celos_rutas)
 app.include_router(Ganancia_historica_rutas)
+app.include_router(natalidad_paricion_real_rutas)
 
 
 

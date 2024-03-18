@@ -461,4 +461,10 @@ modelo_ganancia_historica_peso = Table("ganancia_historica_peso", meta, Column("
                                Column("ganancia_diaria_media", Float),
                                Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
 
+modelo_natalidad_paricion_real = Table("natalidad_o_paricion_real", meta, Column("id_natalidad", Integer, primary_key=True),
+                               Column("periodo", Integer),
+                               Column("intervalo_entre_partos_periodo", Float),
+                               Column("natalidad_paricion_real", Float),
+                               Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
+
 meta.create_all(engine)

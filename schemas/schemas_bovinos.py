@@ -673,3 +673,14 @@ class esquema_ganancia_historica_peso(BaseModel):
     class Config:
         orm_mode = True
         env_file = ".env"
+
+
+class esquema_natalidad_paricion_real(BaseModel):
+    id_natalidad: int
+    periodo: int
+    intervalo_entre_partos_periodo: Optional[float] = None
+    natalidad_paricion_real: Optional[float] = None
+    usuario_id: Optional[str] = None
+    class Config:
+        orm_mode = True
+        env_file = ".env"
