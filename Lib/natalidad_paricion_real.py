@@ -61,16 +61,18 @@ def natalidad_paricion_real(session: Session,current_user):
             #si el valor correspondiente al año actual
 
             if consulta_existencia == []:
+                intervalo_entre_partos_periodo=0
                 ingresoperiodo = modelo_natalidad_paricion_real.insert().values(periodo=periodo_actual,
-                                                                                intervalo_entre_partos_periodo=0,
+                                                                                intervalo_entre_partos_periodo=intervalo_entre_partos_periodo,
                                                                                 natalidad_paricion_real=tasa_natalidad_paricion,
                                                                                 usuario_id=current_user)
 
                 session.execute(ingresoperiodo)
                 session.commit()
             else:
+                intervalo_entre_partos_periodo = 0
                 session.execute(modelo_natalidad_paricion_real.update().values(periodo=periodo_actual,
-                                                                                intervalo_entre_partos_periodo=0,
+                                                                                intervalo_entre_partos_periodo=intervalo_entre_partos_periodo,
                                                                                 natalidad_paricion_real=tasa_natalidad_paricion). \
                            where(modelo_natalidad_paricion_real.columns.periodo == periodo_actual).
                            filter(modelo_natalidad_paricion_real.c.usuario_id == current_user))
@@ -81,7 +83,6 @@ def natalidad_paricion_real(session: Session,current_user):
             c = 0
             while (c < contador):
                 periodo = consulta_anyo[0].year + c
-                print(periodo)
                 # se determinan las fechas del periodo (inicio y fin de año)
                 fecha_inicio = datetime(periodo, 1, 1)
                 fecha_fin = datetime(periodo, 12, 31)
@@ -89,7 +90,7 @@ def natalidad_paricion_real(session: Session,current_user):
                 intervalo_entre_partos_periodo = session.query(func.avg(modelo_historial_intervalo_partos.c.intervalo)).\
                     where(between(modelo_historial_intervalo_partos.columns.fecha_parto1, fecha_inicio, fecha_fin)).\
                     filter(modelo_historial_intervalo_partos.c.usuario_id==current_user).all()
-                print(periodo,intervalo_entre_partos_periodo[0][0])
+
 
                 if intervalo_entre_partos_periodo[0][0]==None or intervalo_entre_partos_periodo is None:
 
@@ -122,28 +123,32 @@ def natalidad_paricion_real(session: Session,current_user):
                     calculo_natalidad_paricion_real = (365 / (intervalo_entre_partos_periodo[0][0])) * 100
                     valor_natalidad_paricion_real = round(calculo_natalidad_paricion_real, 2)
 
-                consulta_existencia_natalidad = session.query(modelo_natalidad_paricion_real). \
-                    where(modelo_natalidad_paricion_real.columns.periodo == periodo). \
-                    filter(modelo_natalidad_paricion_real.c.usuario_id == current_user).all()
+                    consulta_existencia_natalidad = session.query(modelo_natalidad_paricion_real). \
+                        where(modelo_natalidad_paricion_real.columns.periodo == periodo). \
+                        filter(modelo_natalidad_paricion_real.c.usuario_id == current_user).all()
 
-                if consulta_existencia_natalidad == []:
-                    ingresoperiodo = modelo_natalidad_paricion_real.insert().values(periodo=periodo,
-                                                                                    intervalo_entre_partos_periodo=intervalo_entre_partos_periodo[0][0],
-                                                                                    natalidad_paricion_real=valor_natalidad_paricion_real,
-                                                                                    usuario_id=current_user)
+                    if consulta_existencia_natalidad == []:
+                        ingresoperiodo = modelo_natalidad_paricion_real.insert().values(periodo=periodo,
+                                                                                        intervalo_entre_partos_periodo=
+                                                                                        intervalo_entre_partos_periodo[0][0],
+                                                                                        natalidad_paricion_real=valor_natalidad_paricion_real,
+                                                                                        usuario_id=current_user)
 
-                    session.execute(ingresoperiodo)
-                    session.commit()
-                    c=c+1
-                else:
-                    session.execute(
-                        modelo_natalidad_paricion_real.update().values(intervalo_entre_partos_periodo=intervalo_entre_partos_periodo[0][0],
-                                                                                    natalidad_paricion_real=valor_natalidad_paricion_real). \
-                        where(modelo_natalidad_paricion_real.columns.periodo == periodo).
-                        filter(modelo_natalidad_paricion_real.c.usuario_id == current_user))
-                    session.commit()
-                    c=c+1
+                        session.execute(ingresoperiodo)
+                        session.commit()
+                        c = c + 1
+                    else:
+                        session.execute(
+                            modelo_natalidad_paricion_real.update().values(
+                                intervalo_entre_partos_periodo=intervalo_entre_partos_periodo[0][0],
+                                natalidad_paricion_real=valor_natalidad_paricion_real). \
+                                where(modelo_natalidad_paricion_real.columns.periodo == periodo).
+                                filter(modelo_natalidad_paricion_real.c.usuario_id == current_user))
+                        session.commit()
+                        c = c + 1
 
+
+        #codigo que permite actualizar en caso de que se cambien las fechas de intrvalos entre partos
         if consulta_anyo is None or consulta_anyo==[]:
             session.execute(modelo_natalidad_paricion_real.delete().
                        where(modelo_natalidad_paricion_real.c.periodo != datetime.now().year).
@@ -151,26 +156,17 @@ def natalidad_paricion_real(session: Session,current_user):
             session.commit()
 
         else:
-            pass
-
-        consulta_periodos= session.query(modelo_natalidad_paricion_real.c.periodo). \
+            consulta_periodos= session.query(modelo_natalidad_paricion_real). \
+                where(modelo_natalidad_paricion_real.columns.periodo < consulta_anyo[0].year). \
                 filter(modelo_natalidad_paricion_real.c.usuario_id == current_user).all()
-        for i in consulta_periodos:
-            periodo=i[0]
-            fecha_inicio = datetime(periodo, 1, 1)
-            fecha_fin = datetime(periodo, 12, 31)
 
-            consulta_intervalo= session.query(modelo_historial_intervalo_partos.c.intervalo).\
-                    where(between(modelo_historial_intervalo_partos.columns.fecha_parto1, fecha_inicio, fecha_fin)).\
-                    filter(modelo_historial_intervalo_partos.c.usuario_id==current_user).first()
-            if consulta_intervalo is None or consulta_intervalo==[]:
+            if consulta_periodos is None or consulta_periodos == []:
+                pass
+            else:
                 session.execute(modelo_natalidad_paricion_real.delete().
-                                where(modelo_natalidad_paricion_real.c.periodo==periodo).
+                                where(modelo_natalidad_paricion_real.c.periodo < consulta_anyo[0].year).
                                 filter(modelo_natalidad_paricion_real.c.usuario_id == current_user))
                 session.commit()
-
-            else:
-                pass
 
 
     except Exception as e:
