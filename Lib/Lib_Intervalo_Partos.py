@@ -66,6 +66,11 @@ logger.addHandler(file_handler)
 en la base de datos"""
 def intervalo_partos(session:Session,current_user):
     try:
+        #el sguiente codigo elimina el egistro anterior para evistar datos duplicados o incorrectos
+        session.execute(modelo_historial_intervalo_partos.delete(). \
+                        where(modelo_historial_intervalo_partos.c.usuario_id==current_user))
+        session.commit()
+
         # Realiza el join co la tabla de bovinos (solo se veran los id de los bovinos)
         #como la tabla de historial de partos puede tener un id repetido mas de una vez, se utiliza el conjunto o set
         #el set no permite elementos repetidos, por lo tanto solo nos dara un listado de id unicos
@@ -175,42 +180,7 @@ def intervalo_partos(session:Session,current_user):
                                                                                           nombre_bovino=nombre_bovino).where(modelo_historial_intervalo_partos.columns.id_bovino == id_bovino_partos).filter(modelo_historial_intervalo_partos.columns.fecha_parto1 == consulta_partos[e][2],modelo_historial_intervalo_partos.columns.fecha_parto2 == consulta_partos[e + 1][2]))
                         session.commit()
                         e = e + 1
-                # debido a que el usuario puede alterar y eliminar las fechas de partos
-                # es necesario eliminar los intervalos que tienen las fechas antes de ser cambiadas
-                # Esta consulta permite averiguar todos los intervalos existentes
-                consulta_fechas = session.query(modelo_historial_intervalo_partos).all()
-                for i in consulta_fechas:
-                    # Toma el ID del bovino, este es el campo numero 1
-                    id_bovino_fecha = i[1]
-                    # Toma la primera fecha de parto, este es el campo numero 2
-                    f_parto1 = i[2]
-                    # Toma la segunda fecha de parto, este es el campo numero 3
-                    f_parto2 = i[3]
-                    # consulta en el historial de partos si existe la primera fecha de parto de ese bovino
-                    consulta_f1 = session.query(modelo_historial_partos). \
-                        where(modelo_historial_partos.c.id_bovino == id_bovino_fecha). \
-                        filter(modelo_historial_partos.c.fecha_parto == f_parto1).all()
-                    # si no existe esa fecha en el historial de parto siginifica que fue cambiada o eliminada
-                    # entonces se debe eliminar el intervalo que contenga la fecha (pues esta trabajando con una fecha vieja)
-                    if consulta_f1 == []:
-                        session.execute(modelo_historial_intervalo_partos.delete(). \
-                                        where(modelo_historial_intervalo_partos.c.id_bovino == id_bovino_partos). \
-                                        filter(modelo_historial_intervalo_partos.c.fecha_parto1 == f_parto1))
-                        session.commit()
-                    # en caso de existir no se realizaran cambios
-                    else:
-                        pass
-                    # aplicamos el metodo anterior con la segunda fecha de parto
-                    consulta_f2 = session.query(modelo_historial_partos). \
-                        where(modelo_historial_partos.c.id_bovino == id_bovino_fecha). \
-                        filter(modelo_historial_partos.c.fecha_parto == f_parto2).all()
-                    if consulta_f2 == []:
-                        session.execute(modelo_historial_intervalo_partos.delete(). \
-                                        where(modelo_historial_intervalo_partos.c.id_bovino == id_bovino_partos). \
-                                        filter(modelo_historial_intervalo_partos.c.fecha_parto2 == f_parto2))
-                        session.commit()
-                    else:
-                        pass
+
                 # el siguiente codigo permite establecer si un animal tiene o no registros de parto
             consulta_id_bovinos_leche = session.query(modelo_leche).all()
             for i in consulta_id_bovinos_leche:
