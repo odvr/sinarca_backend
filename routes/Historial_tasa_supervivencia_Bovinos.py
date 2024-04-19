@@ -92,7 +92,7 @@ async def listar_tabla_perdida_terneros(db: Session = Depends(get_database_sessi
 
 
                 }
-                print(ItemsSupervivencia)
+
                 HistorialTasaParicionReal.append(ItemsSupervivencia)
 
 
