@@ -186,16 +186,29 @@ def capacidad_carga(session:Session,current_user):
         consumo_promedio=54
 
         #obtenemos la capacidad de carga
-        capacidad_carga_animal_ajustada=(forraje_verde_disponible/consumo_promedio)/periodo_de_ocupacion
+        if periodo_de_ocupacion==0 or periodo_de_ocupacion is None:
+            capacidad_carga_animal_ajustada = 0
 
-        #se obtiene una interpretacion
-        interpretacion=f'Con tus {hectareas_predio} hectareas, puedes mantener hasta {round(capacidad_carga_animal_ajustada,2)} unidades animales (1 unidad animal=400 kg) durante {periodo_de_ocupacion} dia(s) de ocupacion'
+            # se obtiene una interpretacion
+            interpretacion = f'No has ingresado un perido de ocupacion valido (mayor a 0 dias)'
 
-        # actualizacion de campos
-        session.execute(modelo_capacidad_carga.update().values(interpretacion=interpretacion,
-                                                               carga_animal_usuario=round(capacidad_carga_animal_ajustada,2)). \
-                        where(modelo_capacidad_carga.columns.id_capacidad == id_capacidad))
-        session.commit()
+            # actualizacion de campos
+            session.execute(modelo_capacidad_carga.update().values(interpretacion=interpretacion,
+                                                                   carga_animal_usuario=capacidad_carga_animal_ajustada). \
+                            where(modelo_capacidad_carga.columns.id_capacidad == id_capacidad))
+            session.commit()
+        else:
+            capacidad_carga_animal_ajustada = (forraje_verde_disponible / consumo_promedio) / periodo_de_ocupacion
+
+            # se obtiene una interpretacion
+            interpretacion = f'Con tus {hectareas_predio} hectareas, puedes mantener hasta {round(capacidad_carga_animal_ajustada, 2)} unidades animales (1 unidad animal=400 kg) durante {periodo_de_ocupacion} dia(s) de ocupacion'
+
+            # actualizacion de campos
+            session.execute(modelo_capacidad_carga.update().values(interpretacion=interpretacion,
+                                                                   carga_animal_usuario=round(
+                                                                       capacidad_carga_animal_ajustada, 2)). \
+                            where(modelo_capacidad_carga.columns.id_capacidad == id_capacidad))
+            session.commit()
   except Exception as e:
       logger.error(f'Error Funcion capacidad_carga: {e}')
       raise
