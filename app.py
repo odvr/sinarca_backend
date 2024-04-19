@@ -38,7 +38,7 @@ from routes.Veterinaria import Veterinaria
 from routes.registro_celos import registro_celos_rutas
 from routes.Ganancia_historica_pesos import Ganancia_historica_rutas
 from routes.Natalidad_y_Paricion_real import natalidad_paricion_real_rutas
-
+from routes.Marcas_Bovinos import  Marcas_Bovinos
 '''
 CORS o "intercambio de recursos de origen cruzado"se refiere a las situaciones 
 en las que una interfaz que se ejecuta en un navegador tiene código JavaScript que se comunica
@@ -91,6 +91,7 @@ app.include_router(Historial_Tasa_Supervivencia)
 app.include_router(registro_celos_rutas)
 app.include_router(Ganancia_historica_rutas)
 app.include_router(natalidad_paricion_real_rutas)
+app.include_router(Marcas_Bovinos)
 
 
 

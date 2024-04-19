@@ -90,7 +90,7 @@ async def inventario_prod_leche(db: Session = Depends(get_database_session),curr
         peso_segun_raza(session=db,current_user=current_user)
         #itemsPromedioRaza = db.query(modelo_orden_peso).all()
         itemsPromedioRaza = db.query(modelo_orden_peso).filter(modelo_orden_peso.c.usuario_id == current_user).all()
-        print(itemsPromedioRaza)
+
 
     except Exception as e:
         logger.error(f'Error al obtener inventario de Promedio Por Razas: {e}')

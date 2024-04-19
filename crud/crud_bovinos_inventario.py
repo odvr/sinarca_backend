@@ -87,6 +87,27 @@ class CRUDBovinos:
             return None  # o cualquier valor predeterminado que desees
 
 
+    def Buscar_Ruta_Foto_Marca(self,db: Session,id_registro_marca, current_user):
+
+        try:
+            BuscarRutaFisicaFotoMarca = db.query(modelo_registro_marca).filter(
+                modelo_registro_marca.columns.id_registro_marca == id_registro_marca,
+                modelo_registro_marca.c.usuario_id == current_user).first()
+
+            # Manejar el caso en que BuscarRutaFisica sea None
+            if BuscarRutaFisicaFotoMarca is None:
+                return None
+
+            Ruta_Marcas = BuscarRutaFisicaFotoMarca.ruta_marca
+            db.close()
+
+            return Ruta_Marcas
+        except AttributeError as e:
+            # Manejar la excepción de AttributeError
+
+            return None
+
+
     def Buscar_Usuario_Conectado(self,db: Session, current_user):
 
         try:
