@@ -56,7 +56,8 @@ modelo_bovinos_inventario = Table("bovinos", meta,
                                   Column("ruta_imagen_marca", String(300)),
                                   Column("ruta_fisica_foto_perfil",String(300)),
                                   Column("fecha_de_ingreso_hato",Date),
-                                  Column("fecha_de_ingreso_sistema",Date)
+                                  Column("fecha_de_ingreso_sistema",Date),
+                                  Column("edad_destete", Integer)
                                   )
 
 
@@ -466,6 +467,35 @@ modelo_natalidad_paricion_real = Table("natalidad_o_paricion_real", meta, Column
                                Column("periodo", Integer),
                                Column("intervalo_entre_partos_periodo", Float),
                                Column("natalidad_paricion_real", Float),
+                               Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
+
+modelo_periodos_lactancia = Table("periodos_lactancia", meta, Column("id_lactancia", Integer, primary_key=True),
+                               Column("id_bovino", Integer),
+                               Column("nombre_bovino", String(300)),
+                               Column("fecha_inicio_lactancia", Date),
+                               Column("fecha_final_lactancia", Date),
+                               Column("duracion", Integer),
+                               Column("total_litros_producidos", Float),
+                               Column("tipo", String(300)),
+                               Column("pico", Float),
+                               Column("fecha_pico", Date),
+                               Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
+
+
+modelo_periodos_secado = Table("periodos_secado", meta, Column("id_secado", Integer, primary_key=True),
+                               Column("id_bovino", Integer),
+                               Column("nombre_bovino", String(300)),
+                               Column("fecha_inicio_secado", Date),
+                               Column("fecha_final_secado", Date),
+                               Column("duracion", Integer),
+                               Column("interpretacion", String(300)),
+                               Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
+
+modelo_abortos = Table("abortos", meta, Column("id_aborto", Integer, primary_key=True),
+                               Column("id_bovino", Integer),
+                               Column("nombre_bovino", String(300)),
+                               Column("fecha_aborto", Date),
+                               Column("causa", String(300)),
                                Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
 
 meta.create_all(engine)

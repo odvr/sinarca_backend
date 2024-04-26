@@ -118,6 +118,7 @@ class Esquema_bovinos(BaseModel):
     ruta_fisica_foto_perfil: Optional[str] = None
     fecha_de_ingreso_hato: Optional[date] = None
     fecha_de_ingreso_sistema: Optional[date] = None
+    edad_destete: Optional[int] = None
     #Este Config La clase se utiliza para proporcionar configuraciones a Pydantic.
     class Config:
         orm_mode = True
@@ -681,6 +682,38 @@ class esquema_natalidad_paricion_real(BaseModel):
     periodo: int
     intervalo_entre_partos_periodo: Optional[float] = None
     natalidad_paricion_real: Optional[float] = None
+    usuario_id: Optional[str] = None
+    class Config:
+        orm_mode = True
+        env_file = ".env"
+
+
+
+class esquema_periodos_lactancia(BaseModel):
+    id_lactancia: int
+    id_bovino: int
+    nombre_bovino: Optional[str] = None
+    fecha_inicio_lactancia: Optional[date] = None
+    fecha_final_lactancia: Optional[date] = None
+    duracion:Optional[int] = None
+    total_litros_producidos:Optional[float] = None
+    tipo: Optional[str] = None
+    pico:Optional[float] = None
+    fecha_pico: Optional[date] = None
+    usuario_id: Optional[str] = None
+    class Config:
+        orm_mode = True
+        env_file = ".env"
+
+
+class esquema_periodos_secado(BaseModel):
+    id_secado: int
+    id_bovino: int
+    nombre_bovino: Optional[str] = None
+    fecha_inicio_secado: Optional[date] = None
+    fecha_final_secado: Optional[date] = None
+    duracion:Optional[int] = None
+    interpretacion: Optional[str] = None
     usuario_id: Optional[str] = None
     class Config:
         orm_mode = True
