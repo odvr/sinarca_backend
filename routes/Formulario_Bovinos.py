@@ -69,14 +69,14 @@ la clase Esquema_bovinos  recibira como base para crear el animal esto con fin d
 
 
 @Formulario_Bovino.post(
-    "/crear_bovino/{nombre_bovino}/{fecha_nacimiento}/{raza}/{sexo}/{marca}/{proposito}/{mansedumbre}/{estado}/{compra_bovino}/{fecha_pesaje}/{peso}/{ordeno}/{fecha_muerte}/{razon_muerte}/{numero_bono_venta}/{fecha_venta}/{precio_venta}/{razon_venta}/{medio_pago}/{comprador}/{numero_bono_compra}/{fecha_compra}/{precio_compra}/{razon_compra}/{medio_pago_compra}/{comprador_compras}/{id_bovino_madre}/{id_bovino_padre}/{id_registro_marca}/{registroIngresoHato}",
+    "/crear_bovino/{nombre_bovino}/{fecha_nacimiento}/{raza}/{sexo}/{marca}/{proposito}/{mansedumbre}/{estado}/{compra_bovino}/{fecha_pesaje}/{peso}/{ordeno}/{fecha_muerte}/{razon_muerte}/{numero_bono_venta}/{fecha_venta}/{precio_venta}/{razon_venta}/{medio_pago}/{comprador}/{numero_bono_compra}/{fecha_compra}/{precio_compra}/{razon_compra}/{medio_pago_compra}/{comprador_compras}/{id_bovino_madre}/{id_bovino_padre}/{id_registro_marca}/{registroIngresoHato}/{TiposPesaje}",
     status_code=status.HTTP_201_CREATED, tags=["Formualario_Bovinos"])
 async def crear_bovinos(nombre_bovino: str, fecha_nacimiento: date, raza: str, sexo: str, marca: str, proposito: str,
                         mansedumbre: str, estado: str, compra_bovino: str, fecha_pesaje: date, peso: float,
                         ordeno: str, fecha_muerte: date, razon_muerte: str, numero_bono_venta: str,
                         fecha_venta: date, precio_venta: int, razon_venta: str, medio_pago: str, comprador: str,
                         numero_bono_compra: str, fecha_compra: date, precio_compra: int, razon_compra: str,
-                        medio_pago_compra: str, comprador_compras: str, id_bovino_madre: str, id_bovino_padre: str,
+                        medio_pago_compra: str, comprador_compras: str, id_bovino_madre: str, id_bovino_padre: str,TiposPesaje:str,
                         id_registro_marca: str,registroIngresoHato: Optional[date] = None, db: Session = Depends(get_database_session),
                         current_user: Esquema_Usuario = Depends(get_current_user)):
     eliminarduplicados(db=db)
@@ -182,7 +182,7 @@ async def crear_bovinos(nombre_bovino: str, fecha_nacimiento: date, raza: str, s
 
             ingresoFechaPesaje = modelo_datos_pesaje.insert().values(id_bovino=id_bovino, fecha_pesaje=fecha_pesaje,
                                                                      peso=peso, usuario_id=current_user,
-                                                                     nombre_bovino=nombre_bovino)
+                                                                     nombre_bovino=nombre_bovino,tipo_pesaje=TiposPesaje)
 
             db.execute(ingresoFechaPesaje)
 

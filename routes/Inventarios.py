@@ -122,6 +122,7 @@ async def Buscar_Historial_Bovino(id_bovino: int , db: Session = Depends(get_dat
                     historial_item = {
                         "ListadoPeso": pesaje.peso,
                         "fecha_pesaje": pesaje.fecha_pesaje,
+                        "tipo_pesaje": pesaje.tipo_pesaje,
 
                     }
                     Historial.append(historial_item)

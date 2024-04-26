@@ -43,17 +43,46 @@ def get_database_session():
 """
 Ingresa los datos para el reporte de pesaje del animal 
 """
-@pesaje.post("/fecha_pesaje/{id_bovino}/{fecha_pesaje}/{peso}",status_code=200,tags=["Formualario_Bovinos"])
-async def crear_fecha_pesaje(id_bovino:str,fecha_pesaje:date,peso:float,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+@pesaje.post("/fecha_pesaje/{id_bovino}/{fecha_pesaje}/{peso}/{tipo_pesaje}",status_code=200,tags=["Formualario_Bovinos"])
+async def crear_fecha_pesaje(id_bovino:str,fecha_pesaje:date,peso:float,tipo_pesaje:str,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
 
     try:
 
-        nombre_bovino = crud.bovinos_inventario.Buscar_Nombre(db=db, id_bovino=id_bovino, current_user=current_user)
-        ingresoFechaPesaje = modelo_datos_pesaje.insert().values(id_bovino=id_bovino,fecha_pesaje=fecha_pesaje,peso=peso,usuario_id=current_user,nombre_bovino=nombre_bovino)
+        TipoPesajeDestete = db.query(modelo_datos_pesaje).filter(modelo_datos_pesaje.c.usuario_id == current_user,modelo_datos_pesaje.c.id_bovino == id_bovino,modelo_datos_pesaje.c.tipo_pesaje == "Destete" ).first()
+        TipoPesajeNacimiento = db.query(modelo_datos_pesaje).filter(modelo_datos_pesaje.c.usuario_id == current_user,
+                                                                 modelo_datos_pesaje.c.id_bovino == id_bovino,
+                                                                 modelo_datos_pesaje.c.tipo_pesaje == "Peso Nacimiento").first()
 
+        if TipoPesajeDestete is None and tipo_pesaje == "Destete":
+            nombre_bovino = crud.bovinos_inventario.Buscar_Nombre(db=db, id_bovino=id_bovino, current_user=current_user)
+            ingresoFechaPesaje = modelo_datos_pesaje.insert().values(id_bovino=id_bovino, fecha_pesaje=fecha_pesaje,
+                                                                     peso=peso, usuario_id=current_user,
+                                                                     nombre_bovino=nombre_bovino,
+                                                                     tipo_pesaje=tipo_pesaje)
 
-        db.execute(ingresoFechaPesaje)
-        db.commit()
+            db.execute(ingresoFechaPesaje)
+            db.commit()
+        if TipoPesajeNacimiento is None and tipo_pesaje == "Peso Nacimiento":
+            nombre_bovino = crud.bovinos_inventario.Buscar_Nombre(db=db, id_bovino=id_bovino, current_user=current_user)
+            ingresoFechaPesaje = modelo_datos_pesaje.insert().values(id_bovino=id_bovino, fecha_pesaje=fecha_pesaje,
+                                                                     peso=peso, usuario_id=current_user,
+                                                                     nombre_bovino=nombre_bovino,
+                                                                     tipo_pesaje=tipo_pesaje)
+
+            db.execute(ingresoFechaPesaje)
+            db.commit()
+
+        if tipo_pesaje == "Periódico":
+            nombre_bovino = crud.bovinos_inventario.Buscar_Nombre(db=db, id_bovino=id_bovino, current_user=current_user)
+            ingresoFechaPesaje = modelo_datos_pesaje.insert().values(id_bovino=id_bovino, fecha_pesaje=fecha_pesaje,
+                                                                     peso=peso, usuario_id=current_user,
+                                                                     nombre_bovino=nombre_bovino,
+                                                                     tipo_pesaje=tipo_pesaje)
+
+            db.execute(ingresoFechaPesaje)
+            db.commit()
+        else:
+            Response(status_code=status.HTTP_400_BAD_REQUEST)
 
     except Exception as e:
         logger.error(f'Error al Crear INGRESO DE PESAJE: {e}')
