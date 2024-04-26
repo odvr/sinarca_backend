@@ -218,7 +218,8 @@ modelo_datos_pesaje  = Table("ReportesPesaje", meta, Column("id_pesaje", Integer
                       Column("fecha_pesaje", Date),
                       Column("peso", Float),
                       Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")),
-                      Column("nombre_bovino", String(300))
+                      Column("nombre_bovino", String(300)),
+                      Column("tipo_pesaje", String(300))
                              )
 
 modelo_veterinaria = Table("veterinaria", meta, Column("id_veterinaria", Integer, primary_key=True),

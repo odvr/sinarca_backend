@@ -299,6 +299,7 @@ class esquema_modelo_Reporte_Pesaje(BaseModel):
     peso:float
     usuario_id: Optional[str] = None
     nombre_bovino:Optional[str] = None
+    tipo_pesaje:Optional[str] = None
     class Config:
         orm_mode = True
         env_file = ".env"
