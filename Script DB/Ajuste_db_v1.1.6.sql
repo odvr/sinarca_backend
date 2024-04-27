@@ -58,4 +58,4 @@ ENGINE=InnoDB
 
 
 INSERT INTO configuracion (nombre_aplicacion, version, descripcion, fecha_actualizacion, responsable_actualizacion, observaciones)
-VALUES ('Ruta Ganadera', '1.1.6', 'nuevas tablas (abortos, periodos lactancia y periodos secado)', '2024-04-26', 'Jose Vega');
+VALUES ('Ruta Ganadera', '1.1.6', 'nuevas tablas (abortos, periodos lactancia y periodos secado)', '2024-04-26', 'Jose Vega','');
