@@ -24,7 +24,7 @@ from fastapi import APIRouter, Response,status
 # importa el esquema de los bovinos
 from models.modelo_bovinos import modelo_bovinos_inventario, modelo_ventas, modelo_datos_muerte, modelo_ceba, \
     modelo_carga_animal_y_consumo_agua, modelo_levante, modelo_datos_pesaje, modelo_leche, modelo_macho_reproductor, \
-    modelo_compra, modelo_arbol_genealogico, modelo_registro_marca
+    modelo_compra, modelo_arbol_genealogico, modelo_registro_marca, modelo_abortos
 from sqlalchemy.orm import Session
 
 from routes.Endogamia import crear_endogamia
@@ -386,6 +386,10 @@ Ingresa los datos para el reporte de Animales Muertos
 async def crear_registro_muerte(id_bovino:str,estado:str,fecha_muerte:date,razon_muerte:str,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
 
     try:
+
+        """
+        Valida si el animal ya existe en la tabla 
+        """
         consulta = db.execute(
             modelo_datos_muerte.select().where(
                 modelo_datos_muerte.columns.id_bovino == id_bovino)).first()
@@ -414,6 +418,35 @@ async def crear_registro_muerte(id_bovino:str,estado:str,fecha_muerte:date,razon
 
     return Response(status_code=status.HTTP_201_CREATED)
 
+
+
+
+@Formulario_Bovino.post("/CrearAborto/{id_bovino}/{fecha_aborto}/{causas_aborto}",status_code=200,tags=["Formualario_Bovinos"])
+async def crear_registro_abortos_bovinos(id_bovino:str,fecha_aborto:date,causas_aborto:str,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+
+    try:
+        #busca el nombre del animal
+        nombre_bovino = crud.bovinos_inventario.Buscar_Nombre(db=db, id_bovino=id_bovino, current_user=current_user)
+        ingresoRegistroAborto = modelo_abortos.insert().values(id_bovino=id_bovino, fecha_aborto=fecha_aborto,
+                                                                    causa=causas_aborto,
+                                                                    usuario_id=current_user,
+                                                                    nombre_bovino=nombre_bovino)
+        db.execute(ingresoRegistroAborto)
+        db.commit()
+
+
+
+
+
+
+
+    except Exception as e:
+        logger.error(f'Error al Crear INGRESO DE ABORTOS: {e}')
+        raise
+    finally:
+        db.close()
+
+    return Response(status_code=status.HTTP_201_CREATED)
 
 
 """

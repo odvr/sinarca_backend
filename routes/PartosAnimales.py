@@ -14,7 +14,7 @@ from Lib.Registro_partos import registro_partos_animales
 from config.db import get_session
 # # importa el esquema de los bovinos
 from models.modelo_bovinos import modelo_historial_partos, modelo_partos, modelo_bovinos_inventario, \
-    modelo_registro_celos
+    modelo_registro_celos, modelo_abortos
 from datetime import date
 from fastapi import APIRouter, Response
 from fastapi import  status
@@ -101,15 +101,53 @@ async def listar_tabla_Partos_Animales(db: Session = Depends(get_database_sessio
     return itemsListarPartos
 
 
-@partos_bovinos.get("/listar_tabla_Historial_Partos_Unidad/{id_bovino}",response_model=list[esquema_historial_partos] )
+@partos_bovinos.get("/listar_tabla_Historial_Partos_Unidad/{id_bovino}",response_model=list )
 async def listar_tabla_Partos_Individual(id_bovino: str,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user) ):
     try:
         intervalo_partos(session=db,current_user=current_user)
 
-        consulta = db.execute(
+        itemsListarPartos = db.execute(
             modelo_historial_partos.select().where(modelo_historial_partos.columns.id_bovino == id_bovino)).all()
 
-        #itemsListarPartos = db.query(modelo_historial_partos).filter(modelo_historial_partos.c.usuario_id == current_user).all()
+        itemsListarAbortos = db.execute(
+            modelo_abortos.select().where(modelo_abortos.columns.id_bovino == id_bovino)).all()
+
+        Historial = []
+
+        # Valida si la consulta no este vacia
+        if itemsListarPartos is not None:
+            # Recorre la consulta para enviar los datos
+            for ListarPartos in itemsListarPartos:
+                Historial.append({
+
+                    "id_bovino": ListarPartos.id_bovino,
+                    "fecha_parto": ListarPartos.fecha_parto,
+                    "tipo_parto": ListarPartos.tipo_parto,
+                    "id_bovino_hijo": ListarPartos.id_bovino_hijo,
+                    "usuario_id": ListarPartos.usuario_id,
+                    "nombre_madre": ListarPartos.nombre_madre,
+                    "nombre_hijo": ListarPartos.nombre_hijo,
+
+                })
+                # Valida si la consulta no este vacia
+        if itemsListarAbortos is not None:
+            # Recorre la consulta para enviar los datos
+            for AbortosBovinos in itemsListarAbortos:
+                Historial.append({
+
+                    "id_aborto": AbortosBovinos.id_aborto,
+                    "id_bovino_abortos": AbortosBovinos.id_bovino,
+                    "nombre_bovino_abortos": AbortosBovinos.nombre_bovino,
+                    "fecha_aborto": AbortosBovinos.fecha_aborto,
+                    "causa": AbortosBovinos.causa,
+                    "usuario_id": AbortosBovinos.usuario_id,
+
+                })
+
+
+        return Historial
+
+
 
     except Exception as e:
         logger.error(f'Error al obtener TABLA DE ENDOGAMIA: {e}')
