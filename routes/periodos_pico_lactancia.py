@@ -128,3 +128,4 @@ async def listar_Partos_animal(id_bovino:int,db: Session = Depends(get_database_
     finally:
         db.close()
 
+
