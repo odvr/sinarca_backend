@@ -479,7 +479,9 @@ modelo_periodos_lactancia = Table("periodos_lactancia", meta, Column("id_lactanc
                                Column("tipo", String(300)),
                                Column("pico", Float),
                                Column("fecha_pico", Date),
-                               Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
+                               Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")),
+                               Column("id_parto", String(300), ForeignKey("partos.id_parto")),
+                               Column("mensaje", String(300)))
 
 
 modelo_periodos_secado = Table("periodos_secado", meta, Column("id_secado", Integer, primary_key=True),

@@ -701,6 +701,8 @@ class esquema_periodos_lactancia(BaseModel):
     pico:Optional[float] = None
     fecha_pico: Optional[date] = None
     usuario_id: Optional[str] = None
+    id_parto:Optional[int] = None
+    mensaje:Optional[str] = None
     class Config:
         orm_mode = True
         env_file = ".env"
