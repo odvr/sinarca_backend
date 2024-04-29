@@ -17,9 +17,11 @@ from Lib.periodos_lactancia import periodos_lactancia, pico_y_produccion_lactanc
 from config.db import get_session
 from crud import crud_bovinos_inventario
 # # importa el esquema de los bovinos
-from models.modelo_bovinos import modelo_registro_celos, modelo_partos, modelo_periodos_lactancia
+from models.modelo_bovinos import modelo_registro_celos, modelo_partos, modelo_periodos_lactancia, \
+    modelo_historial_partos
 from routes.rutas_bovinos import get_current_user
-from schemas.schemas_bovinos import Esquema_Usuario, esquema_registro_celos, esquema_partos
+from schemas.schemas_bovinos import Esquema_Usuario, esquema_registro_celos, esquema_partos, esquema_historial_partos, \
+    esquema_periodos_lactancia
 
 # Configuracion de la libreria para los logs de sinarca
 # Crea un objeto logger
@@ -80,7 +82,7 @@ async def crear_periodo_lactancia(id_bovino: int= Form(...),id_parto: int= Form(
     return Response(status_code=status.HTTP_201_CREATED)
 
 
-@registro_periodo_lactancia_rutas.get("/listar_tabla_lactancias", response_model=list[esquema_registro_celos] )
+@registro_periodo_lactancia_rutas.get("/listar_tabla_lactancias", response_model=list[esquema_periodos_lactancia] )
 async def listar_tabla_lactancia(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
 
     try:
@@ -110,4 +112,19 @@ async def eliminar_lactancia(id_lactancia: str,db: Session = Depends(get_databas
 
     # retorna un estado de no contenido
     return Response(status_code=HTTP_204_NO_CONTENT)
+
+
+
+@registro_periodo_lactancia_rutas.get("/listar_Partos_Animal/{id_bovino}",response_model=list[esquema_historial_partos] )
+async def listar_Partos_animal(id_bovino:int,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+
+    try:
+
+        ListarPartos = db.query(modelo_historial_partos).filter(modelo_historial_partos.c.usuario_id == current_user,modelo_historial_partos.c.id_bovino == id_bovino).all()
+        return ListarPartos
+    except Exception as e:
+        logger.error(f'Error al obtener inventario de Fecha de Parto: {e}')
+        raise
+    finally:
+        db.close()
 
