@@ -16,7 +16,8 @@ from models.modelo_bovinos import modelo_bovinos_inventario, modelo_veterinaria,
     modelo_descarte, modelo_arbol_genealogico, modelo_historial_intervalo_partos, modelo_litros_leche, modelo_orden_IEP, \
     modelo_orden_litros, \
     modelo_orden_peso, modelo_historial_partos, modelo_carga_animal_y_consumo_agua, modelo_veterinaria_evoluciones, \
-    modelo_datos_pesaje, modelo_compra, modelo_palpaciones, modelo_registro_celos, modelo_registro_vacunas_bovinos
+    modelo_datos_pesaje, modelo_compra, modelo_palpaciones, modelo_registro_celos, modelo_registro_vacunas_bovinos, \
+    modelo_periodos_lactancia, modelo_abortos
 
 '''***********'''
 from passlib.context import CryptContext
@@ -303,6 +304,31 @@ def eliminacionBovino(id_bov_eliminar,session: Session):
               modelo_vientres_aptos.delete().where(modelo_vientres_aptos.c.id_bovino == id_bov_eliminar))
           session.commit()
 
+          # consulta de bovino en la tabla de periodos de lactancia
+      consulta_bovino_lactancia = session.query(modelo_periodos_lactancia). \
+          filter(modelo_periodos_lactancia.c.id_bovino == id_bov_eliminar).all()
+      # si el id ya no existe entonces no se hara cambios
+      if consulta_bovino_lactancia == []:
+          pass
+      # caso contrario se eliminara de la tabla
+      else:
+          session.execute(modelo_periodos_lactancia.delete().where(
+              modelo_periodos_lactancia.c.id_bovino == id_bov_eliminar))
+          session.commit()
+
+
+          # consulta de bovino en la tabla de abortos
+      consulta_bovino_aborto = session.query(modelo_abortos). \
+          filter(modelo_abortos.c.id_bovino == id_bov_eliminar).all()
+      # si el id ya no existe entonces no se hara cambios
+      if consulta_bovino_aborto == []:
+          pass
+      # caso contrario se eliminara de la tabla
+      else:
+          session.execute(modelo_abortos.delete().where(
+              modelo_abortos.c.id_bovino == id_bov_eliminar))
+          session.commit()
+
       #consulta de bovino en la tabla de partos
       consulta_bovino_partos_historial = session.query(modelo_historial_partos).\
           filter(modelo_historial_partos.c.id_bovino==id_bov_eliminar).all()
@@ -347,6 +373,7 @@ def eliminacionBovino(id_bov_eliminar,session: Session):
           session.execute(modelo_datos_pesaje.delete().where(modelo_datos_pesaje.c.id_bovino == id_bov_eliminar))
           session.commit()
       session.commit()
+
 
       # consulta de bovino en la tabla de compras
       consulta_bovino_compra = session.query(modelo_compra). \
