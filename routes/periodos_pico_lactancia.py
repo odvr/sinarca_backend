@@ -53,7 +53,7 @@ async def crear_periodo_lactancia(id_bovino: int= Form(...),id_parto: int= Form(
         nombre_bovino=crud.bovinos_inventario.Buscar_Nombre(db=db,id_bovino=id_bovino,current_user=current_user)
 
         consulta_id=db.query(modelo_periodos_lactancia).\
-            filter(modelo_periodos_lactancia.c.id_bovino==id_bovino).all()
+            filter(modelo_periodos_lactancia.c.id_parto==id_parto).all()
 
         if consulta_id == [] or consulta_id is None:
             ingresoLactancia = modelo_periodos_lactancia.insert().values(id_bovino=id_bovino,
