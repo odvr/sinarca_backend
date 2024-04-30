@@ -82,13 +82,56 @@ async def crear_periodo_lactancia(id_bovino: int= Form(...),id_parto: int= Form(
     return Response(status_code=status.HTTP_201_CREATED)
 
 
-@registro_periodo_lactancia_rutas.get("/listar_tabla_lactancias", response_model=list[esquema_periodos_lactancia] )
+@registro_periodo_lactancia_rutas.get("/listar_tabla_lactancias", response_model=list )
 async def listar_tabla_lactancia(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
 
     try:
+        #Consulta de Datos
+        itemsAnimalesLactancias = db.query(modelo_periodos_lactancia).filter(
+            modelo_periodos_lactancia.c.usuario_id == current_user).all()
+        #idparto = itemsAnimalesLactancias.id_parto
+        #print(idparto)
+        #ListarPartos = db.query(modelo_historial_partos).filter(modelo_historial_partos.c.usuario_id == current_user,modelo_historial_partos.c.id_bovino == id_bovino).all()
 
-        itemsAnimalesLactancias = db.query(modelo_periodos_lactancia).filter(modelo_periodos_lactancia.c.usuario_id == current_user).all()
-        return itemsAnimalesLactancias
+        HistorialPartosLactancias = []
+
+        if  itemsAnimalesLactancias is not None:
+            for Lactancias in itemsAnimalesLactancias:
+                ListarPartos = db.query(modelo_historial_partos).filter(
+                    modelo_historial_partos.c.usuario_id == current_user,
+                    modelo_historial_partos.c.id_parto == Lactancias.id_parto).all()
+                for i in ListarPartos:
+                    Partos = {
+
+                        "nombre_hijo": i.nombre_hijo,
+                        "fecha_parto": i.fecha_parto,
+
+                    }
+
+
+                historial_Lactancia = {
+
+                    "id_lactancia": Lactancias.id_lactancia,
+                    "id_bovino": Lactancias.id_bovino,
+                    "nombre_bovino": Lactancias.nombre_bovino,
+                    "fecha_inicio_lactancia": Lactancias.fecha_inicio_lactancia,
+                    "fecha_final_lactancia": Lactancias.fecha_final_lactancia,
+                    "duracion": Lactancias.duracion,
+                    "total_litros_producidos": Lactancias.total_litros_producidos,
+                    "tipo": Lactancias.tipo,
+                    "pico": Lactancias.pico,
+                    "fecha_pico": Lactancias.fecha_pico,
+                    "id_parto": Lactancias.id_parto,
+                    "mensaje": Lactancias.mensaje,
+                    "partos": Partos,  # Agrega los datos de parto aquí
+
+
+                }
+                HistorialPartosLactancias.append(historial_Lactancia)
+
+
+
+        return HistorialPartosLactancias
 
     except Exception as e:
         logger.error(f'Error al obtener tabla_lactancias: {e}')
