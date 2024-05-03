@@ -38,6 +38,17 @@ class CRUDBovinos:
             Nombre_Bovino = ConsultarNombre.nombre_bovino
             db.close()
             return Nombre_Bovino
+
+    def Buscar_ID_Nombre_Padre(self, db: Session, id_bovino_padre, current_user):
+        ConsultarNombrePadre = db.query(modelo_registro_pajillas).filter(
+            modelo_registro_pajillas.columns.Codigo_toro_pajilla == id_bovino_padre,
+            modelo_registro_pajillas.c.usuario_id == current_user).first()
+        if ConsultarNombrePadre is None:
+            return None
+        else:
+            ID_BovinoPadre = ConsultarNombrePadre.id_pajillas
+            db.close()
+            return ID_BovinoPadre
     def Buscar_Nombre_Pajilla(self,db: Session,Codigo_toro_pajilla, current_user):
         ConsultarNombre_pajilla = db.query(modelo_registro_pajillas).filter(
             modelo_registro_pajillas.columns.id_pajillas == Codigo_toro_pajilla,
