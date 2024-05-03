@@ -6,7 +6,7 @@ Librerias requeridas
 '''
 
 import logging
-
+from datetime import timedelta
 
 from fastapi import APIRouter
 
@@ -69,8 +69,37 @@ def palpaciones(session: Session,current_user):
                 session.execute(modelo_leche.update().values(datos_prenez=consulta_prenez[3],nombre_bovino=nombre_bovino_leche). \
                                 where(modelo_leche.columns.id_bovino == id_bovino_leche))
                 session.commit()
+
+
+        # el siguiente codigo calcula las fechas de partos para animales preñadas
+        # consulta de animales preñadas en el modulo de palpaciones
+        consulta_animales_prenadas = session.query(modelo_palpaciones).\
+            filter(modelo_palpaciones.columns.diagnostico_prenez=="Preñada",
+                   modelo_palpaciones.columns.usuario_id==current_user).all()
+
+        for i in consulta_animales_prenadas:
+            # Toma el id de la palpacion en este caso es el campo 0
+            id_palpacion = i[0]
+            # Toma la fecha de palpacion del bovino en este caso es el campo 2
+            fecha_palpacion=i[2]
+            # Toma los dias de gestacion,en este caso es el campo 7
+            dias_gestacion = i[7]
+
+            #con la fecha de palpacion y los dis de gestacion, se calula la fecha estimada de preñez
+            fecha_estimada_prenez=fecha_palpacion-timedelta(dias_gestacion)
+            #con la fecha de preñez se calula la fecha aproximada de parto(la gestacion dura aproximadamente 283 dias)
+            fecha_estimada_parto=fecha_estimada_prenez + timedelta(283)
+
+            #actualiza los campos
+            session.execute(
+                modelo_palpaciones.update().values(fecha_estimada_prenez=fecha_estimada_prenez,
+                                                   fecha_estimada_parto=fecha_estimada_parto). \
+                where(modelo_palpaciones.columns.id_palpacion == id_palpacion))
+            session.commit()
+
     except Exception as e:
         logger.error(f'Error Funcion palpaciones: {e}')
         raise
     finally:
         session.close()
+

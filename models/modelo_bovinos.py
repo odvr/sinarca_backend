@@ -296,7 +296,11 @@ modelo_palpaciones = Table("palpaciones", meta, Column("id_palpacion", Integer, 
                       Column("diagnostico_prenez", String(300)),
                       Column("observaciones", String(300)),
                       Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")),
-                      Column("nombre_bovino", String(300)))
+                      Column("nombre_bovino", String(300)),
+                      Column("dias_gestacion", Integer),
+                      Column("fecha_estimada_prenez", Date),
+                      Column("fecha_estimada_parto", Date))
+
 
 modelo_dias_abiertos = Table("dias_abiertos", meta, Column("id_dias_abiertos", Integer, primary_key=True),
                       Column("id_bovino", Integer),
@@ -487,17 +491,38 @@ modelo_periodos_lactancia = Table("periodos_lactancia", meta, Column("id_lactanc
 modelo_periodos_secado = Table("periodos_secado", meta, Column("id_secado", Integer, primary_key=True),
                                Column("id_bovino", Integer),
                                Column("nombre_bovino", String(300)),
+                               Column("fecha_recomendada_secado", Date),
+                               Column("secado_realizado", String(300)),
                                Column("fecha_inicio_secado", Date),
                                Column("fecha_final_secado", Date),
                                Column("duracion", Integer),
                                Column("interpretacion", String(300)),
-                               Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
+                               Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")),
+                               Column("tratamiento", String(300)))
 
 modelo_abortos = Table("abortos", meta, Column("id_aborto", Integer, primary_key=True),
                                Column("id_bovino", Integer),
                                Column("nombre_bovino", String(300)),
                                Column("fecha_aborto", Date),
                                Column("causa", String(300)),
+                               Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
+
+
+modelo_evaluaciones_macho_reproductor = Table("evaluaciones_macho_reproductor", meta, Column("id_evaluacion", Integer, primary_key=True),
+                               Column("id_bovino", Integer),
+                               Column("nombre_bovino", String(300)),
+                               Column("fecha_evaluacion", Date),
+                               Column("edad_evaluacion", Integer),
+                               Column("circunferencia_escrotal", Float),
+                               Column("simetria_testicular", String(300)),
+                               Column("forma_escrotal", String(300)),
+                               Column("consistencia_testiculos", String(300)),
+                               Column("tamano_prepucio", String(300)),
+                               Column("linea_dorsal", String(300)),
+                               Column("tipo_pezuna", String(300)),
+                               Column("muculatura", String(300)),
+                               Column("pezunas", String(300)),
+                               Column("mensaje", String(300)),
                                Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
 
 meta.create_all(engine)
