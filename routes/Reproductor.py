@@ -17,13 +17,15 @@ from config.db import get_session
 from models.modelo_bovinos import modelo_bovinos_inventario, modelo_veterinaria, modelo_leche, modelo_levante, \
     modelo_ventas, modelo_datos_muerte, \
     modelo_indicadores, modelo_ceba, modelo_macho_reproductor, modelo_carga_animal_y_consumo_agua, modelo_datos_pesaje, \
-    modelo_capacidad_carga, modelo_calculadora_hectareas_pastoreo, modelo_partos, modelo_vientres_aptos
+    modelo_capacidad_carga, modelo_calculadora_hectareas_pastoreo, modelo_partos, modelo_vientres_aptos, \
+    modelo_evaluaciones_macho_reproductor
 from routes.rutas_bovinos import get_current_user
 
 from schemas.schemas_bovinos import Esquema_bovinos, esquema_produccion_levante, \
     esquema_produccion_ceba, esquema_datos_muerte, esquema_modelo_ventas, esquema_arbol_genealogico, \
     esquema_modelo_Reporte_Pesaje, esquema_produccion_leche, esquema_veterinaria, esquema_veterinaria_evoluciones, \
-    esquema_partos, esquema_macho_reproductor, Esquema_Usuario, esquema_indicadores
+    esquema_partos, esquema_macho_reproductor, Esquema_Usuario, esquema_indicadores, \
+    esquema_evaluaciones_macho_reproductor
 from sqlalchemy import update, between, func
 from starlette.status import HTTP_204_NO_CONTENT
 from datetime import date, datetime, timedelta
@@ -129,8 +131,64 @@ async def CrearReproductor(id_bovino: str,proposito:str,db: Session = Depends(ge
 
 
 
+"""
+La siguiente API realiza la creación del formulario de evaluaciones del toro Reproductor
 
 
+
+"""
+@ReproductorRutas.post("/CrearEvaluacionToroReproductor/{id_bovino}/{fecha_evaluacion}/{simetria_testicular}/{forma_escrotal}/{consistencia_testiculos}/{tamano_prepucio}/{linea_dorsal}/{tipo_pezuna}/{muculatura}/{EstadoHC}/{comentarios_evaluacion_reproductor}",status_code=status.HTTP_201_CREATED)
+async def CrearParametrosEvacionToroReproductor(id_bovino: int,fecha_evaluacion:date,simetria_testicular:str,forma_escrotal:str,consistencia_testiculos:str, tamano_prepucio:str,linea_dorsal:str, tipo_pezuna:str,muculatura:str,EstadoHC:str,comentarios_evaluacion_reproductor:str,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+
+    try:
+        # Realiza la Busqueda del Nombre
+        nombre_bovino = crud.bovinos_inventario.Buscar_Nombre(db=db, id_bovino=id_bovino, current_user=current_user)
+
+        ingresoEvaluacionToroReproductor = modelo_evaluaciones_macho_reproductor.insert().values(id_bovino=id_bovino,fecha_evaluacion=fecha_evaluacion,simetria_testicular=simetria_testicular,forma_escrotal=forma_escrotal,consistencia_testiculos=consistencia_testiculos,tamano_prepucio=tamano_prepucio,linea_dorsal=linea_dorsal,tipo_pezuna=tipo_pezuna,muculatura=muculatura,estado_solicitud_reproductor=EstadoHC,usuario_id=current_user,nombre_bovino=nombre_bovino,comentarios_evaluacion_reproductor=comentarios_evaluacion_reproductor)
+        db.execute(ingresoEvaluacionToroReproductor)
+        db.commit()
+
+    except Exception as e:
+        logger.error(f'Error al Crear Formulario de Toro reproductor: {e}')
+        raise
+    finally:
+        db.close()
+
+    return Response(status_code=status.HTTP_201_CREATED)
+
+"""
+Elimina 
+"""
+@ReproductorRutas.delete("/eliminar_evaluacion_reproductor/{id_evaluacion}")
+async def Eliminar_endogamia(id_evaluacion: str,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+
+    try:
+
+
+        db.execute(modelo_evaluaciones_macho_reproductor.delete().where(modelo_evaluaciones_macho_reproductor.c.id_evaluacion == id_evaluacion))
+        db.commit()
+    except Exception as e:
+        logger.error(f'Error al intentar Eliminar Evolución reproductor: {e}')
+        raise
+    finally:
+        db.close()
+
+    return
+
+
+
+@ReproductorRutas.get("/listar_tabla_Evaluaciones_Reproductor/{id_bovino}", response_model=list[esquema_evaluaciones_macho_reproductor],tags=["Reproductor"] )
+async def listar_tabla_Evaluaciones_Reproductor(id_bovino:str,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+
+    try:
+
+        ItemsEvaluaciones = db.query(modelo_evaluaciones_macho_reproductor).filter(modelo_evaluaciones_macho_reproductor.c.usuario_id == current_user,modelo_evaluaciones_macho_reproductor.columns.id_bovino == id_bovino).all()
+    except Exception as e:
+        logger.error(f'Error al obtener TABLA DE Evaluaciones Reproductor: {e}')
+        raise
+    finally:
+        db.close()
+    return ItemsEvaluaciones
 
 
 @ReproductorRutas.delete("/eliminar_bovino_reproductor/{id_bovino}", status_code=HTTP_204_NO_CONTENT)

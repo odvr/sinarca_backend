@@ -744,6 +744,8 @@ class esquema_evaluaciones_macho_reproductor(BaseModel):
     muculatura: Optional[str] = None
     pezunas: Optional[str] = None
     mensaje: Optional[str] = None
+    estado_solicitud_reproductor: Optional[str] = None
+    comentarios_evaluacion_reproductor: Optional[str] = None
     usuario_id: Optional[str] = None
 
     class Config:

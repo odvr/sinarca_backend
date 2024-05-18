@@ -523,6 +523,8 @@ modelo_evaluaciones_macho_reproductor = Table("evaluaciones_macho_reproductor", 
                                Column("muculatura", String(300)),
                                Column("pezunas", String(300)),
                                Column("mensaje", String(300)),
+                               Column("estado_solicitud_reproductor", String(300)),
+                               Column("comentarios_evaluacion_reproductor", String(300)),
                                Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
 
 meta.create_all(engine)
