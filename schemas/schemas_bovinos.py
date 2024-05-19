@@ -734,7 +734,7 @@ class esquema_evaluaciones_macho_reproductor(BaseModel):
     nombre_bovino: Optional[str] = None
     fecha_evaluacion: Optional[date] = None
     edad_evaluacion:Optional[int] = None
-    circunferencia_escrotal: Optional[float] = None
+    circunferencia_escrotal: Optional[str] = None
     simetria_testicular: Optional[str] = None
     forma_escrotal:Optional[str] = None
     consistencia_testiculos: Optional[str] = None
