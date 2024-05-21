@@ -137,14 +137,14 @@ La siguiente API realiza la creación del formulario de evaluaciones del toro Re
 
 
 """
-@ReproductorRutas.post("/CrearEvaluacionToroReproductor/{id_bovino}/{fecha_evaluacion}/{simetria_testicular}/{forma_escrotal}/{consistencia_testiculos}/{tamano_prepucio}/{linea_dorsal}/{tipo_pezuna}/{muculatura}/{EstadoHC}/{comentarios_evaluacion_reproductor}/{circunferencia_escrotal}",status_code=status.HTTP_201_CREATED)
-async def CrearParametrosEvacionToroReproductor(id_bovino: int,fecha_evaluacion:date,simetria_testicular:str,forma_escrotal:str,consistencia_testiculos:str, tamano_prepucio:str,linea_dorsal:str, tipo_pezuna:str,muculatura:str,EstadoHC:str,comentarios_evaluacion_reproductor:str,circunferencia_escrotal:str,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+@ReproductorRutas.post("/CrearEvaluacionToroReproductor/{id_bovino}/{fecha_evaluacion}/{simetria_testicular}/{forma_escrotal}/{consistencia_testiculos}/{tamano_prepucio}/{linea_dorsal}/{tipo_pezuna}/{muculatura}/{comentarios_evaluacion_reproductor}/{circunferencia_escrotal}",status_code=status.HTTP_201_CREATED)
+async def CrearParametrosEvacionToroReproductor(id_bovino: int,fecha_evaluacion:date,simetria_testicular:str,forma_escrotal:str,consistencia_testiculos:str, tamano_prepucio:str,linea_dorsal:str, tipo_pezuna:str,muculatura:str,comentarios_evaluacion_reproductor:str,circunferencia_escrotal:str,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
 
     try:
         # Realiza la Busqueda del Nombre
         nombre_bovino = crud.bovinos_inventario.Buscar_Nombre(db=db, id_bovino=id_bovino, current_user=current_user)
 
-        ingresoEvaluacionToroReproductor = modelo_evaluaciones_macho_reproductor.insert().values(id_bovino=id_bovino,fecha_evaluacion=fecha_evaluacion,simetria_testicular=simetria_testicular,forma_escrotal=forma_escrotal,consistencia_testiculos=consistencia_testiculos,tamano_prepucio=tamano_prepucio,linea_dorsal=linea_dorsal,tipo_pezuna=tipo_pezuna,muculatura=muculatura,estado_solicitud_reproductor=EstadoHC,usuario_id=current_user,nombre_bovino=nombre_bovino,comentarios_evaluacion_reproductor=comentarios_evaluacion_reproductor,circunferencia_escrotal=circunferencia_escrotal)
+        ingresoEvaluacionToroReproductor = modelo_evaluaciones_macho_reproductor.insert().values(id_bovino=id_bovino,fecha_evaluacion=fecha_evaluacion,simetria_testicular=simetria_testicular,forma_escrotal=forma_escrotal,consistencia_testiculos=consistencia_testiculos,tamano_prepucio=tamano_prepucio,linea_dorsal=linea_dorsal,tipo_pezuna=tipo_pezuna,muculatura=muculatura,usuario_id=current_user,nombre_bovino=nombre_bovino,comentarios_evaluacion_reproductor=comentarios_evaluacion_reproductor,circunferencia_escrotal=circunferencia_escrotal)
         db.execute(ingresoEvaluacionToroReproductor)
         db.commit()
 
