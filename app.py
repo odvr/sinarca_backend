@@ -18,6 +18,7 @@ from routes.Palpaciones_Bovinos import Palpaciones_Bovinos
 from routes.PartosAnimales import partos_bovinos
 from routes.Pesaje import pesaje
 from routes.Prod_leche import Produccion_Leche
+from routes.Recepcion_correos_landing_page import CorreosLandingPage
 from routes.Registro_Pajillas import Pajillas
 from routes.Reproductor import ReproductorRutas
 from routes.Total_Animales import Pruebas_TotalAnimales
@@ -95,6 +96,7 @@ app.include_router(Ganancia_historica_rutas)
 app.include_router(natalidad_paricion_real_rutas)
 app.include_router(Marcas_Bovinos)
 app.include_router(registro_periodo_lactancia_rutas)
+app.include_router(CorreosLandingPage)
 
 
 
