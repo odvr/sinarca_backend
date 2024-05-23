@@ -85,6 +85,7 @@ Crea los Registros de Palpaciones
 async def crear_registro_listros_diarios(id_bovino: str = Form(...),
                                         fecha_palpacion: date = Form(...),
                                         diagnostico_prenez: str = Form(...),
+                                        dias_gestacion: int = Form(...),
                                         observaciones: str = Form(...),
                                         db: Session = Depends(get_database_session),
                                         current_user: Esquema_Usuario = Depends(get_current_user)):
@@ -94,7 +95,7 @@ async def crear_registro_listros_diarios(id_bovino: str = Form(...),
         Nombre_Bovino = crud.bovinos_inventario.Buscar_Nombre(db=db, id_bovino=id_bovino, current_user=current_user)
 
         IngrasarPalpacion  = modelo_palpaciones.insert().values(id_bovino=id_bovino,
-                                                                 fecha_palpacion=fecha_palpacion,observaciones=observaciones, diagnostico_prenez=diagnostico_prenez,
+                                                                 fecha_palpacion=fecha_palpacion,observaciones=observaciones, dias_gestacion=dias_gestacion,diagnostico_prenez=diagnostico_prenez,
                                                                  usuario_id = current_user, nombre_bovino = Nombre_Bovino
 
                                                                  )
