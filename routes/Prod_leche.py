@@ -96,7 +96,7 @@ async def inventario_prod_leche(db: Session = Depends(get_database_session),
         IEP_por_raza(session= db,current_user=current_user)
         registro_partos_animales(session= db,current_user=current_user)
         dias_abiertos(session= db,current_user=current_user)
-        palpaciones(session= db,current_user=current_user)
+
 
         abuelo_materno(session=db, current_user=current_user)
         abuela_materna(session=db, current_user=current_user)

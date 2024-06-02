@@ -47,6 +47,8 @@ async def Listar_Palpaciones(db: Session = Depends(get_database_session),current
 
     try:
 
+        palpaciones(session=db, current_user=current_user)
+
 
         ItemsPalpaciones = db.query(modelo_palpaciones).filter(modelo_palpaciones.c.usuario_id == current_user).all()
 
