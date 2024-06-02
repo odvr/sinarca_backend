@@ -18,6 +18,7 @@ from fastapi import  Depends
 from routes.rutas_bovinos import get_current_user
 from schemas.schemas_bovinos import  Esquema_Usuario, esquema_palpaciones
 from sqlalchemy.orm import Session
+from typing import Optional
 # Configuracion de la libreria para los logs de sinarca
 # Crea un objeto logger
 logger = logging.getLogger(__name__)
@@ -85,8 +86,8 @@ Crea los Registros de Palpaciones
 async def crear_registro_listros_diarios(id_bovino: str = Form(...),
                                         fecha_palpacion: date = Form(...),
                                         diagnostico_prenez: str = Form(...),
-                                        dias_gestacion: int = Form(...),
-                                        observaciones: str = Form(...),
+                                        dias_gestacion: Optional [int] = Form(None),
+                                        observaciones:  Optional [str] = Form(...),
                                         db: Session = Depends(get_database_session),
                                         current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
