@@ -751,3 +751,19 @@ class esquema_evaluaciones_macho_reproductor(BaseModel):
     class Config:
         orm_mode = True
         env_file = ".env"
+
+
+class esquema_lotes_bovinos(BaseModel):
+    id_lote_bovinos: int
+    nombre_lote: Optional[str] = None
+    estado: Optional[str] = None
+    ubicacion: Optional[str] = None
+    tipo_uso: Optional[str] = None
+    tamano_lote: Optional[str] = None
+
+    observaciones: Optional[str] = None
+    usuario_id: Optional[str] = None
+
+    class Config:
+        orm_mode = True
+        env_file = ".env"

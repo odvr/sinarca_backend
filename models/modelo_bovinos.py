@@ -57,7 +57,8 @@ modelo_bovinos_inventario = Table("bovinos", meta,
                                   Column("ruta_fisica_foto_perfil",String(300)),
                                   Column("fecha_de_ingreso_hato",Date),
                                   Column("fecha_de_ingreso_sistema",Date),
-                                  Column("edad_destete", Integer)
+                                  Column("edad_destete", Integer),
+                                  Column("nombre_lote_bovino",String(300))
                                   )
 
 
@@ -525,6 +526,17 @@ modelo_evaluaciones_macho_reproductor = Table("evaluaciones_macho_reproductor", 
                                Column("mensaje", String(300)),
                                Column("estado_solicitud_reproductor", String(300)),
                                Column("comentarios_evaluacion_reproductor", String(300)),
+                               Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
+
+
+modelo_lotes_bovinos= Table("lotes_bovinos", meta, Column("id_lote_bovinos", Integer, primary_key=True),
+                               Column("nombre_lote", String(300)),
+                               Column("estado", String(100)),
+                               Column("ubicacion", String(100)),
+                               Column("tipo_uso", String(100)),
+                               Column("tamano_lote", String(100)),
+                               Column("observaciones", String(300)),
+
                                Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
 
 meta.create_all(engine)

@@ -39,6 +39,28 @@ class CRUDBovinos:
             db.close()
             return Nombre_Bovino
 
+    def Buscar_Lote_Bovino(self,db: Session,id_bovino, current_user):
+        """
+
+        :param db:
+        :param id_bovino:
+        :param current_user:
+        :return:  LoteAnimal
+
+        Consulta el lote de animal
+        """
+        ConsultarLote = db.query(modelo_bovinos_inventario).filter(
+            modelo_bovinos_inventario.columns.id_bovino == id_bovino,
+            modelo_bovinos_inventario.c.usuario_id == current_user).first()
+        if ConsultarLote is None:
+            return None
+        else:
+            LoteAnimal = ConsultarLote.nombre_bovino
+            db.close()
+            return LoteAnimal
+
+
+
     def Buscar_ID_Nombre_Padre(self, db: Session, id_bovino_padre, current_user):
         ConsultarNombrePadre = db.query(modelo_registro_pajillas).filter(
             modelo_registro_pajillas.columns.Codigo_toro_pajilla == id_bovino_padre,
