@@ -119,6 +119,7 @@ class Esquema_bovinos(BaseModel):
     fecha_de_ingreso_hato: Optional[date] = None
     fecha_de_ingreso_sistema: Optional[date] = None
     edad_destete: Optional[int] = None
+    nombre_lote_bovino: Optional[str] = None
     #Este Config La clase se utiliza para proporcionar configuraciones a Pydantic.
     class Config:
         orm_mode = True
@@ -759,7 +760,7 @@ class esquema_lotes_bovinos(BaseModel):
     estado: Optional[str] = None
     ubicacion: Optional[str] = None
     tipo_uso: Optional[str] = None
-    tamano_lote: Optional[str] = None
+
 
     observaciones: Optional[str] = None
     usuario_id: Optional[str] = None

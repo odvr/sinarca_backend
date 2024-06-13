@@ -10,6 +10,7 @@ from fastapi import Form
 from config.db import   get_session
 from fastapi import APIRouter,Response
 from typing import Optional
+from typing import List
 # importa el esquema de los bovinos
 from models.modelo_bovinos import modelo_bovinos_inventario, modelo_lotes_bovinos
 from sqlalchemy.orm import Session
@@ -48,9 +49,11 @@ def get_database_session():
 async def listar_tabla_lotes(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
 
     try:
+
+
         LotesBovinos = db.query(modelo_lotes_bovinos). \
             filter( modelo_lotes_bovinos.c.usuario_id == current_user).all()
-        #itemsAnimalesVeterinaria =  session.execute(modelo_veterinaria.select()).all()
+
 
     except Exception as e:
         logger.error(f'Error al obtener Tabla Lotes: {e}')
@@ -66,7 +69,7 @@ async def crear_lotes_bovinos(nombre_lote: str = Form(...),
                                         estado: Optional [str] = Form(None),
                                         ubicacion: Optional [str] = Form(None),
                                         tipo_uso:  Optional [str] = Form(None),
-                                        tamano_lote:  Optional [str] = Form(None),
+
                                         observaciones:  Optional [str] = Form(None),
                                         db: Session = Depends(get_database_session),
                                         current_user: Esquema_Usuario = Depends(get_current_user)):
@@ -75,7 +78,7 @@ async def crear_lotes_bovinos(nombre_lote: str = Form(...),
 
 
 
-        IngresarLote  = modelo_lotes_bovinos.insert().values( tamano_lote=tamano_lote,
+        IngresarLote  = modelo_lotes_bovinos.insert().values(
                                                                  nombre_lote=nombre_lote,estado=estado, ubicacion=ubicacion,tipo_uso=tipo_uso,observaciones=observaciones,
                                                                  usuario_id = current_user
 
@@ -94,3 +97,55 @@ async def crear_lotes_bovinos(nombre_lote: str = Form(...),
     return Response(status_code=status.HTTP_201_CREATED)
 
 
+
+
+@Lotes_Bovinos.delete("/eliminar_lote_bovino/{id_lote_bovinos}")
+async def eliminar_Parto_Bovinos(id_lote_bovinos: int,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user) ):
+
+    try:
+        db.execute(modelo_lotes_bovinos.delete().where(modelo_lotes_bovinos.c.id_lote_bovinos == id_lote_bovinos))
+        db.commit()
+        # retorna un estado de no contenido
+        return
+
+    except Exception as e:
+        logger.error(f'Error al Intentar Eliminar Lote: {e}')
+        raise
+    finally:
+        db.close()
+
+
+
+
+@Lotes_Bovinos.post("/Asociar_Actualizar_Lote_Bovino", status_code=status.HTTP_201_CREATED)
+async def Asociar_Actualizar_Lote_Bovino(nombre_lote: str = Form(...),
+                                        ListadoBovinos: Optional [List[str]] = Form(None),
+                                        db: Session = Depends(get_database_session),
+                                        current_user: Esquema_Usuario = Depends(get_current_user)):
+
+    try:
+
+
+        """El siguiente For Recorre la Lista de Animales por usuario
+        Recibe solamente los ID'S de los animales que son unicos en la base de datos
+        """
+        for Bovinos in ListadoBovinos:
+
+            db.execute(modelo_bovinos_inventario.update().values(
+
+                nombre_lote_bovino=nombre_lote
+
+            ).where(
+                modelo_bovinos_inventario.columns.id_bovino == Bovinos))
+
+
+            db.commit()
+            db.close()
+
+
+    except Exception as e:
+        logger.error(f'Error al Actualizar el Campo del Lote: {e}')
+        raise
+    finally:
+        db.close()
+    return Response(status_code=status.HTTP_201_CREATED)

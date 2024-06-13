@@ -534,7 +534,7 @@ modelo_lotes_bovinos= Table("lotes_bovinos", meta, Column("id_lote_bovinos", Int
                                Column("estado", String(100)),
                                Column("ubicacion", String(100)),
                                Column("tipo_uso", String(100)),
-                               Column("tamano_lote", String(100)),
+
                                Column("observaciones", String(300)),
 
                                Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
