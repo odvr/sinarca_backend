@@ -100,13 +100,38 @@ async def crear_lotes_bovinos(nombre_lote: str = Form(...),
 
 
 @Lotes_Bovinos.delete("/eliminar_lote_bovino/{id_lote_bovinos}")
-async def eliminar_Parto_Bovinos(id_lote_bovinos: int,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user) ):
+async def eliminar_Lote_Bovinos(id_lote_bovinos: int,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user) ):
 
     try:
+
+        """Consulta el nombre del Lote que será utulizado para la eliminación de la tabla de Bovinos"""
+        ConsultarNombreLote =  db.query(modelo_lotes_bovinos).filter(
+            modelo_lotes_bovinos.columns.id_lote_bovinos == id_lote_bovinos,
+            modelo_lotes_bovinos.c.usuario_id == current_user).first()
+
+        NombreLote = ConsultarNombreLote.nombre_lote
+        """Listado de Inventarios"""
+        ConsultarTablaBovinosListado = db.query(modelo_bovinos_inventario).filter(
+            modelo_bovinos_inventario.c.usuario_id == current_user).all()
+        """Recorre la Lista de Bovinos en el inventario de un solo usuario para poder actualizar  el campo de lote"""
+        for Bovinos in ConsultarTablaBovinosListado:
+            #Id Bovino para actualizar
+            IDBovino = Bovinos.id_bovino
+            db.execute(modelo_bovinos_inventario.update().values(nombre_lote_bovino="-").where(
+                modelo_bovinos_inventario.c.id_bovino == IDBovino,
+                modelo_bovinos_inventario.c.nombre_lote_bovino == NombreLote,
+                modelo_bovinos_inventario.c.usuario_id == current_user))
+            db.commit()
+
         db.execute(modelo_lotes_bovinos.delete().where(modelo_lotes_bovinos.c.id_lote_bovinos == id_lote_bovinos))
         db.commit()
-        # retorna un estado de no contenido
         return
+
+
+
+
+
+
 
     except Exception as e:
         logger.error(f'Error al Intentar Eliminar Lote: {e}')
