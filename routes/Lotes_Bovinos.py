@@ -7,6 +7,8 @@ import logging
 from fastapi import  Depends
 from starlette import status
 from fastapi import Form
+
+import crud.crud_bovinos_inventario
 from config.db import   get_session
 from fastapi import APIRouter,Response
 from typing import Optional
@@ -14,6 +16,7 @@ from typing import List
 # importa el esquema de los bovinos
 from models.modelo_bovinos import modelo_bovinos_inventario, modelo_lotes_bovinos
 from sqlalchemy.orm import Session
+from sqlalchemy import and_
 from routes.rutas_bovinos import get_current_user
 from schemas.schemas_bovinos import  Esquema_Usuario, esquema_lotes_bovinos
 
@@ -49,8 +52,7 @@ def get_database_session():
 async def listar_tabla_lotes(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
 
     try:
-
-
+        crud.crud_bovinos_inventario.bovinos_inventario.ActualizarCantidadAnimalesEnLote(db=db,current_user=current_user)
         LotesBovinos = db.query(modelo_lotes_bovinos). \
             filter( modelo_lotes_bovinos.c.usuario_id == current_user).all()
 
@@ -76,17 +78,30 @@ async def crear_lotes_bovinos(nombre_lote: str = Form(...),
     try:
 
 
+        #Realiza una consulta para validar si el nombre ya existe o no existe.
+        Consulta_Nomnbres_Lote = db.execute(
+            modelo_bovinos_inventario.select().where(
+                and_(
+                    modelo_lotes_bovinos.columns.nombre_lote == nombre_lote,
+                    modelo_lotes_bovinos.columns.usuario_id == current_user
+                )
+            )
+        ).first()
+        if Consulta_Nomnbres_Lote is None:
+            # Actualiza la cantidad de animales en el Lote
+            crud.crud_bovinos_inventario.bovinos_inventario.ActualizarCantidadAnimalesEnLote(db=db,
+                                                                                             current_user=current_user)
+            IngresarLote = modelo_lotes_bovinos.insert().values(
+                nombre_lote=nombre_lote, estado=estado, ubicacion=ubicacion, tipo_uso=tipo_uso,
+                observaciones=observaciones,
+                usuario_id=current_user
 
+            )
 
-        IngresarLote  = modelo_lotes_bovinos.insert().values(
-                                                                 nombre_lote=nombre_lote,estado=estado, ubicacion=ubicacion,tipo_uso=tipo_uso,observaciones=observaciones,
-                                                                 usuario_id = current_user
-
-                                                                 )
-
-        db.execute(IngresarLote)
-        db.commit()
-
+            db.execute(IngresarLote)
+            db.commit()
+        else:
+            return Response(status_code=status.HTTP_409_CONFLICT)
 
 
     except Exception as e:
@@ -105,6 +120,8 @@ async def eliminar_Lote_Bovinos(id_lote_bovinos: int,db: Session = Depends(get_d
     try:
 
         """Consulta el nombre del Lote que será utulizado para la eliminación de la tabla de Bovinos"""
+        crud.crud_bovinos_inventario.bovinos_inventario.ActualizarCantidadAnimalesEnLote(db=db,
+                                                                                         current_user=current_user)
         ConsultarNombreLote =  db.query(modelo_lotes_bovinos).filter(
             modelo_lotes_bovinos.columns.id_lote_bovinos == id_lote_bovinos,
             modelo_lotes_bovinos.c.usuario_id == current_user).first()
@@ -154,6 +171,8 @@ async def Asociar_Actualizar_Lote_Bovino(nombre_lote: str = Form(...),
         """El siguiente For Recorre la Lista de Animales por usuario
         Recibe solamente los ID'S de los animales que son unicos en la base de datos
         """
+        crud.crud_bovinos_inventario.bovinos_inventario.ActualizarCantidadAnimalesEnLote(db=db,
+                                                                                         current_user=current_user)
         for Bovinos in ListadoBovinos:
 
             db.execute(modelo_bovinos_inventario.update().values(

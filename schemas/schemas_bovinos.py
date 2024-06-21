@@ -764,6 +764,7 @@ class esquema_lotes_bovinos(BaseModel):
 
     observaciones: Optional[str] = None
     usuario_id: Optional[str] = None
+    total_bovinos: Optional[int] = None
 
     class Config:
         orm_mode = True

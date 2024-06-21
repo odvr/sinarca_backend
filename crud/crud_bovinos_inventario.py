@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 
 from models.modelo_bovinos import modelo_bovinos_inventario, modelo_registro_marca, modelo_registro_pajillas, \
-    modelo_usuarios
+    modelo_usuarios, modelo_lotes_bovinos
 
 
 class CRUDBovinos:
@@ -169,5 +169,28 @@ class CRUDBovinos:
             RutasUnidas = Rutabase + Buscar_Datos_Foto_Perfil
 
             return RutasUnidas
+
+    def ActualizarCantidadAnimalesEnLote(self,db,current_user):
+
+        """
+
+        :param db:
+        :param current_user:
+        :return:
+        """
+        ConsultarNombreLote = db.query(modelo_lotes_bovinos).filter(
+            modelo_lotes_bovinos.c.usuario_id == current_user).all()
+
+        for Consulta in ConsultarNombreLote:
+            ContarAnimalesLote = db.query(modelo_bovinos_inventario). \
+                filter(modelo_bovinos_inventario.c.nombre_lote_bovino == Consulta.nombre_lote,
+                       modelo_bovinos_inventario.c.usuario_id == current_user).count()
+            db.execute(modelo_lotes_bovinos.update().values(total_bovinos=ContarAnimalesLote).where(
+                modelo_lotes_bovinos.c.id_lote_bovinos == Consulta.id_lote_bovinos,
+                modelo_bovinos_inventario.c.usuario_id == current_user))
+            db.commit()
+            db.close()
+
+
 
 bovinos_inventario = CRUDBovinos()
