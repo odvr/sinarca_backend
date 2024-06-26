@@ -42,6 +42,7 @@ from routes.Natalidad_y_Paricion_real import natalidad_paricion_real_rutas
 from routes.Marcas_Bovinos import  Marcas_Bovinos
 from routes.periodos_pico_lactancia import periodos_lactancia, registro_periodo_lactancia_rutas
 from routes.Lotes_Bovinos import  Lotes_Bovinos
+from routes.Plan_Sanitario_Bovinos import Plan_Sanitario_Bovinos
 
 '''
 CORS o "intercambio de recursos de origen cruzado"se refiere a las situaciones 
@@ -99,6 +100,7 @@ app.include_router(Marcas_Bovinos)
 app.include_router(registro_periodo_lactancia_rutas)
 app.include_router(CorreosLandingPage)
 app.include_router(Lotes_Bovinos)
+app.include_router(Plan_Sanitario_Bovinos)
 
 
 

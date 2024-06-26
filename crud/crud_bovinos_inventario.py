@@ -2,11 +2,23 @@ from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union
 
 from sqlalchemy.orm import Session
 
-
+import logging
 
 from models.modelo_bovinos import modelo_bovinos_inventario, modelo_registro_marca, modelo_registro_pajillas, \
-    modelo_usuarios, modelo_lotes_bovinos
+    modelo_usuarios, modelo_lotes_bovinos, modelo_manejo_ternero_recien_nacido_lotes
 
+# Configuracion de la libreria para los logs de sinarca
+# Crea un objeto logger
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+# Crea un manejador de archivo para guardar el log
+log_file = 'Log_Sinarca.log'
+file_handler = logging.FileHandler(log_file)
+# Define el formato del log
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+file_handler.setFormatter(formatter)
+# Agrega el manejador de archivo al logger
+logger.addHandler(file_handler)
 
 class CRUDBovinos:
     def __init__(self):
@@ -19,6 +31,8 @@ class CRUDBovinos:
         * `schema`: A Pydantic model (schema) class
         """
         self.model = modelo_bovinos_inventario
+
+
 
     def get(self, db: Session, id: Any) -> Any:
         return db.query(self.model).filter(self.model.id == id).first()
@@ -191,6 +205,65 @@ class CRUDBovinos:
             db.commit()
             db.close()
 
+    def CrearPlanSanidadRecienNacidosBovinos(self,nombre_lote_asociado,estado_respiratorio_inicial_lote,fecha_desinfeccion_lote,producto_usado_lote,metodo_aplicacion_lote,notificar_evento_lote, db,current_user):
+        """
+        Realiza la creación de planes sanitario solamente para los parametros de Recien Nacidos
+        :param nombre_lote_asociado:
+        :param estado_respiratorio_inicial_lote:
+        :param fecha_desinfeccion_lote:
+        :param producto_usado_lote:
+        :param metodo_aplicacion_lote:
+        :param notificar_evento_lote:
+        :param db:
+        :param current_user:
+        :return:
+        """
+
+
+        try:
+            AnimalesLote = db.query(modelo_bovinos_inventario). \
+                filter(modelo_bovinos_inventario.c.nombre_lote_bovino == nombre_lote_asociado,
+                       modelo_bovinos_inventario.c.usuario_id == current_user).all()
+
+            for IDAnimales in AnimalesLote:
+                ListadoIDBovino = IDAnimales.id_bovino
+                NombreBovino = IDAnimales.nombre_bovino
+
+                # La siguiente variable contiene el estado de la solicitud de la tabla
+                Estado="Activo"
+                #Consulta si El animal ya existe para actualizar o crear el campo dentro de la tabla
+                ConsultaIDExiste = db.execute(
+                    modelo_manejo_ternero_recien_nacido_lotes.select().where(
+                        modelo_manejo_ternero_recien_nacido_lotes.columns.id_bovino == ListadoIDBovino)).first()
+                if ConsultaIDExiste is None:
+                    IngresarPlanSanidadLotes = modelo_manejo_ternero_recien_nacido_lotes.insert().values(
+                        estado_solicitud_recien_nacido=Estado,
+                        id_bovino=ListadoIDBovino,
+                        nombre_bovino=NombreBovino,
+                        estado_respiratorio_inicial_lote=estado_respiratorio_inicial_lote,
+                        fecha_desinfeccion_lote=fecha_desinfeccion_lote, nombre_lote_asociado=nombre_lote_asociado,
+                        producto_usado_lote=producto_usado_lote,
+                        metodo_aplicacion_lote=metodo_aplicacion_lote, notificar_evento_lote=notificar_evento_lote,
+                        usuario_id=current_user
+
+                    )
+
+                    db.execute(IngresarPlanSanidadLotes)
+                    db.commit()
+                else:
+                    db.execute(modelo_manejo_ternero_recien_nacido_lotes.update().where(modelo_manejo_ternero_recien_nacido_lotes.c.id_bovino == ListadoIDBovino).values(
+                        nombre_bovino=NombreBovino,
+                        estado_solicitud_recien_nacido=Estado,
+                        estado_respiratorio_inicial_lote=estado_respiratorio_inicial_lote,
+                        fecha_desinfeccion_lote=fecha_desinfeccion_lote, nombre_lote_asociado=nombre_lote_asociado,
+                        producto_usado_lote=producto_usado_lote,
+                        metodo_aplicacion_lote=metodo_aplicacion_lote, notificar_evento_lote=notificar_evento_lote,))
+                    db.commit()
+
+
+        except Exception as e:
+            logger.error(f'Error al Registrar Manejo de Terneros Recien Nacidos: {e}')
+            raise
 
 
 bovinos_inventario = CRUDBovinos()

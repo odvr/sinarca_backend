@@ -769,3 +769,23 @@ class esquema_lotes_bovinos(BaseModel):
     class Config:
         orm_mode = True
         env_file = ".env"
+
+
+class esquema_manejo_ternero_recien_nacido_lotes(BaseModel):
+    manejo_ternero_recien_nacido_lotes: int
+    estado_solicitud_recien_nacido: Optional[str] = None
+    id_bovino: Optional[int] = None
+    nombre_bovino: Optional[str] = None
+    estado_respiratorio_inicial_lote: Optional[str] = None
+    fecha_desinfeccion_lote: Optional[str] = None
+    producto_usado_lote: Optional[str] = None
+    metodo_aplicacion_lote: Optional[int] = None
+    notificar_evento_lote: Optional[int] = None
+    nombre_lote_asociado: Optional[int] = None
+
+
+    usuario_id: Optional[str] = None
+
+    class Config:
+        orm_mode = True
+        env_file = ".env"

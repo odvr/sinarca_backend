@@ -540,4 +540,19 @@ modelo_lotes_bovinos= Table("lotes_bovinos", meta, Column("id_lote_bovinos", Int
 
                                Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
 
+
+
+
+modelo_manejo_ternero_recien_nacido_lotes= Table("manejo_ternero_recien_nacido_lotes", meta, Column("id_manejo_recien_nacido_lote", Integer, primary_key=True),
+                               Column("estado_solicitud_recien_nacido", String(300)),
+                               Column("id_bovino", Integer),
+                               Column("nombre_lote_asociado", String(300)),
+                               Column("nombre_bovino", String(100)),
+                               Column("estado_respiratorio_inicial_lote", String(100)),
+                               Column("fecha_desinfeccion_lote", String(300)),
+                               Column("producto_usado_lote", String(300)),
+                               Column("metodo_aplicacion_lote", String(300)),
+                               Column("notificar_evento_lote", String(300)),
+                               Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
+
 meta.create_all(engine)
