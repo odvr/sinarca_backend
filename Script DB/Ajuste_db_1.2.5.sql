@@ -22,4 +22,6 @@ ALTER TABLE `eventos_asociados_lotes`
 
 ALTER TABLE `eventos_asociados_lotes`
 	ADD COLUMN `FechaNotificacionRecienNacido` DATE NULL DEFAULT NULL AFTER `estado_evento`;
-S
+
+INSERT INTO configuracion (nombre_aplicacion, version, descripcion, fecha_actualizacion, responsable_actualizacion, observaciones)
+VALUES ('Ruta Ganadera', '1.2.5', 'Nueva Tabla para aplicada para las Notificaciones del plan Sanitario en eventos', '2024-06-26', 'Omar Vega ','Se requiere Versión FrodTend V.1.2.6 o superior');

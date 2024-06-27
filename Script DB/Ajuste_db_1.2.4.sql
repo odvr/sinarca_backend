@@ -22,3 +22,7 @@ ALTER TABLE `manejo_ternero_recien_nacido_lotes`
 
 ALTER TABLE `manejo_ternero_recien_nacido_lotes`
 	ADD COLUMN `nombre_lote_asociado` VARCHAR(300) NULL DEFAULT NULL AFTER `estado_solicitud_recien_nacido`;
+
+
+INSERT INTO configuracion (nombre_aplicacion, version, descripcion, fecha_actualizacion, responsable_actualizacion, observaciones)
+VALUES ('Ruta Ganadera', '1.2.4', 'Nueva Tabla para aplicada para las Notificaciones del plan Sanitario', '2024-06-26', 'Omar Vega ','Se requiere Versión FrodTend V.1.2.6 o superior');
