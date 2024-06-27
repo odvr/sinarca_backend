@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 import logging
 
 from models.modelo_bovinos import modelo_bovinos_inventario, modelo_registro_marca, modelo_registro_pajillas, \
-    modelo_usuarios, modelo_lotes_bovinos, modelo_manejo_ternero_recien_nacido_lotes
+    modelo_usuarios, modelo_lotes_bovinos, modelo_manejo_ternero_recien_nacido_lotes, modelo_eventos_asociados_lotes
 
 # Configuracion de la libreria para los logs de sinarca
 # Crea un objeto logger
@@ -205,7 +205,7 @@ class CRUDBovinos:
             db.commit()
             db.close()
 
-    def CrearPlanSanidadRecienNacidosBovinos(self,nombre_lote_asociado,estado_respiratorio_inicial_lote,fecha_desinfeccion_lote,producto_usado_lote,metodo_aplicacion_lote,notificar_evento_lote, db,current_user):
+    def CrearPlanSanidadRecienNacidosBovinos(self,nombre_lote_asociado,estado_respiratorio_inicial_lote,fecha_desinfeccion_lote,producto_usado_lote,metodo_aplicacion_lote,notificar_evento_lote,FechaNotificacionRecienNacido, db,current_user):
         """
         Realiza la creación de planes sanitario solamente para los parametros de Recien Nacidos
         :param nombre_lote_asociado:
@@ -221,9 +221,24 @@ class CRUDBovinos:
 
 
         try:
+            #La siguiente consulta trae la información de la tabla de inventario de los animales asociados al Lote
             AnimalesLote = db.query(modelo_bovinos_inventario). \
                 filter(modelo_bovinos_inventario.c.nombre_lote_bovino == nombre_lote_asociado,
                        modelo_bovinos_inventario.c.usuario_id == current_user).all()
+
+            IngresarEventos = modelo_eventos_asociados_lotes.insert().values(
+
+                nombre_lote=nombre_lote_asociado,
+                nombre_evento="Manejo del Ternero Recién Nacido",
+                estado_evento="Activo",
+                FechaNotificacionRecienNacido=FechaNotificacionRecienNacido,
+
+                usuario_id=current_user
+
+            )
+
+            db.execute(IngresarEventos)
+            db.commit()
 
             for IDAnimales in AnimalesLote:
                 ListadoIDBovino = IDAnimales.id_bovino

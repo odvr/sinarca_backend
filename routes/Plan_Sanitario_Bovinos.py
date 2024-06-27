@@ -7,7 +7,7 @@ import logging
 from fastapi import  Depends
 from starlette import status
 from fastapi import Form
-
+from datetime import date
 import crud.crud_bovinos_inventario
 from config.db import   get_session
 from fastapi import APIRouter,Response
@@ -15,11 +15,11 @@ from typing import Optional
 from typing import List
 # importa el esquema de los bovinos
 from models.modelo_bovinos import modelo_bovinos_inventario, modelo_lotes_bovinos, \
-    modelo_manejo_ternero_recien_nacido_lotes
+    modelo_manejo_ternero_recien_nacido_lotes, modelo_eventos_asociados_lotes
 from sqlalchemy.orm import Session
 from sqlalchemy import and_
 from routes.rutas_bovinos import get_current_user
-from schemas.schemas_bovinos import  Esquema_Usuario, esquema_lotes_bovinos
+from schemas.schemas_bovinos import Esquema_Usuario, esquema_lotes_bovinos, esquema_eventos_asociados_lotes
 
 # Configuracion de las rutas para fash api
 Plan_Sanitario_Bovinos = APIRouter()
@@ -52,12 +52,13 @@ async def crear_lotes_bovinos(SelectPlanSanidad: Optional [str] = Form(None),est
                                         producto_usado_lote: Optional [str] = Form(None),
                                         metodo_aplicacion_lote:  Optional [str] = Form(None),
                                         notificar_evento_lote:  Optional [str] = Form(None),
+                                        FechaNotificacionRecienNacido:  Optional [date] = Form(None),
                                         db: Session = Depends(get_database_session),
                                         current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
 
         if SelectPlanSanidad =="Manejo del Ternero Recién Nacido":
-            crud.crud_bovinos_inventario.bovinos_inventario.CrearPlanSanidadRecienNacidosBovinos(nombre_lote_asociado=nombre_lote_asociado,estado_respiratorio_inicial_lote=estado_respiratorio_inicial_lote,fecha_desinfeccion_lote=fecha_desinfeccion_lote,producto_usado_lote=producto_usado_lote,metodo_aplicacion_lote=metodo_aplicacion_lote,notificar_evento_lote=notificar_evento_lote,db=db,current_user=current_user)
+            crud.crud_bovinos_inventario.bovinos_inventario.CrearPlanSanidadRecienNacidosBovinos(nombre_lote_asociado=nombre_lote_asociado,estado_respiratorio_inicial_lote=estado_respiratorio_inicial_lote,fecha_desinfeccion_lote=fecha_desinfeccion_lote,producto_usado_lote=producto_usado_lote,metodo_aplicacion_lote=metodo_aplicacion_lote,notificar_evento_lote=notificar_evento_lote,FechaNotificacionRecienNacido=FechaNotificacionRecienNacido,db=db,current_user=current_user)
 
 
 
@@ -91,8 +92,22 @@ async def listar_planes_sanitarios(db: Session = Depends(get_database_session),c
 
         #itemsListarGananciasPesos = db.query(modelo_manejo_ternero_recien_nacido_lotes).filter(modelo_ganancia_historica_peso.c.usuario_id == current_user).first()
         ConsultaManejoTerneros = db.query(modelo_manejo_ternero_recien_nacido_lotes).filter(modelo_manejo_ternero_recien_nacido_lotes.c.usuario_id == current_user).all()
+        ConsultaEventosAsociados = db.query(modelo_eventos_asociados_lotes).filter(modelo_eventos_asociados_lotes.c.usuario_id == current_user).all()
 
         ListaPlanesSanitariosLotes = []
+
+        if ConsultaEventosAsociados is not None:
+            for EventosAsociados in ConsultaEventosAsociados:
+                historialEventos = {
+                    "id_eventos_asociados": EventosAsociados.id_eventos_asociados,
+                    "id_lote_asociado": EventosAsociados.id_lote_asociado,
+                    "nombre_lote": EventosAsociados.nombre_lote,
+                    "nombre_evento": EventosAsociados.nombre_evento,
+                    "estado_evento": EventosAsociados.estado_evento,
+                    "FechaNotificacionRecienNacido": EventosAsociados.FechaNotificacionRecienNacido,
+
+                }
+                ListaPlanesSanitariosLotes.append(historialEventos)
 
         if ConsultaManejoTerneros is not None:
             for ManejoTerneros in ConsultaManejoTerneros:
@@ -109,25 +124,14 @@ async def listar_planes_sanitarios(db: Session = Depends(get_database_session),c
                     "producto_usado_lote": ManejoTerneros.producto_usado_lote,
                     "metodo_aplicacion_lote": ManejoTerneros.metodo_aplicacion_lote,
                     "notificar_evento_lote": ManejoTerneros.notificar_evento_lote,
+                    "historialEventos":historialEventos
 
 
                 }
                 ListaPlanesSanitariosLotes.append(historial_item)
-        """
-                if itemsListarGananciasPesos is not None:
-            ConsultaHistorialCeba.append({
 
-                "ganancia_diaria_media": itemsListarGananciasPesos.ganancia_diaria_media,
-                "peso_anterior": itemsListarGananciasPesos.peso_anterior,
-                "peso_posterior": itemsListarGananciasPesos.peso_posterior,
-                "fecha_anterior": itemsListarGananciasPesos.fecha_anterior,
-                "fecha_posterior": itemsListarGananciasPesos.fecha_posterior,
 
-                "dias": itemsListarGananciasPesos.dias,
-            })
 
-        
-        """
 
         return ListaPlanesSanitariosLotes
 
@@ -137,5 +141,3 @@ async def listar_planes_sanitarios(db: Session = Depends(get_database_session),c
         raise
     finally:
         db.close()
-
-

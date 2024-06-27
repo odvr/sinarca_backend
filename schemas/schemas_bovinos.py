@@ -760,8 +760,6 @@ class esquema_lotes_bovinos(BaseModel):
     estado: Optional[str] = None
     ubicacion: Optional[str] = None
     tipo_uso: Optional[str] = None
-
-
     observaciones: Optional[str] = None
     usuario_id: Optional[str] = None
     total_bovinos: Optional[int] = None
@@ -785,6 +783,20 @@ class esquema_manejo_ternero_recien_nacido_lotes(BaseModel):
 
 
     usuario_id: Optional[str] = None
+
+    class Config:
+        orm_mode = True
+        env_file = ".env"
+
+
+class esquema_eventos_asociados_lotes(BaseModel):
+    id_eventos_asociados: int
+    id_lote_asociado: Optional[str] = None
+    nombre_lote: Optional[str] = None
+    nombre_evento: Optional[str] = None
+    estado_evento: Optional[str] = None
+    usuario_id: Optional[str] = None
+    FechaNotificacionRecienNacido: Optional[date] = None
 
     class Config:
         orm_mode = True
