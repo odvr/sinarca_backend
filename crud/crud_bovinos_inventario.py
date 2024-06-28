@@ -535,7 +535,7 @@ class CRUDBovinos:
                     db.execute(IngresarPlanSanidadLotesPodologia)
                     db.commit()
                 else:
-                    db.execute(modelo_manejo_ternero_recien_nacido_lotes.update().where(
+                    db.execute(modelo_control_podologia_lotes.update().where(
                         modelo_descorne_lotes.c.id_bovino == ListadoIDBovino).values(
                         nombre_bovino=NombreBovino,
                         estado_solicitud_recien_nacido=Estado,
