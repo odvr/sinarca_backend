@@ -265,6 +265,7 @@ modelo_registro_vacunas_bovinos = Table("registro_vacunacion_bovinos", meta, Col
                         Column("id_bovino", Integer, ForeignKey("bovinos.id_bovino")),
                         Column("fecha_registrada_usuario", Date),
                         Column("tipo_vacuna", String(50)),
+                        Column("nombre_lote_asociado", String(300)),
                         Column("fecha_bitacora_Sistema", DateTime),
                         Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")),
                         Column("nombre_bovino", String(300)))
@@ -563,7 +564,42 @@ modelo_eventos_asociados_lotes= Table("eventos_asociados_lotes", meta, Column("i
                                Column("nombre_lote", String(300)),
                                Column("nombre_evento", String(100)),
                                Column("estado_evento", String(100)),
-                               Column("FechaNotificacionRecienNacido", Date),
+                               Column("FechaNotificacion", Date),
+                               Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
+
+modelo_descorne_lotes= Table("descorne_lotes", meta, Column("id_descorne_lote", Integer, primary_key=True),
+                               Column("metodo_descorne", String(300)),
+                               Column("fecha_descorne",Date),
+                               Column("estado_solicitud_descorne", String(100)),
+                               Column("nombre_bovino", String(100)),
+                               Column("id_bovino", Integer),
+                               Column("nombre_lote_asociado", String(100)),
+                               Column("comentario_descorne", String(100)),
+                               Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
+
+
+
+modelo_control_parasitos_lotes= Table("control_parasitos_lote", meta, Column("id_control_parasitos", Integer, primary_key=True),
+                               Column("fecha_tratamiento_lote",Date),
+                               Column("tipo_tratamiento",String(300)),
+                               Column("producto_usado", String(100)),
+                               Column("nombre_bovino", String(100)),
+                               Column("id_bovino", Integer),
+                               Column("nombre_lote_asociado", String(100)),
+                               Column("estado_solicitud_parasitos", String(100)),
+                               Column("comentario_parasitos", String(100)),
+                               Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
+
+
+modelo_control_podologia_lotes= Table("control_podologia_lotes", meta, Column("id_control_podologia", Integer, primary_key=True),
+                               Column("fecha_registro_podologia",Date),
+                               Column("espacialista_podologia",String(300)),
+                               Column("comentario_podologia", String(100)),
+                               Column("nombre_bovino", String(100)),
+                               Column("id_bovino", Integer),
+                               Column("nombre_lote_asociado", String(100)),
+                               Column("estado_solicitud_podologia", String(100)),
+                               Column("FechaNotificacionPodologia", String(100)),
                                Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
 
 meta.create_all(engine)

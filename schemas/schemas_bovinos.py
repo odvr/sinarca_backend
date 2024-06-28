@@ -347,6 +347,7 @@ class esquema_registro_vacunas_bovinos(BaseModel):
     id_bovino: int
     fecha_registrada_usuario:Optional[date] = None
     tipo_vacuna: Optional[str] = None
+    nombre_lote_asociado: Optional[str] = None
     fecha_bitacora_Sistema: Optional[date] = None
     usuario_id: Optional[str] = None
     nombre_bovino:Optional[str] = None
@@ -796,7 +797,55 @@ class esquema_eventos_asociados_lotes(BaseModel):
     nombre_evento: Optional[str] = None
     estado_evento: Optional[str] = None
     usuario_id: Optional[str] = None
-    FechaNotificacionRecienNacido: Optional[date] = None
+    FechaNotificacion: Optional[date] = None
+
+    class Config:
+        orm_mode = True
+        env_file = ".env"
+
+
+class esquema_descorne_lotes(BaseModel):
+    id_descorne_lote : int
+    estado_solicitud_descorne: Optional[str] = None
+    metodo_descorne: Optional[str] = None
+    fecha_descorne: Optional[date] = None
+    id_bovino: Optional[int] = None
+    nombre_bovino: Optional[str] = None
+    nombre_lote_asociado: Optional[int] = None
+    comentario_descorne: Optional[str] = None
+    usuario_id: Optional[str] = None
+
+    class Config:
+        orm_mode = True
+        env_file = ".env"
+
+class esquema_control_parasitos_lotes(BaseModel):
+    id_control_parasitos : int
+    fecha_tratamiento_lote: Optional[date] = None
+    tipo_tratamiento: Optional[str] = None
+    estado_solicitud_parasitos : Optional[str] = None
+    producto_usado: Optional[str] = None
+    id_bovino: Optional[int] = None
+    nombre_bovino: Optional[str] = None
+    nombre_lote_asociado: Optional[int] = None
+    comentario_parasitos: Optional[str] = None
+    usuario_id: Optional[str] = None
+
+    class Config:
+        orm_mode = True
+        env_file = ".env"
+
+class esquema_control_podologia_lotes(BaseModel):
+    id_control_podologia : int
+    fecha_registro_podologia: Optional[date] = None
+    espacialista_podologia: Optional[str] = None
+    estado_solicitud_podologia : Optional[str] = None
+    FechaNotificacionPodologia: Optional[date] = None
+    id_bovino: Optional[int] = None
+    nombre_bovino: Optional[str] = None
+    nombre_lote_asociado: Optional[int] = None
+    comentario_podologia: Optional[str] = None
+    usuario_id: Optional[str] = None
 
     class Config:
         orm_mode = True
