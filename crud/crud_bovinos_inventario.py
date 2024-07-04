@@ -328,7 +328,7 @@ class CRUDBovinos:
                 #Consulta si El animal ya existe para actualizar o crear el campo dentro de la tabla
                 ConsultaIDExiste = db.execute(
                     modelo_descorne_lotes.select().where(
-                        modelo_descorne_lotes.columns.id_bovino == ListadoIDBovino)).first()
+                        modelo_descorne_lotes.columns.id_evento_lote_asociado == id_evento_lote_asociado)).first()
                 if ConsultaIDExiste is None:
                     IngresarPlanSanidadLotesDescorne = modelo_descorne_lotes.insert().values(
                         estado_solicitud_descorne=Estado,
@@ -392,7 +392,7 @@ class CRUDBovinos:
                 # Consulta si El animal ya existe para actualizar o crear el campo dentro de la tabla
                 ConsultaIDExiste = db.execute(
                     modelo_control_parasitos_lotes.select().where(
-                        modelo_control_parasitos_lotes.columns.id_bovino == ListadoIDBovino)).first()
+                        modelo_control_parasitos_lotes.columns.id_evento_lote_asociado == id_evento_lote_asociado)).first()
                 if ConsultaIDExiste is None:
                     IngresarPlanSanidadLotesDescorne = modelo_control_parasitos_lotes.insert().values(
                         estado_solicitud_parasitos=Estado,
@@ -460,7 +460,7 @@ class CRUDBovinos:
                 # Consulta si El animal ya existe para actualizar o crear el campo dentro de la tabla
                 ConsultaIDExiste = db.execute(
                     modelo_registro_vacunas_bovinos.select().where(
-                        modelo_registro_vacunas_bovinos.columns.id_bovino == ListadoIDBovino)).first()
+                        modelo_registro_vacunas_bovinos.columns.id_evento_lote_asociado == id_evento_lote_asociado)).first()
                 if ConsultaIDExiste is None:
 
 
@@ -524,7 +524,7 @@ class CRUDBovinos:
                 # Consulta si El animal ya existe para actualizar o crear el campo dentro de la tabla
                 ConsultaIDExiste = db.execute(
                     modelo_control_podologia_lotes.select().where(
-                        modelo_control_podologia_lotes.columns.id_bovino == ListadoIDBovino)).first()
+                        modelo_control_podologia_lotes.columns.id_evento_lote_asociado == id_evento_lote_asociado)).first()
                 if ConsultaIDExiste is None:
                     IngresarPlanSanidadLotesPodologia= modelo_control_podologia_lotes.insert().values(
                         estado_solicitud_podologia=Estado,
