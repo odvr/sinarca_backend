@@ -15,7 +15,8 @@ from typing import Optional
 from typing import List
 # importa el esquema de los bovinos
 from models.modelo_bovinos import modelo_bovinos_inventario, modelo_lotes_bovinos, \
-    modelo_manejo_ternero_recien_nacido_lotes, modelo_eventos_asociados_lotes
+    modelo_manejo_ternero_recien_nacido_lotes, modelo_eventos_asociados_lotes, modelo_descorne_lotes, \
+    modelo_control_parasitos_lotes, modelo_registro_vacunas_bovinos, modelo_control_podologia_lotes
 from sqlalchemy.orm import Session
 from sqlalchemy import and_
 from routes.rutas_bovinos import get_current_user
@@ -99,11 +100,117 @@ async def crear_lotes_bovinos(SelectPlanSanidad: Optional [str] = Form(None), es
         db.close()
     return Response(status_code=status.HTTP_201_CREATED)
 
+@Plan_Sanitario_Bovinos.get("/listar_planes_sanitarios_Asociados/{id_eventos_asociados}",response_model=list,tags=["Plan Sanitario"])
+async def listar_planes_sanitarios_asociados(id_eventos_asociados:int ,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+
+    try:
+
+        ConsultaEventoDescorne = db.query(modelo_descorne_lotes).filter(modelo_descorne_lotes.c.usuario_id == current_user,modelo_descorne_lotes.c.id_evento_lote_asociado == id_eventos_asociados).all()
+
+        ConsultarEventosDesparacitacion = db.query(modelo_control_parasitos_lotes).filter(modelo_control_parasitos_lotes.c.usuario_id == current_user,modelo_control_parasitos_lotes.c.id_evento_lote_asociado == id_eventos_asociados).all()
+        ConsultarEventosVacunacion = db.query(modelo_registro_vacunas_bovinos).filter(
+            modelo_registro_vacunas_bovinos.c.usuario_id == current_user,
+            modelo_registro_vacunas_bovinos.c.id_evento_lote_asociado == id_eventos_asociados).all()
+        ConsultarEventosPodologia = db.query(modelo_control_podologia_lotes).filter(
+            modelo_control_podologia_lotes.c.usuario_id == current_user,
+            modelo_control_podologia_lotes.c.id_evento_lote_asociado == id_eventos_asociados).all()
+        ListaEventosAsociados = []
+
+        if ConsultaEventoDescorne is not None:
+            for EventosAsociados in ConsultaEventoDescorne:
+                historialEventos = {
+                    "id_descorne_lote": EventosAsociados.id_descorne_lote,
+                    "metodo_descorne": EventosAsociados.metodo_descorne,
+                    "fecha_descorne": EventosAsociados.fecha_descorne,
+                    "estado_solicitud_descorne": EventosAsociados.estado_solicitud_descorne,
+                    "nombre_bovino": EventosAsociados.nombre_bovino,
+                    "comentario_descorne": EventosAsociados.comentario_descorne,
+                }
+                ListaEventosAsociados.append(historialEventos)
+
+            if ConsultarEventosDesparacitacion is not None:
+                for EventosAsociadosDesparacitacion in ConsultarEventosDesparacitacion:
+                    historialEventosDesparacitacion = {
+                        "id_control_parasitos": EventosAsociadosDesparacitacion.id_control_parasitos,
+                        "fecha_tratamiento_lote": EventosAsociadosDesparacitacion.fecha_tratamiento_lote,
+                        "tipo_tratamiento": EventosAsociadosDesparacitacion.tipo_tratamiento,
+                        "producto_usado": EventosAsociadosDesparacitacion.producto_usado,
+                        "nombre_bovino": EventosAsociadosDesparacitacion.nombre_bovino,
+                        "estado_solicitud_parasitos": EventosAsociadosDesparacitacion.estado_solicitud_parasitos,
+                        "comentario_parasitos": EventosAsociadosDesparacitacion.comentario_parasitos,
+                    }
+                    ListaEventosAsociados.append(historialEventosDesparacitacion)
+
+            if ConsultarEventosVacunacion is not None:
+                for EventosAsociadosVacunacion in ConsultarEventosVacunacion:
+                    historialEventosVacunacion = {
+                        "id_vacunacion_bovinos": EventosAsociadosVacunacion.id_vacunacion_bovinos,
+                        "fecha_registrada_usuario": EventosAsociadosVacunacion.fecha_registrada_usuario,
+                        "tipo_vacuna": EventosAsociadosVacunacion.tipo_vacuna,
+                        "nombre_lote_asociado": EventosAsociadosVacunacion.nombre_lote_asociado,
+                        "nombre_bovino": EventosAsociadosVacunacion.nombre_bovino,
+
+
+                    }
+                    ListaEventosAsociados.append(historialEventosVacunacion)
+            if ConsultarEventosPodologia is not None:
+                for EventosAsociadosPodologia in ConsultarEventosPodologia:
+                    historialEventosVacunacion = {
+                        "id_control_podologia": EventosAsociadosPodologia.id_control_podologia,
+                        "fecha_registro_podologia": EventosAsociadosPodologia.fecha_registro_podologia,
+                        "espacialista_podologia": EventosAsociadosPodologia.espacialista_podologia,
+                        "comentario_podologia": EventosAsociadosPodologia.comentario_podologia,
+                        "nombre_bovino": EventosAsociadosPodologia.nombre_bovino,
+                        "estado_solicitud_podologia": EventosAsociadosPodologia.estado_solicitud_podologia,
+
+
+                    }
+                    ListaEventosAsociados.append(historialEventosVacunacion)
+
+
+
+        return ListaEventosAsociados
+
+
+    except Exception as e:
+        logger.error(f'Error al obtener inventario de Produccion Levante: {e}')
+        raise
+    finally:
+        db.close()
+
+
+
+
+
+
+@Plan_Sanitario_Bovinos.post("/eliminar_plan_sanitario", status_code=status.HTTP_201_CREATED)
+async def eliminar_plan_sanitario_bovinos(id_eventos_asociados: Optional [int] = Form(None),db: Session = Depends(get_database_session),
+                              current_user: Esquema_Usuario = Depends(get_current_user)):
+    try:
+
+        db.execute(modelo_eventos_asociados_lotes.delete().where(modelo_eventos_asociados_lotes.c.id_eventos_asociados == id_eventos_asociados))
+        db.commit()
+
+
+
+
+
+
+    except Exception as e:
+        logger.error(f'Error al Eliminar Plan sanitario Lotes : {e}')
+        raise
+    finally:
+        db.close()
+    return Response(status_code=status.HTTP_201_CREATED)
+
+
+
+
 @Plan_Sanitario_Bovinos.get("/listar_planes_sanitarios",response_model=list,tags=["Plan Sanitario"])
 async def listar_planes_sanitarios(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
 
     try:
-        #itemsListarGananciasPesos = db.query(modelo_manejo_ternero_recien_nacido_lotes).filter(modelo_ganancia_historica_peso.c.usuario_id == current_user).first()
+
         ConsultaManejoTerneros = db.query(modelo_manejo_ternero_recien_nacido_lotes).filter(modelo_manejo_ternero_recien_nacido_lotes.c.usuario_id == current_user).all()
         ConsultaEventosAsociados = db.query(modelo_eventos_asociados_lotes).filter(modelo_eventos_asociados_lotes.c.usuario_id == current_user).all()
 
@@ -134,7 +241,7 @@ async def listar_planes_sanitarios(db: Session = Depends(get_database_session),c
                     "producto_usado_lote": ManejoTerneros.producto_usado_lote,
                     "metodo_aplicacion_lote": ManejoTerneros.metodo_aplicacion_lote,
                     "notificar_evento_lote": ManejoTerneros.notificar_evento_lote,
-                    "historialEventos":historialEventos
+
                 }
                 ListaPlanesSanitariosLotes.append(historial_item)
 

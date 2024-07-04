@@ -266,6 +266,7 @@ modelo_registro_vacunas_bovinos = Table("registro_vacunacion_bovinos", meta, Col
                         Column("fecha_registrada_usuario", Date),
                         Column("tipo_vacuna", String(50)),
                         Column("nombre_lote_asociado", String(300)),
+                        Column("id_evento_lote_asociado", Integer),
                         Column("fecha_bitacora_Sistema", DateTime),
                         Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")),
                         Column("nombre_bovino", String(300)))
@@ -574,6 +575,7 @@ modelo_descorne_lotes= Table("descorne_lotes", meta, Column("id_descorne_lote", 
                                Column("nombre_bovino", String(100)),
                                Column("id_bovino", Integer),
                                Column("nombre_lote_asociado", String(100)),
+                               Column("id_evento_lote_asociado", Integer),
                                Column("comentario_descorne", String(100)),
                                Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
 
@@ -587,6 +589,7 @@ modelo_control_parasitos_lotes= Table("control_parasitos_lote", meta, Column("id
                                Column("id_bovino", Integer),
                                Column("nombre_lote_asociado", String(100)),
                                Column("estado_solicitud_parasitos", String(100)),
+                               Column("id_evento_lote_asociado", Integer),
                                Column("comentario_parasitos", String(100)),
                                Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
 
@@ -599,6 +602,7 @@ modelo_control_podologia_lotes= Table("control_podologia_lotes", meta, Column("i
                                Column("id_bovino", Integer),
                                Column("nombre_lote_asociado", String(100)),
                                Column("estado_solicitud_podologia", String(100)),
+                               Column("id_evento_lote_asociado", Integer),
                                Column("FechaNotificacionPodologia", String(100)),
                                Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
 

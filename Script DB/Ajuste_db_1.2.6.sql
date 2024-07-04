@@ -81,3 +81,7 @@ CREATE TABLE IF NOT EXISTS `control_podologia_lotes` (
 COLLATE='latin1_bin'
 ENGINE=InnoDB
 ;
+
+
+INSERT INTO configuracion (nombre_aplicacion, version, descripcion, fecha_actualizacion, responsable_actualizacion, observaciones)
+VALUES ('Ruta Ganadera', '1.2.6', '', '2024-06-30', 'Omar Vega ','Se requiere Versión FrodTend V.1.2.6 o superior');

@@ -313,8 +313,11 @@ class CRUDBovinos:
 
             )
 
-            db.execute(IngresarEventos)
+            IngresoEvento=db.execute(IngresarEventos)
+
             db.commit()
+            id_evento_lote_asociado = IngresoEvento.inserted_primary_key[0]
+
 
             for IDAnimales in AnimalesLote:
                 ListadoIDBovino = IDAnimales.id_bovino
@@ -335,6 +338,7 @@ class CRUDBovinos:
                         metodo_descorne=metodo_descorne,
                         fecha_descorne=fecha_descorne,
                         comentario_descorne=comentario_descorne,
+                        id_evento_lote_asociado=id_evento_lote_asociado,
                         usuario_id=current_user
 
                     )
@@ -342,9 +346,9 @@ class CRUDBovinos:
                     db.execute(IngresarPlanSanidadLotesDescorne)
                     db.commit()
                 else:
-                    db.execute(modelo_manejo_ternero_recien_nacido_lotes.update().where(modelo_descorne_lotes.c.id_bovino == ListadoIDBovino).values(
+                    db.execute(modelo_descorne_lotes.update().where(modelo_descorne_lotes.c.id_bovino == ListadoIDBovino).values(
                         nombre_bovino=NombreBovino,
-                        estado_solicitud_recien_nacido=Estado,
+
                         metodo_descorne=metodo_descorne,
                         fecha_descorne=fecha_descorne,
                         comentario_descorne=comentario_descorne))
@@ -375,8 +379,9 @@ class CRUDBovinos:
 
             )
 
-            db.execute(IngresarEventos)
+            IngresarEventoDesparacitacion = db.execute(IngresarEventos)
             db.commit()
+            id_evento_lote_asociado = IngresarEventoDesparacitacion.inserted_primary_key[0]
 
             for IDAnimales in AnimalesLote:
                 ListadoIDBovino = IDAnimales.id_bovino
@@ -398,6 +403,7 @@ class CRUDBovinos:
                         tipo_tratamiento=tipo_tratamiento,
                         producto_usado=producto_usado,
                         comentario_parasitos=comentario_parasitos,
+                        id_evento_lote_asociado=id_evento_lote_asociado,
                         usuario_id=current_user
 
                     )
@@ -440,8 +446,10 @@ class CRUDBovinos:
 
             )
 
-            db.execute(IngresarEventos)
+            IngresoEventoVacunacion = db.execute(IngresarEventos)
+
             db.commit()
+            id_evento_lote_asociado = IngresoEventoVacunacion.inserted_primary_key[0]
 
             for IDAnimales in AnimalesLote:
                 ListadoIDBovino = IDAnimales.id_bovino
@@ -463,6 +471,7 @@ class CRUDBovinos:
                         nombre_lote_asociado=nombre_lote_asociado,
                         fecha_registrada_usuario=fecha_registrada_usuario,
                         tipo_vacuna=tipo_vacuna,
+                        id_evento_lote_asociado=id_evento_lote_asociado,
 
 
                         usuario_id=current_user
@@ -496,22 +505,20 @@ class CRUDBovinos:
                        modelo_bovinos_inventario.c.usuario_id == current_user).all()
 
             IngresarEventos = modelo_eventos_asociados_lotes.insert().values(
-
                 nombre_lote=nombre_lote_asociado,
                 nombre_evento="Podología",
                 estado_evento="Activo",
                 FechaNotificacion=FechaNotificacionPodologia,
                 usuario_id=current_user
-
             )
 
-            db.execute(IngresarEventos)
+            IngresoEventoPodologia= db.execute(IngresarEventos)
             db.commit()
-
+            id_evento_lote_asociado = IngresoEventoPodologia.inserted_primary_key[0]
             for IDAnimales in AnimalesLote:
                 ListadoIDBovino = IDAnimales.id_bovino
                 NombreBovino = IDAnimales.nombre_bovino
-
+                print(id_evento_lote_asociado)
                 # La siguiente variable contiene el estado de la solicitud de la tabla
                 Estado = "Activo"
                 # Consulta si El animal ya existe para actualizar o crear el campo dentro de la tabla
@@ -527,7 +534,7 @@ class CRUDBovinos:
                         fecha_registro_podologia=fecha_registro_podologia,
                         espacialista_podologia=espacialista_podologia,
                         comentario_podologia=comentario_podologia,
-
+                        id_evento_lote_asociado=id_evento_lote_asociado,
                         usuario_id=current_user
 
                     )
@@ -538,8 +545,8 @@ class CRUDBovinos:
                     db.execute(modelo_control_podologia_lotes.update().where(
                         modelo_descorne_lotes.c.id_bovino == ListadoIDBovino).values(
                         nombre_bovino=NombreBovino,
-                        estado_solicitud_recien_nacido=Estado,
-
+                        estado_solicitud_podologia=Estado,
+                        id_evento_lote_asociado=id_evento_lote_asociado,
                         nombre_lote_asociado=nombre_lote_asociado,
                         fecha_registro_podologia=fecha_registro_podologia,
                         espacialista_podologia=espacialista_podologia,

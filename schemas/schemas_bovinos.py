@@ -348,6 +348,7 @@ class esquema_registro_vacunas_bovinos(BaseModel):
     fecha_registrada_usuario:Optional[date] = None
     tipo_vacuna: Optional[str] = None
     nombre_lote_asociado: Optional[str] = None
+    id_evento_lote_asociado: Optional[int] = None
     fecha_bitacora_Sistema: Optional[date] = None
     usuario_id: Optional[str] = None
     nombre_bovino:Optional[str] = None
@@ -810,6 +811,7 @@ class esquema_descorne_lotes(BaseModel):
     metodo_descorne: Optional[str] = None
     fecha_descorne: Optional[date] = None
     id_bovino: Optional[int] = None
+    id_evento_lote_asociado: Optional[int] = None
     nombre_bovino: Optional[str] = None
     nombre_lote_asociado: Optional[int] = None
     comentario_descorne: Optional[str] = None
@@ -827,6 +829,7 @@ class esquema_control_parasitos_lotes(BaseModel):
     producto_usado: Optional[str] = None
     id_bovino: Optional[int] = None
     nombre_bovino: Optional[str] = None
+    id_evento_lote_asociado: Optional[int] = None
     nombre_lote_asociado: Optional[int] = None
     comentario_parasitos: Optional[str] = None
     usuario_id: Optional[str] = None
@@ -841,6 +844,7 @@ class esquema_control_podologia_lotes(BaseModel):
     espacialista_podologia: Optional[str] = None
     estado_solicitud_podologia : Optional[str] = None
     FechaNotificacionPodologia: Optional[date] = None
+    id_evento_lote_asociado: Optional[int] = None
     id_bovino: Optional[int] = None
     nombre_bovino: Optional[str] = None
     nombre_lote_asociado: Optional[int] = None
