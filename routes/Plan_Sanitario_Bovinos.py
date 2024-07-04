@@ -48,6 +48,7 @@ def get_database_session():
 
 @Plan_Sanitario_Bovinos.post("/crear_plan_sanitario", status_code=status.HTTP_201_CREATED)
 async def crear_lotes_bovinos(SelectPlanSanidad: Optional [str] = Form(None), estado_respiratorio_inicial_lote: Optional [str] = Form(None),
+                              comentario_evento: Optional [str] = Form(None),
                               fecha_desinfeccion_lote: Optional [str] = Form(None),
                               nombre_lote_asociado: Optional [str] = Form(None),
                               producto_usado_lote: Optional [str] = Form(None),
@@ -67,24 +68,23 @@ async def crear_lotes_bovinos(SelectPlanSanidad: Optional [str] = Form(None), es
                               db: Session = Depends(get_database_session),
                               current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
-
         if SelectPlanSanidad =="Manejo del Ternero Recién Nacido":
             crud.crud_bovinos_inventario.bovinos_inventario.CrearPlanSanidadRecienNacidosBovinos(nombre_lote_asociado=nombre_lote_asociado, estado_respiratorio_inicial_lote=estado_respiratorio_inicial_lote, fecha_desinfeccion_lote=fecha_desinfeccion_lote, producto_usado_lote=producto_usado_lote, metodo_aplicacion_lote=metodo_aplicacion_lote, notificar_evento_lote=notificar_evento_lote, FechaNotificacion=FechaNotificacion, db=db, current_user=current_user)
         if SelectPlanSanidad =="Descorne":
-            crud.crud_bovinos_inventario.bovinos_inventario.CrearPlanSanidadDescorne(nombre_lote_asociado=nombre_lote_asociado,metodo_descorne=metodo_descorne,fecha_descorne=fecha_descorne,comentario_descorne=comentario_descorne,db=db,current_user=current_user)
+            crud.crud_bovinos_inventario.bovinos_inventario.CrearPlanSanidadDescorne(nombre_lote_asociado=nombre_lote_asociado,metodo_descorne=metodo_descorne,fecha_descorne=fecha_descorne,comentario_descorne=comentario_descorne,comentario_evento =comentario_evento,db=db,current_user=current_user)
         if SelectPlanSanidad == "Programa de Control de Parásitos":
-            crud.crud_bovinos_inventario.bovinos_inventario.CrearPlanSanidadControlParasitos(nombre_lote_asociado=nombre_lote_asociado,fecha_tratamiento_lote=fecha_tratamiento_lote,tipo_tratamiento=tipo_tratamiento,producto_usado=producto_usado,comentario_parasitos=comentario_parasitos,db=db,current_user=current_user)
+            crud.crud_bovinos_inventario.bovinos_inventario.CrearPlanSanidadControlParasitos(nombre_lote_asociado=nombre_lote_asociado,fecha_tratamiento_lote=fecha_tratamiento_lote,tipo_tratamiento=tipo_tratamiento,producto_usado=producto_usado,comentario_parasitos=comentario_parasitos,comentario_evento=comentario_evento,db=db,current_user=current_user)
 
         if SelectPlanSanidad == "Vacunaciones":
             crud.crud_bovinos_inventario.bovinos_inventario.CrearPlanSanidadVacunacion(nombre_lote_asociado=nombre_lote_asociado,db=db,current_user=current_user,
                                                                                        fecha_registrada_usuario=fecha_registrada_usuario,tipo_vacuna=tipo_vacuna,
-                                                                                       FechaNotificacionVacuna=FechaNotificacionVacuna
+                                                                                       FechaNotificacionVacuna=FechaNotificacionVacuna,comentario_evento=comentario_evento
 
                                                                                       )
         if SelectPlanSanidad == "Podología":
             crud.crud_bovinos_inventario.bovinos_inventario.CrearPlanSanidadPodologia(nombre_lote_asociado=nombre_lote_asociado,fecha_registro_podologia=fecha_registro_podologia,
                                                                                       espacialista_podologia=espacialista_podologia,comentario_podologia=comentario_podologia,
-                                                                                      FechaNotificacionPodologia=FechaNotificacionPodologia,db=db,current_user=current_user
+                                                                                      FechaNotificacionPodologia=FechaNotificacionPodologia,comentario_evento=comentario_evento,db=db,current_user=current_user
                                                                                       )
 
         else:
@@ -225,6 +225,7 @@ async def listar_planes_sanitarios(db: Session = Depends(get_database_session),c
                     "nombre_evento": EventosAsociados.nombre_evento,
                     "estado_evento": EventosAsociados.estado_evento,
                     "FechaNotificacion": EventosAsociados.FechaNotificacion,
+                    "comentario_evento": EventosAsociados.comentario_evento,
                 }
                 ListaPlanesSanitariosLotes.append(historialEventos)
 
@@ -256,3 +257,29 @@ async def listar_planes_sanitarios(db: Session = Depends(get_database_session),c
         raise
     finally:
         db.close()
+
+
+
+
+
+@Plan_Sanitario_Bovinos.put("/actualizar_plan_sanitario", status_code=status.HTTP_201_CREATED)
+async def actualizar_plan_sanitario(id_eventos_asociados: Optional [int] = Form(None),estado_evento: Optional [str] = Form(None),FechaNotificacion: Optional [date] = Form(None),db: Session = Depends(get_database_session),
+                              current_user: Esquema_Usuario = Depends(get_current_user)):
+    try:
+        print(id_eventos_asociados)
+        print(estado_evento)
+        print(FechaNotificacion)
+        db.execute(modelo_eventos_asociados_lotes.update().where(
+            modelo_eventos_asociados_lotes.c.id_eventos_asociados == id_eventos_asociados).values(
+            estado_evento=estado_evento,
+            FechaNotificacion=FechaNotificacion,
+             ))
+        db.commit()
+
+    except Exception as e:
+        logger.error(f'Error al Actualizar Plan sanitario Lotes : {e}')
+        raise
+    finally:
+        db.close()
+    return Response(status_code=status.HTTP_201_CREATED)
+

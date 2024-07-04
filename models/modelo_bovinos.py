@@ -559,11 +559,11 @@ modelo_manejo_ternero_recien_nacido_lotes= Table("manejo_ternero_recien_nacido_l
 
 
 
-
 modelo_eventos_asociados_lotes= Table("eventos_asociados_lotes", meta, Column("id_eventos_asociados", Integer, primary_key=True),
                                Column("id_lote_asociado", String(300)),
                                Column("nombre_lote", String(300)),
                                Column("nombre_evento", String(100)),
+                               Column("comentario_evento", String(100)),
                                Column("estado_evento", String(100)),
                                Column("FechaNotificacion", Date),
                                Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))

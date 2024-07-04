@@ -283,7 +283,7 @@ class CRUDBovinos:
             raise
 
 
-    def CrearPlanSanidadDescorne (self,nombre_lote_asociado,metodo_descorne,fecha_descorne,comentario_descorne, db,current_user):
+    def CrearPlanSanidadDescorne (self,nombre_lote_asociado,metodo_descorne,fecha_descorne,comentario_descorne,comentario_evento, db,current_user):
 
         """
         Realiza la cración de planes de sanidad referentes al Descorne de los Animales
@@ -309,6 +309,7 @@ class CRUDBovinos:
                 nombre_lote=nombre_lote_asociado,
                 nombre_evento="Descorne",
                 estado_evento="Activo",
+                comentario_evento=comentario_evento,
                 usuario_id=current_user
 
             )
@@ -359,7 +360,7 @@ class CRUDBovinos:
             logger.error(f'Error al Registrar Descorne: {e}')
             raise
 
-    def CrearPlanSanidadControlParasitos(self, nombre_lote_asociado, fecha_tratamiento_lote, tipo_tratamiento, producto_usado,comentario_parasitos, db,
+    def CrearPlanSanidadControlParasitos(self, nombre_lote_asociado, fecha_tratamiento_lote, tipo_tratamiento, producto_usado,comentario_parasitos,comentario_evento, db,
                                  current_user):
 
 
@@ -375,6 +376,7 @@ class CRUDBovinos:
                 nombre_lote=nombre_lote_asociado,
                 nombre_evento="Programa de Control de Parásitos",
                 estado_evento="Activo",
+                comentario_evento=comentario_evento,
                 usuario_id=current_user
 
             )
@@ -426,7 +428,7 @@ class CRUDBovinos:
             logger.error(f'Error al Registrar Parasitos: {e}')
             raise
 
-    def CrearPlanSanidadVacunacion(self, nombre_lote_asociado,  db,current_user,fecha_registrada_usuario,tipo_vacuna,FechaNotificacionVacuna,):
+    def CrearPlanSanidadVacunacion(self, nombre_lote_asociado,  db,current_user,fecha_registrada_usuario,tipo_vacuna,FechaNotificacionVacuna,comentario_evento):
 
 
 
@@ -442,6 +444,7 @@ class CRUDBovinos:
                 nombre_evento="Vacunaciones",
                 estado_evento="Activo",
                 FechaNotificacion=FechaNotificacionVacuna,
+                comentario_evento=comentario_evento,
                 usuario_id=current_user
 
             )
@@ -493,7 +496,7 @@ class CRUDBovinos:
             logger.error(f'Error al Registrar Vacunación: {e}')
             raise
 
-    def CrearPlanSanidadPodologia(self, nombre_lote_asociado, fecha_registro_podologia, espacialista_podologia, comentario_podologia,FechaNotificacionPodologia, db,
+    def CrearPlanSanidadPodologia(self, nombre_lote_asociado, fecha_registro_podologia, espacialista_podologia, comentario_podologia,FechaNotificacionPodologia,comentario_evento, db,
                                  current_user):
 
 
@@ -509,6 +512,7 @@ class CRUDBovinos:
                 nombre_evento="Podología",
                 estado_evento="Activo",
                 FechaNotificacion=FechaNotificacionPodologia,
+                comentario_evento=comentario_evento,
                 usuario_id=current_user
             )
 

@@ -797,6 +797,7 @@ class esquema_eventos_asociados_lotes(BaseModel):
     nombre_lote: Optional[str] = None
     nombre_evento: Optional[str] = None
     estado_evento: Optional[str] = None
+    comentario_evento: Optional[str] = None
     usuario_id: Optional[str] = None
     FechaNotificacion: Optional[date] = None
 
