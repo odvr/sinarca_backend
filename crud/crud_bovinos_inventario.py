@@ -177,6 +177,32 @@ class CRUDBovinos:
             return None  # o cualquier valor predeterminado que desees
 
 
+    def Buscar_Nombre_lote(self,db: Session,id_eventos_asociados, current_user):
+        """
+        Busca el nombre del Lote por evento asociado
+        :param db: Conexión de la base de datos
+        :param id_eventos_asociados: ID del evento asocuado
+        :param current_user: Usuario conectado
+        :return:
+        """
+        try:
+            BuscarNombreLote = db.query(modelo_eventos_asociados_lotes).filter(
+                modelo_eventos_asociados_lotes.columns.id_eventos_asociados == id_eventos_asociados,
+                modelo_eventos_asociados_lotes.c.usuario_id == current_user).first()
+
+            # Manejar el caso en que BuscarRutaFisica sea None
+            if BuscarNombreLote is None:
+                return None
+
+            NombreLoteAsociado = BuscarNombreLote.nombre_lote
+            db.close()
+
+            return NombreLoteAsociado
+        except AttributeError as e:
+            pass
+
+            return None
+
     def VerificarConsultaDatosFotoPerfilBovino(self,Buscar_Datos_Foto_Perfil,Rutabase):
         if not Buscar_Datos_Foto_Perfil:
             Consulta = "ConsultaVacia"
@@ -232,7 +258,7 @@ class CRUDBovinos:
 
                 nombre_lote=nombre_lote_asociado,
                 nombre_evento="Manejo del Ternero Recién Nacido",
-                estado_evento="Activo",
+                estado_evento="Planeado",
                 FechaNotificacion=FechaNotificacion,
 
                 usuario_id=current_user
@@ -247,7 +273,7 @@ class CRUDBovinos:
                 NombreBovino = IDAnimales.nombre_bovino
 
                 # La siguiente variable contiene el estado de la solicitud de la tabla
-                Estado="Activo"
+                Estado="Planeado"
                 #Consulta si El animal ya existe para actualizar o crear el campo dentro de la tabla
                 ConsultaIDExiste = db.execute(
                     modelo_manejo_ternero_recien_nacido_lotes.select().where(
@@ -308,7 +334,7 @@ class CRUDBovinos:
 
                 nombre_lote=nombre_lote_asociado,
                 nombre_evento="Descorne",
-                estado_evento="Activo",
+                estado_evento="Planeado",
                 comentario_evento=comentario_evento,
                 usuario_id=current_user
 
@@ -325,35 +351,25 @@ class CRUDBovinos:
                 NombreBovino = IDAnimales.nombre_bovino
 
                 # La siguiente variable contiene el estado de la solicitud de la tabla
-                Estado="Activo"
+                Estado="Planeado"
                 #Consulta si El animal ya existe para actualizar o crear el campo dentro de la tabla
-                ConsultaIDExiste = db.execute(
-                    modelo_descorne_lotes.select().where(
-                        modelo_descorne_lotes.columns.id_evento_lote_asociado == id_evento_lote_asociado)).first()
-                if ConsultaIDExiste is None:
-                    IngresarPlanSanidadLotesDescorne = modelo_descorne_lotes.insert().values(
-                        estado_solicitud_descorne=Estado,
-                        id_bovino=ListadoIDBovino,
-                        nombre_bovino=NombreBovino,
-                        nombre_lote_asociado=nombre_lote_asociado,
-                        metodo_descorne=metodo_descorne,
-                        fecha_descorne=fecha_descorne,
-                        comentario_descorne=comentario_descorne,
-                        id_evento_lote_asociado=id_evento_lote_asociado,
-                        usuario_id=current_user
 
-                    )
+                IngresarPlanSanidadLotesDescorne = modelo_descorne_lotes.insert().values(
+                    estado_solicitud_descorne=Estado,
+                    id_bovino=ListadoIDBovino,
+                    nombre_bovino=NombreBovino,
+                    nombre_lote_asociado=nombre_lote_asociado,
+                    metodo_descorne=metodo_descorne,
+                    fecha_descorne=fecha_descorne,
+                    comentario_descorne=comentario_descorne,
+                    id_evento_lote_asociado=id_evento_lote_asociado,
+                    usuario_id=current_user
 
-                    db.execute(IngresarPlanSanidadLotesDescorne)
-                    db.commit()
-                else:
-                    db.execute(modelo_descorne_lotes.update().where(modelo_descorne_lotes.c.id_bovino == ListadoIDBovino).values(
-                        nombre_bovino=NombreBovino,
+                )
 
-                        metodo_descorne=metodo_descorne,
-                        fecha_descorne=fecha_descorne,
-                        comentario_descorne=comentario_descorne))
-                    db.commit()
+                db.execute(IngresarPlanSanidadLotesDescorne)
+                db.commit()
+
 
 
         except Exception as e:
@@ -375,7 +391,7 @@ class CRUDBovinos:
 
                 nombre_lote=nombre_lote_asociado,
                 nombre_evento="Programa de Control de Parásitos",
-                estado_evento="Activo",
+                estado_evento="Planeado",
                 comentario_evento=comentario_evento,
                 usuario_id=current_user
 
@@ -386,42 +402,32 @@ class CRUDBovinos:
             id_evento_lote_asociado = IngresarEventoDesparacitacion.inserted_primary_key[0]
 
             for IDAnimales in AnimalesLote:
+
                 ListadoIDBovino = IDAnimales.id_bovino
                 NombreBovino = IDAnimales.nombre_bovino
 
                 # La siguiente variable contiene el estado de la solicitud de la tabla
-                Estado = "Activo"
+                Estado = "Planeado"
                 # Consulta si El animal ya existe para actualizar o crear el campo dentro de la tabla
-                ConsultaIDExiste = db.execute(
-                    modelo_control_parasitos_lotes.select().where(
-                        modelo_control_parasitos_lotes.columns.id_evento_lote_asociado == id_evento_lote_asociado)).first()
-                if ConsultaIDExiste is None:
-                    IngresarPlanSanidadLotesDescorne = modelo_control_parasitos_lotes.insert().values(
-                        estado_solicitud_parasitos=Estado,
-                        id_bovino=ListadoIDBovino,
-                        nombre_bovino=NombreBovino,
-                        nombre_lote_asociado=nombre_lote_asociado,
-                        fecha_tratamiento_lote=fecha_tratamiento_lote,
-                        tipo_tratamiento=tipo_tratamiento,
-                        producto_usado=producto_usado,
-                        comentario_parasitos=comentario_parasitos,
-                        id_evento_lote_asociado=id_evento_lote_asociado,
-                        usuario_id=current_user
 
-                    )
+                IngresarPlanSanidadLotesDesparacitacion = modelo_control_parasitos_lotes.insert().values(
+                    estado_solicitud_parasitos=Estado,
+                    id_bovino=ListadoIDBovino,
+                    nombre_bovino=NombreBovino,
+                    nombre_lote_asociado=nombre_lote_asociado,
+                    fecha_tratamiento_lote=fecha_tratamiento_lote,
+                    tipo_tratamiento=tipo_tratamiento,
+                    producto_usado=producto_usado,
+                    comentario_parasitos=comentario_parasitos,
+                    id_evento_lote_asociado=id_evento_lote_asociado,
+                    usuario_id=current_user
 
-                    db.execute(IngresarPlanSanidadLotesDescorne)
-                    db.commit()
-                else:
-                    db.execute(modelo_control_parasitos_lotes.update().where(
-                        modelo_descorne_lotes.c.id_bovino == ListadoIDBovino).values(
-                        nombre_bovino=NombreBovino,
-                        estado_solicitud_recien_nacido=Estado,
-                        fecha_tratamiento_lote=fecha_tratamiento_lote,
-                        tipo_tratamiento=tipo_tratamiento,
-                        producto_usado=producto_usado,
-                        comentario_parasitos=comentario_parasitos,))
-                    db.commit()
+                )
+
+                db.execute(IngresarPlanSanidadLotesDesparacitacion)
+                db.commit()
+
+
 
 
         except Exception as e:
@@ -442,7 +448,7 @@ class CRUDBovinos:
 
                 nombre_lote=nombre_lote_asociado,
                 nombre_evento="Vacunaciones",
-                estado_evento="Activo",
+                estado_evento="Planeado",
                 FechaNotificacion=FechaNotificacionVacuna,
                 comentario_evento=comentario_evento,
                 usuario_id=current_user
@@ -455,41 +461,34 @@ class CRUDBovinos:
             id_evento_lote_asociado = IngresoEventoVacunacion.inserted_primary_key[0]
 
             for IDAnimales in AnimalesLote:
+                print(IDAnimales)
                 ListadoIDBovino = IDAnimales.id_bovino
                 NombreBovino = IDAnimales.nombre_bovino
 
                 # La siguiente variable contiene el estado de la solicitud de la tabla
-                Estado = "Activo"
-                # Consulta si El animal ya existe para actualizar o crear el campo dentro de la tabla
-                ConsultaIDExiste = db.execute(
-                    modelo_registro_vacunas_bovinos.select().where(
-                        modelo_registro_vacunas_bovinos.columns.id_evento_lote_asociado == id_evento_lote_asociado)).first()
-                if ConsultaIDExiste is None:
+                Estado = "Planeado"
+                IngresarPlanSanidadLotesVacunacion = modelo_registro_vacunas_bovinos.insert().values(
+
+                    id_bovino=ListadoIDBovino,
+                    nombre_bovino=NombreBovino,
+                    nombre_lote_asociado=nombre_lote_asociado,
+                    fecha_registrada_usuario=fecha_registrada_usuario,
+                    tipo_vacuna=tipo_vacuna,
+                    estado_evento_lotes=Estado,
+                    id_evento_lote_asociado=id_evento_lote_asociado,
+
+                    usuario_id=current_user
+
+                )
+
+                db.execute(IngresarPlanSanidadLotesVacunacion)
+                db.commit()
 
 
-                    IngresarPlanSanidadLotesDescorne = modelo_registro_vacunas_bovinos.insert().values(
-
-                        id_bovino=ListadoIDBovino,
-                        nombre_bovino=NombreBovino,
-                        nombre_lote_asociado=nombre_lote_asociado,
-                        fecha_registrada_usuario=fecha_registrada_usuario,
-                        tipo_vacuna=tipo_vacuna,
-                        id_evento_lote_asociado=id_evento_lote_asociado,
 
 
-                        usuario_id=current_user
 
-                    )
 
-                    db.execute(IngresarPlanSanidadLotesDescorne)
-                    db.commit()
-                else:
-                    db.execute(modelo_registro_vacunas_bovinos.update().where(
-                        modelo_descorne_lotes.c.id_bovino == ListadoIDBovino).values(
-                        nombre_bovino=NombreBovino,
-                        fecha_registrada_usuario=fecha_registrada_usuario,
-                        tipo_vacuna=tipo_vacuna,))
-                    db.commit()
 
 
         except Exception as e:
@@ -510,7 +509,7 @@ class CRUDBovinos:
             IngresarEventos = modelo_eventos_asociados_lotes.insert().values(
                 nombre_lote=nombre_lote_asociado,
                 nombre_evento="Podología",
-                estado_evento="Activo",
+                estado_evento="Planeado",
                 FechaNotificacion=FechaNotificacionPodologia,
                 comentario_evento=comentario_evento,
                 usuario_id=current_user
@@ -524,38 +523,26 @@ class CRUDBovinos:
                 NombreBovino = IDAnimales.nombre_bovino
                 print(id_evento_lote_asociado)
                 # La siguiente variable contiene el estado de la solicitud de la tabla
-                Estado = "Activo"
-                # Consulta si El animal ya existe para actualizar o crear el campo dentro de la tabla
-                ConsultaIDExiste = db.execute(
-                    modelo_control_podologia_lotes.select().where(
-                        modelo_control_podologia_lotes.columns.id_evento_lote_asociado == id_evento_lote_asociado)).first()
-                if ConsultaIDExiste is None:
-                    IngresarPlanSanidadLotesPodologia= modelo_control_podologia_lotes.insert().values(
-                        estado_solicitud_podologia=Estado,
-                        id_bovino=ListadoIDBovino,
-                        nombre_bovino=NombreBovino,
-                        nombre_lote_asociado=nombre_lote_asociado,
-                        fecha_registro_podologia=fecha_registro_podologia,
-                        espacialista_podologia=espacialista_podologia,
-                        comentario_podologia=comentario_podologia,
-                        id_evento_lote_asociado=id_evento_lote_asociado,
-                        usuario_id=current_user
+                Estado = "Planeado"
 
-                    )
+                IngresarPlanSanidadLotesPodologia = modelo_control_podologia_lotes.insert().values(
+                    estado_solicitud_podologia=Estado,
+                    id_bovino=ListadoIDBovino,
+                    nombre_bovino=NombreBovino,
+                    nombre_lote_asociado=nombre_lote_asociado,
+                    fecha_registro_podologia=fecha_registro_podologia,
+                    espacialista_podologia=espacialista_podologia,
+                    comentario_podologia=comentario_podologia,
+                    id_evento_lote_asociado=id_evento_lote_asociado,
+                    usuario_id=current_user
 
-                    db.execute(IngresarPlanSanidadLotesPodologia)
-                    db.commit()
-                else:
-                    db.execute(modelo_control_podologia_lotes.update().where(
-                        modelo_descorne_lotes.c.id_bovino == ListadoIDBovino).values(
-                        nombre_bovino=NombreBovino,
-                        estado_solicitud_podologia=Estado,
-                        id_evento_lote_asociado=id_evento_lote_asociado,
-                        nombre_lote_asociado=nombre_lote_asociado,
-                        fecha_registro_podologia=fecha_registro_podologia,
-                        espacialista_podologia=espacialista_podologia,
-                        comentario_podologia=comentario_podologia,))
-                    db.commit()
+                )
+
+                db.execute(IngresarPlanSanidadLotesPodologia)
+                db.commit()
+
+
+
 
 
         except Exception as e:

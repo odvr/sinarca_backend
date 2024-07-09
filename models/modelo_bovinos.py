@@ -266,6 +266,7 @@ modelo_registro_vacunas_bovinos = Table("registro_vacunacion_bovinos", meta, Col
                         Column("fecha_registrada_usuario", Date),
                         Column("tipo_vacuna", String(50)),
                         Column("nombre_lote_asociado", String(300)),
+                        Column("estado_evento_lotes", String(300)),
                         Column("id_evento_lote_asociado", Integer),
                         Column("fecha_bitacora_Sistema", DateTime),
                         Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")),

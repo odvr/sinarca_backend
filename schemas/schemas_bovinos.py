@@ -348,6 +348,7 @@ class esquema_registro_vacunas_bovinos(BaseModel):
     fecha_registrada_usuario:Optional[date] = None
     tipo_vacuna: Optional[str] = None
     nombre_lote_asociado: Optional[str] = None
+    estado_evento_lotes: Optional[str] = None
     id_evento_lote_asociado: Optional[int] = None
     fecha_bitacora_Sistema: Optional[date] = None
     usuario_id: Optional[str] = None

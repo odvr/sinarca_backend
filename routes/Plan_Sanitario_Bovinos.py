@@ -188,6 +188,29 @@ async def eliminar_plan_sanitario_bovinos(id_eventos_asociados: Optional [int] =
                               current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
 
+
+
+        ConsultarTipoEvento = db.query(modelo_eventos_asociados_lotes).filter(
+            modelo_eventos_asociados_lotes.columns.id_eventos_asociados == id_eventos_asociados,
+            modelo_eventos_asociados_lotes.c.usuario_id == current_user).first()
+        NombreEvento = ConsultarTipoEvento.nombre_evento
+
+        if NombreEvento == "Vacunaciones":
+            db.execute(modelo_registro_vacunas_bovinos.delete().where(
+                modelo_registro_vacunas_bovinos.c.id_evento_lote_asociado == id_eventos_asociados))
+            db.commit()
+        if NombreEvento == "Descorne":
+            db.execute(modelo_descorne_lotes.delete().where(
+                modelo_descorne_lotes.c.id_evento_lote_asociado == id_eventos_asociados))
+            db.commit()
+        if NombreEvento == "Programa de Control de Parásitos":
+            db.execute(modelo_control_parasitos_lotes.delete().where(
+                modelo_control_parasitos_lotes.c.id_evento_lote_asociado == id_eventos_asociados))
+            db.commit()
+        if NombreEvento == "Podología":
+            db.execute(modelo_control_podologia_lotes.delete().where(
+                modelo_control_podologia_lotes.c.id_evento_lote_asociado == id_eventos_asociados))
+            db.commit()
         db.execute(modelo_eventos_asociados_lotes.delete().where(modelo_eventos_asociados_lotes.c.id_eventos_asociados == id_eventos_asociados))
         db.commit()
 
@@ -266,9 +289,42 @@ async def listar_planes_sanitarios(db: Session = Depends(get_database_session),c
 async def actualizar_plan_sanitario(id_eventos_asociados: Optional [int] = Form(None),estado_evento: Optional [str] = Form(None),FechaNotificacion: Optional [date] = Form(None),db: Session = Depends(get_database_session),
                               current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
-        print(id_eventos_asociados)
-        print(estado_evento)
-        print(FechaNotificacion)
+
+
+        ConsultarTipoEvento = db.query(modelo_eventos_asociados_lotes).filter(
+            modelo_eventos_asociados_lotes.columns.id_eventos_asociados == id_eventos_asociados,
+            modelo_eventos_asociados_lotes.c.usuario_id == current_user).first()
+        NombreEvento = ConsultarTipoEvento.nombre_evento
+
+        if NombreEvento == "Vacunaciones":
+            db.execute(modelo_registro_vacunas_bovinos.update().where(
+            modelo_registro_vacunas_bovinos.c.id_evento_lote_asociado == id_eventos_asociados).values(
+            estado_evento_lotes=estado_evento,
+
+             ))
+            db.commit()
+        if NombreEvento == "Descorne":
+            db.execute(modelo_descorne_lotes.update().where(
+            modelo_descorne_lotes.c.id_evento_lote_asociado == id_eventos_asociados).values(
+            estado_solicitud_descorne=estado_evento,
+
+             ))
+            db.commit()
+        if NombreEvento == "Programa de Control de Parásitos":
+            db.execute(modelo_control_parasitos_lotes.update().where(
+                modelo_control_parasitos_lotes.c.id_evento_lote_asociado == id_eventos_asociados).values(
+                estado_solicitud_parasitos=estado_evento,
+
+            ))
+            db.commit()
+        if NombreEvento == "Podología":
+            db.execute(modelo_control_podologia_lotes.update().where(
+                modelo_control_podologia_lotes.c.id_evento_lote_asociado == id_eventos_asociados).values(
+                estado_solicitud_podologia=estado_evento,
+
+            ))
+            db.commit()
+
         db.execute(modelo_eventos_asociados_lotes.update().where(
             modelo_eventos_asociados_lotes.c.id_eventos_asociados == id_eventos_asociados).values(
             estado_evento=estado_evento,
