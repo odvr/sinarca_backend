@@ -309,8 +309,8 @@ async def Listar_Registro_Vacunas_Bovinos(db: Session = Depends(get_database_ses
 
     try:
 
-        consulta = db.query(modelo_registro_vacunas_bovinos).filter(modelo_registro_vacunas_bovinos.c.usuario_id == current_user).all()
-        # Cerrar la sesión
+        consulta = db.query(modelo_registro_vacunas_bovinos).filter(modelo_registro_vacunas_bovinos.c.usuario_id == current_user,modelo_registro_vacunas_bovinos.c.estado_evento_lotes == "Ejecutado").all()
+
         db.close()
 
     except Exception as e:
