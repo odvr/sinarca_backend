@@ -38,8 +38,6 @@ def  Notificar_Eventos_Planes_Sanitarios(db: Session):
 
     "Consulta para ejecutada para validar los datos"
     ConsultarTablaEventosPlanesSanitariosLotes = db.query(modelo_eventos_asociados_lotes).all()
-
-
     """
     Debe recorrer la tabla completa para poder realizar la valitación de los Estad
     """
@@ -77,7 +75,7 @@ def  Notificar_Eventos_Planes_Sanitarios(db: Session):
                     TipoEvento = DatosPlanesSanitarios.nombre_evento
                     # Invoca la funcioón de envio de correo electronico
                     enviar_correo(destinatario=BuscarCorreo.correo_electronico, asunto=Asunto,
-                                  Notificacion="¡Hola!\n\nTe recuerdo que el día "+ FechaEventoStr + " tienes programado el Plan Sanitario " + TipoEvento + " correspondiente al Lote " + NombreLoteNotificar + ".\n\nEs importante que actualices tus planes sanitarios y los mantengas al día, ya que son fundamentales para la salud de tu hato ganadero.")
+                                  Notificacion="¡Hola!\n\nTe recuerdo que en Dos días  tienes programado el Plan Sanitario " + TipoEvento + " correspondiente al Lote " + NombreLoteNotificar + ".\n\nEs importante que actualices tus planes sanitarios y los mantengas al día, ya que son fundamentales para la salud de tu hato ganadero.")
 
 
 # Usando el context manager para obtener y cerrar la sesión de base de datos correctamente

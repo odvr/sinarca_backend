@@ -567,6 +567,7 @@ modelo_eventos_asociados_lotes= Table("eventos_asociados_lotes", meta, Column("i
                                Column("comentario_evento", String(100)),
                                Column("estado_evento", String(100)),
                                Column("FechaNotificacion", Date),
+                               Column("notificaciones_generadas", Integer),
                                Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
 
 modelo_descorne_lotes= Table("descorne_lotes", meta, Column("id_descorne_lote", Integer, primary_key=True),
