@@ -322,7 +322,9 @@ modelo_carga_animal_y_consumo_agua = Table("carga_animal", meta, Column("id_carg
                                            Column("consumo_forraje_vivo", Float),
                                            Column("raza", String(300)),
                                            Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")),
-                                           Column("nombre_bovino", String(300)))
+                                           Column("nombre_bovino", String(300)),
+                                           Column("id_lote", Integer, ForeignKey("lotes_bovinos.id_lote_bovinos"),unique=True),
+                                           Column("nombre_lote", String(300)))
 
 modelo_capacidad_carga = Table("capacidad_carga", meta, Column("id_capacidad", Integer, primary_key=True),
                                Column("medicion_aforo", Float),
@@ -331,7 +333,28 @@ modelo_capacidad_carga = Table("capacidad_carga", meta, Column("id_capacidad", I
                                Column("carga_animal_usuario", Float),
                                Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")),
                                Column("nombre_potrero", String(300)),
-                               Column("interpretacion", String(300)))
+                               Column("interpretacion", String(300)),
+                               Column("id_lote", Integer, ForeignKey("lotes_bovinos.id_lote_bovinos"), unique=True),
+                               Column("nombre_lote", String(300)),
+                               Column("estado", String(300)),
+                               Column("fecha_inicio_ocupacion", Date),
+                               Column("fecha_final_recomendada", Date),
+                               Column("fecha_final_real", Date),
+                               Column("fecha_inicio_descanso", Date),
+                               Column("fecha_final_descanso", Date),
+                               Column("dias_descanso", Integer))
+
+
+modelo_registro_ocupaciones_potreros = Table("registro_ocupaciones_potreros", meta, Column("id_ocupacion", Integer, primary_key=True),
+                               Column("id_potrero", Integer),
+                               Column("nombre_potrero",  String(300)),
+                               Column("id_lote", Integer),
+                               Column("nombre_lote",  String(300)),
+                               Column("fecha_inicio_ocupacion", Date),
+                               Column("fecha_final_recomendada", Date),
+                               Column("fecha_final_real", Date),
+                               Column("observacion",  String(300)),
+                               Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
 
 modelo_calculadora_hectareas_pastoreo = Table("pastoreo", meta, Column("id_pastoreo", Integer, primary_key=True),
                                               Column("id_bovino", Integer, ForeignKey("bovinos.id_bovino")),

@@ -21,9 +21,10 @@ from Lib.funcion_vientres_aptos import vientres_aptos
 # importa la conexion de la base de datos
 from sqlalchemy.orm import Session
 # importa el esquema de los bovinos
-from models.modelo_bovinos import modelo_bovinos_inventario,modelo_veterinaria, modelo_leche, modelo_levante,modelo_ventas,modelo_datos_muerte, \
-    modelo_indicadores, modelo_ceba, modelo_macho_reproductor, modelo_carga_animal_y_consumo_agua,modelo_datos_pesaje, \
-    modelo_capacidad_carga,  modelo_arbol_genealogico
+from models.modelo_bovinos import modelo_bovinos_inventario, modelo_veterinaria, modelo_leche, modelo_levante, \
+    modelo_ventas, modelo_datos_muerte, \
+    modelo_indicadores, modelo_ceba, modelo_macho_reproductor, modelo_carga_animal_y_consumo_agua, modelo_datos_pesaje, \
+    modelo_capacidad_carga, modelo_arbol_genealogico, modelo_lotes_bovinos, modelo_registro_ocupaciones_potreros
 from schemas.schemas_bovinos import Esquema_bovinos,User, esquema_produccion_leche, esquema_produccion_levante,TokenSchema,esquema_descarte, \
     esquema_produccion_ceba
 from sqlalchemy import select, insert, values, update, bindparam, between, join, func, null
@@ -74,6 +75,7 @@ def carga_animal(session:Session,current_user):
       consulta_bovinos = session.query(modelo_bovinos_inventario).\
           filter(modelo_bovinos_inventario.c.estado=="Vivo",
                  modelo_bovinos_inventario.columns.usuario_id==current_user).all()
+
       if consulta_bovinos==[]:
           pass
       else:
@@ -87,11 +89,29 @@ def carga_animal(session:Session,current_user):
               peso = i[5]
               # Toma la raza del animal en este caso es el campo 2
               raza = i[4]
+              # Toma el nombre del lote del animal en este caso es el campo 18
+              nombre_lote = i[18]
+
               # determinacion de la unidad animal (una unidad animal equivale a 400 kg de peso vivo)
               unidad_animal = peso / 400
               # determinacion del consumo de forraje vivo por animal (cada animal consume un 10% de su peso vivo al dia)
               consumo_forraje = peso * 0.1
-              # consulta que determina su el bovino ya existe en la tabla
+
+              #El siguiente codigo busca el id del lote y actuliza el campo
+
+              consultarLote = session.query(modelo_lotes_bovinos.c.id_lote_bovinos).filter(
+                  modelo_lotes_bovinos.columns.nombre_lote == nombre_lote,
+                  modelo_lotes_bovinos.c.usuario_id == current_user).first()
+
+              if consultarLote is None:
+                  pass
+              else:
+                  session.execute(modelo_carga_animal_y_consumo_agua.update().values(id_lote=consultarLote[0],
+                                                                                     nombre_lote=nombre_lote). \
+                                  where(modelo_carga_animal_y_consumo_agua.columns.id_bovino == id))
+                  session.commit()
+
+              # consulta que determina si el bovino ya existe en la tabla
               consulta_existencia_bovino = session.query(modelo_carga_animal_y_consumo_agua). \
                   filter(modelo_carga_animal_y_consumo_agua.columns.id_bovino == id).all()
               if consulta_existencia_bovino == []:
@@ -157,7 +177,9 @@ def capacidad_carga(session:Session,current_user):
   try:
     # consulta del resultado del aforo
     consulta_aforo = session.query(modelo_capacidad_carga). \
-          where(modelo_capacidad_carga.c.usuario_id == current_user).all()
+          where(modelo_capacidad_carga.c.medicion_aforo != None,
+                modelo_capacidad_carga.c.id_lote != None,
+                modelo_capacidad_carga.c.usuario_id == current_user).all()
     for i in consulta_aforo:
         # Toma el resultado del aforo (campo 1)
         # el aforo determina cuantos kilogramos de materia seca produce un metro cuadrado de pasto en el predio
@@ -167,7 +189,26 @@ def capacidad_carga(session:Session,current_user):
         # Toma la cantidad de hectareas que posee el usuario(campo 2)
         hectareas_predio = i[2]
         # Toma el periodo de ocupacion
-        periodo_de_ocupacion = i[3]
+        # Toma el lote
+        id_lote = i[8]
+        # Toma la fecha de incio de ocupacion
+        fecha_inicio_ocupacion = i[11]
+        # al ingresar un lote, se considera en ocupacion o uso
+        estado="En Uso"
+
+        consultarLote = session.query(modelo_lotes_bovinos.c.nombre_lote).filter(
+            modelo_lotes_bovinos.columns.id_lote_bovinos == id_lote,
+            modelo_lotes_bovinos.c.usuario_id == current_user).first()
+
+        #el siguiente codigo consulta el nombre del lote
+        if consultarLote is None:
+            pass
+        else:
+            session.execute(modelo_capacidad_carga.update().values(nombre_lote=consultarLote[0]). \
+                            where(modelo_capacidad_carga.columns.id_capacidad == id_capacidad))
+            session.commit()
+
+
 
         #se convierten las hectareas a metros
         metros_predio=hectareas_predio*10000
@@ -185,32 +226,162 @@ def capacidad_carga(session:Session,current_user):
 
         consumo_promedio=54
 
-        #obtenemos la capacidad de carga
-        if periodo_de_ocupacion==0 or periodo_de_ocupacion is None:
-            capacidad_carga_animal_ajustada = 0
+        #Se obtiene la carga animal del lote seleccionado
+        consulta_carga_lote= session.query(func.sum(modelo_carga_animal_y_consumo_agua.c.valor_unidad_animal)). \
+          filter(modelo_carga_animal_y_consumo_agua.c.usuario_id == current_user,
+                 modelo_carga_animal_y_consumo_agua.c.id_lote == id_lote).first()
 
-            # se obtiene una interpretacion
-            interpretacion = f'No has ingresado un perido de ocupacion valido (mayor a 0 dias)'
+        consumo_lote= consulta_carga_lote[0]*consumo_promedio
 
+
+        capacidad_carga_animal_ajustada = (forraje_verde_disponible / consumo_lote)
+        #se obtienen lod dias de ocupacion que podra estar el lote en el predio
+        ocupacion=round(capacidad_carga_animal_ajustada,0)
+
+        #se asigna una interpretacion dependiendo de la cantidad de dias de ocupacion
+
+        if ocupacion<1:
+            interpretacion = f'Este Lote puede permanecer menos de un día en este predio, por favor, reconsidera cambiarlo a un lote con más forraje disponible'
             # actualizacion de campos
             session.execute(modelo_capacidad_carga.update().values(interpretacion=interpretacion,
-                                                                   carga_animal_usuario=capacidad_carga_animal_ajustada). \
+                                                                   carga_animal_usuario=consulta_carga_lote[0],
+                                                                   estado=estado). \
                             where(modelo_capacidad_carga.columns.id_capacidad == id_capacidad))
             session.commit()
+
+
         else:
-            capacidad_carga_animal_ajustada = (forraje_verde_disponible / consumo_promedio) / periodo_de_ocupacion
-
-            # se obtiene una interpretacion
-            interpretacion = f'Con tus {hectareas_predio} hectareas, puedes mantener hasta {round(capacidad_carga_animal_ajustada, 2)} unidades animales (1 unidad animal=400 kg) durante {periodo_de_ocupacion} dia(s) de ocupacion'
-
+            interpretacion = f'Puedes tener este Lote hasta {ocupacion} días en este predio'
             # actualizacion de campos
             session.execute(modelo_capacidad_carga.update().values(interpretacion=interpretacion,
-                                                                   carga_animal_usuario=round(
-                                                                       capacidad_carga_animal_ajustada, 2)). \
+                                                                   carga_animal_usuario=consulta_carga_lote[0],
+                                                                   periodo_ocupacion=ocupacion,
+                                                                   estado=estado). \
                             where(modelo_capacidad_carga.columns.id_capacidad == id_capacidad))
             session.commit()
+
+
+
+        # el siguiente codigo determina la fecha recomendada de duracion de la ocupacion
+        fecha_final_recomendada= fecha_inicio_ocupacion + timedelta(ocupacion)
+        session.execute(modelo_capacidad_carga.update().values(fecha_final_recomendada=fecha_final_recomendada). \
+                        where(modelo_capacidad_carga.columns.id_capacidad == id_capacidad))
+        session.commit()
+
+
+
+
   except Exception as e:
       logger.error(f'Error Funcion capacidad_carga: {e}')
+      raise
+  finally:
+      session.close()
+
+
+
+
+def finalizar_ocupacion(id_capacidad, session: Session):
+    try:
+        consulta_capacidad=session.query(modelo_capacidad_carga).\
+          filter(modelo_capacidad_carga.c.id_capacidad==id_capacidad).all()
+
+        if consulta_capacidad is None:
+            pass
+        else:
+            for i in consulta_capacidad:
+                id_lote = i[8]
+                nombre_lote= i[9]
+                nombre_potrero= i[6]
+                fecha_inicio_ocupacion=i[11]
+                fecha_final_recomendada=i[12]
+                dias_descanso=i[16]
+                usuario_id=i[5]
+
+                fecha_final_real = date.today()
+
+                var1 = 1
+                fecha_inicio_descanso = date.today() + timedelta(var1)
+
+                fecha_final_descanso = fecha_inicio_descanso + timedelta(dias_descanso)
+                estado = "En descanso"
+                valor_vacio = None
+
+                #si un predio ya ha pasado su tiempo de descanso, se actualizaran sus valores y estados (estara en descanso)
+                session.execute(
+                    modelo_capacidad_carga.update().values(medicion_aforo=valor_vacio, hectareas_predio=valor_vacio,
+                                                           carga_animal_usuario=valor_vacio, nombre_potrero=valor_vacio,
+                                                           interpretacion=valor_vacio, id_lote=valor_vacio,
+                                                           nombre_lote=valor_vacio, estado=estado,
+                                                           fecha_inicio_ocupacion=valor_vacio,
+                                                           fecha_final_recomendada=valor_vacio,
+                                                           fecha_final_real=valor_vacio,
+                                                           fecha_inicio_descanso=fecha_inicio_descanso,
+                                                           fecha_final_descanso=fecha_final_descanso). \
+                    where(modelo_capacidad_carga.columns.id_capacidad == id_capacidad))
+                session.commit()
+
+                if fecha_final_real > fecha_final_recomendada :
+                    observacion = "Ocupación más larga de la fecha recomendada"
+                    ingresoRegistro = modelo_registro_ocupaciones_potreros.insert().values(id_potrero=id_capacidad,
+                                                                                           nombre_potrero=nombre_potrero,
+                                                                                           id_lote=id_lote,
+                                                                                           nombre_lote=nombre_lote,
+                                                                                           fecha_inicio_ocupacion=fecha_inicio_ocupacion,
+                                                                                           fecha_final_recomendada=fecha_final_recomendada,
+                                                                                           fecha_final_real=fecha_final_real,
+                                                                                           observacion=observacion,usuario_id=usuario_id)
+
+                    session.execute(ingresoRegistro)
+                    session.commit()
+                else:
+                    observacion = "tiempo de Ocupación correcto "
+                    ingresoRegistro = modelo_registro_ocupaciones_potreros.insert().values(id_potrero=id_capacidad,
+                                                                                           nombre_potrero=nombre_potrero,
+                                                                                           id_lote=id_lote,
+                                                                                           nombre_lote=nombre_lote,
+                                                                                           fecha_inicio_ocupacion=fecha_inicio_ocupacion,
+                                                                                           fecha_final_recomendada=fecha_final_recomendada,
+                                                                                           fecha_final_real=fecha_final_real,
+                                                                                           observacion=observacion,usuario_id=usuario_id)
+
+                    session.execute(ingresoRegistro)
+                    session.commit()
+
+
+
+
+
+
+    except Exception as e:
+        logger.error(f'Error Funcion finalizar_ocupacion:{e}')
+        raise
+    finally:
+        session.close()
+
+
+def actualizar_estados_ocupacion(session:Session,current_user):
+  try:
+    # consulta del resultado del aforo
+    consulta_potreros = session.query(modelo_capacidad_carga). \
+          where(modelo_capacidad_carga.c.estado == "En descanso",
+                modelo_capacidad_carga.c.usuario_id == current_user).all()
+    for i in consulta_potreros:
+        id_capacidad = i[0]
+        fecha_final_descanso = i[15]
+
+        fecha_actual= date.today()
+
+        estado="Disponible"
+
+        if fecha_actual>fecha_final_descanso:
+            session.execute(modelo_capacidad_carga.update().values(estado=estado). \
+                            where(modelo_capacidad_carga.columns.id_capacidad == id_capacidad))
+            session.commit()
+
+        else:
+            pass
+  except Exception as e:
+      logger.error(f'Error Funcion actualizar_estados_ocupacion: {e}')
       raise
   finally:
       session.close()

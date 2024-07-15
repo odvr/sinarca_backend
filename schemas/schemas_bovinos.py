@@ -446,6 +446,8 @@ class esquema_carga_animal_y_consumo_agua(BaseModel):
     raza: Optional[str] = None
     usuario_id: Optional[str] = None
     nombre_bovino:Optional[str] = None
+    id_lote: Optional[int] = None
+    nombre_lote: Optional[str] = None
     class Config:
         orm_mode = True
         env_file = ".env"
@@ -459,6 +461,31 @@ class esquema_capacidad_carga(BaseModel):
     usuario_id: Optional[str] = None
     nombre_potrero:Optional[str] = None
     interpretacion: Optional[str] = None
+    id_lote: Optional[int] = None
+    nombre_lote: Optional[str] = None
+    estado: Optional[str] = None
+    fecha_inicio_ocupacion: Optional[date] = None
+    fecha_final_recomendada: Optional[date] = None
+    fecha_final_real: Optional[date] = None
+    fecha_inicio_descanso: Optional[date] = None
+    fecha_final_descanso: Optional[date] = None
+    dias_descanso: Optional[int] = None
+    class Config:
+        orm_mode = True
+        env_file = ".env"
+
+class esquema_registro_ocupaciones_potreros(BaseModel):
+    id_ocupacion: int
+    id_potrero: int
+    nombre_potrero: Optional[str] = None
+    id_lote: Optional[int] = None
+    nombre_lote: Optional[str] = None
+    fecha_inicio_ocupacion: Optional[date] = None
+    fecha_final_recomendada: Optional[date] = None
+    fecha_final_real: Optional[date] = None
+    observacion: Optional[str] = None
+    usuario_id: Optional[str] = None
+
     class Config:
         orm_mode = True
         env_file = ".env"

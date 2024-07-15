@@ -1,11 +1,14 @@
 '''
 Librerias requeridas
 '''
+from datetime import date
+
 from sqlalchemy.orm import Session
 import logging
 
 from Lib.actualizacion_peso import actualizacion_peso
-from Lib.carga_animal_capacidad_carga import carga_animal, capacidad_carga, eliminacion_capacidad_carga
+from Lib.carga_animal_capacidad_carga import carga_animal, capacidad_carga, eliminacion_capacidad_carga, \
+    actualizar_estados_ocupacion, finalizar_ocupacion
 # # importa la conexion de la base de datos
 from config.db import get_session
 # # importa el esquema de los bovinos
@@ -85,22 +88,26 @@ async def listar_carga_animales(db: Session = Depends(get_database_session),curr
 
 
 
-@capacidad_carga_rutas.post("/crear_capacidad_carga/{medicion_aforo}/{hectareas_predio}/{periodo_ocupacion}/{nombre_potrero}", status_code=status.HTTP_201_CREATED)
-async def crear_capacidad_carga(medicion_aforo: float,hectareas_predio :float,periodo_ocupacion:int,nombre_potrero:str,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+@capacidad_carga_rutas.post("/crear_capacidad_carga/{medicion_aforo}/{hectareas_predio}/{id_lote}/{nombre_potrero}", status_code=status.HTTP_201_CREATED)
+async def crear_capacidad_carga(medicion_aforo: float,hectareas_predio :float,id_lote:int,nombre_potrero:str,fecha_inicio_ocupacion: date,dias_descanso:int,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
 
 
     try:
 
         ingresoCapacidad = modelo_capacidad_carga.insert().values(medicion_aforo=medicion_aforo,
                                                                   hectareas_predio=hectareas_predio,
-                                                                  periodo_ocupacion=periodo_ocupacion,
+                                                                  id_lote=id_lote,
                                                                   nombre_potrero=nombre_potrero,
+                                                                  fecha_inicio_ocupacion=fecha_inicio_ocupacion,
+                                                                  dias_descanso=dias_descanso,
                                                                   usuario_id=current_user)
 
 
         db.execute(ingresoCapacidad)
         carga_animal(session=db,current_user=current_user)
         capacidad_carga(session=db,current_user=current_user)
+        actualizar_estados_ocupacion(session=db,current_user=current_user)
+
 
     except Exception as e:
         logger.error(f'Error al Crear CAPACIDAD CARGA: {e}')
