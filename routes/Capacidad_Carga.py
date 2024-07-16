@@ -88,7 +88,7 @@ async def listar_carga_animales(db: Session = Depends(get_database_session),curr
 
 
 
-@capacidad_carga_rutas.post("/crear_capacidad_carga/{medicion_aforo}/{hectareas_predio}/{id_lote}/{nombre_potrero}", status_code=status.HTTP_201_CREATED)
+@capacidad_carga_rutas.post("/crear_capacidad_carga/{medicion_aforo}/{hectareas_predio}/{id_lote}/{nombre_potrero}/{fecha_inicio_ocupacion}/{dias_descanso}", status_code=status.HTTP_201_CREATED)
 async def crear_capacidad_carga(medicion_aforo: float,hectareas_predio :float,id_lote:int,nombre_potrero:str,fecha_inicio_ocupacion: date,dias_descanso:int,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
 
 

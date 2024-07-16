@@ -456,7 +456,7 @@ class esquema_capacidad_carga(BaseModel):
     id_capacidad: int
     medicion_aforo: float
     hectareas_predio: float
-    periodo_ocupacion: int
+    periodo_ocupacion: Optional[int] = None
     carga_animal_usuario: float
     usuario_id: Optional[str] = None
     nombre_potrero:Optional[str] = None
