@@ -294,13 +294,13 @@ def finalizar_ocupacion(id_capacidad, session: Session):
                 nombre_potrero= i[6]
                 fecha_inicio_ocupacion=i[11]
                 fecha_final_recomendada=i[12]
+                fecha_final_real=i[13]
                 dias_descanso=i[16]
                 usuario_id=i[5]
 
-                fecha_final_real = date.today()
 
                 var1 = 1
-                fecha_inicio_descanso = date.today() + timedelta(var1)
+                fecha_inicio_descanso = fecha_final_real + timedelta(var1)
 
                 fecha_final_descanso = fecha_inicio_descanso + timedelta(dias_descanso)
                 estado = "En descanso"
@@ -313,6 +313,7 @@ def finalizar_ocupacion(id_capacidad, session: Session):
                                                            interpretacion=valor_vacio, id_lote=valor_vacio,
                                                            nombre_lote=valor_vacio, estado=estado,
                                                            fecha_inicio_ocupacion=valor_vacio,
+                                                           periodo_ocupacion=valor_vacio,
                                                            fecha_final_recomendada=valor_vacio,
                                                            fecha_final_real=valor_vacio,
                                                            fecha_inicio_descanso=fecha_inicio_descanso,

@@ -119,6 +119,31 @@ async def crear_capacidad_carga(medicion_aforo: float,hectareas_predio :float,id
 
 
 
+
+@capacidad_carga_rutas.post("/finalizar_ocupacion/{id_capacidad}/{fecha_final_real}", status_code=status.HTTP_201_CREATED)
+async def finalizar_ocupacion_capacidad(id_capacidad: int,fecha_final_real :date,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+
+
+    try:
+
+        db.execute(update(modelo_capacidad_carga).
+                   where(modelo_capacidad_carga.c.id_capacidad == id_capacidad).
+                   values(fecha_final_real=fecha_final_real))
+
+        db.commit()
+
+        finalizar_ocupacion(id_capacidad,session=db)
+
+
+    except Exception as e:
+        logger.error(f'Error al finalizar_ocupacion {e}')
+        raise
+    finally:
+        db.close()
+
+    return Response(status_code=status.HTTP_201_CREATED)
+
+
 @capacidad_carga_rutas.delete("/eliminar_capacidad_carga/{id_capacidad_eliminar}")
 async def eliminar_capacidad_carga(id_capacidad_eliminar: int,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user) ):
 
