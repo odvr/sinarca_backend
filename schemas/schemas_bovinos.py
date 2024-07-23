@@ -454,10 +454,10 @@ class esquema_carga_animal_y_consumo_agua(BaseModel):
 
 class esquema_capacidad_carga(BaseModel):
     id_capacidad: int
-    medicion_aforo: float
-    hectareas_predio: float
+    medicion_aforo: Optional[float]= None
+    hectareas_predio: Optional[float]= None
     periodo_ocupacion: Optional[int] = None
-    carga_animal_usuario: float
+    carga_animal_usuario: Optional[float]= None
     usuario_id: Optional[str] = None
     nombre_potrero:Optional[str] = None
     interpretacion: Optional[str] = None

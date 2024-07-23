@@ -50,6 +50,7 @@ async def listar_capacidad_carga(db: Session = Depends(get_database_session),cur
         carga_animal(session=db,current_user=current_user)
         capacidad_carga(session=db,current_user=current_user)
         actualizacion_peso(session=db)
+        actualizar_estados_ocupacion(session=db, current_user=current_user)
         #itemscargaAnimales = db.execute(modelo_capacidad_carga.select()).all()
         itemscargaAnimales = db.query(modelo_capacidad_carga).filter(modelo_capacidad_carga.c.usuario_id == current_user).all()
 
@@ -106,7 +107,7 @@ async def crear_capacidad_carga(medicion_aforo: float,hectareas_predio :float,id
         db.execute(ingresoCapacidad)
         carga_animal(session=db,current_user=current_user)
         capacidad_carga(session=db,current_user=current_user)
-        actualizar_estados_ocupacion(session=db,current_user=current_user)
+
 
 
     except Exception as e:

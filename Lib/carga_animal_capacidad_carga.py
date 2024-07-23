@@ -309,7 +309,7 @@ def finalizar_ocupacion(id_capacidad, session: Session):
                 #si un predio ya ha pasado su tiempo de descanso, se actualizaran sus valores y estados (estara en descanso)
                 session.execute(
                     modelo_capacidad_carga.update().values(medicion_aforo=valor_vacio, hectareas_predio=valor_vacio,
-                                                           carga_animal_usuario=valor_vacio, nombre_potrero=valor_vacio,
+                                                           carga_animal_usuario=valor_vacio,
                                                            interpretacion=valor_vacio, id_lote=valor_vacio,
                                                            nombre_lote=valor_vacio, estado=estado,
                                                            fecha_inicio_ocupacion=valor_vacio,
