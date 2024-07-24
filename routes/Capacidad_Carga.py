@@ -2,10 +2,10 @@
 Librerias requeridas
 '''
 from datetime import date
-
+from typing import Optional
 from sqlalchemy.orm import Session
 import logging
-
+from fastapi import Form
 from Lib.actualizacion_peso import actualizacion_peso
 from Lib.carga_animal_capacidad_carga import carga_animal, capacidad_carga, eliminacion_capacidad_carga, \
     actualizar_estados_ocupacion, finalizar_ocupacion
@@ -158,3 +158,26 @@ async def eliminar_capacidad_carga(id_capacidad_eliminar: int,db: Session = Depe
         raise
     finally:
         db.close()
+
+
+@capacidad_carga_rutas.put("/actualizar_capacidad_carga", status_code=status.HTTP_201_CREATED)
+async def actualizar_plan_sanitario(id_capacidad: Optional [int] = Form(None),medicion_aforo: Optional [float] = Form(None),hectareas_predio: Optional [float] = Form(None),id_lote: Optional [int] = Form(None),fecha_inicio_ocupacion: Optional [date] = Form(None),dias_descanso: Optional [int] = Form(None),db: Session = Depends(get_database_session),
+                              current_user: Esquema_Usuario = Depends(get_current_user)):
+    try:
+        db.execute(modelo_capacidad_carga.update().where(
+            modelo_capacidad_carga.c.id_capacidad == id_capacidad).values(
+            medicion_aforo=medicion_aforo,
+            hectareas_predio=hectareas_predio,
+            id_lote=id_lote,
+
+            fecha_inicio_ocupacion=fecha_inicio_ocupacion,
+            dias_descanso=dias_descanso,
+
+        ))
+        db.commit()
+    except Exception as e:
+        logger.error(f'Error al Actualizar Capacidad Carga : {e}')
+        raise
+    finally:
+        db.close()
+    return Response(status_code=status.HTTP_201_CREATED)
