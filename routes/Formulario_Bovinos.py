@@ -7,7 +7,7 @@ from http.client import HTTPException
 from typing import Optional
 import logging
 from datetime import date, datetime, timedelta
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends ,Form
 from sqlalchemy import and_
 from starlette.staticfiles import StaticFiles
 from starlette.status import HTTP_204_NO_CONTENT
@@ -67,17 +67,19 @@ Realiza la creacion de nuevos bovinos en la base de datos,
 la clase Esquema_bovinos  recibira como base para crear el animal esto con fin de realizar la consulta
 """
 
-
+"""
+id_capacidad: Optional [int] = Form(None)
+"""
 @Formulario_Bovino.post(
-    "/crear_bovino/{nombre_bovino}/{fecha_nacimiento}/{raza}/{sexo}/{marca}/{proposito}/{mansedumbre}/{estado}/{compra_bovino}/{fecha_pesaje}/{peso}/{ordeno}/{fecha_muerte}/{razon_muerte}/{numero_bono_venta}/{fecha_venta}/{precio_venta}/{razon_venta}/{medio_pago}/{comprador}/{numero_bono_compra}/{fecha_compra}/{precio_compra}/{razon_compra}/{medio_pago_compra}/{comprador_compras}/{id_bovino_madre}/{id_bovino_padre}/{inseminacion}/{id_registro_marca}/{registroIngresoHato}/{TiposPesaje}/{LoteSeleccionado}",
+    "/crear_bovino",
     status_code=status.HTTP_201_CREATED, tags=["Formualario_Bovinos"])
-async def crear_bovinos(nombre_bovino: str, fecha_nacimiento: date, raza: str, sexo: str, marca: str, proposito: str,
-                        mansedumbre: str, estado: str, compra_bovino: str, fecha_pesaje: date, peso: float,
-                        ordeno: str, fecha_muerte: date, razon_muerte: str, numero_bono_venta: str,
-                        fecha_venta: date, precio_venta: int, razon_venta: str, medio_pago: str, comprador: str,
-                        numero_bono_compra: str, fecha_compra: date, precio_compra: int, razon_compra: str,
-                        medio_pago_compra: str, comprador_compras: str, id_bovino_madre: str, id_bovino_padre: str, inseminacion:str,TiposPesaje:str,
-                        id_registro_marca: str,LoteSeleccionado:str,registroIngresoHato: Optional[date] = None, db: Session = Depends(get_database_session),
+async def crear_bovinos(nombre_bovino: Optional [str] = Form(None), fecha_nacimiento:  Optional [date] = Form(None), raza:  Optional [str] = Form(None), sexo:  Optional [str] = Form(None), marca:  Optional [str] = Form(None), proposito:  Optional [str] = Form(None),
+                        mansedumbre:  Optional [str] = Form(None), estado:  Optional [str] = Form(None), compra_bovino:  Optional [str] = Form(None), fecha_pesaje:  Optional [date] = Form(None), peso:  Optional [float] = Form(None),
+                        ordeno:  Optional [str] = Form(None), fecha_muerte:  Optional [date] = Form(None), razon_muerte:  Optional [str] = Form(None), numero_bono_venta:  Optional [str] = Form(None),
+                        fecha_venta:  Optional [date] = Form(None), precio_venta:  Optional [int] = Form(None), razon_venta:  Optional [str] = Form(None), medio_pago:  Optional [str] = Form(None), comprador:  Optional [str] = Form(None),
+                        numero_bono_compra:  Optional [str] = Form(None), fecha_compra: Optional [date] = Form(None), precio_compra: Optional [int] = Form(None), razon_compra: Optional [str] = Form(None),
+                        medio_pago_compra: Optional [str] = Form(None), comprador_compras: Optional [str] = Form(None), id_bovino_madre: Optional [str] = Form(None), id_bovino_padre: Optional [str] = Form(None), inseminacion:Optional [str] = Form(None),TiposPesaje:Optional [str] = Form(None),
+                        id_registro_marca: Optional [str] = Form(None),LoteSeleccionado:Optional [str] = Form(None),registroIngresoHato: Optional[date] = None, db: Session = Depends(get_database_session),
                         current_user: Esquema_Usuario = Depends(get_current_user)):
     eliminarduplicados(db=db)
     vientres_aptos(session=db, current_user=current_user)
@@ -318,10 +320,6 @@ async def crear_bovinos(nombre_bovino: str, fecha_nacimiento: date, raza: str, s
                     modelo_bovinos_inventario.columns.id_bovino == id_bovino))
                 db.commit()
 
-            
-
-
-
 
 
 
@@ -343,7 +341,8 @@ async def crear_bovinos(nombre_bovino: str, fecha_nacimiento: date, raza: str, s
             if inseminacion == "0":
                 pass
             else:
-
+                pass
+                """
                 ingresoEndogamia = modelo_arbol_genealogico.insert().values(id_bovino=id_bovino,
                                                                             id_bovino_madre=id_bovino_madre,
                                                                             id_bovino_padre=id_bovino_padre,
@@ -353,6 +352,8 @@ async def crear_bovinos(nombre_bovino: str, fecha_nacimiento: date, raza: str, s
 
                 db.execute(ingresoEndogamia)
                 db.commit()
+                """
+
                 #endogamia(condb=db)
             return Response(status_code=status.HTTP_201_CREATED)
         else:

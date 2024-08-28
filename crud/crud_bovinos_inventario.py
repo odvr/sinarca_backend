@@ -78,6 +78,15 @@ class CRUDBovinos:
 
 
     def Buscar_ID_Nombre_Padre(self, db: Session, id_bovino_padre, current_user):
+        """
+
+        :param db:
+        :param id_bovino_padre:
+        :param current_user:
+        :return: ID_BovinoPadre
+
+        la siguiente función retorna el ID del Modulo de Pajillas
+        """
         ConsultarNombrePadre = db.query(modelo_registro_pajillas).filter(
             modelo_registro_pajillas.columns.Codigo_toro_pajilla == id_bovino_padre,
             modelo_registro_pajillas.c.usuario_id == current_user).first()
