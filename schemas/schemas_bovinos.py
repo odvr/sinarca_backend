@@ -884,3 +884,13 @@ class esquema_control_podologia_lotes(BaseModel):
     class Config:
         orm_mode = True
         env_file = ".env"
+
+class esquema_envio_correos_publicidad(BaseModel):
+    enviar_correos_publicidad : int
+    correo_enviado: Optional[str] = None
+    fecha_envio: Optional[date] = None
+    estado_envio : Optional[str] = None
+
+    class Config:
+        orm_mode = True
+        env_file = ".env"

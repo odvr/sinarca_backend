@@ -631,4 +631,9 @@ modelo_control_podologia_lotes= Table("control_podologia_lotes", meta, Column("i
                                Column("FechaNotificacionPodologia", String(100)),
                                Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
 
+modelo_envio_correo_publicidad = Table("enviar_correos_publicidad", meta, Column("id_envio_correo_publicidad", Integer, primary_key=True),
+                        Column("correo_enviado", String(100)),
+                        Column("fecha_envio", DateTime ),
+                        Column("estado_envio", String(100)))
+
 meta.create_all(engine)

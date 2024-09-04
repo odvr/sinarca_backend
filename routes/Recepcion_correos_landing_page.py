@@ -6,10 +6,19 @@ Librerias requeridas
 import logging
 from Lib.enviar_correos import enviar_correo
 from sqlalchemy.orm import Session
-from fastapi import APIRouter, Response
+from fastapi import APIRouter, Response,Form
 from fastapi.security import OAuth2PasswordBearer
+from fastapi import  Depends
+from Lib.enviar_correos_publicidad import enviar_correo_publicidad
 from config.db import get_session
 from fastapi import  status
+from typing import Optional
+
+from datetime import  datetime
+from sqlalchemy.orm import Session
+from models.modelo_bovinos import modelo_envio_correo_publicidad
+
+
 
 oauth2_scheme = OAuth2PasswordBearer("/token")
 
@@ -59,3 +68,21 @@ async def envioCorreolandingPage(nombre, email,mensaje):
 
     return Response(status_code=status.HTTP_201_CREATED)
 
+@CorreosLandingPage.post("/EnviarCorreosPublicidad",status_code=status.HTTP_201_CREATED, tags=["Envio de Correos"])
+async def envioCorreolandingPage(destinatario: Optional [str] = Form(None),db: Session = Depends(get_database_session)):
+    """
+    :param destinatario:
+    :return:
+    """
+
+    enviar_correo_publicidad(destinatario)
+    FechaDeEnvioCorreo = datetime.now()
+
+    ingresoEnvio = modelo_envio_correo_publicidad.insert().values(correo_enviado=destinatario,
+                                                                  fecha_envio=FechaDeEnvioCorreo,
+
+                                                                  )
+    db.execute(ingresoEnvio)
+    db.commit()
+
+    return Response(status_code=status.HTTP_201_CREATED)
