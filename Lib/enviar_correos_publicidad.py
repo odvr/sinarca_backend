@@ -54,3 +54,37 @@ def enviar_correo_publicidad(destinatario):
     except Exception as e:
         logger.error(f'Error al enviar Correo Publicitario: {e}')
         raise
+
+def enviar_correo_bienvenida(destinatario):
+    """
+
+    :param destinatario: Envia el destinatario de Bienvenida
+    :return:
+    """
+
+    try:
+
+        # Cargar el contenido del archivo HTML desde la carpeta 'Plantillas'
+        with open(Rutabase+'/Lib/Plantillas/Bienvenida.html', 'r', encoding='utf-8') as file:
+            MensajeEnvioBienvenida = file.read()
+        # Configurar el mensaje
+        msg = MIMEMultipart()
+        msg['From'] = remitente
+        msg['To'] = destinatario
+        msg['Subject'] = "Bienvenida - Ruta Ganadera"
+        # Agregar el cuerpo del mensaje con encabezado html
+        msg.attach(MIMEText(MensajeEnvioBienvenida, 'html'))
+        # Establecer conexión con el servidor SMTP
+        servidor = smtplib.SMTP(host=servidor_smtp, port=puerto_smtp)
+        servidor.starttls()  # Habilitar la capa de seguridad
+        # Iniciar sesión en el servidor SMTP
+        servidor.login(remitente, password)
+        # Enviar el correo electrónico
+        servidor.sendmail(remitente, destinatario, msg.as_string())
+        # Cerrar la conexión
+        servidor.quit()
+
+
+    except Exception as e:
+        logger.error(f'Error al enviar Correo Bienvenida: {e}')
+        raise

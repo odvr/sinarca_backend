@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 from fastapi import APIRouter, Response,Form
 from fastapi.security import OAuth2PasswordBearer
 from fastapi import  Depends
-from Lib.enviar_correos_publicidad import enviar_correo_publicidad
+from Lib.enviar_correos_publicidad import enviar_correo_publicidad, enviar_correo_bienvenida
 from config.db import get_session
 from fastapi import  status
 from typing import Optional
@@ -84,5 +84,20 @@ async def envioCorreolandingPage(destinatario: Optional [str] = Form(None),db: S
                                                                   )
     db.execute(ingresoEnvio)
     db.commit()
+
+    return Response(status_code=status.HTTP_201_CREATED)
+
+
+@CorreosLandingPage.post("/EnviarCorreoBienvenida",status_code=status.HTTP_201_CREATED, tags=["Envio de Correos"])
+async def envioCorreolandingPage(destinatario: Optional [str] = Form(None),db: Session = Depends(get_database_session)):
+    """
+    :param destinatario:
+    :return:
+    """
+
+    enviar_correo_bienvenida(destinatario)
+
+
+
 
     return Response(status_code=status.HTTP_201_CREATED)
