@@ -894,3 +894,142 @@ class esquema_envio_correos_publicidad(BaseModel):
     class Config:
         orm_mode = True
         env_file = ".env"
+
+
+"""
+Esquema para el sistema DRP
+"""
+
+class esquema_clientes(BaseModel):
+    cliente_id   : int
+    nombre_cliente: Optional[str] = None
+    direccion: Optional[str] = None
+    telefono : Optional[str] = None
+    email: Optional[str] = None
+    tipo_cliente: Optional[str] = None
+    fecha_creacion: Optional[date] = None
+    usuario_id: Optional[str] = None
+    class Config:
+        orm_mode = True
+        env_file = ".env"
+class esquema_facturas(BaseModel):
+    factura_id   : int
+    cliente_id: Optional[int] = None
+    fecha_emision: Optional[date] = None
+    fecha_vencimiento : Optional[date] = None
+    monto_total: Optional[int] = None
+    estado: Optional[str] = None
+    metodo_pago: Optional[str] = None
+    detalle: Optional[str] = None
+    usuario_id: Optional[str] = None
+    class Config:
+        orm_mode = True
+        env_file = ".env"
+class esquema_pagos(BaseModel):
+    pago_id   : int
+    factura_id: Optional[int] = None
+    fecha_pago: Optional[date] = None
+    monto : Optional[int] = None
+    metodo_pago: Optional[str] = None
+    referencia_pago: Optional[str] = None
+    usuario_id: Optional[str] = None
+    class Config:
+        orm_mode = True
+        env_file = ".env"
+
+
+
+class esquema_productos(BaseModel):
+    producto_id   : int
+    nombre_producto: Optional[str] = None
+    precio_unitario: Optional[float] = None
+    stock_actual : Optional[int] = None
+    unidad_medida: Optional[str] = None
+    referencia_pago: Optional[str] = None
+    usuario_id: Optional[str] = None
+    class Config:
+        orm_mode = True
+        env_file = ".env"
+
+class esquema_movimientos_stock(BaseModel):
+    movimiento_id   : int
+    producto_id: Optional[int] = None
+    tipo_movimiento: Optional[str] = None
+    cantidad : Optional[int] = None
+    fecha_movimiento: Optional[date] = None
+    origen_destino: Optional[str] = None
+    usuario_id: Optional[str] = None
+    class Config:
+        orm_mode = True
+        env_file = ".env"
+
+class esquema_movimientos_stock(BaseModel):
+    empleado_id   : int
+    nombre_empleado: Optional[str] = None
+    puesto: Optional[str] = None
+    salario_base : Optional[float] = None
+    fecha_contratacion: Optional[date] = None
+    número_seguridad_social: Optional[str] = None
+    usuario_id: Optional[str] = None
+    class Config:
+        orm_mode = True
+        env_file = ".env"
+
+class esquema_nomina(BaseModel):
+    nomina_id   : int
+    empleado_id: Optional[int] = None
+    periodo: Optional[str] = None
+    salario_bruto : Optional[float] = None
+    deducciones: Optional[float] = None
+    salario_neto: Optional[float] = None
+    fecha_pago: Optional[date] = None
+    usuario_id: Optional[str] = None
+    class Config:
+        orm_mode = True
+        env_file = ".env"
+
+class esquema_tareas(BaseModel):
+    tarea_id   : int
+    nombre_tarea: Optional[str] = None
+    descripcion: Optional[str] = None
+    fecha_asignacion : Optional[date] = None
+    fecha_entrega: Optional[date] = None
+    empleado_id: Optional[int] = None
+    usuario_id: Optional[str] = None
+    class Config:
+        orm_mode = True
+        env_file = ".env"
+
+
+class esquema_cotizaciones(BaseModel):
+    cotizacion_id   : int
+    cliente_id: Optional[int] = None
+    fecha_cotizacion: Optional[date] = None
+    total_cotizacion : Optional[float] = None
+    estado: Optional[str] = None
+    usuario_id: Optional[str] = None
+    class Config:
+        orm_mode = True
+        env_file = ".env"
+
+class esquema_kpis(BaseModel):
+    kpi_id   : int
+    nombre_kpi: Optional[str] = None
+    valor_actual: Optional[float] = None
+    meta : Optional[float] = None
+    fecha_actualización: Optional[date] = None
+    usuario_id: Optional[str] = None
+    class Config:
+        orm_mode = True
+        env_file = ".env"
+
+class esquema_presupuestos(BaseModel):
+    presupuesto_id   : int
+    periodo: Optional[str] = None
+    monto_presupuestado: Optional[float] = None
+    monto_gastado : Optional[float] = None
+    fecha_creacion: Optional[date] = None
+    usuario_id: Optional[str] = None
+    class Config:
+        orm_mode = True
+        env_file = ".env"

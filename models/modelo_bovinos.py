@@ -635,5 +635,104 @@ modelo_envio_correo_publicidad = Table("enviar_correos_publicidad", meta, Column
                         Column("correo_enviado", String(100)),
                         Column("fecha_envio", DateTime ),
                         Column("estado_envio", String(100)))
+"""
+Modelo de Base de datos KPIs
+"""
+
+modelo_clientes= Table("clientes", meta, Column("cliente_id", Integer, primary_key=True,autoincrement=True),
+                               Column("nombre_cliente",String(300)),
+                               Column("direccion",String(300)),
+                               Column("telefono", String(100)),
+                               Column("email", String(100)),
+                               Column("tipo_cliente", String(100)),
+                               Column("fecha_creacion", Date),
+                               Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
+
+
+modelo_facturas= Table("facturas", meta, Column("factura_id", Integer, primary_key=True,autoincrement=True),
+                               Column("cliente_id", Integer, ForeignKey("clientes.cliente_id")),
+                               Column("fecha_emision",Date),
+                               Column("fecha_vencimiento", Date),
+                               Column("monto_total", Float),
+                               Column("estado", String(100)),
+                               Column("metodo_pago", String(100)),
+                               Column("detalle", String(100)),
+                               Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
+
+
+modelo_pagos= Table("pagos", meta, Column("pago_id", Integer, primary_key=True,autoincrement=True),
+                               Column("factura_id", Integer, ForeignKey("facturas.factura_id")),
+                               Column("fecha_pago",Date),
+                               Column("monto", Float),
+                               Column("metodo_pago", String(100)),
+                               Column("referencia_pago", String(100)),
+                               Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
+
+modelo_productos= Table("productos", meta, Column("producto_id", Integer, primary_key=True,autoincrement=True),
+
+                               Column("nombre_producto",String(100)),
+                               Column("tipo_producto", String(100)),
+                               Column("precio_unitario",Float),
+                               Column("stock_actual", Integer),
+                               Column("unidad_medida", String(100)),
+                               Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
+
+modelo_movimientos_stock= Table("movimientos_stock", meta, Column("movimiento_id", Integer, primary_key=True,autoincrement=True),
+                               Column("producto_id", Integer, ForeignKey("productos.producto_id")),
+                               Column("tipo_movimiento",String(100)),
+                               Column("cantidad", Integer),
+                               Column("fecha_movimiento", Date),
+                               Column("origen_destino", String(100)),
+                               Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
+
+modelo_empleados= Table("empleados", meta, Column("empleado_id", Integer, primary_key=True,autoincrement=True),
+
+                               Column("nombre_empleado",String(100)),
+                               Column("puesto", String(100)),
+                               Column("salario_base", Float),
+                               Column("fecha_contratación", Date),
+                               Column("numero_seguridad_social", String(100)),
+                               Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
+
+modelo_nomina= Table("nomina", meta, Column("nomina_id", Integer, primary_key=True,autoincrement=True),
+                               Column("empleado_id", Integer, ForeignKey("empleados.empleado_id")),
+                               Column("periodo",String(100)),
+                               Column("salario_bruto", Float),
+                               Column("deducciones", Float),
+                               Column("salario_neto", Float),
+                               Column("fecha_pago", Date),
+                               Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
+modelo_tareas= Table("tareas", meta, Column("tarea_id", Integer, primary_key=True,autoincrement=True),
+                               Column("empleado_id", Integer, ForeignKey("empleados.empleado_id")),
+                               Column("nombre_tarea",String(100)),
+                               Column("descripcion", String(100)),
+                               Column("fecha_asignación", Date),
+                               Column("fecha_entrega", Date),
+                               Column("estado", String(300)),
+                               Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
+
+modelo_cotizaciones= Table("cotizaciones", meta, Column("cotizacion_id", Integer, primary_key=True,autoincrement=True),
+                               Column("cliente_id", Integer, ForeignKey("clientes.cliente_id")),
+                               Column("fecha_cotizacion",Date),
+                               Column("total_cotizacion", Float),
+                               Column("estado", String(300)),
+                               Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
+
+modelo_presupuestos= Table("presupuestos", meta, Column("presupuesto_id", Integer, primary_key=True,autoincrement=True),
+                               Column("periodo",String(300)),
+                               Column("monto_presupuestado", Float),
+                               Column("monto_gastado", Float),
+                               Column("fecha_creacion", Date),
+                               Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
+
+
+modelo_kpis= Table("kpis", meta, Column("kpi_id", Integer, primary_key=True, autoincrement=True),
+                               Column("nombre_kpi",String(300)),
+                               Column("valor_actual", Float),
+                               Column("meta", Float),
+                               Column("fecha_actualizacion", Date),
+                               Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
+
+
 
 meta.create_all(engine)
