@@ -7,10 +7,10 @@ from datetime import  date
 from fastapi import APIRouter, Depends,Form,Response,status
 from config.db import   get_session
 # importa el esquema de los bovinos
-from models.modelo_bovinos import  modelo_clientes
+from models.modelo_bovinos import modelo_clientes, modelo_cotizaciones
 from sqlalchemy.orm import Session
 from routes.rutas_bovinos import get_current_user
-from schemas.schemas_bovinos import  Esquema_Usuario, esquema_clientes
+from schemas.schemas_bovinos import Esquema_Usuario, esquema_clientes, esquema_cotizaciones
 from typing import Optional
 
 # Configuracion de las rutas para fash api
@@ -78,3 +78,43 @@ async def CrearClientes(nombre_cliente: Optional [str] = Form(None),direccion: O
     finally:
         db.close()
     return Response(status_code=status.HTTP_201_CREATED)
+
+
+@ERP.delete("/Eliminar_Cliente/{cliente_id}")
+async def Eliminar_cliente(cliente_id: int,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user) ):
+    try:
+        db.execute(modelo_clientes.delete().where(modelo_clientes.c.cliente_id == cliente_id))
+        db.commit()
+        return
+    except Exception as e:
+        logger.error(f'Error al Intentar Eliminar Cliente: {e}')
+        raise
+    finally:
+        db.close()
+
+"""
+Cotizaciones
+"""
+
+@ERP.get("/Cotizaciones",response_model=list[esquema_cotizaciones],tags=["ERP"] )
+async def Listar_Cotizaciones(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+
+    try:
+        Cotizaciones = db.query(modelo_cotizaciones).filter(modelo_cotizaciones.c.usuario_id == current_user).all()
+        return Cotizaciones
+
+    except Exception as e:
+        logger.error(f'Error al obtener tabla Clientes: {e}')
+        raise
+    finally:
+        db.close()
+@ERP.get("/Listar_Clientes",response_model=list[esquema_cotizaciones] )
+async def listar_clientes(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+    try:
+        ListarClientes = db.query(modelo_clientes).filter(modelo_clientes.c.usuario_id == current_user).all()
+        return ListarClientes
+    except Exception as e:
+        logger.error(f'Error al obtener inventario de Anamales de Descarte: {e}')
+        raise
+    finally:
+        db.close()
