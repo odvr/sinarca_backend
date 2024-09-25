@@ -1004,6 +1004,8 @@ class esquema_tareas(BaseModel):
 class esquema_cotizaciones(BaseModel):
     cotizacion_id   : int
     cliente_id: Optional[int] = None
+    producto: Optional[str] = None
+    cantidad: Optional[int] = None
     fecha_cotizacion: Optional[date] = None
     total_cotizacion : Optional[float] = None
     estado: Optional[str] = None

@@ -7,7 +7,7 @@ from datetime import  date
 from fastapi import APIRouter, Depends,Form,Response,status
 from config.db import   get_session
 # importa el esquema de los bovinos
-from models.modelo_bovinos import modelo_clientes, modelo_cotizaciones
+from models.modelo_bovinos import modelo_clientes, modelo_cotizaciones, modelo_facturas
 from sqlalchemy.orm import Session
 from routes.rutas_bovinos import get_current_user
 from schemas.schemas_bovinos import Esquema_Usuario, esquema_clientes, esquema_cotizaciones
@@ -96,7 +96,7 @@ async def Eliminar_cliente(cliente_id: int,db: Session = Depends(get_database_se
 Cotizaciones
 """
 
-@ERP.get("/Cotizaciones",response_model=list[esquema_cotizaciones],tags=["ERP"] )
+@ERP.get("/Cotizaciones",  response_model=list[esquema_cotizaciones],tags=["ERP"] )
 async def Listar_Cotizaciones(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
 
     try:
@@ -118,3 +118,81 @@ async def listar_clientes(db: Session = Depends(get_database_session),current_us
         raise
     finally:
         db.close()
+@ERP.post("/CrearCotizacion",status_code=status.HTTP_201_CREATED, tags=["ERP"])
+async def CrearCotizacion(cliente_id: Optional [int] = Form(None),producto: Optional [str] = Form(None),cantidad: Optional [int] = Form(None),fecha_cotizacion: Optional [date] = Form(None),total_cotizacion: Optional [int] = Form(None),db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+    """
+    :param cliente_id:
+    :param producto:
+    :param cantidad:
+    :param fecha_cotizacion:
+    :param total_cotizacion:
+    :param db:
+    :param current_user:
+    :return:  status_code=status.HTTP_201_CREATE
+    """
+    try:
+        CrearCotizaciones = modelo_cotizaciones.insert().values(cliente_id=cliente_id,producto=producto,cantidad=cantidad,fecha_cotizacion=fecha_cotizacion,total_cotizacion=total_cotizacion,usuario_id=current_user)
+        db.execute(CrearCotizaciones)
+        db.commit()
+
+    except Exception as e:
+        logger.error(f'Error al Crear Cotización: {e}')
+        raise
+    finally:
+        db.close()
+    return Response(status_code=status.HTTP_201_CREATED)
+
+
+"""
+/**********************
+
+Facturación
+/*/*******
+
+"""
+
+
+@ERP.post("/CrearFactura", status_code=status.HTTP_201_CREATED, tags=["ERP"])
+async def CrearFactura(
+    cliente_id: Optional[int] = Form(None),
+    fecha_emision: Optional[date] = Form(None),
+    fecha_vencimiento: Optional[date] = Form(None),
+    monto_total: Optional[float] = Form(None),
+    estado: Optional[str] = Form(None),
+    metodo_pago: Optional[str] = Form(None),
+detalle: Optional[str] = Form(None),
+    db: Session = Depends(get_database_session),
+    current_user: Esquema_Usuario = Depends(get_current_user)
+):
+
+    # Registrar los datos recibidos
+    logger.error(f'Datos recibidos para CrearFactura - Cliente ID: {cliente_id}, '
+                f'Fecha de Emisión: {fecha_emision}, Fecha de Vencimiento: {fecha_vencimiento}, '
+                f'Monto Total: {monto_total}, Estado: {estado}, Método de Pago: {metodo_pago}, '
+                f'Usuario ID: {current_user}')
+
+    try:
+        CrearFactura = modelo_facturas.insert().values(
+            cliente_id=cliente_id,
+            fecha_emision=fecha_emision,
+            fecha_vencimiento=fecha_vencimiento,
+            monto_total=monto_total,
+            estado=estado,
+            metodo_pago=metodo_pago,
+            detalle=detalle,
+            usuario_id=current_user
+        )
+        db.execute(CrearFactura)
+        db.commit()
+
+    except Exception as e:
+        # Ampliar el log de errores para incluir detalles de la excepción y los datos recibidos
+        logger.error(f'Error al Crear Factura: {e} - Datos: Cliente ID: {cliente_id}, '
+                     f'Fecha de Emisión: {fecha_emision}, Fecha de Vencimiento: {fecha_vencimiento}, '
+                     f'Monto Total: {monto_total}, Estado: {estado}, Método de Pago: {metodo_pago}, '
+                     f'Usuario ID: {current_user}')
+        raise
+    finally:
+        db.close()
+
+    return Response(status_code=status.HTTP_201_CREATED)

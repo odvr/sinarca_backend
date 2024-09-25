@@ -714,6 +714,8 @@ modelo_tareas= Table("tareas", meta, Column("tarea_id", Integer, primary_key=Tru
 modelo_cotizaciones= Table("cotizaciones", meta, Column("cotizacion_id", Integer, primary_key=True,autoincrement=True),
                                Column("cliente_id", Integer, ForeignKey("clientes.cliente_id")),
                                Column("fecha_cotizacion",Date),
+                               Column("producto",String(300)),
+                               Column("cantidad",Integer),
                                Column("total_cotizacion", Float),
                                Column("estado", String(300)),
                                Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
