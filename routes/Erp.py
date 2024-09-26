@@ -5,13 +5,18 @@ Librerias requeridas
 import logging
 from datetime import  date
 from fastapi import APIRouter, Depends,Form,Response,status
+
+import crud
 from config.db import   get_session
 # importa el esquema de los bovinos
-from models.modelo_bovinos import modelo_clientes, modelo_cotizaciones, modelo_facturas
+from models.modelo_bovinos import modelo_clientes, modelo_cotizaciones, modelo_facturas, modelo_ventas
 from sqlalchemy.orm import Session
 from routes.rutas_bovinos import get_current_user
-from schemas.schemas_bovinos import Esquema_Usuario, esquema_clientes, esquema_cotizaciones
-from typing import Optional
+from schemas.schemas_bovinos import Esquema_Usuario, esquema_clientes, esquema_cotizaciones, esquema_facturas
+from typing import Optional,List
+import json
+
+
 
 # Configuracion de las rutas para fash api
 ERP = APIRouter()
@@ -158,26 +163,42 @@ async def CrearFactura(
     fecha_emision: Optional[date] = Form(None),
     fecha_vencimiento: Optional[date] = Form(None),
     monto_total: Optional[float] = Form(None),
+    precio_kg: Optional[float] = Form(None),
     estado: Optional[str] = Form(None),
     metodo_pago: Optional[str] = Form(None),
-detalle: Optional[str] = Form(None),
+    detalle: Optional[str] = Form(None),
+    tipo_venta: Optional[str] = Form(None),
+    animales: Optional[List[str]] = Form(None),
     db: Session = Depends(get_database_session),
     current_user: Esquema_Usuario = Depends(get_current_user)
 ):
 
-    # Registrar los datos recibidos
-    logger.error(f'Datos recibidos para CrearFactura - Cliente ID: {cliente_id}, '
-                f'Fecha de Emisión: {fecha_emision}, Fecha de Vencimiento: {fecha_vencimiento}, '
-                f'Monto Total: {monto_total}, Estado: {estado}, Método de Pago: {metodo_pago}, '
-                f'Usuario ID: {current_user}')
-
     try:
+
+        if tipo_venta == "Venta de Animales":
+            for animal in animales:
+                Bovino = json.loads(animal)  # Deserializa la cadena JSON
+                id_bovino = Bovino['id_bovino']  # Accede al id_bovino
+                nombre_bovino = crud.bovinos_inventario.Buscar_Nombre(db=db, id_bovino=id_bovino,
+                                                                      current_user=current_user)
+
+                estado = "Vendido"
+                ingresoVentas = modelo_ventas.insert().values(id_bovino=id_bovino, estado=estado,nombre_bovino=nombre_bovino,
+                                                              fecha_venta=fecha_emision,
+                                                              precio_venta=precio_kg,
+                                                              usuario_id=current_user)
+                db.execute(ingresoVentas)
+                db.commit()
+
+
+
         CrearFactura = modelo_facturas.insert().values(
             cliente_id=cliente_id,
             fecha_emision=fecha_emision,
             fecha_vencimiento=fecha_vencimiento,
             monto_total=monto_total,
             estado=estado,
+            tipo_venta=tipo_venta,
             metodo_pago=metodo_pago,
             detalle=detalle,
             usuario_id=current_user
@@ -196,3 +217,17 @@ detalle: Optional[str] = Form(None),
         db.close()
 
     return Response(status_code=status.HTTP_201_CREATED)
+
+
+@ERP.get("/ListarFacturas",  response_model=list[esquema_facturas],tags=["ERP"] )
+async def ListarFacturas(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+
+    try:
+        ListarFacturas = db.query(modelo_facturas).filter(modelo_facturas.c.usuario_id == current_user).all()
+        return ListarFacturas
+
+    except Exception as e:
+        logger.error(f'Error al obtener tabla Facturas: {e}')
+        raise
+    finally:
+        db.close()
