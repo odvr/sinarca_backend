@@ -9,7 +9,8 @@ from fastapi import APIRouter, Depends,Form,Response,status
 import crud
 from config.db import   get_session
 # importa el esquema de los bovinos
-from models.modelo_bovinos import modelo_clientes, modelo_cotizaciones, modelo_facturas, modelo_ventas
+from models.modelo_bovinos import modelo_clientes, modelo_cotizaciones, modelo_facturas, modelo_ventas, \
+    modelo_bovinos_inventario
 from sqlalchemy.orm import Session
 from routes.rutas_bovinos import get_current_user
 from schemas.schemas_bovinos import Esquema_Usuario, esquema_clientes, esquema_cotizaciones, esquema_facturas
@@ -183,10 +184,17 @@ async def CrearFactura(
                                                                       current_user=current_user)
 
                 estado = "Vendido"
+
                 ingresoVentas = modelo_ventas.insert().values(id_bovino=id_bovino, estado=estado,nombre_bovino=nombre_bovino,
                                                               fecha_venta=fecha_emision,
                                                               precio_venta=precio_kg,
                                                               usuario_id=current_user)
+
+                db.execute(modelo_bovinos_inventario.update().values(
+                    estado=estado,
+                ).where(
+                    modelo_bovinos_inventario.columns.id_bovino == id_bovino))
+
                 db.execute(ingresoVentas)
                 db.commit()
 
