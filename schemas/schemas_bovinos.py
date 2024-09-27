@@ -272,6 +272,9 @@ class esquema_modelo_ventas(BaseModel):
     razon_venta: Optional[str] = None
     medio_pago: Optional[str] = None
     comprador: Optional[str] = None
+    peso_venta: Optional[str] = None
+    valor_kg_venta: Optional[str] = None
+    id_factura_asociada: Optional[int] = None
     usuario_id: Optional[str] = None
     nombre_bovino:Optional[str] = None
     class Config:

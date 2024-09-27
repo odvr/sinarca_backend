@@ -196,6 +196,9 @@ Column("id_bovino", Integer, ForeignKey("bovinos.id_bovino")),
                       Column("razon_venta", String(300)),
                       Column("medio_pago", String(300)),
                       Column("comprador", String(300)),
+                      Column("peso_venta", String(300)),
+                      Column("valor_kg_venta", String(300)),
+                      Column("id_factura_asociada", Integer),
                       Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")),
                       Column("nombre_bovino", String(300))
                       )
@@ -210,6 +213,7 @@ Column("id_bovino", Integer, ForeignKey("bovinos.id_bovino")),
                       Column("razon_compra", String(300)),
                       Column("medio_pago_compra", String(300)),
                       Column("comprador", String(300)),
+
                       Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")),
                       Column("nombre_bovino", String(300))
                       )

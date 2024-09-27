@@ -175,11 +175,33 @@ async def CrearFactura(
 ):
 
     try:
+        # Crea la factura
+        CrearFactura = modelo_facturas.insert().values(
+            cliente_id=cliente_id,
+            fecha_emision=fecha_emision,
+            fecha_vencimiento=fecha_vencimiento,
+            monto_total=monto_total,
+            estado=estado,
+            tipo_venta=tipo_venta,
+            metodo_pago=metodo_pago,
+            detalle=detalle,
+            usuario_id=current_user
+        )
+
+
+        IngresoFacturacion = db.execute(CrearFactura)
+        db.commit()
+        # Obtener el ID de la factura para asociar a la tabla
+        id_factura_asociada = IngresoFacturacion.inserted_primary_key[0]
 
         if tipo_venta == "Venta de Animales":
             for animal in animales:
                 Bovino = json.loads(animal)  # Deserializa la cadena JSON
                 id_bovino = Bovino['id_bovino']  # Accede al id_bovino
+                peso = Bovino['peso']  # Accede al peso
+                valorUnitario = Bovino['valorUnitario']  # Accede al peso
+                print(fecha_emision)
+
                 nombre_bovino = crud.bovinos_inventario.Buscar_Nombre(db=db, id_bovino=id_bovino,
                                                                       current_user=current_user)
 
@@ -187,7 +209,10 @@ async def CrearFactura(
 
                 ingresoVentas = modelo_ventas.insert().values(id_bovino=id_bovino, estado=estado,nombre_bovino=nombre_bovino,
                                                               fecha_venta=fecha_emision,
-                                                              precio_venta=precio_kg,
+                                                              precio_venta=valorUnitario,
+                                                              valor_kg_venta=precio_kg,
+                                                              id_factura_asociada = id_factura_asociada,
+                                                              peso_venta=peso,
                                                               usuario_id=current_user)
 
                 db.execute(modelo_bovinos_inventario.update().values(
@@ -200,19 +225,7 @@ async def CrearFactura(
 
 
 
-        CrearFactura = modelo_facturas.insert().values(
-            cliente_id=cliente_id,
-            fecha_emision=fecha_emision,
-            fecha_vencimiento=fecha_vencimiento,
-            monto_total=monto_total,
-            estado=estado,
-            tipo_venta=tipo_venta,
-            metodo_pago=metodo_pago,
-            detalle=detalle,
-            usuario_id=current_user
-        )
-        db.execute(CrearFactura)
-        db.commit()
+
 
     except Exception as e:
         # Ampliar el log de errores para incluir detalles de la excepción y los datos recibidos
@@ -236,6 +249,19 @@ async def ListarFacturas(db: Session = Depends(get_database_session),current_use
 
     except Exception as e:
         logger.error(f'Error al obtener tabla Facturas: {e}')
+        raise
+    finally:
+        db.close()
+
+@ERP.get("/ListarFactura/{factura_id}",  response_model=list[esquema_facturas],tags=["ERP"] )
+async def ListarFactura(factura_id : int,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+
+    try:
+        ListarFactura = db.query(modelo_facturas).filter(modelo_facturas.c.usuario_id == current_user,modelo_facturas.c.factura_id == factura_id).all()
+        return ListarFactura
+
+    except Exception as e:
+        logger.error(f'Error al obtener la factura: {e}')
         raise
     finally:
         db.close()
