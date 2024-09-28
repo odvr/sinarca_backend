@@ -73,3 +73,21 @@ async def listar_tabla_ventas(db: Session = Depends(get_database_session),curren
         db.close()
 
     return consultaVentas
+
+
+
+
+@Ventas_Bovinos.get("/ListarVentasAsociadasFacturas/{id_factura_asociada}",response_model=list[esquema_modelo_ventas] )
+async def listar_tabla_pesaje_Por_Animal(id_factura_asociada:int,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+    try:
+        ListarBovinosAsociadosVenta = db.query(modelo_ventas).where(modelo_ventas.columns.id_factura_asociada == id_factura_asociada).all()
+        if ListarBovinosAsociadosVenta is None:
+            raise HTTPException(status_code=404, detail="Factura  no encontrada")
+        else:
+            return ListarBovinosAsociadosVenta
+
+    except Exception as e:
+        logger.error(f'Error al obtener inventario de TABLA PESAJE POR ANIMAL: {e}')
+        raise
+    finally:
+        db.close()
