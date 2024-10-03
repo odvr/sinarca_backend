@@ -4,16 +4,20 @@ Librerias requeridas
 '''
 import logging
 from datetime import  date
+from http.client import HTTPException
+
 from fastapi import APIRouter, Depends,Form,Response,status
+from starlette.status import HTTP_204_NO_CONTENT
 
 import crud
 from config.db import   get_session
 # importa el esquema de los bovinos
 from models.modelo_bovinos import modelo_clientes, modelo_cotizaciones, modelo_facturas, modelo_ventas, \
-    modelo_bovinos_inventario
+    modelo_bovinos_inventario, modelo_pagos
 from sqlalchemy.orm import Session
 from routes.rutas_bovinos import get_current_user
-from schemas.schemas_bovinos import Esquema_Usuario, esquema_clientes, esquema_cotizaciones, esquema_facturas
+from schemas.schemas_bovinos import Esquema_Usuario, esquema_clientes, esquema_cotizaciones, esquema_facturas, \
+    esquema_pagos
 from typing import Optional,List
 import json
 
@@ -200,7 +204,7 @@ async def CrearFactura(
                 id_bovino = Bovino['id_bovino']  # Accede al id_bovino
                 peso = Bovino['peso']  # Accede al peso
                 valorUnitario = Bovino['valorUnitario']  # Accede al peso
-                print(fecha_emision)
+
 
                 nombre_bovino = crud.bovinos_inventario.Buscar_Nombre(db=db, id_bovino=id_bovino,
                                                                       current_user=current_user)
@@ -262,6 +266,88 @@ async def ListarFactura(factura_id : int,db: Session = Depends(get_database_sess
 
     except Exception as e:
         logger.error(f'Error al obtener la factura: {e}')
+        raise
+    finally:
+        db.close()
+
+
+@ERP.put("/EditarFactura/{factura_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def CambiarDatosFactura(
+         factura_id : int,
+         estado: Optional[str] = Form(None),
+         fecha_vencimiento: Optional[date] = Form(None),
+         pagos: Optional[List[str]] = Form(None),
+         db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+    """
+    Cuando se editan  Facturas y existen Abonos el realiza el Ingreso de los Abonos
+    :param factura_id:
+    :param estado:
+    :param fecha_vencimiento:
+    :param db:
+    :param current_user:
+    :return:
+    """
+    try:
+
+            db.execute(modelo_facturas.update().values(
+                estado=estado,
+                fecha_vencimiento = fecha_vencimiento
+
+
+
+            ).where(
+                modelo_facturas.columns.factura_id == factura_id))
+            db.commit()
+
+
+            #Valida si se agrego un pago o abono a la factura
+
+            if not pagos:
+                print("La Lista Esta Vacia ")
+                pass
+            else:
+                for pago in pagos:
+                    PagosAbonos = json.loads(pago)  # Deserializa la cadena JSON
+                    fecha_pago = PagosAbonos['fecha_pago']
+                    metodo_pago = PagosAbonos['metodo_pago']
+                    montoAbono = PagosAbonos['monto']
+                    print(montoAbono)
+
+                    IngresoPagos = modelo_pagos.insert().values(factura_id=factura_id, fecha_pago=fecha_pago,
+                                                                metodo_pago=metodo_pago,
+                                                                monto=montoAbono,
+                                                                usuario_id=current_user
+                                                                )
+
+                    db.execute(IngresoPagos)
+                    db.commit()
+
+
+
+
+
+
+    except Exception as e:
+        logger.error(f'Error al Editar Factura: {e}')
+        raise
+
+    finally:
+        db.close()
+
+    return Response(status_code=HTTP_204_NO_CONTENT)
+
+
+@ERP.get("/Abonos_Asociados/{factura_id}",response_model=list[esquema_pagos] )
+async def ListarAbonosAsociados(factura_id:int,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+    try:
+        ListaAbonos = db.query(modelo_pagos).where(modelo_pagos.columns.factura_id == factura_id).all()
+        if ListaAbonos is None:
+            raise HTTPException(status_code=404, detail="Factura  no encontrada")
+        else:
+            return ListaAbonos
+
+    except Exception as e:
+        logger.error(f'Error al obtener Abonos Asociados a las facturas : {e}')
         raise
     finally:
         db.close()
