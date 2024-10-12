@@ -231,42 +231,43 @@ def capacidad_carga(session:Session,current_user):
           filter(modelo_carga_animal_y_consumo_agua.c.usuario_id == current_user,
                  modelo_carga_animal_y_consumo_agua.c.id_lote == id_lote).first()
 
-        consumo_lote= consulta_carga_lote[0]*consumo_promedio
-
-
-        capacidad_carga_animal_ajustada = (forraje_verde_disponible / consumo_lote)
-        #se obtienen lod dias de ocupacion que podra estar el lote en el predio
-        ocupacion=round(capacidad_carga_animal_ajustada,0)
-
-        #se asigna una interpretacion dependiendo de la cantidad de dias de ocupacion
-
-        if ocupacion<1:
-            interpretacion = f'Este Lote puede permanecer menos de un día en este predio, por favor, reconsidera cambiarlo a un lote con más forraje disponible'
-            # actualizacion de campos
-            session.execute(modelo_capacidad_carga.update().values(interpretacion=interpretacion,
-                                                                   carga_animal_usuario=consulta_carga_lote[0],
-                                                                   estado=estado). \
-                            where(modelo_capacidad_carga.columns.id_capacidad == id_capacidad))
-            session.commit()
-
-
+        if consulta_carga_lote[0]==None:
+            pass
         else:
-            interpretacion = f'Puedes tener este Lote hasta {ocupacion} días en este predio'
-            # actualizacion de campos
-            session.execute(modelo_capacidad_carga.update().values(interpretacion=interpretacion,
-                                                                   carga_animal_usuario=consulta_carga_lote[0],
-                                                                   periodo_ocupacion=ocupacion,
-                                                                   estado=estado). \
+            consumo_lote = consulta_carga_lote[0] * consumo_promedio
+
+            capacidad_carga_animal_ajustada = (forraje_verde_disponible / consumo_lote)
+            # se obtienen lod dias de ocupacion que podra estar el lote en el predio
+            ocupacion = round(capacidad_carga_animal_ajustada, 0)
+
+            # se asigna una interpretacion dependiendo de la cantidad de dias de ocupacion
+
+            if ocupacion < 1:
+                interpretacion = f'Este Lote puede permanecer menos de un día en este predio, por favor, reconsidera cambiarlo a un lote con más forraje disponible'
+                # actualizacion de campos
+                session.execute(modelo_capacidad_carga.update().values(interpretacion=interpretacion,
+                                                                       carga_animal_usuario=consulta_carga_lote[0],
+                                                                       estado=estado). \
+                                where(modelo_capacidad_carga.columns.id_capacidad == id_capacidad))
+                session.commit()
+
+
+            else:
+                interpretacion = f'Puedes tener este Lote hasta {ocupacion} días en este predio'
+                # actualizacion de campos
+                session.execute(modelo_capacidad_carga.update().values(interpretacion=interpretacion,
+                                                                       carga_animal_usuario=consulta_carga_lote[0],
+                                                                       periodo_ocupacion=ocupacion,
+                                                                       estado=estado). \
+                                where(modelo_capacidad_carga.columns.id_capacidad == id_capacidad))
+                session.commit()
+
+            # el siguiente codigo determina la fecha recomendada de duracion de la ocupacion
+            fecha_final_recomendada = fecha_inicio_ocupacion + timedelta(ocupacion)
+            session.execute(modelo_capacidad_carga.update().values(fecha_final_recomendada=fecha_final_recomendada). \
                             where(modelo_capacidad_carga.columns.id_capacidad == id_capacidad))
             session.commit()
 
-
-
-        # el siguiente codigo determina la fecha recomendada de duracion de la ocupacion
-        fecha_final_recomendada= fecha_inicio_ocupacion + timedelta(ocupacion)
-        session.execute(modelo_capacidad_carga.update().values(fecha_final_recomendada=fecha_final_recomendada). \
-                        where(modelo_capacidad_carga.columns.id_capacidad == id_capacidad))
-        session.commit()
 
 
 
