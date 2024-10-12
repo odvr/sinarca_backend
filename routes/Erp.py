@@ -279,6 +279,7 @@ async def CambiarDatosFactura(
          estado: Optional[str] = Form(None),
          fecha_vencimiento: Optional[date] = Form(None),
          pagos: Optional[List[str]] = Form(None),
+         descripcion: Optional[str] = Form(None),
          db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
     """
     Cuando se editan  Facturas y existen Abonos el realiza el Ingreso de los Abonos
@@ -293,7 +294,8 @@ async def CambiarDatosFactura(
 
             db.execute(modelo_facturas.update().values(
                 estado=estado,
-                fecha_vencimiento = fecha_vencimiento
+                fecha_vencimiento = fecha_vencimiento,
+                descripcion=descripcion
 
 
 
