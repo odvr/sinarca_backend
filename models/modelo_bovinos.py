@@ -662,7 +662,8 @@ modelo_facturas= Table("facturas", meta, Column("factura_id", Integer, primary_k
                                Column("tipo_venta", String(100)),
                                Column("metodo_pago", String(100)),
                                Column("detalle", String(100)),
-                               Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
+                               Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")),
+                               Column("descripcion", String(300)))
 
 
 modelo_pagos= Table("pagos", meta, Column("pago_id", Integer, primary_key=True,autoincrement=True),

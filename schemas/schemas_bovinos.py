@@ -926,6 +926,7 @@ class esquema_facturas(BaseModel):
     metodo_pago: Optional[str] = None
     detalle: Optional[str] = None
     usuario_id: Optional[str] = None
+    descripcion: Optional[str] = None
     class Config:
         orm_mode = True
         env_file = ".env"

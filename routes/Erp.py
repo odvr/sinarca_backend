@@ -174,6 +174,7 @@ async def CrearFactura(
     detalle: Optional[str] = Form(None),
     tipo_venta: Optional[str] = Form(None),
     animales: Optional[List[str]] = Form(None),
+    descripcion: Optional[str] = Form(None),
     db: Session = Depends(get_database_session),
     current_user: Esquema_Usuario = Depends(get_current_user)
 ):
@@ -189,7 +190,8 @@ async def CrearFactura(
             tipo_venta=tipo_venta,
             metodo_pago=metodo_pago,
             detalle=detalle,
-            usuario_id=current_user
+            usuario_id=current_user,
+            descripcion=descripcion
         )
 
 
