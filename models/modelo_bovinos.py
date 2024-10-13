@@ -696,8 +696,12 @@ modelo_empleados= Table("empleados", meta, Column("empleado_id", Integer, primar
                                Column("nombre_empleado",String(100)),
                                Column("puesto", String(100)),
                                Column("salario_base", Float),
-                               Column("fecha_contratación", Date),
+                               Column("fecha_contratacion", Date),
                                Column("numero_seguridad_social", String(100)),
+                               Column("email", String(100)),
+                               Column("telefono", String(100)),
+                               Column("direccion", String(100)),
+                               Column("departamento", String(100)),
                                Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
 
 modelo_nomina= Table("nomina", meta, Column("nomina_id", Integer, primary_key=True,autoincrement=True),

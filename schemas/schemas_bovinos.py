@@ -9,6 +9,7 @@ from pydantic import BaseModel
 from datetime import date
 from typing import Optional,Union
 from uuid import UUID
+from decimal import Decimal
 from sqlalchemy.orm import relationship
 from sqlalchemy import create_engine, Column, Integer, String
 from sqlalchemy.orm import sessionmaker
@@ -968,13 +969,17 @@ class esquema_movimientos_stock(BaseModel):
         orm_mode = True
         env_file = ".env"
 
-class esquema_movimientos_stock(BaseModel):
-    empleado_id   : int
+class esquema_empleados(BaseModel):
+    empleado_id  : int
     nombre_empleado: Optional[str] = None
     puesto: Optional[str] = None
     salario_base : Optional[float] = None
     fecha_contratacion: Optional[date] = None
-    número_seguridad_social: Optional[str] = None
+    numero_seguridad_social: Optional[str] = None
+    email: Optional[str] = None
+    telefono: Optional[str] = None
+    direccion: Optional[str] = None
+    departamento: Optional[str] = None
     usuario_id: Optional[str] = None
     class Config:
         orm_mode = True

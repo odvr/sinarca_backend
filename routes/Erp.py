@@ -5,7 +5,7 @@ Librerias requeridas
 import logging
 from datetime import  date
 from http.client import HTTPException
-
+from decimal import Decimal
 from fastapi import APIRouter, Depends,Form,Response,status
 from starlette.status import HTTP_204_NO_CONTENT
 
@@ -13,11 +13,11 @@ import crud
 from config.db import   get_session
 # importa el esquema de los bovinos
 from models.modelo_bovinos import modelo_clientes, modelo_cotizaciones, modelo_facturas, modelo_ventas, \
-    modelo_bovinos_inventario, modelo_pagos
+    modelo_bovinos_inventario, modelo_pagos, modelo_empleados
 from sqlalchemy.orm import Session
 from routes.rutas_bovinos import get_current_user
 from schemas.schemas_bovinos import Esquema_Usuario, esquema_clientes, esquema_cotizaciones, esquema_facturas, \
-    esquema_pagos
+    esquema_pagos, esquema_empleados
 from typing import Optional,List
 import json
 
@@ -352,6 +352,72 @@ async def ListarAbonosAsociados(factura_id:int,db: Session = Depends(get_databas
 
     except Exception as e:
         logger.error(f'Error al obtener Abonos Asociados a las facturas : {e}')
+        raise
+    finally:
+        db.close()
+
+"""
+/**********************
+
+Empleados
+/*/*******
+
+"""
+
+
+@ERP.post("/CrearEmpleado", status_code=status.HTTP_201_CREATED, tags=["ERP"])
+async def CrearEmpleado(
+
+    nombre_empleado: Optional[str] = Form(None),
+    puesto: Optional[str] = Form(None),
+    salario_base: Optional[float] = Form(None),
+    fecha_contratacion: Optional[date] = Form(None),
+    numero_seguridad_social: Optional[str] = Form(None),
+    email: Optional[str] = Form(None),
+    telefono: Optional[str] = Form(None),
+    direccion: Optional[str] = Form(None),
+    departamento: Optional[str]= Form(None),
+
+    db: Session = Depends(get_database_session),
+    current_user: Esquema_Usuario = Depends(get_current_user)
+):
+
+    try:
+        # Crea la Empleado
+        Crear_Empleado = modelo_empleados.insert().values(
+            nombre_empleado=nombre_empleado,
+            puesto=puesto,
+            salario_base=salario_base,
+            fecha_contratacion=fecha_contratacion,
+            numero_seguridad_social=numero_seguridad_social,
+            email=email,
+            telefono=telefono,
+            direccion=direccion,
+            departamento=departamento,
+            usuario_id=current_user
+
+        )
+
+
+        db.execute(Crear_Empleado)
+        db.commit()
+    except Exception as e:
+        logger.error(f'Error al crear Empleados: {e}')
+        raise
+    finally:
+        db.close()
+
+
+
+@ERP.get("/ListarEmpleados",  response_model=list[esquema_empleados],tags=["ERP"] )
+async def ListarEmpleados(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+
+    try:
+        ListaEmpleados = db.query(modelo_facturas).filter(modelo_empleados.c.usuario_id == current_user).all()
+        return ListaEmpleados
+
+    except Exception as e:
+        logger.error(f'Error al obtener tabla Empeados: {e}')
         raise
     finally:
         db.close()
