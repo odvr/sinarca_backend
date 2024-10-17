@@ -413,7 +413,7 @@ async def CrearEmpleado(
 async def ListarEmpleados(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
 
     try:
-        ListaEmpleados = db.query(modelo_facturas).filter(modelo_empleados.c.usuario_id == current_user).all()
+        ListaEmpleados = db.query(modelo_empleados).filter(modelo_empleados.c.usuario_id == current_user).all()
         return ListaEmpleados
 
     except Exception as e:
@@ -421,3 +421,62 @@ async def ListarEmpleados(db: Session = Depends(get_database_session),current_us
         raise
     finally:
         db.close()
+
+
+@ERP.get("/Listar_Empleado/{empleado_id}",  response_model=list[esquema_empleados],tags=["ERP"] )
+async def ListaEmpleado(empleado_id : int,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+
+    try:
+        ListarEmpleado = db.query(modelo_empleados).filter(modelo_empleados.c.usuario_id == current_user,modelo_empleados.c.empleado_id == empleado_id).all()
+        return ListarEmpleado
+
+    except Exception as e:
+        logger.error(f'Error al obtener Empleado: {e}')
+        raise
+    finally:
+        db.close()
+
+
+
+@ERP.put("/Editar_Empleado/{empleado_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def EditarEmpleado(
+         empleado_id : int,
+         nombre_empleado: Optional[str] = Form(None),
+         puesto: Optional[str] = Form(None),
+         salario_base: Optional[float] = Form(None),
+         fecha_contratacion: Optional[date] = Form(None),
+         numero_seguridad_social: Optional[str] = Form(None),
+         email: Optional[str] = Form(None),
+         telefono: Optional[str] = Form(None),
+         direccion: Optional[str] = Form(None),
+         departamento: Optional[str] = Form(None),
+         db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+
+    try:
+
+            db.execute(modelo_empleados.update().values(
+
+                nombre_empleado = nombre_empleado,
+                puesto=puesto,
+                salario_base=salario_base,
+                fecha_contratacion=fecha_contratacion,
+                numero_seguridad_social=numero_seguridad_social,
+                email=email,
+                telefono=telefono,
+                direccion=direccion,
+                departamento=departamento
+
+
+            ).where(
+                modelo_empleados.columns.empleado_id == empleado_id))
+            db.commit()
+
+
+    except Exception as e:
+        logger.error(f'Error al Editar Empleado: {e}')
+        raise
+
+    finally:
+        db.close()
+
+    return Response(status_code=HTTP_204_NO_CONTENT)
