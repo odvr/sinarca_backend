@@ -980,6 +980,11 @@ class esquema_empleados(BaseModel):
     telefono: Optional[str] = None
     direccion: Optional[str] = None
     departamento: Optional[str] = None
+    tipo_contrato: Optional[str] = None
+    periodicidad_pago: Optional[str] = None
+    detalles: Optional[str] = None
+    estado: Optional[str] = None
+    fecha_retiro: Optional[date] = None
     usuario_id: Optional[str] = None
     class Config:
         orm_mode = True

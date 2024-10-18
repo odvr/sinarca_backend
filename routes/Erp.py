@@ -7,6 +7,7 @@ from datetime import  date
 from http.client import HTTPException
 from decimal import Decimal
 from fastapi import APIRouter, Depends,Form,Response,status
+from sqlalchemy import func
 from starlette.status import HTTP_204_NO_CONTENT
 
 import crud
@@ -377,12 +378,18 @@ async def CrearEmpleado(
     telefono: Optional[str] = Form(None),
     direccion: Optional[str] = Form(None),
     departamento: Optional[str]= Form(None),
+    tipo_contrato: Optional[str]= Form(None),
+    periodicidad_pago: Optional[str]= Form(None),
+    detalles: Optional[str]= Form(None),
 
     db: Session = Depends(get_database_session),
     current_user: Esquema_Usuario = Depends(get_current_user)
 ):
 
     try:
+
+        #Envia el Dato como Activo
+        estado= "Activo"
         # Crea la Empleado
         Crear_Empleado = modelo_empleados.insert().values(
             nombre_empleado=nombre_empleado,
@@ -394,6 +401,10 @@ async def CrearEmpleado(
             telefono=telefono,
             direccion=direccion,
             departamento=departamento,
+            tipo_contrato=tipo_contrato,
+            periodicidad_pago=periodicidad_pago,
+            detalles=detalles,
+            estado=estado,
             usuario_id=current_user
 
         )
@@ -450,6 +461,8 @@ async def EditarEmpleado(
          telefono: Optional[str] = Form(None),
          direccion: Optional[str] = Form(None),
          departamento: Optional[str] = Form(None),
+         estado: Optional[str] = Form(None),
+         fecha_retiro: Optional[date] = Form(None),
          db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
 
     try:
@@ -464,8 +477,9 @@ async def EditarEmpleado(
                 email=email,
                 telefono=telefono,
                 direccion=direccion,
-                departamento=departamento
-
+                departamento=departamento,
+                estado=estado,
+                fecha_retiro=fecha_retiro
 
             ).where(
                 modelo_empleados.columns.empleado_id == empleado_id))
@@ -480,3 +494,18 @@ async def EditarEmpleado(
         db.close()
 
     return Response(status_code=HTTP_204_NO_CONTENT)
+
+@ERP.get("/Calcular_Total_Nomina",tags=["ERP"])
+async def CalcularAnimalesNomina(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+    try:
+        #Realiza la Busqueda del Salirio
+        ConsultaNomina = db.query(func.sum(modelo_empleados.columns.salario_base)).filter(modelo_empleados.c.estado != "Retirado",
+                   modelo_empleados.c.usuario_id == current_user).all()
+        ListaConsultaNomina = ConsultaNomina[0][0]
+
+        return ListaConsultaNomina
+    except Exception as e:
+        logger.error(f'Error en Calcular Nomina Total: {e}')
+        raise HTTPException(status_code=500, detail="Error interno del servidor")
+    finally:
+        db.close()
