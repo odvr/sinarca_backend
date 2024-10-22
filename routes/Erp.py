@@ -11,6 +11,7 @@ from sqlalchemy import func
 from starlette.status import HTTP_204_NO_CONTENT
 
 import crud
+from Lib.Nomina import calcular_nomina
 from config.db import   get_session
 # importa el esquema de los bovinos
 from models.modelo_bovinos import modelo_clientes, modelo_cotizaciones, modelo_facturas, modelo_ventas, \
@@ -496,7 +497,7 @@ async def EditarEmpleado(
     return Response(status_code=HTTP_204_NO_CONTENT)
 
 @ERP.get("/Calcular_Total_Nomina",tags=["ERP"])
-async def CalcularAnimalesNomina(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+async def CalcularNomina(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
         #Realiza la Busqueda del Salirio
         ConsultaNomina = db.query(func.sum(modelo_empleados.columns.salario_base)).filter(modelo_empleados.c.estado != "Retirado",
@@ -506,6 +507,22 @@ async def CalcularAnimalesNomina(db: Session = Depends(get_database_session),cur
         return ListaConsultaNomina
     except Exception as e:
         logger.error(f'Error en Calcular Nomina Total: {e}')
+        raise HTTPException(status_code=500, detail="Error interno del servidor")
+    finally:
+        db.close()
+
+
+
+@ERP.post("/Pago_Parcial_Nomina",tags=["ERP"])
+async def CalcularNomina(db: Session = Depends(get_database_session),
+                         empleado_id: Optional[int] = Form(None),
+                         current_user: Esquema_Usuario = Depends(get_current_user)):
+    try:
+        #Realiza el Calculo de la Nomina Mensual
+        calcular_nomina(empleado_id=empleado_id,current_user=current_user,db=db)
+
+    except Exception as e:
+        logger.error(f'Error en Calcular Parcialmente Nomina: {e}')
         raise HTTPException(status_code=500, detail="Error interno del servidor")
     finally:
         db.close()
