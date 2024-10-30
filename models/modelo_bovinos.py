@@ -711,10 +711,11 @@ modelo_empleados= Table("empleados", meta, Column("empleado_id", Integer, primar
 
 modelo_nomina= Table("nomina", meta, Column("nomina_id", Integer, primary_key=True,autoincrement=True),
                                Column("empleado_id", Integer, ForeignKey("empleados.empleado_id")),
-                               Column("periodo",String(100)),
+                               Column("periodo",String(300)),
                                Column("salario_bruto", Float),
                                Column("deducciones", Float),
                                Column("salario_neto", Float),
+                               Column("recargos", Float),
                                Column("fecha_pago", Date),
                                Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
 modelo_tareas= Table("tareas", meta, Column("tarea_id", Integer, primary_key=True,autoincrement=True),

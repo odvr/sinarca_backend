@@ -996,6 +996,7 @@ class esquema_nomina(BaseModel):
     periodo: Optional[str] = None
     salario_bruto : Optional[float] = None
     deducciones: Optional[float] = None
+    recargos: Optional[float] = None
     salario_neto: Optional[float] = None
     fecha_pago: Optional[date] = None
     usuario_id: Optional[str] = None

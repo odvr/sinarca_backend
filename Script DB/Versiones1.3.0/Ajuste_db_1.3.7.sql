@@ -8,4 +8,9 @@ ALTER TABLE `empleados`
 ALTER TABLE `empleados`
 	ADD COLUMN `fecha_retiro` DATE NULL DEFAULT NULL AFTER `estado`;
 INSERT INTO configuracion (nombre_aplicacion, version, descripcion, fecha_actualizacion, responsable_actualizacion, observaciones)
+
+ALTER TABLE `nomina`
+	ADD COLUMN `recargos` FLOAT NULL DEFAULT NULL AFTER `deducciones`;
+
+
 VALUES ('Ruta Ganadera', '1.3.7', 'Modulo de Empleados Nuevos Campos', '2024-10-17', 'odvr','Versiones superiores a FronTend 1.4.4');

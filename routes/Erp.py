@@ -5,21 +5,21 @@ Librerias requeridas
 import logging
 from datetime import  date
 from http.client import HTTPException
-from decimal import Decimal
-from fastapi import APIRouter, Depends,Form,Response,status
+
+from fastapi import APIRouter, Depends,Form,Response,status,Body
 from sqlalchemy import func
 from starlette.status import HTTP_204_NO_CONTENT
 
 import crud
-from Lib.Nomina import calcular_nomina
+
 from config.db import   get_session
 # importa el esquema de los bovinos
 from models.modelo_bovinos import modelo_clientes, modelo_cotizaciones, modelo_facturas, modelo_ventas, \
-    modelo_bovinos_inventario, modelo_pagos, modelo_empleados
+    modelo_bovinos_inventario, modelo_pagos, modelo_empleados, modelo_nomina
 from sqlalchemy.orm import Session
 from routes.rutas_bovinos import get_current_user
 from schemas.schemas_bovinos import Esquema_Usuario, esquema_clientes, esquema_cotizaciones, esquema_facturas, \
-    esquema_pagos, esquema_empleados
+    esquema_pagos, esquema_empleados, esquema_nomina
 from typing import Optional,List
 import json
 
@@ -435,6 +435,21 @@ async def ListarEmpleados(db: Session = Depends(get_database_session),current_us
         db.close()
 
 
+@ERP.get("/ListarEmpleadosActivos",  response_model=list[esquema_empleados],tags=["ERP"] )
+async def ListarEmpleadosActivos(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+
+    try:
+        ListaEmpleados = db.query(modelo_empleados).filter(modelo_empleados.c.usuario_id == current_user,modelo_empleados.c.estado == "Activo").all()
+        return ListaEmpleados
+
+    except Exception as e:
+        logger.error(f'Error al obtener tabla Empeados: {e}')
+        raise
+    finally:
+        db.close()
+
+
+
 @ERP.get("/Listar_Empleado/{empleado_id}",  response_model=list[esquema_empleados],tags=["ERP"] )
 async def ListaEmpleado(empleado_id : int,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
 
@@ -513,16 +528,45 @@ async def CalcularNomina(db: Session = Depends(get_database_session),current_use
 
 
 
-@ERP.post("/Pago_Parcial_Nomina",tags=["ERP"])
-async def CalcularNomina(db: Session = Depends(get_database_session),
-                         empleado_id: Optional[int] = Form(None),
+
+@ERP.post("/liquidar_nomina",tags=["ERP"])
+async def LiquidarNomina(db: Session = Depends(get_database_session),
+                         data: dict = Body(...),
                          current_user: Esquema_Usuario = Depends(get_current_user)):
+
+    """
+    Body(...): Utilizamos Body(...) para recibir el contenido del JSON directamente como un diccionario (dict) sin envolverlo en clases adicionales.    :param db:
+    :param data:
+    :param current_user:
+    :return:
+    """
     try:
-        #Realiza el Calculo de la Nomina Mensual
-        calcular_nomina(empleado_id=empleado_id,current_user=current_user,db=db)
+
+        nomina = data.get("nomina", [])
+
+        for empleado in nomina:
+
+            PagoNomina = modelo_nomina.insert().values(
+                empleado_id=empleado["empleado_id"],
+
+                periodo=empleado["periodo"],
+                salario_bruto=empleado["salario_bruto"],
+                deducciones=empleado["deducciones"],
+                recargos=empleado["recargos"],
+                salario_neto=empleado["salario_neto"],
+                fecha_pago=empleado["fecha_pago"],
+                usuario_id=current_user
+
+            )
+
+            db.execute(PagoNomina)
+            db.commit()
+
+
+
 
     except Exception as e:
-        logger.error(f'Error en Calcular Parcialmente Nomina: {e}')
+        logger.error(f'Error al Pagar Nomina: {e}')
         raise HTTPException(status_code=500, detail="Error interno del servidor")
     finally:
         db.close()
