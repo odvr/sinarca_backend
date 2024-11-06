@@ -12,5 +12,14 @@ INSERT INTO configuracion (nombre_aplicacion, version, descripcion, fecha_actual
 ALTER TABLE `nomina`
 	ADD COLUMN `recargos` FLOAT NULL DEFAULT NULL AFTER `deducciones`;
 
+DROP TABLE `movimientos_stock`;
 
+ALTER TABLE `facturas`
+	ADD COLUMN `destino` VARCHAR(150) NULL DEFAULT NULL AFTER `tipo_venta`;
+
+
+ALTER TABLE `facturas`
+	ADD COLUMN `lote_asociado` VARCHAR(300) NULL DEFAULT NULL AFTER `destino`;
+
+INSERT INTO configuracion (nombre_aplicacion, version, descripcion, fecha_actualizacion, responsable_actualizacion, observaciones)
 VALUES ('Ruta Ganadera', '1.3.7', 'Modulo de Empleados Nuevos Campos', '2024-10-17', 'odvr','Versiones superiores a FronTend 1.4.4');

@@ -66,7 +66,7 @@ async def Listar_Clientes(db: Session = Depends(get_database_session),current_us
 
 
 @ERP.post("/CrearClientes",status_code=status.HTTP_201_CREATED, tags=["ERP"])
-async def CrearClientes(nombre_cliente: Optional [str] = Form(None),direccion: Optional [str] = Form(None),telefono: Optional [str] = Form(None),email: Optional [str] = Form(None),tipo_cliente: Optional [str] = Form(None),fecha_creacion: Optional [date] = Form(None),db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+async def CrearClientes(nombre_cliente: Optional [str] = Form(None),direccion: Optional [str] = Form(None),telefono: Optional [str] = Form(None),email: Optional [str] = Form(None),tipo_cliente: Optional [str] = Form(None),db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
     """
     API Para realizar la  creacion de clientes
     :param nombre_cliente:
@@ -80,6 +80,7 @@ async def CrearClientes(nombre_cliente: Optional [str] = Form(None),direccion: O
     :return:
     """
     try:
+        fecha_creacion= date.now()
         CrearCliente = modelo_clientes.insert().values(nombre_cliente=nombre_cliente,direccion=direccion,telefono=telefono,email=email,fecha_creacion=fecha_creacion,tipo_cliente=tipo_cliente,usuario_id=current_user)
         db.execute(CrearCliente)
         db.commit()
@@ -172,6 +173,8 @@ async def CrearFactura(
     monto_total: Optional[float] = Form(None),
     precio_kg: Optional[float] = Form(None),
     estado: Optional[str] = Form(None),
+    lote_asociado: Optional[str] = Form(None),
+    destino: Optional[str] = Form(None),
     metodo_pago: Optional[str] = Form(None),
     detalle: Optional[str] = Form(None),
     tipo_venta: Optional[str] = Form(None),
@@ -188,7 +191,9 @@ async def CrearFactura(
             fecha_emision=fecha_emision,
             fecha_vencimiento=fecha_vencimiento,
             monto_total=monto_total,
+            destino=destino,
             estado=estado,
+            lote_asociado=lote_asociado,
             tipo_venta=tipo_venta,
             metodo_pago=metodo_pago,
             detalle=detalle,
