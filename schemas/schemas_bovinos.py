@@ -919,6 +919,7 @@ class esquema_clientes(BaseModel):
 class esquema_facturas(BaseModel):
     factura_id   : int
     cliente_id: Optional[int] = None
+    radicado_factura: Optional[str] = None
     fecha_emision: Optional[date] = None
     fecha_vencimiento : Optional[date] = None
     monto_total: Optional[int] = None

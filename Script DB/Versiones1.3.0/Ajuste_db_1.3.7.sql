@@ -21,5 +21,8 @@ ALTER TABLE `facturas`
 ALTER TABLE `facturas`
 	ADD COLUMN `lote_asociado` VARCHAR(300) NULL DEFAULT NULL AFTER `destino`;
 
+ALTER TABLE `facturas`
+	ADD COLUMN `radicado_factura` VARCHAR(500) NULL DEFAULT NULL AFTER `cliente_id`;
+
 INSERT INTO configuracion (nombre_aplicacion, version, descripcion, fecha_actualizacion, responsable_actualizacion, observaciones)
 VALUES ('Ruta Ganadera', '1.3.7', 'Modulo de Empleados Nuevos Campos', '2024-10-17', 'odvr','Versiones superiores a FronTend 1.4.4');

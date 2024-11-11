@@ -3,7 +3,7 @@
 Librerias requeridas
 '''
 import logging
-from datetime import  date
+from datetime import date, datetime
 from http.client import HTTPException
 
 from fastapi import APIRouter, Depends,Form,Response,status,Body
@@ -11,6 +11,7 @@ from sqlalchemy import func
 from starlette.status import HTTP_204_NO_CONTENT
 
 import crud
+from Lib.GenerarRadicadoFactura import generar_radicado
 
 from config.db import   get_session
 # importa el esquema de los bovinos
@@ -80,7 +81,7 @@ async def CrearClientes(nombre_cliente: Optional [str] = Form(None),direccion: O
     :return:
     """
     try:
-        fecha_creacion= date.now()
+        fecha_creacion= datetime.now()
         CrearCliente = modelo_clientes.insert().values(nombre_cliente=nombre_cliente,direccion=direccion,telefono=telefono,email=email,fecha_creacion=fecha_creacion,tipo_cliente=tipo_cliente,usuario_id=current_user)
         db.execute(CrearCliente)
         db.commit()
@@ -185,10 +186,15 @@ async def CrearFactura(
 ):
 
     try:
+
+        #Genera el Numero de Radicado
+        Radicado =generar_radicado()
+
         # Crea la factura
         CrearFactura = modelo_facturas.insert().values(
             cliente_id=cliente_id,
             fecha_emision=fecha_emision,
+            radicado_factura=Radicado,
             fecha_vencimiento=fecha_vencimiento,
             monto_total=monto_total,
             destino=destino,
@@ -322,16 +328,60 @@ async def CambiarDatosFactura(
                     fecha_pago = PagosAbonos['fecha_pago']
                     metodo_pago = PagosAbonos['metodo_pago']
                     montoAbono = PagosAbonos['monto']
-                    print(montoAbono)
+                    CalcularTotalAbonos = db.query(func.sum(modelo_pagos.columns.monto)).filter(
+                        modelo_pagos.c.factura_id == factura_id,
+                        modelo_pagos.c.usuario_id == current_user
+                    ).scalar()  # Usa .scalar() para obtener un solo valor en lugar de una lista
 
-                    IngresoPagos = modelo_pagos.insert().values(factura_id=factura_id, fecha_pago=fecha_pago,
-                                                                metodo_pago=metodo_pago,
-                                                                monto=montoAbono,
-                                                                usuario_id=current_user
-                                                                )
+                    # Obtén la factura específica
+                    ConsultarMontoTotalFacturura = db.query(modelo_facturas).filter(
+                        modelo_facturas.c.usuario_id == current_user,
+                        modelo_facturas.c.factura_id == factura_id
+                    ).first()  # Usa .first() para obtener un solo registro
 
-                    db.execute(IngresoPagos)
-                    db.commit()
+                    # Verifica si CalcularTotalAbonos y el monto total de la factura no son None
+                    if CalcularTotalAbonos is not None and ConsultarMontoTotalFacturura is not None:
+
+                        if CalcularTotalAbonos >= ConsultarMontoTotalFacturura[4]:
+                            Estado = "pagada"
+
+                            db.execute(modelo_facturas.update().values(
+
+                                estado=Estado,
+
+                            ).where(
+                                modelo_facturas.columns.factura_id == factura_id))
+                            db.commit()
+
+
+                    else:
+
+                        IngresoPagos = modelo_pagos.insert().values(factura_id=factura_id, fecha_pago=fecha_pago,
+                                                                    metodo_pago=metodo_pago,
+                                                                    monto=montoAbono,
+                                                                    usuario_id=current_user
+                                                                    )
+                        # Convierte montoAbono a float
+                        montoAbono = float(montoAbono)
+                        # Actualiza el monto total de la factura restando el valor del abono actual
+                        nuevo_monto_total = ConsultarMontoTotalFacturura[4] - montoAbono
+
+                        db.execute(modelo_facturas.update().values(
+                            monto_total=nuevo_monto_total
+                        ).where(
+                            modelo_facturas.columns.factura_id == factura_id
+                        ))
+
+                        db.execute(IngresoPagos)
+                        db.commit()
+
+
+
+
+
+
+
+
 
 
 

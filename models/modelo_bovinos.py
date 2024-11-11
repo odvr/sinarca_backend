@@ -659,6 +659,7 @@ modelo_facturas= Table("facturas", meta, Column("factura_id", Integer, primary_k
                                Column("fecha_vencimiento", Date),
                                Column("monto_total", Float),
                                Column("estado", String(100)),
+                               Column("radicado_factura", String(500)),
                                Column("destino", String(150)),
                                Column("lote_asociado", String(300)),
                                Column("tipo_venta", String(100)),
