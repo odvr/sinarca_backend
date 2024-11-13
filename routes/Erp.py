@@ -316,76 +316,59 @@ async def CambiarDatosFactura(
                 modelo_facturas.columns.factura_id == factura_id))
             db.commit()
 
-
-            #Valida si se agrego un pago o abono a la factura
-
             if not pagos:
-                print("La Lista Esta Vacia ")
-                pass
+                print("La lista de pagos está vacía")
             else:
-                for pago in pagos:
-                    PagosAbonos = json.loads(pago)  # Deserializa la cadena JSON
-                    fecha_pago = PagosAbonos['fecha_pago']
-                    metodo_pago = PagosAbonos['metodo_pago']
-                    montoAbono = PagosAbonos['monto']
-                    CalcularTotalAbonos = db.query(func.sum(modelo_pagos.columns.monto)).filter(
+                # Consultar el monto total de la factura y verificar que exista
+                factura = db.query(modelo_facturas).filter(
+                    modelo_facturas.c.usuario_id == current_user,
+                    modelo_facturas.c.factura_id == factura_id
+                ).first()
+
+                if factura is None:
+                    print("Factura no encontrada.")
+                else:
+                    monto_total_factura = factura[4]  # Campo del monto total de la factura
+                    saldo_restante = factura[5]  # Campo del saldo restante inicial
+
+                    # Calcular total de abonos existentes en la base de datos para esta factura
+                    total_abonos_actuales = db.query(func.sum(modelo_pagos.c.monto)).filter(
                         modelo_pagos.c.factura_id == factura_id,
                         modelo_pagos.c.usuario_id == current_user
-                    ).scalar()  # Usa .scalar() para obtener un solo valor en lugar de una lista
+                    ).scalar() or 0  # Si no hay abonos previos, asigna 0
 
-                    # Obtén la factura específica
-                    ConsultarMontoTotalFacturura = db.query(modelo_facturas).filter(
-                        modelo_facturas.c.usuario_id == current_user,
-                        modelo_facturas.c.factura_id == factura_id
-                    ).first()  # Usa .first() para obtener un solo registro
+                    for pago in pagos:
+                        abono = json.loads(pago)
+                        fecha_pago = abono['fecha_pago']
+                        metodo_pago = abono['metodo_pago']
+                        monto_abono = float(abono['monto'])
 
-                    # Verifica si CalcularTotalAbonos y el monto total de la factura no son None
-                    if CalcularTotalAbonos is not None and ConsultarMontoTotalFacturura is not None:
+                        # Actualizar el total de abonos con el nuevo monto de abono
+                        total_abonos_actuales += monto_abono
 
-                        if CalcularTotalAbonos >= ConsultarMontoTotalFacturura[4]:
-                            Estado = "pagada"
-
-                            db.execute(modelo_facturas.update().values(
-
-                                estado=Estado,
-
-                            ).where(
-                                modelo_facturas.columns.factura_id == factura_id))
-                            db.commit()
-
-
-                    else:
-
-                        IngresoPagos = modelo_pagos.insert().values(factura_id=factura_id, fecha_pago=fecha_pago,
-                                                                    metodo_pago=metodo_pago,
-                                                                    monto=montoAbono,
-                                                                    usuario_id=current_user
-                                                                    )
-                        # Convierte montoAbono a float
-                        montoAbono = float(montoAbono)
-                        # Actualiza el monto total de la factura restando el valor del abono actual
-                        nuevo_monto_total = ConsultarMontoTotalFacturura[4] - montoAbono
-
-                        db.execute(modelo_facturas.update().values(
-                            monto_total=nuevo_monto_total
-                        ).where(
-                            modelo_facturas.columns.factura_id == factura_id
+                        # Insertar el nuevo pago en la tabla de pagos
+                        db.execute(modelo_pagos.insert().values(
+                            factura_id=factura_id,
+                            fecha_pago=fecha_pago,
+                            metodo_pago=metodo_pago,
+                            monto=monto_abono,
+                            usuario_id=current_user
                         ))
 
-                        db.execute(IngresoPagos)
+                        # Calcular el nuevo saldo restante
+                        saldo_restante = monto_total_factura - total_abonos_actuales
+
+                        # Determinar si la factura debe marcarse como pagada o permanecer pendiente
+                        estado_factura = "pagada" if saldo_restante <= 0 else "pendiente"
+
+                        # Actualizar saldo restante y estado de la factura en la base de datos
+                        db.execute(modelo_facturas.update().values(
+                            saldo_restante=saldo_restante,
+                            estado=estado_factura
+                        ).where(
+                            modelo_facturas.c.factura_id == factura_id
+                        ))
                         db.commit()
-
-
-
-
-
-
-
-
-
-
-
-
 
 
     except Exception as e:

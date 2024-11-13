@@ -923,6 +923,7 @@ class esquema_facturas(BaseModel):
     fecha_emision: Optional[date] = None
     fecha_vencimiento : Optional[date] = None
     monto_total: Optional[int] = None
+    saldo_restante: Optional[int] = None
     estado: Optional[str] = None
     destino: Optional[str] = None
     lote_asociado: Optional[str] = None
