@@ -518,11 +518,11 @@ class esquema_vientres_aptos(BaseModel):
         env_file = ".env"
 
 class esquema_historial_partos(BaseModel):
-    id_parto: int
-    id_bovino: int
+    id_parto:Optional[int] = None
+    id_bovino:Optional[int] = None
     fecha_parto: Optional[date] = None
     tipo_parto: Optional[str] = None
-    id_bovino_hijo:int
+    id_bovino_hijo:Optional[int] = None
     usuario_id: Optional[str] = None
     nombre_madre:Optional[str] = None
     nombre_hijo: Optional[str] = None

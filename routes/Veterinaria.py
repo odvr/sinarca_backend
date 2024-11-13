@@ -303,13 +303,13 @@ async def CrearRegistroVacunacionBovinos(id_bovino:str,fecha_registro_vacunacion
 
     return Response(status_code=status.HTTP_201_CREATED)
 
-@Veterinaria.get("/listar_Registros_Vacunas",  response_model=list[esquema_registro_vacunas_bovinos],tags=["Veterinaria"])
-async def Listar_Registro_Vacunas_Bovinos(db: Session = Depends(get_database_session),
+@Veterinaria.get("/listar_Registros_Vacunas/{id_bovino}",  response_model=list[esquema_registro_vacunas_bovinos],tags=["Veterinaria"])
+async def Listar_Registro_Vacunas_Bovinos(id_bovino:int,db: Session = Depends(get_database_session),
         current_user: Esquema_Usuario = Depends(get_current_user)):
 
     try:
 
-        consulta = db.query(modelo_registro_vacunas_bovinos).filter(modelo_registro_vacunas_bovinos.c.usuario_id == current_user).all()
+        consulta = db.query(modelo_registro_vacunas_bovinos).filter(modelo_registro_vacunas_bovinos.c.usuario_id == current_user,modelo_registro_vacunas_bovinos.c.id_bovino == id_bovino).all()
 
         db.close()
 

@@ -4,7 +4,7 @@ Librerias requeridas
 
 import logging
 import json
-
+from sqlalchemy import func,extract
 import crud
 from Lib.Lib_Intervalo_Partos import intervalo_partos, fecha_aproximada_parto
 # # importa la conexion de la base de datos
@@ -99,6 +99,38 @@ async def listar_tabla_Partos_Animales(db: Session = Depends(get_database_sessio
     finally:
         db.close()
     return itemsListarPartos
+
+
+@partos_bovinos.get("/historial_partos_anuales" )
+async def listar_historial_partos_anuales(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user) ):
+    """
+    La siguiente función Retorna el historial de Partos Anuales
+    :param db:
+    :param current_user:
+    :return:
+    """
+    try:
+        # Consulta para contar el total de partos agrupado por año
+        partos_por_ano = (
+            db.query(
+                extract('year', modelo_historial_partos.c.fecha_parto).label('año'),
+                func.count(modelo_historial_partos.c.id_parto).label('total_partos')
+            )
+            .filter(modelo_historial_partos.c.usuario_id == current_user)
+            .group_by(extract('year', modelo_historial_partos.c.fecha_parto))
+            .order_by(extract('year', modelo_historial_partos.c.fecha_parto))
+            .all()
+        )
+
+        # Formato de salida en una lista de diccionarios
+        return [{"año": int(ano), "total_partos": total_partos} for ano, total_partos in partos_por_ano]
+
+    except Exception as e:
+        logger.error(f'Error al obtener historial de partos anuales: {e}')
+        raise
+    finally:
+        db.close()
+    return HistorialPartosAnuales
 
 
 @partos_bovinos.get("/listar_tabla_Historial_Partos_Unidad/{id_bovino}",response_model=list )
