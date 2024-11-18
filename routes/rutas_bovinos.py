@@ -203,6 +203,12 @@ async def BuscarUsuario(db: Session = Depends(get_database_session),current_user
 
 
 
+@rutas_bovinos.get("/HolaMundo",tags=["Pruebas"])
+async def HolaMundo():
+    return {"message": "Hello World"}
+
+
+
 
 @rutas_bovinos.get("/Calcular_animales_levante",tags=["dashboard"])
 async def animales_levante(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
