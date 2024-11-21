@@ -22,6 +22,7 @@ modelo_usuarios = Table("usuarios", meta, Column("id_usuario", Integer, primary_
                      Column("hashed_password", String(300)),
                      Column("nombre_predio", String(300)),
                      Column("correo_electronico", String(300)),
+                     Column("codigo_asociacion", String(300)),
                      Column("telefono", String(300)),
                      Column("ubicacion_predio", String(300)),
                      Column("nombre_apellido", String(300)),
@@ -754,6 +755,15 @@ modelo_kpis= Table("kpis", meta, Column("kpi_id", Integer, primary_key=True, aut
                                Column("meta", Float),
                                Column("fecha_actualizacion", Date),
                                Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
+
+
+
+modelo_asociados= Table("asociados", meta, Column("id_asociado", Integer, primary_key=True, autoincrement=True),
+                               Column("correo",String(300)),
+                               Column("telefono", String(300)),
+                               Column("codigo", String(300)),
+                               Column("fecha_creacion", Date))
+
 
 
 

@@ -23,6 +23,7 @@ class Esquema_Usuario(BaseModel):
     hashed_password: str
     nombre_predio: Optional[str]
     correo_electronico: Optional[str]
+    codigo_asociacion: Optional[str]
     telefono: Optional[str]
     ubicacion_predio: Optional[str]
     nombre_apellido: Optional[str]
@@ -1052,6 +1053,17 @@ class esquema_presupuestos(BaseModel):
     monto_gastado : Optional[float] = None
     fecha_creacion: Optional[date] = None
     usuario_id: Optional[str] = None
+    class Config:
+        orm_mode = True
+        env_file = ".env"
+
+class esquema_asociados(BaseModel):
+    id_asociado   : int
+    correo: Optional[str] = None
+    telefono: Optional[str] = None
+    codigo : Optional[str] = None
+    fecha_creacion: Optional[date] = None
+
     class Config:
         orm_mode = True
         env_file = ".env"

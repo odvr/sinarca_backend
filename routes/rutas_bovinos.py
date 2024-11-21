@@ -10,11 +10,12 @@ from sqlalchemy import and_
 from fastapi import APIRouter, Request
 
 from Lib.Tasa_Supervivencia import tasa_supervivencia
+from Lib.enviar_correos_publicidad import enviar_correo_bienvenida
 from Lib.perdida_Terneros import perdida_Terneros1
 from config.db import   get_session
 from crud.crud_bovinos_inventario import CRUDBovinos
 # importa el esquema de los bovinos
-from models.modelo_bovinos import modelo_usuarios, modelo_bovinos_inventario, modelo_indicadores
+from models.modelo_bovinos import modelo_usuarios, modelo_bovinos_inventario, modelo_indicadores, modelo_asociados
 from sqlalchemy.orm import Session
 
 from schemas.schemas_bovinos import Esquema_Token, Esquema_Usuario, esquema_indicadores
@@ -170,7 +171,8 @@ async def create_user(data: Esquema_Usuario,db: Session = Depends(get_database_s
     CrearIndicadores = crud.crear_indicadores.Crear_indicadores_db(db=db, current_user=data.usuario_id)
     # Crea el registro en el Capacidad de carga
     # CrearIndicadoresCapacidadCarga = crud.crear_indicadores.Crear_indicadores_capacidad_carga(db=db,current_user=data.usuario_id)
-
+    #Envia el correo de Bienvenida
+    enviar_correo_bienvenida(data.correo_electronico)
     db.execute(ingreso)
     db.execute(CrearIndicadores)
     # db.execute(CrearIndicad   oresCapacidadCarga)
@@ -181,6 +183,76 @@ async def create_user(data: Esquema_Usuario,db: Session = Depends(get_database_s
 
 
     return user
+
+
+
+@rutas_bovinos.post('/RegistrarAsociados', summary="Create new user",)
+async def CrearUsuarioAsociado(data: Esquema_Usuario,db: Session = Depends(get_database_session)):
+    user = db.execute(modelo_usuarios.select().where(modelo_usuarios.columns.usuario_id == data.usuario_id)).first()
+    # Consultar la Asociación de la que recibe la menbrecia
+
+    consutarAsociacion = db.execute(modelo_asociados.select().where(modelo_asociados.columns.codigo == data.codigo_asociacion)).all()
+
+
+    if user is not None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Lo siento este Usuario Ya existe =("
+        )
+    if  not consutarAsociacion :
+         raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+               detail="Lo siento este Codigo No es Valido "
+            )
+
+    FechaDeRegistro = datetime.now()
+
+    ingreso = modelo_usuarios.insert().values(usuario_id=data.usuario_id,
+
+                                              hashed_password=get_hashed_password(data.hashed_password),
+
+                                              nombre_predio=data.nombre_predio,
+
+                                              correo_electronico=data.correo_electronico, telefono=data.telefono,
+
+                                              ubicacion_predio=data.ubicacion_predio,
+
+                                              nombre_apellido=data.nombre_apellido,
+
+                                              codigo_asociacion=data.codigo_asociacion,
+
+                                              fecha_de_registro=FechaDeRegistro
+
+                                              )
+
+    # Crea el registro en el Indicador del usuario
+
+    CrearIndicadores = crud.crear_indicadores.Crear_indicadores_db(db=db, current_user=data.usuario_id)
+
+    # Crea el registro en el Capacidad de carga
+
+    # CrearIndicadoresCapacidadCarga = crud.crear_indicadores.Crear_indicadores_capacidad_carga(db=db,current_user=data.usuario_id)
+
+    # Envia el correo de Bienvenida
+
+    enviar_correo_bienvenida(data.correo_electronico)
+
+    db.execute(ingreso)
+
+    db.execute(CrearIndicadores)
+
+    # db.execute(CrearIndicad   oresCapacidadCarga)
+
+    # Obtener el nuevo usuario de la base de datos
+
+    db.commit()
+
+    user = data.usuario_id
+
+    return user
+
+
+
 
 
 
