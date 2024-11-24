@@ -9,10 +9,13 @@ from sqlalchemy.orm import Session
 from fastapi import APIRouter, Response,Form
 from fastapi.security import OAuth2PasswordBearer
 from fastapi import  Depends
-from Lib.enviar_correos_publicidad import enviar_correo_publicidad, enviar_correo_bienvenida
+from Lib.enviar_correos_publicidad import enviar_correo_publicidad, enviar_correo_bienvenida, \
+    enviar_correo_publicidad_Asociaciones
 from config.db import get_session
 from fastapi import  status
 from typing import Optional
+
+from typing import List
 
 from datetime import  datetime
 from sqlalchemy.orm import Session
@@ -69,22 +72,31 @@ async def envioCorreolandingPage(nombre, email,mensaje):
     return Response(status_code=status.HTTP_201_CREATED)
 
 @CorreosLandingPage.post("/EnviarCorreosPublicidad",status_code=status.HTTP_201_CREATED, tags=["Envio de Correos"])
-async def envioCorreolandingPage(destinatario: Optional [str] = Form(None),db: Session = Depends(get_database_session)):
+async def envioCorreolandingPage(destinatario:  Optional [List[str]] = Form(None),tipoDestinatario: Optional [str] = Form(None),db: Session = Depends(get_database_session)):
     """
     :param destinatario:
     :return:
     """
 
-    enviar_correo_publicidad(destinatario)
-    FechaDeEnvioCorreo = datetime.now()
+    for correos in destinatario:
 
-    ingresoEnvio = modelo_envio_correo_publicidad.insert().values(correo_enviado=destinatario,
-                                                                  fecha_envio=FechaDeEnvioCorreo,
+        #Separa los correos por correo
+        correos_separados = correos.split(',')
+        for correo in correos_separados:
+            if tipoDestinatario == "Ganaderos Común":
+                enviar_correo_publicidad(correo)
 
-                                                                  )
-    db.execute(ingresoEnvio)
-    db.commit()
+            if tipoDestinatario == "Asociaciones":
+                enviar_correo_publicidad_Asociaciones(correo)
 
+            FechaDeEnvioCorreo = datetime.now()
+
+            ingresoEnvio = modelo_envio_correo_publicidad.insert().values(correo_enviado=correo,
+                                                                          fecha_envio=FechaDeEnvioCorreo,
+
+                                                                          )
+            db.execute(ingresoEnvio)
+            db.commit()
     return Response(status_code=status.HTTP_201_CREATED)
 
 

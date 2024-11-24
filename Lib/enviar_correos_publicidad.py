@@ -88,3 +88,41 @@ def enviar_correo_bienvenida(destinatario):
     except Exception as e:
         logger.error(f'Error al enviar Correo Bienvenida: {e}')
         raise
+
+
+
+
+
+def enviar_correo_publicidad_Asociaciones(destinatario):
+    """
+    La siguiente Función envia publicidad a las asociaciones
+
+    :return:
+    """
+
+    try:
+
+        # Cargar el contenido del archivo HTML desde la carpeta 'Plantillas'
+        with open(Rutabase+'/Lib/Plantillas/PublicidadAsociaciones.html', 'r', encoding='utf-8') as file:
+            MensajeEnvioPublicidad = file.read()
+        # Configurar el mensaje
+        msg = MIMEMultipart()
+        msg['From'] = remitente
+        msg['To'] = destinatario
+        msg['Subject'] = " Ruta Ganadera: Transformando tu ganadería 🐄💻"
+        # Agregar el cuerpo del mensaje con encabezado html
+        msg.attach(MIMEText(MensajeEnvioPublicidad, 'html'))
+        # Establecer conexión con el servidor SMTP
+        servidor = smtplib.SMTP(host=servidor_smtp, port=puerto_smtp)
+        servidor.starttls()  # Habilitar la capa de seguridad
+        # Iniciar sesión en el servidor SMTP
+        servidor.login(remitente, password)
+        # Enviar el correo electrónico
+        servidor.sendmail(remitente, destinatario, msg.as_string())
+        # Cerrar la conexión
+        servidor.quit()
+
+
+    except Exception as e:
+        logger.error(f'Error al enviar Correo Publicitario Para Asociaciones: {e}')
+        raise
