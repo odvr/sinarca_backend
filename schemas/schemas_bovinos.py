@@ -25,6 +25,7 @@ class Esquema_Usuario(BaseModel):
     correo_electronico: Optional[str]
     codigo_asociacion: Optional[str]
     telefono: Optional[str]
+    tipo_usuario: Optional[str]
     ubicacion_predio: Optional[str]
     nombre_apellido: Optional[str]
     fecha_de_registro: Optional[date]

@@ -23,6 +23,7 @@ modelo_usuarios = Table("usuarios", meta, Column("id_usuario", Integer, primary_
                      Column("nombre_predio", String(300)),
                      Column("correo_electronico", String(300)),
                      Column("codigo_asociacion", String(300)),
+                     Column("tipo_usuario", String(300)),
                      Column("telefono", String(300)),
                      Column("ubicacion_predio", String(300)),
                      Column("nombre_apellido", String(300)),

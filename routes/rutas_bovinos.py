@@ -274,6 +274,37 @@ async def BuscarUsuario(db: Session = Depends(get_database_session),current_user
 
 
 
+@rutas_bovinos.get("/ListarUsuarios",tags=["dashboard"],response_model=list[Esquema_Usuario])
+async def BuscarTodosUsuarios(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+  try:
+      """
+      Realiza la Busqueda de todos los usuarios solamente para el rol de super usuario
+      """
+      BuscarTablaUsuarios = db.query(modelo_usuarios).all()
+      return BuscarTablaUsuarios
+  except Exception as e:
+      logger.error(f'Error Al Intentar Buscar el Usuario: {e}')
+      raise
+  finally:
+      db.close()
+
+
+
+
+@rutas_bovinos.get("/IndicadoresGenerales",tags=["dashboard"],response_model=list[esquema_indicadores])
+async def Buscar_Indicadores(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+  try:
+      """
+      Realiza la Busqueda de todos los indicadores de los usuarios solamente para usuarios con el Rol Super usuario
+      """
+      Buscar_Indicadores_Generales = db.query(modelo_indicadores).all()
+      return Buscar_Indicadores_Generales
+  except Exception as e:
+      logger.error(f'Error Al Intentar Buscar el Usuario: {e}')
+      raise
+  finally:
+      db.close()
+
 
 @rutas_bovinos.get("/HolaMundo",tags=["Pruebas"])
 async def HolaMundo():
