@@ -921,6 +921,7 @@ class esquema_clientes(BaseModel):
 class esquema_facturas(BaseModel):
     factura_id   : int
     cliente_id: Optional[int] = None
+    nombre_cliente_proveedor: Optional[str] = None
     radicado_factura: Optional[str] = None
     fecha_emision: Optional[date] = None
     fecha_vencimiento : Optional[date] = None
@@ -958,6 +959,20 @@ class esquema_productos(BaseModel):
     stock_actual : Optional[int] = None
     unidad_medida: Optional[str] = None
     referencia_pago: Optional[str] = None
+    usuario_id: Optional[str] = None
+    class Config:
+        orm_mode = True
+        env_file = ".env"
+
+
+class esquema_provedores(BaseModel):
+    proveedor_id   : int
+    nombre: Optional[str] = None
+    direccion: Optional[str] = None
+    telefono : Optional[str] = None
+    correo: Optional[str] = None
+    tipoCliente: Optional[str] = None
+    tipoPersona: Optional[str] = None
     usuario_id: Optional[str] = None
     class Config:
         orm_mode = True

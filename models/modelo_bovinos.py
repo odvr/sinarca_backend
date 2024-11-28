@@ -662,6 +662,7 @@ modelo_facturas= Table("facturas", meta, Column("factura_id", Integer, primary_k
                                Column("monto_total", Float),
                                Column("saldo_restante", Float),
                                Column("estado", String(100)),
+                               Column("nombre_cliente_proveedor", String(300)),
                                Column("radicado_factura", String(500)),
                                Column("destino", String(150)),
                                Column("lote_asociado", String(300)),
@@ -748,6 +749,18 @@ modelo_presupuestos= Table("presupuestos", meta, Column("presupuesto_id", Intege
                                Column("monto_gastado", Float),
                                Column("fecha_creacion", Date),
                                Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
+
+modelo_proveedores= Table("proveedores", meta, Column("proveedor_id", Integer, primary_key=True,autoincrement=True),
+                               Column("nombre",String(300)),
+                               Column("direccion", String(300)),
+                               Column("telefono", String(300)),
+                               Column("correo", String(300)),
+                               Column("tipoCliente", String(300)),
+                               Column("tipoPersona", String(300)),
+                               Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
+
+
+
 
 
 modelo_kpis= Table("kpis", meta, Column("kpi_id", Integer, primary_key=True, autoincrement=True),

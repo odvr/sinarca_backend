@@ -16,11 +16,11 @@ from Lib.GenerarRadicadoFactura import generar_radicado
 from config.db import   get_session
 # importa el esquema de los bovinos
 from models.modelo_bovinos import modelo_clientes, modelo_cotizaciones, modelo_facturas, modelo_ventas, \
-    modelo_bovinos_inventario, modelo_pagos, modelo_empleados, modelo_nomina
+    modelo_bovinos_inventario, modelo_pagos, modelo_empleados, modelo_nomina, modelo_proveedores
 from sqlalchemy.orm import Session
 from routes.rutas_bovinos import get_current_user
 from schemas.schemas_bovinos import Esquema_Usuario, esquema_clientes, esquema_cotizaciones, esquema_facturas, \
-    esquema_pagos, esquema_empleados, esquema_nomina
+    esquema_pagos, esquema_empleados, esquema_nomina, esquema_provedores
 from typing import Optional,List
 import json
 
@@ -169,6 +169,7 @@ Facturación
 @ERP.post("/CrearFactura", status_code=status.HTTP_201_CREATED, tags=["ERP"])
 async def CrearFactura(
     cliente_id: Optional[int] = Form(None),
+    nombre_cliente_proveedor: Optional[str] = Form(None),
     fecha_emision: Optional[date] = Form(None),
     fecha_vencimiento: Optional[date] = Form(None),
     monto_total: Optional[float] = Form(None),
@@ -192,7 +193,7 @@ async def CrearFactura(
 
         # Crea la factura
         CrearFactura = modelo_facturas.insert().values(
-            cliente_id=cliente_id,
+
             fecha_emision=fecha_emision,
             radicado_factura=Radicado,
             fecha_vencimiento=fecha_vencimiento,
@@ -204,7 +205,8 @@ async def CrearFactura(
             metodo_pago=metodo_pago,
             detalle=detalle,
             usuario_id=current_user,
-            descripcion=descripcion
+            descripcion=descripcion,
+            nombre_cliente_proveedor=nombre_cliente_proveedor
         )
 
 
@@ -395,6 +397,30 @@ async def ListarAbonosAsociados(factura_id:int,db: Session = Depends(get_databas
         raise
     finally:
         db.close()
+
+"""
+*/****Cartera
+"""
+@ERP.get("/ConsultarCartera/{fecha_inicio}/{fecha_fin}/{tipo_factura}",  response_model=list[esquema_facturas],tags=["ERP"] )
+async def ConsultarCartera(fecha_inicio : date,fecha_fin : date,tipo_factura : str, db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+    try:
+        consulta = db.query(modelo_facturas).filter(modelo_facturas.c.usuario_id == current_user)
+
+        if fecha_inicio:
+            consulta = consulta.filter(modelo_facturas.c.fecha_emision >= fecha_inicio)
+        if fecha_fin:
+            consulta = consulta.filter(modelo_facturas.c.fecha_emision <= fecha_fin)
+        if tipo_factura:
+            consulta = consulta.filter(modelo_facturas.c.detalle == tipo_factura)
+        print(consulta)
+        return consulta.all()
+
+    except Exception as e:
+        logger.error(f'Error al obtener la factura: {e}')
+        raise
+    finally:
+        db.close()
+
 
 """
 /**********************
@@ -608,3 +634,119 @@ async def LiquidarNomina(db: Session = Depends(get_database_session),
         raise HTTPException(status_code=500, detail="Error interno del servidor")
     finally:
         db.close()
+
+"""
+Proveedores
+
+"""
+
+
+@ERP.post("/CrearProvedor",status_code=status.HTTP_201_CREATED, tags=["ERP"])
+async def CrearProvedor(nombre: Optional [str] = Form(None),direccion: Optional [str] = Form(None),telefono: Optional [str] = Form(None),correo: Optional [str] = Form(None),tipoCliente: Optional [str] = Form(None),tipoPersona: Optional [str] = Form(None),db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+    """
+        Registra Los proveedores
+    """
+    try:
+
+        CrearProvedor = modelo_proveedores.insert().values(nombre=nombre,direccion=direccion,telefono=telefono,correo=correo,tipoCliente=tipoCliente,tipoPersona=tipoPersona,usuario_id=current_user)
+        db.execute(CrearProvedor)
+        db.commit()
+
+    except Exception as e:
+        logger.error(f'Error al obtener tabla Provedores: {e}')
+        raise
+    finally:
+        db.close()
+    return Response(status_code=status.HTTP_201_CREATED)
+
+
+@ERP.get("/Listar_Proveedores",response_model=list[esquema_provedores] )
+async def listar_proveedores(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+    try:
+        ListarProvedores = db.query(modelo_proveedores).filter(modelo_proveedores.c.usuario_id == current_user).all()
+        return ListarProvedores
+    except Exception as e:
+        logger.error(f'Error  Listar Proveedores: {e}')
+        raise
+    finally:
+        db.close()
+
+
+
+@ERP.delete("/Eliminar_Provedor/{proveedor_id}")
+async def Eliminar_cliente(proveedor_id: int,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user) ):
+    try:
+        db.execute(modelo_proveedores.delete().where(modelo_proveedores.c.proveedor_id == proveedor_id))
+        db.commit()
+        return
+    except Exception as e:
+        logger.error(f'Error al Intentar Eliminar Proveedor: {e}')
+        raise
+    finally:
+        db.close()
+
+
+
+
+
+"""
+@ERP.get("/IndicadoresERP",response_model=list )
+async def indicadores_erp(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user) ):
+    try:
+
+
+        itemsListarPartos = db.execute(
+            modelo_historial_partos.select().where(modelo_historial_partos.columns.id_bovino == id_bovino)).all()
+
+        itemsListarAbortos = db.execute(
+            modelo_abortos.select().where(modelo_abortos.columns.id_bovino == id_bovino)).all()
+
+        Historial = []
+
+        # Valida si la consulta no este vacia
+        if itemsListarPartos is not None:
+            # Recorre la consulta para enviar los datos
+            for ListarPartos in itemsListarPartos:
+                Historial.append({
+
+                    "id_bovino": ListarPartos.id_bovino,
+                    "fecha_parto": ListarPartos.fecha_parto,
+                    "tipo_parto": ListarPartos.tipo_parto,
+                    "id_bovino_hijo": ListarPartos.id_bovino_hijo,
+                    "usuario_id": ListarPartos.usuario_id,
+                    "nombre_madre": ListarPartos.nombre_madre,
+                    "nombre_hijo": ListarPartos.nombre_hijo,
+
+                })
+                # Valida si la consulta no este vacia
+        if itemsListarAbortos is not None:
+            # Recorre la consulta para enviar los datos
+            for AbortosBovinos in itemsListarAbortos:
+                Historial.append({
+
+                    "id_aborto": AbortosBovinos.id_aborto,
+                    "id_bovino_abortos": AbortosBovinos.id_bovino,
+                    "nombre_bovino_abortos": AbortosBovinos.nombre_bovino,
+                    "fecha_aborto": AbortosBovinos.fecha_aborto,
+                    "causa": AbortosBovinos.causa,
+                    "usuario_id": AbortosBovinos.usuario_id,
+
+                })
+
+
+        return Historial
+
+
+
+    except Exception as e:
+        logger.error(f'Error al obtener TABLA DE ENDOGAMIA: {e}')
+        raise
+    finally:
+        db.close()
+    return consulta
+
+
+
+
+"""
+
