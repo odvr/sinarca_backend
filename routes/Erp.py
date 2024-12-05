@@ -7,7 +7,7 @@ from datetime import date, datetime
 from http.client import HTTPException
 
 from fastapi import APIRouter, Depends,Form,Response,status,Body
-from sqlalchemy import func
+from sqlalchemy import func, or_, extract
 from starlette.status import HTTP_204_NO_CONTENT
 
 import crud
@@ -404,7 +404,15 @@ async def ListarAbonosAsociados(factura_id:int,db: Session = Depends(get_databas
 @ERP.get("/ConsultarCartera/{fecha_inicio}/{fecha_fin}/{tipo_factura}",  response_model=list[esquema_facturas],tags=["ERP"] )
 async def ConsultarCartera(fecha_inicio : date,fecha_fin : date,tipo_factura : str, db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
-        consulta = db.query(modelo_facturas).filter(modelo_facturas.c.usuario_id == current_user)
+
+        # Solo realiza la consulta de los datos con los estados de pendientes y vencidas
+        consulta = db.query(modelo_facturas).filter(
+            modelo_facturas.c.usuario_id == current_user,
+            or_(
+                modelo_facturas.c.estado == "pendiente",
+                modelo_facturas.c.estado == "vencida"
+            )
+        )
 
         if fecha_inicio:
             consulta = consulta.filter(modelo_facturas.c.fecha_emision >= fecha_inicio)
@@ -420,6 +428,165 @@ async def ConsultarCartera(fecha_inicio : date,fecha_fin : date,tipo_factura : s
         raise
     finally:
         db.close()
+
+@ERP.get("/Calcular_Total_Ventas",tags=["ERP"])
+async def CalcularVentas(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+    try:
+        "Consulta del total de la factura"
+        ConsultaVentas = db.query(func.sum(modelo_facturas.columns.monto_total)).filter(modelo_facturas.c.detalle == "Factura de Venta",modelo_facturas.c.estado == "pagada",
+                   modelo_facturas.c.usuario_id == current_user).all()
+        ConsultaVentas = ConsultaVentas[0][0]
+
+        return ConsultaVentas
+    except Exception as e:
+        logger.error(f'Error en Calcular TotalVentas: {e}')
+        raise HTTPException(status_code=500, detail="Error interno del servidor")
+    finally:
+        db.close()
+
+@ERP.get("/Calcular_Total_Compras",tags=["ERP"])
+async def CalcularCompras(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+    try:
+        "Consulta del total de la factura de compras"
+        ConsultaCompras = db.query(func.sum(modelo_facturas.columns.monto_total)).filter(modelo_facturas.c.detalle == "Factura de Compra",
+                   modelo_facturas.c.estado == "pagada",modelo_facturas.c.usuario_id == current_user).all()
+        ConsultaCompra = ConsultaCompras[0][0]
+
+        return ConsultaCompra
+    except Exception as e:
+        logger.error(f'Error en Calcular Compras: {e}')
+        raise HTTPException(status_code=500, detail="Error interno del servidor")
+    finally:
+        db.close()
+
+
+@ERP.get("/Ventas_Trimestrales" )
+async def VentasTrimestrales(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user) ):
+    """
+    La siguiente función Retorna el historial  Trimestrales
+
+    """
+    try:
+        # Consulta para agrupar ventas por año y trimestre
+        ventas_trimestrales = (
+            db.query(
+                extract('year', modelo_facturas.c.fecha_emision).label('año'),
+                extract('quarter', modelo_facturas.c.fecha_emision).label('trimestre'),
+                func.sum(modelo_facturas.c.monto_total).label('total_ventas')
+            )
+            .filter(
+                modelo_facturas.c.usuario_id == current_user,
+                modelo_facturas.c.detalle == "Factura de Venta",
+                modelo_facturas.c.estado == "pagada"
+            )
+            .group_by(
+                extract('year', modelo_facturas.c.fecha_emision),
+                extract('quarter', modelo_facturas.c.fecha_emision)
+            )
+            .order_by(
+                extract('year', modelo_facturas.c.fecha_emision),
+                extract('quarter', modelo_facturas.c.fecha_emision)
+            )
+            .all()
+        )
+
+        # Formatear los resultados como lista de diccionarios
+        resultado = [
+            {
+                "año": int(venta.año),
+                "trimestre": int(venta.trimestre),
+                "total_ventas": float(venta.total_ventas)
+            }
+            for venta in ventas_trimestrales
+        ]
+
+        return resultado
+
+    except Exception as e:
+        logger.error(f'Error al obtener reporte de ventas trimestrales: {e}')
+        raise HTTPException(status_code=500, detail="Error al obtener el reporte de ventas trimestrales")
+    finally:
+        db.close()
+
+
+
+@ERP.get("/facturas_estado")
+async def facturas_estado(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user) ):
+    """
+    Comparación entre el número de facturas pagadas y las pendientes.
+    """
+    estados = (
+        db.query(modelo_facturas.c.estado, func.count(modelo_facturas.c.factura_id).label("cantidad"))
+        .group_by(modelo_facturas.c.estado)
+        .filter(modelo_facturas.c.usuario_id == current_user)
+        .all()
+    )
+    return [{"estado": e.estado, "cantidad": e.cantidad} for e in estados]
+
+@ERP.get("/ingresos_por_destino")
+async def ingresos_por_destino(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user) ):
+    """
+    Muestra los ingresos totales según el destino Centro de Costos
+    """
+    destinos = (
+        db.query(modelo_facturas.c.destino, func.sum(modelo_facturas.c.monto_total).label("ingreso_total"))
+        .group_by(modelo_facturas.c.destino)
+        .filter(modelo_facturas.c.usuario_id == current_user)
+        .all()
+    )
+    return [{"destino": d.destino, "ingreso_total": d.ingreso_total} for d in destinos]
+
+@ERP.get("/analisis_saldo_restante")
+async def analisis_saldo_restante(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user) ):
+    """
+    Promedio y total del saldo_restante.
+    """
+    resultado = (
+        db.query(
+            func.sum(modelo_facturas.c.saldo_restante).label("saldo_total"),
+            func.avg(modelo_facturas.c.saldo_restante).label("saldo_promedio")
+        )
+        .filter(modelo_facturas.c.usuario_id == current_user)
+        .one()
+    )
+    return {"saldo_total": resultado.saldo_total, "saldo_promedio": resultado.saldo_promedio}
+
+@ERP.get("/tendencias_mensuales")
+async def tendencias_mensuales(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user) ):
+    """
+    Tendencias mensuales de ventas dentro del año actual.
+    """
+    tendencias = (
+        db.query(
+            extract('month', modelo_facturas.c.fecha_emision).label("mes"),
+            func.sum(modelo_facturas.c.monto_total).label("ingreso_mensual")
+        )
+        .filter(modelo_facturas.c.usuario_id == current_user,extract('year', modelo_facturas.c.fecha_emision) == func.extract('year', func.now()))
+        .group_by(extract('month', modelo_facturas.c.fecha_emision))
+        .order_by(extract('month', modelo_facturas.c.fecha_emision))
+        .all()
+    )
+    return [{"mes": int(t.mes), "ingreso_mensual": t.ingreso_mensual} for t in tendencias]
+
+@ERP.get("/facturacion_anual")
+async def facturacion_anual(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user) ):
+    """
+    Comparación de facturación total entre diferentes años.
+    """
+    facturacion = (
+        db.query(
+            extract('year', modelo_facturas.c.fecha_emision).label("año"),
+            func.sum(modelo_facturas.c.monto_total).label("ingreso_anual")
+        )
+        .group_by(extract('year', modelo_facturas.c.fecha_emision))
+        .filter(modelo_facturas.c.usuario_id == current_user,modelo_facturas.c.detalle == "Factura de Venta")
+        .order_by(extract('year', modelo_facturas.c.fecha_emision))
+        .all()
+    )
+    return [{"año": int(f.año), "ingreso_anual": f.ingreso_anual} for f in facturacion]
+
+
+
 
 
 """
