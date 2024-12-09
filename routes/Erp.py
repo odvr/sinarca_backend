@@ -539,7 +539,7 @@ async def ingresos_por_destino(db: Session = Depends(get_database_session),curre
 @ERP.get("/analisis_saldo_restante")
 async def analisis_saldo_restante(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user) ):
     """
-    Promedio y total del saldo_restante.
+    Proporciona el promedio y total del saldo restante en las facturas.
     """
     resultado = (
         db.query(
