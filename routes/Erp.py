@@ -11,7 +11,10 @@ from sqlalchemy import func, or_, extract
 from starlette.status import HTTP_204_NO_CONTENT
 
 import crud
+from Lib.Cambiar_Estado_Facturas import CambiarEstadoFacturaSinEnviarNotificacion
+
 from Lib.GenerarRadicadoFactura import generar_radicado
+
 
 from config.db import   get_session
 # importa el esquema de los bovinos
@@ -265,6 +268,7 @@ async def CrearFactura(
 async def ListarFacturas(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
 
     try:
+        CambiarEstadoFacturaSinEnviarNotificacion()
         ListarFacturas = db.query(modelo_facturas).filter(modelo_facturas.c.usuario_id == current_user).all()
         return ListarFacturas
 
@@ -467,6 +471,8 @@ async def VentasTrimestrales(db: Session = Depends(get_database_session),current
 
     """
     try:
+
+
         # Consulta para agrupar ventas por año y trimestre
         ventas_trimestrales = (
             db.query(
@@ -541,6 +547,7 @@ async def analisis_saldo_restante(db: Session = Depends(get_database_session),cu
     """
     Proporciona el promedio y total del saldo restante en las facturas.
     """
+
     resultado = (
         db.query(
             func.sum(modelo_facturas.c.saldo_restante).label("saldo_total"),

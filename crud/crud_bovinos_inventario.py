@@ -212,6 +212,32 @@ class CRUDBovinos:
 
             return None
 
+    def Buscar_Correo_Usuario(self,db: Session,usuario_id):
+        """
+        Busca el correo del usuario para emitir notificaciones
+        :param db: Conexión de Base de datos
+        :param usuario_id: ID Del Usuario a notificar
+        :return: Correo Electronico
+        """
+        try:
+            BUscarCorreoElectronico = db.query(modelo_usuarios).filter(
+                modelo_usuarios.columns.usuario_id == usuario_id
+                ).first()
+
+            # Manejar el caso en que BuscarCorreo sea None
+            if BUscarCorreoElectronico is None:
+                return None
+
+            CorreoElectronico = BUscarCorreoElectronico.correo_electronico
+            db.close()
+
+            return CorreoElectronico
+        except AttributeError as e:
+            pass
+
+            return None
+
+
     def VerificarConsultaDatosFotoPerfilBovino(self,Buscar_Datos_Foto_Perfil,Rutabase):
         if not Buscar_Datos_Foto_Perfil:
             Consulta = "ConsultaVacia"

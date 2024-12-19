@@ -3,13 +3,31 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from config.db import remitente,password,servidor_smtp,puerto_smtp
 def enviar_correo(destinatario, asunto,Notificacion):
-    '''
-    La siguiente funcion realiza el envio de Correos Tipo notificacion para los usuarios recibe los siguientes parametros
-    :param destinatario:
-    :param asunto:
-    :return:
+    """
+    Envía un correo electrónico de tipo notificación a un usuario.
 
-    '''
+    Esta función permite realizar el envío de correos electrónicos con un formato de notificación.
+    Es ideal para notificar a los usuarios sobre eventos, alertas o cualquier tipo de comunicación.
+
+    Parámetros:
+    :param destinatario: str
+        Dirección de correo electrónico del destinatario.
+    :param asunto: str
+        Asunto del correo que aparecerá en la bandeja de entrada del destinatario.
+    :param notificacion: str
+        Contenido o cuerpo del correo electrónico. Este será el mensaje que se enviará al cliente.
+
+    Retorno:
+    :return: None
+        La función no devuelve ningún valor. Su propósito es realizar el envío del correo.
+
+    Ejemplo de uso:
+    enviar_correo("usuario@example.com", "Recordatorio", "Estimado usuario, le recordamos que...")
+
+    Notas:
+    - Asegúrese de que el servidor de correo esté configurado correctamente antes de utilizar esta función.
+    - Maneje posibles excepciones para garantizar que errores en el envío no interrumpan el flujo principal de la aplicación.
+    """
 
     mensaje = """
     
