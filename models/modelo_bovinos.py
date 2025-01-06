@@ -45,7 +45,6 @@ modelo_bovinos_inventario = Table("bovinos", meta,
                                   Column("id_bovino", Integer, primary_key=True),
                                   Column("fecha_nacimiento", Date),
                                   Column("edad", Integer),
-                                  Column("chip_asociado", String(50)),
                                   Column("sexo", String(300)),
                                   Column("raza", String(300)),
                                   Column("peso", Float),
@@ -61,7 +60,8 @@ modelo_bovinos_inventario = Table("bovinos", meta,
                                   Column("fecha_de_ingreso_hato",Date),
                                   Column("fecha_de_ingreso_sistema",Date),
                                   Column("edad_destete", Integer),
-                                  Column("nombre_lote_bovino",String(300))
+                                  Column("nombre_lote_bovino",String(300)),
+                                  Column("chip_asociado",String(50))
                                   )
 
 

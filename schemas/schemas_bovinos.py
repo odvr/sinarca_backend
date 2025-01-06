@@ -106,7 +106,6 @@ class TokenPayload(BaseModel):
 class Esquema_bovinos(BaseModel):
     id_bovino : int
     fecha_nacimiento: date
-    chip_asociado: Optional[str] = None
     edad: Optional[int] = None
     sexo :str
     raza : str
@@ -124,6 +123,8 @@ class Esquema_bovinos(BaseModel):
     fecha_de_ingreso_sistema: Optional[date] = None
     edad_destete: Optional[int] = None
     nombre_lote_bovino: Optional[str] = None
+    chip_asociado: Optional[str] = None
+
     #Este Config La clase se utiliza para proporcionar configuraciones a Pydantic.
     class Config:
         orm_mode = True
