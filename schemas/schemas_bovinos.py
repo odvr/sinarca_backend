@@ -106,6 +106,7 @@ class TokenPayload(BaseModel):
 class Esquema_bovinos(BaseModel):
     id_bovino : int
     fecha_nacimiento: date
+    chip_asociado: Optional[str] = None
     edad: Optional[int] = None
     sexo :str
     raza : str

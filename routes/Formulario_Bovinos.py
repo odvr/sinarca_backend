@@ -73,7 +73,7 @@ id_capacidad: Optional [int] = Form(None)
 @Formulario_Bovino.post(
     "/crear_bovino",
     status_code=status.HTTP_201_CREATED, tags=["Formualario_Bovinos"])
-async def crear_bovinos(nombre_bovino: Optional [str] = Form(None), fecha_nacimiento:  Optional [date] = Form(None), raza:  Optional [str] = Form(None), sexo:  Optional [str] = Form(None), marca:  Optional [str] = Form(None), proposito:  Optional [str] = Form(None),
+async def crear_bovinos(nombre_bovino: Optional [str] = Form(None), chip_asociado: Optional [str] = Form(None),fecha_nacimiento:  Optional [date] = Form(None), raza:  Optional [str] = Form(None), sexo:  Optional [str] = Form(None), marca:  Optional [str] = Form(None), proposito:  Optional [str] = Form(None),
                         mansedumbre:  Optional [str] = Form(None), estado:  Optional [str] = Form(None), compra_bovino:  Optional [str] = Form(None), fecha_pesaje:  Optional [date] = Form(None), peso:  Optional [float] = Form(None),
                         ordeno:  Optional [str] = Form(None), fecha_muerte:  Optional [date] = Form(None), razon_muerte:  Optional [str] = Form(None), numero_bono_venta:  Optional [str] = Form(None),
                         fecha_venta:  Optional [date] = Form(None), precio_venta:  Optional [int] = Form(None), razon_venta:  Optional [str] = Form(None), medio_pago:  Optional [str] = Form(None), comprador:  Optional [str] = Form(None),
@@ -90,12 +90,15 @@ async def crear_bovinos(nombre_bovino: Optional [str] = Form(None), fecha_nacimi
             modelo_bovinos_inventario.select().where(
                 and_(
                     modelo_bovinos_inventario.columns.nombre_bovino == nombre_bovino,
+                    modelo_bovinos_inventario.columns.chip_asociado == chip_asociado,
                     modelo_bovinos_inventario.columns.usuario_id == current_user
                 )
             )
         ).first()
+
+
         """
-        Si el bovino no se encuentra lo registra
+        Si el bovino no se encuentra lo registra y Chip que sea Igual
         """
         if Consulta_Nomnbres_Bovinos is None:
             if registroIngresoHato == "2000-01-01":
@@ -107,6 +110,7 @@ async def crear_bovinos(nombre_bovino: Optional [str] = Form(None), fecha_nacimi
             ingreso = modelo_bovinos_inventario.insert().values(nombre_bovino=nombre_bovino,
                                                                 fecha_nacimiento=fecha_nacimiento,
                                                                 raza=raza,
+                                                                chip_asociado=chip_asociado,
                                                                 sexo=sexo,
                                                                 marca=marca,
                                                                 proposito=proposito,
@@ -571,6 +575,36 @@ async def id_inventario_bovino(id_bovino: str,db: Session = Depends(get_database
 
     # condb.commit()
     return consulta
+
+"""
+La siguiente función realiza la Busqueda del Codigo generado Por los Chip Bovinos 
+"""
+
+@Formulario_Bovino.get("/BuscarChip/{chipManual}", response_model=int, tags=["Formualario_Bovinos"])
+async def Buscar_id_Chip(
+    chipManual: str,
+    db: Session = Depends(get_database_session),
+    current_user: Esquema_Usuario = Depends(get_current_user)
+):
+    try:
+        consulta = db.execute(
+            modelo_bovinos_inventario.select().where(
+                modelo_bovinos_inventario.columns.chip_asociado == chipManual
+            )
+        ).first()
+
+        if consulta is None:
+            raise HTTPException(status_code=404, detail="Chip no encontrado en la base de datos")
+
+        # Extraer y retornar solo el id_bovino
+        return consulta.id_bovino
+
+    except Exception as e:
+        logger.error(f'Error al obtener Chip del Bovino: {e}')
+        raise
+
+
+
 
 
 '''
