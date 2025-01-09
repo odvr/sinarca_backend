@@ -11,6 +11,13 @@ from Lib.Lib_Intervalo_Partos import intervalo_partos, fecha_aproximada_parto
 from sqlalchemy.orm import Session
 
 from Lib.Registro_partos import registro_partos_animales
+from Lib.clasificacion_ganado_leche import tipo_ganado_leche
+from Lib.dias_abiertos import dias_abiertos
+from Lib.endogamia import abuelo_materno, abuela_materna, abuelo_paterno, abuela_paterna, bisabuelo_materno, \
+    bisabuelo_paterno, endogamia
+from Lib.funcion_IEP_por_raza import IEP_por_raza
+from Lib.funcion_litros_leche import promedio_litros_leche
+from Lib.funcion_peso_por_raza import peso_segun_raza
 from config.db import get_session
 # # importa el esquema de los bovinos
 from models.modelo_bovinos import modelo_historial_partos, modelo_partos, modelo_bovinos_inventario, \
@@ -20,6 +27,8 @@ from fastapi import APIRouter, Response
 from fastapi import  status
 from starlette.status import HTTP_204_NO_CONTENT
 from fastapi import  Depends
+
+from routes.Prod_leche import Edad_Primer_Parto, Edad_Sacrificio_Lecheras, EliminarDuplicadosLeche
 from routes.rutas_bovinos import get_current_user
 from schemas.schemas_bovinos import esquema_historial_partos, Esquema_Usuario, esquema_partos
 from routes.rutas_bovinos import get_current_user
@@ -136,8 +145,27 @@ async def listar_historial_partos_anuales(db: Session = Depends(get_database_ses
 @partos_bovinos.get("/listar_tabla_Historial_Partos_Unidad/{id_bovino}",response_model=list )
 async def listar_tabla_Partos_Individual(id_bovino: str,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user) ):
     try:
-        intervalo_partos(session=db,current_user=current_user)
+        "Librerias Requeridas"
+        peso_segun_raza(session=db, current_user=current_user)
+        Edad_Primer_Parto(session=db)
+        Edad_Sacrificio_Lecheras(condb=db)
+        promedio_litros_leche(session=db, current_user=current_user)
+        intervalo_partos(session=db, current_user=current_user)
+        EliminarDuplicadosLeche(condb=db)
 
+        IEP_por_raza(session=db, current_user=current_user)
+        registro_partos_animales(session=db, current_user=current_user)
+        dias_abiertos(session=db, current_user=current_user)
+
+        abuelo_materno(session=db, current_user=current_user)
+        abuela_materna(session=db, current_user=current_user)
+        abuelo_paterno(session=db, current_user=current_user)
+        abuela_paterna(session=db, current_user=current_user)
+        bisabuelo_materno(session=db, current_user=current_user)
+        bisabuelo_paterno(session=db, current_user=current_user)
+        endogamia(session=db, current_user=current_user)
+        intervalo_partos(session=db, current_user=current_user)
+        tipo_ganado_leche(session=db, current_user=current_user)
         itemsListarPartos = db.execute(
             modelo_historial_partos.select().where(modelo_historial_partos.columns.id_bovino == id_bovino)).all()
 
