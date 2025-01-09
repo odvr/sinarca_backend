@@ -93,7 +93,8 @@ def create_access_token(data: dict, expires_delta: timedelta):
 def verify_password(password: str, hashed_pass: str) -> bool:
     return password_context.verify(password, hashed_pass)
 # Ruta para autenticación y emisión de tokens
-@rutas_bovinos.post('/token', summary="Create access and refresh tokens for user",response_model=Esquema_Token)
+
+@rutas_bovinos.post('/token', summary="Create access and refresh tokens for user", response_model=Esquema_Token)
 async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_database_session)):
     user = db.execute(modelo_usuarios.select().where(modelo_usuarios.c.usuario_id == form_data.username)).first()
     if user is None:
@@ -105,7 +106,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = 
     if not verify_password(form_data.password, hashed_pass):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="I"
+            detail="Incorrect email or password"
         )
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
