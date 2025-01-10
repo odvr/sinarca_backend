@@ -61,7 +61,9 @@ modelo_bovinos_inventario = Table("bovinos", meta,
                                   Column("fecha_de_ingreso_sistema",Date),
                                   Column("edad_destete", Integer),
                                   Column("nombre_lote_bovino",String(300)),
-                                  Column("chip_asociado",String(50))
+                                  Column("chip_asociado",String(50)),
+                                  Column("id_finca", String(300), ForeignKey("fincas.id_finca")),
+                                  Column("nombre_finca", String(300))
                                   )
 
 
@@ -571,7 +573,9 @@ modelo_lotes_bovinos= Table("lotes_bovinos", meta, Column("id_lote_bovinos", Int
                                Column("observaciones", String(300)),
                                Column("total_bovinos", Integer),
 
-                               Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
+                               Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")),
+                               Column("id_finca", String(300), ForeignKey("fincas.id_finca")),
+                               Column("nombre_finca", String(300)))
 
 
 
@@ -671,7 +675,9 @@ modelo_facturas= Table("facturas", meta, Column("factura_id", Integer, primary_k
                                Column("metodo_pago", String(100)),
                                Column("detalle", String(100)),
                                Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")),
-                               Column("descripcion", String(300)))
+                               Column("descripcion", String(300)),
+                               Column("id_finca", String(300), ForeignKey("fincas.id_finca")),
+                               Column("nombre_finca", String(300)))
 
 
 modelo_pagos= Table("pagos", meta, Column("pago_id", Integer, primary_key=True,autoincrement=True),
@@ -715,7 +721,9 @@ modelo_empleados= Table("empleados", meta, Column("empleado_id", Integer, primar
                                Column("detalles", String(500)),
                                Column("estado", String(100)),
                                Column("fecha_retiro", Date),
-                               Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
+                               Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")),
+                               Column("id_finca", String(300), ForeignKey("fincas.id_finca")),
+                               Column("nombre_finca", String(300)))
 
 modelo_nomina= Table("nomina", meta, Column("nomina_id", Integer, primary_key=True,autoincrement=True),
                                Column("empleado_id", Integer, ForeignKey("empleados.empleado_id")),
@@ -780,6 +788,52 @@ modelo_asociados= Table("asociados", meta, Column("id_asociado", Integer, primar
                                Column("fecha_creacion", Date))
 
 
+modelo_fincas= Table("fincas", meta, Column("id_finca", Integer, primary_key=True, autoincrement=True),
+                               Column("nombre_finca",String(300)),
+                               Column("departamento", String(300)),
+                               Column("municipio", String(300)),
+                               Column("extension", String(300)),
+                               Column("tipo", String(300)),
+                               Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
 
+modelo_potreros= Table("potreros", meta, Column("id_potrero", Integer, primary_key=True, autoincrement=True),
+                               Column("nombre_potrero",String(300)),
+                               Column("extension", String(300)),
+                               Column("id_finca", String(300), ForeignKey("fincas.id_finca")),
+                               Column("nombre_finca",String(300)),
+                               Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
 
+modelo_indicadores_finca = Table("indicadores_finca", meta,Column("id_indicadores_finca", Integer, primary_key=True,autoincrement=True),
+    Column("perdida_de_terneros_finca", Float),
+    Column("tasa_supervivencia_finca", Float),
+    Column("total_animales_finca", Integer),
+    Column("vacas_prenadas_porcentaje_finca", Float),
+    Column("animales_levante_finca", Integer),
+    Column("animales_ceba_finca", Integer),
+    Column("animales_leche_finca", Integer),
+    Column("vacas_prenadas_finca", Integer),
+    Column("vacas_vacias_finca", Integer),
+    Column("animales_fallecidos_finca", Integer),
+    Column("animales_vendidos_finca", Integer),
+    Column("machos_finca", Integer),
+    Column("hembras_finca", Integer),
+    Column("vacas_en_ordeno_finca", Integer),
+    Column("vacas_no_ordeno_finca", Integer),
+    Column("porcentaje_ordeno_finca", Float),
+    Column("animales_rango_edades_0_9_finca", Integer),
+    Column("animales_rango_edades_9_12_finca", Integer),
+    Column("animales_rango_edades_12_24_finca", Integer),
+    Column("animales_rango_edades_24_36_finca", Integer),
+    Column("animales_rango_edades_mayor_36_finca", Integer),
+    Column("animales_optimos_levante_finca", Integer),
+    Column("animales_optimos_ceba_finca", Integer),
+    Column("vientres_aptos_finca", Integer),
+    Column("relacion_toros_vientres_aptos_finca", Integer),
+    Column("interpretacion_relacion_toros_vientres_aptos_finca", String(300)),
+    Column("total_unidades_animales_finca", String(300)),
+    Column("IEP_hato_finca", Float),
+    Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")),
+    Column("id_finca", Integer, ForeignKey("fincas.id_finca")),
+    Column("nombre_finca", String(300))
+)
 meta.create_all(engine)

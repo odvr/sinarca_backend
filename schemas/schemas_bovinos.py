@@ -124,6 +124,8 @@ class Esquema_bovinos(BaseModel):
     edad_destete: Optional[int] = None
     nombre_lote_bovino: Optional[str] = None
     chip_asociado: Optional[str] = None
+    id_finca   : int
+    nombre_finca: Optional[str] = None
 
     #Este Config La clase se utiliza para proporcionar configuraciones a Pydantic.
     class Config:
@@ -478,6 +480,10 @@ class esquema_capacidad_carga(BaseModel):
     fecha_inicio_descanso: Optional[date] = None
     fecha_final_descanso: Optional[date] = None
     dias_descanso: Optional[int] = None
+    id_finca   : int
+    nombre_finca: Optional[str] = None
+    id_potrero: int
+    nombre_potrero: Optional[str] = None
     class Config:
         orm_mode = True
         env_file = ".env"
@@ -801,6 +807,8 @@ class esquema_lotes_bovinos(BaseModel):
     observaciones: Optional[str] = None
     usuario_id: Optional[str] = None
     total_bovinos: Optional[int] = None
+    id_finca   : int
+    nombre_finca: Optional[str] = None
 
     class Config:
         orm_mode = True
@@ -937,6 +945,8 @@ class esquema_facturas(BaseModel):
     detalle: Optional[str] = None
     usuario_id: Optional[str] = None
     descripcion: Optional[str] = None
+    id_finca   : int
+    nombre_finca: Optional[str] = None
     class Config:
         orm_mode = True
         env_file = ".env"
@@ -1009,6 +1019,8 @@ class esquema_empleados(BaseModel):
     estado: Optional[str] = None
     fecha_retiro: Optional[date] = None
     usuario_id: Optional[str] = None
+    id_finca   : int
+    nombre_finca: Optional[str] = None
     class Config:
         orm_mode = True
         env_file = ".env"
@@ -1082,6 +1094,69 @@ class esquema_asociados(BaseModel):
     codigo : Optional[str] = None
     fecha_creacion: Optional[date] = None
 
+    class Config:
+        orm_mode = True
+        env_file = ".env"
+
+
+class esquema_fincas(BaseModel):
+    id_finca   : int
+    nombre_finca: Optional[str] = None
+    departamento: Optional[str] = None
+    municipio : Optional[str] = None
+    extension: Optional[str] = None
+    tipo: Optional[str] = None
+    usuario_id: Optional[str] = None
+    class Config:
+        orm_mode = True
+        env_file = ".env"
+
+
+class esquema_potreros(BaseModel):
+    id_potrero   : int
+    nombre_potrero: Optional[str] = None
+    extension: Optional[str] = None
+    id_finca   : int
+    nombre_finca: Optional[str] = None
+    usuario_id: Optional[str] = None
+    class Config:
+        orm_mode = True
+        env_file = ".env"
+
+
+class esquema_indicadores_finca(BaseModel):
+    id_indicadores_finca:int
+    perdida_de_terneros_finca: Optional[float] = None
+    tasa_supervivencia_finca: Optional[float] = None
+    total_animales_finca:Optional[int] = None
+    vacas_prenadas_porcentaje_finca:Optional[float] = None
+    animales_levante_finca:Optional[int] = None
+    animales_ceba_finca:Optional[int] = None
+    animales_leche_finca:Optional[int] = None
+    vacas_prenadas_finca:Optional[int] = None
+    vacas_vacias_finca:Optional[int] = None
+    animales_fallecidos_finca:Optional[int] = None
+    animales_vendidos_finca:Optional[int] = None
+    machos_finca:Optional[int] = None
+    hembras_finca:Optional[int] = None
+    vacas_en_ordeno_finca:Optional[int] = None
+    vacas_no_ordeno_finca:Optional[int] = None
+    porcentaje_ordeno_finca:Optional[float] = None
+    animales_rango_edades_0_9_finca:Optional[int] = None
+    animales_rango_edades_9_12_finca:Optional[int] = None
+    animales_rango_edades_12_24_finca:Optional[int] = None
+    animales_rango_edades_24_36_finca:Optional[int] = None
+    animales_rango_edades_mayor_36_finca:Optional[int] = None
+    animales_optimos_levante_finca:Optional[int] = None
+    animales_optimos_ceba_finca:Optional[int] = None
+    vientres_aptos_finca:Optional[int] = None
+    relacion_toros_vientres_aptos_finca:Optional[int]
+    interpretacion_relacion_toros_vientres_aptos_finca:Optional[str]
+    total_unidades_animales_finca:Optional[str] = None
+    IEP_hato_finca:Optional[float] = None
+    usuario_id: Optional[str] = None
+    id_finca   : int
+    nombre_finca: Optional[str] = None
     class Config:
         orm_mode = True
         env_file = ".env"
