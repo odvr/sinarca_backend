@@ -820,26 +820,14 @@ async def CambiarFotoPerfilBovino(id_bovino: str, file: UploadFile = File(...),
         logger.error("Nose pudo Cargar Imagen "+ e)
 
 
-
-
-
-
-
-
-
-
-
 @Formulario_Bovino.post("/GuardarMarca/{nombre_marca_propietario}")
-async def Crear_Marca_bovino(nombre_marca_propietario:str,file: UploadFile = File(...),
-                                  db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)
-                                  ):
-
-
+async def Crear_Marca_bovino(nombre_marca_propietario: str, file: UploadFile = File(...),
+                             db: Session = Depends(get_database_session), current_user: Esquema_Usuario = Depends(get_current_user)):
 
     contents = await file.read()
 
     hora_registro = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    # Obtiene el nombre del archivo sin la extensión
+    # Obtiene el nombre del archivo y la extensión
     filename, file_extension = os.path.splitext(file.filename)
     new_filename = f"{current_user}_{filename}_{uuid.uuid4().hex}{file_extension}"
     # Genera un nuevo nombre de archivo único agregando un identificador único (UUID) al nombre original
@@ -856,15 +844,11 @@ async def Crear_Marca_bovino(nombre_marca_propietario:str,file: UploadFile = Fil
     # Devuelve la URL del archivo para que el usuario pueda acceder a él
     url_registro_marca = f"/static/uploads/{new_filename}"
 
-    db.execute(modelo_registro_marca.insert().values(ruta_marca=url_registro_marca,nombre_marca_propietario=nombre_marca_propietario,usuario_id=current_user))
+    db.execute(modelo_registro_marca.insert().values(ruta_marca=url_registro_marca, nombre_marca_propietario=nombre_marca_propietario, usuario_id=current_user))
     db.commit()
     db.close()
 
-    #db.modelo_registro_marca.insert().values(url_registro_marca=file_url,usuario_id=current_user)
-    #db.commit()
-
     return {"filename": new_filename, "file_url": url_registro_marca}
-
 @Formulario_Bovino.get("/ListarMarcasImagenes", response_model=list[esquema_registro_marca],tags=["Formualario_Bovinos"])
 async def id_inventario_bovino(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
