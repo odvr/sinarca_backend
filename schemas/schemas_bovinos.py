@@ -124,7 +124,7 @@ class Esquema_bovinos(BaseModel):
     edad_destete: Optional[int] = None
     nombre_lote_bovino: Optional[str] = None
     chip_asociado: Optional[str] = None
-    id_finca   : int
+    id_finca   : Optional [int] = None
     nombre_finca: Optional[str] = None
 
     #Este Config La clase se utiliza para proporcionar configuraciones a Pydantic.
@@ -480,7 +480,7 @@ class esquema_capacidad_carga(BaseModel):
     fecha_inicio_descanso: Optional[date] = None
     fecha_final_descanso: Optional[date] = None
     dias_descanso: Optional[int] = None
-    id_finca   : int
+    id_finca   : Optional[int] = None
     nombre_finca: Optional[str] = None
     id_potrero: int
     nombre_potrero: Optional[str] = None
@@ -807,7 +807,7 @@ class esquema_lotes_bovinos(BaseModel):
     observaciones: Optional[str] = None
     usuario_id: Optional[str] = None
     total_bovinos: Optional[int] = None
-    id_finca   : int
+    id_finca   : Optional[int] = None
     nombre_finca: Optional[str] = None
 
     class Config:
@@ -945,7 +945,7 @@ class esquema_facturas(BaseModel):
     detalle: Optional[str] = None
     usuario_id: Optional[str] = None
     descripcion: Optional[str] = None
-    id_finca   : int
+    id_finca   : Optional[int] = None
     nombre_finca: Optional[str] = None
     class Config:
         orm_mode = True
@@ -1019,7 +1019,7 @@ class esquema_empleados(BaseModel):
     estado: Optional[str] = None
     fecha_retiro: Optional[date] = None
     usuario_id: Optional[str] = None
-    id_finca   : int
+    id_finca   : Optional[int] = None
     nombre_finca: Optional[str] = None
     class Config:
         orm_mode = True
@@ -1116,7 +1116,7 @@ class esquema_potreros(BaseModel):
     id_potrero   : int
     nombre_potrero: Optional[str] = None
     extension: Optional[str] = None
-    id_finca   : int
+    id_finca   : Optional[int] = None
     nombre_finca: Optional[str] = None
     usuario_id: Optional[str] = None
     class Config:
@@ -1155,7 +1155,7 @@ class esquema_indicadores_finca(BaseModel):
     total_unidades_animales_finca:Optional[str] = None
     IEP_hato_finca:Optional[float] = None
     usuario_id: Optional[str] = None
-    id_finca   : int
+    id_finca   :Optional[int] = None
     nombre_finca: Optional[str] = None
     class Config:
         orm_mode = True
