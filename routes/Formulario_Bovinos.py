@@ -782,6 +782,25 @@ async def cambiar_esta_bovino(id_bovino:str,fecha_nacimiento:date,edad:int,raza:
         Ruta_marca = crud.bovinos_inventario.Buscar_Ruta_Fisica_Marca(db=db, id_registro_marca=ruta_imagen_marca,
                                                                       current_user=current_user)
 
+        db.execute(modelo_bovinos_inventario.update().values(
+
+            fecha_nacimiento=fecha_nacimiento,
+            edad=edad,
+            raza=raza,
+            sexo=sexo,
+            peso=peso,
+            marca=marca,
+            proposito=proposito,
+            mansedumbre=mansedumbre,
+            estado=estado,
+            compra_bovino=compra_bovino,
+            ruta_imagen_marca=Ruta_marca,
+            fecha_de_ingreso_hato=fecha_de_ingreso_hato
+
+        ).where(
+            modelo_bovinos_inventario.columns.id_bovino == id_bovino))
+        db.commit()
+
         if ruta_imagen_marca == "null":
             db.execute(modelo_bovinos_inventario.update().values(
 
@@ -801,25 +820,7 @@ async def cambiar_esta_bovino(id_bovino:str,fecha_nacimiento:date,edad:int,raza:
             ).where(
                 modelo_bovinos_inventario.columns.id_bovino == id_bovino))
             db.commit()
-        else:
-            db.execute(modelo_bovinos_inventario.update().values(
 
-                fecha_nacimiento=fecha_nacimiento,
-                edad=edad,
-                raza=raza,
-                sexo=sexo,
-                peso=peso,
-                marca=marca,
-                proposito=proposito,
-                mansedumbre=mansedumbre,
-                estado=estado,
-                compra_bovino=compra_bovino,
-                ruta_imagen_marca=Ruta_marca,
-                fecha_de_ingreso_hato=fecha_de_ingreso_hato
-
-            ).where(
-                modelo_bovinos_inventario.columns.id_bovino == id_bovino))
-            db.commit()
 
             # Retorna una consulta con el id actualizado
             #resultado_actualizado = condb.execute(
