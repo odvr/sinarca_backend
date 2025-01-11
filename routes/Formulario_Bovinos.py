@@ -396,6 +396,7 @@ async def crear_bovino_masivo(bovinos: List[dict], db: Session = Depends(get_dat
             mansedumbre = "Manso"
             estado="Vivo"
             ordeno="No"
+            peso = 0
 
             Consulta_Nomnbres_Bovinos = db.execute(
                 modelo_bovinos_inventario.select().where(
@@ -418,7 +419,7 @@ async def crear_bovino_masivo(bovinos: List[dict], db: Session = Depends(get_dat
                 ingreso = modelo_bovinos_inventario.insert().values(nombre_bovino=nombre_bovino,
                                                                     fecha_nacimiento=fecha_nacimiento,
                                                                     raza=raza,
-
+                                                                    peso= peso,
                                                                     sexo=sexo,
                                                                     marca=marca,
                                                                     proposito=proposito,
