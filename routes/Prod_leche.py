@@ -86,25 +86,25 @@ async def inventario_prod_leche(db: Session = Depends(get_database_session),
 
     try:
         "Librerias Requeridas"
-        peso_segun_raza(session=db,current_user=current_user)
+        #peso_segun_raza(session=db,current_user=current_user)
         Edad_Primer_Parto(session=db)
         Edad_Sacrificio_Lecheras(condb=db)
         promedio_litros_leche(session=db,current_user=current_user)
         #intervalo_partos(session=db,current_user=current_user)
         EliminarDuplicadosLeche(condb=db)
 
-        IEP_por_raza(session= db,current_user=current_user)
+        #IEP_por_raza(session= db,current_user=current_user)
         registro_partos_animales(session= db,current_user=current_user)
         dias_abiertos(session= db,current_user=current_user)
 
 
-        abuelo_materno(session=db, current_user=current_user)
-        abuela_materna(session=db, current_user=current_user)
-        abuelo_paterno(session=db, current_user=current_user)
-        abuela_paterna(session=db, current_user=current_user)
-        bisabuelo_materno(session=db, current_user=current_user)
-        bisabuelo_paterno(session=db, current_user=current_user)
-        endogamia(session=db, current_user=current_user)
+        #abuelo_materno(session=db, current_user=current_user)
+        #abuela_materna(session=db, current_user=current_user)
+        #abuelo_paterno(session=db, current_user=current_user)
+        #abuela_paterna(session=db, current_user=current_user)
+        #bisabuelo_materno(session=db, current_user=current_user)
+        #bisabuelo_paterno(session=db, current_user=current_user)
+        #endogamia(session=db, current_user=current_user)
         #intervalo_partos(session=db, current_user=current_user)
         tipo_ganado_leche(session=db, current_user=current_user)
 
