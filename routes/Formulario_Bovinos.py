@@ -8,7 +8,7 @@ from typing import Optional
 import logging
 from datetime import date, datetime, timedelta
 from fastapi import APIRouter, Depends ,Form
-from sqlalchemy import and_
+from sqlalchemy import and_,or_
 from starlette.staticfiles import StaticFiles
 from starlette.status import HTTP_204_NO_CONTENT
 import os
@@ -87,26 +87,26 @@ async def crear_bovinos(nombre_bovino: Optional [str] = Form(None), chip_asociad
 
     try:
 
-        Consulta_Nomnbres_Bovinos = db.execute(
-            modelo_bovinos_inventario.select().where(
-                and_(
-                    modelo_bovinos_inventario.columns.nombre_bovino == nombre_bovino,
-                    modelo_bovinos_inventario.columns.chip_asociado == chip_asociado,
-                    modelo_bovinos_inventario.columns.usuario_id == current_user
-                )
-            )
-        ).first()
 
+        Consulta_Nomnbres_Bovinos = db.execute(modelo_bovinos_inventario.select().where(modelo_bovinos_inventario.columns.nombre_bovino ==nombre_bovino ,
 
-        """
-        Si el bovino no se encuentra lo registra y Chip que sea Igual
-        """
-        if Consulta_Nomnbres_Bovinos is None:
+                    modelo_bovinos_inventario.columns.usuario_id == current_user)).all()
+
+        Consulta_Nomnbres_Chip = db.execute(
+            modelo_bovinos_inventario.select().where( modelo_bovinos_inventario.columns.chip_asociado == chip_asociado,
+
+                                                     modelo_bovinos_inventario.columns.usuario_id == current_user)).all()
+
+        # Verificar si alguna de las consultas tiene resultados
+        if Consulta_Nomnbres_Bovinos or Consulta_Nomnbres_Chip:
+            return Response(status_code=status.HTTP_409_CONFLICT)
+        else:
             if registroIngresoHato == "2000-01-01":
-                registroIngresoHato= "null"
+                registroIngresoHato = "null"
 
             FechaDeRegistroBovino = datetime.now()
-            Ruta_marca = crud.bovinos_inventario.Buscar_Ruta_Fisica_Marca(db=db, id_registro_marca=id_registro_marca, current_user=current_user)
+            Ruta_marca = crud.bovinos_inventario.Buscar_Ruta_Fisica_Marca(db=db, id_registro_marca=id_registro_marca,
+                                                                          current_user=current_user)
 
             ingreso = modelo_bovinos_inventario.insert().values(nombre_bovino=nombre_bovino,
                                                                 fecha_nacimiento=fecha_nacimiento,
@@ -121,7 +121,7 @@ async def crear_bovinos(nombre_bovino: Optional [str] = Form(None), chip_asociad
                                                                 usuario_id=current_user,
                                                                 ruta_imagen_marca=Ruta_marca,
                                                                 fecha_de_ingreso_hato=registroIngresoHato,
-                                                                fecha_de_ingreso_sistema = FechaDeRegistroBovino
+                                                                fecha_de_ingreso_sistema=FechaDeRegistroBovino
                                                                 )
 
             result = db.execute(ingreso)
@@ -189,7 +189,8 @@ async def crear_bovinos(nombre_bovino: Optional [str] = Form(None), chip_asociad
 
             ingresoFechaPesaje = modelo_datos_pesaje.insert().values(id_bovino=id_bovino, fecha_pesaje=fecha_pesaje,
                                                                      peso=peso, usuario_id=current_user,
-                                                                     nombre_bovino=nombre_bovino,tipo_pesaje=TiposPesaje)
+                                                                     nombre_bovino=nombre_bovino,
+                                                                     tipo_pesaje=TiposPesaje)
 
             db.execute(ingresoFechaPesaje)
 
@@ -325,14 +326,12 @@ async def crear_bovinos(nombre_bovino: Optional [str] = Form(None), chip_asociad
                     modelo_bovinos_inventario.columns.id_bovino == id_bovino))
                 db.commit()
 
-
-
-
             if id_bovino_madre == "undefined" and id_bovino_padre == "undefined":
                 pass
 
             if inseminacion == "Si":
-                idBovinoPadre = crud.bovinos_inventario.Buscar_ID_Nombre_Padre(db=db,id_bovino_padre=id_bovino_padre,current_user=current_user)
+                idBovinoPadre = crud.bovinos_inventario.Buscar_ID_Nombre_Padre(db=db, id_bovino_padre=id_bovino_padre,
+                                                                               current_user=current_user)
                 ingresoEndogamia = modelo_arbol_genealogico.insert().values(id_bovino=id_bovino,
                                                                             id_bovino_madre=id_bovino_madre,
                                                                             id_bovino_padre=idBovinoPadre,
@@ -359,10 +358,8 @@ async def crear_bovinos(nombre_bovino: Optional [str] = Form(None), chip_asociad
                 db.commit()
                 """
 
-                #endogamia(condb=db)
+                # endogamia(condb=db)
             return Response(status_code=status.HTTP_201_CREATED)
-        else:
-            return Response(status_code=status.HTTP_409_CONFLICT)
 
 
     except Exception as e:
@@ -398,19 +395,18 @@ async def crear_bovino_masivo(bovinos: List[dict], db: Session = Depends(get_dat
             ordeno="No"
             peso = 0
 
-            Consulta_Nomnbres_Bovinos = db.execute(
-                modelo_bovinos_inventario.select().where(
-                    and_(
-                        modelo_bovinos_inventario.columns.nombre_bovino == nombre_bovino,
-                        modelo_bovinos_inventario.columns.usuario_id == current_user
-                    )
-                )
-            ).first()
+            Consulta_Nomnbres_Bovinos = db.execute(modelo_bovinos_inventario.select().where(
+                modelo_bovinos_inventario.columns.nombre_bovino == nombre_bovino,
 
-            """
-            Si el bovino no se encuentra lo registra y Chip que sea Igual
-            """
-            if Consulta_Nomnbres_Bovinos is None:
+                modelo_bovinos_inventario.columns.usuario_id == current_user)).all()
+
+
+            # Verificar si alguna de las consultas tiene resultados
+            if Consulta_Nomnbres_Bovinos:
+                return Response(status_code=status.HTTP_409_CONFLICT)
+
+
+            else:
 
 
                 FechaDeRegistroBovino = datetime.now()

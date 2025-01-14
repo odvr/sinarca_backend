@@ -195,23 +195,42 @@ async def CrearFactura(
         Radicado =generar_radicado()
 
         # Crea la factura
-        CrearFactura = modelo_facturas.insert().values(
+        if estado == "pendiente":
+            CrearFactura = modelo_facturas.insert().values(
 
-            fecha_emision=fecha_emision,
-            radicado_factura=Radicado,
-            fecha_vencimiento=fecha_vencimiento,
-            monto_total=monto_total,
-            destino=destino,
-            estado=estado,
-            lote_asociado=lote_asociado,
-            tipo_venta=tipo_venta,
-            metodo_pago=metodo_pago,
-            detalle=detalle,
-            usuario_id=current_user,
-            descripcion=descripcion,
-            nombre_cliente_proveedor=nombre_cliente_proveedor
-        )
+                fecha_emision=fecha_emision,
+                radicado_factura=Radicado,
+                saldo_restante= monto_total,
+                fecha_vencimiento=fecha_vencimiento,
+                monto_total=monto_total,
+                destino=destino,
+                estado=estado,
+                lote_asociado=lote_asociado,
+                tipo_venta=tipo_venta,
+                metodo_pago=metodo_pago,
+                detalle=detalle,
+                usuario_id=current_user,
+                descripcion=descripcion,
+                nombre_cliente_proveedor=nombre_cliente_proveedor
+            )
 
+        else:
+            CrearFactura = modelo_facturas.insert().values(
+
+                fecha_emision=fecha_emision,
+                radicado_factura=Radicado,
+                fecha_vencimiento=fecha_vencimiento,
+                monto_total=monto_total,
+                destino=destino,
+                estado=estado,
+                lote_asociado=lote_asociado,
+                tipo_venta=tipo_venta,
+                metodo_pago=metodo_pago,
+                detalle=detalle,
+                usuario_id=current_user,
+                descripcion=descripcion,
+                nombre_cliente_proveedor=nombre_cliente_proveedor
+            )
 
         IngresoFacturacion = db.execute(CrearFactura)
         db.commit()
