@@ -55,9 +55,9 @@ def get_database_session():
                    )
 async def inventario_bovino(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
     # Se llama la funcion con el fin que esta realice el calculo pertinete a la edad del animal ingresado
-    calculoEdad(db=db)
+    calculoEdad(db=db,current_user=current_user)
     actualizacion_peso(session=db,current_user=current_user)
-    eliminarduplicados(db=db)
+    eliminarduplicados(db=db,current_user=current_user)
     vida_util_macho_reproductor(db=db,current_user=current_user)
     try:
         items = db.query(modelo_bovinos_inventario).filter(modelo_bovinos_inventario.c.usuario_id == current_user ).all()

@@ -58,7 +58,7 @@ async def inventario_ceba(db: Session = Depends(get_database_session),current_us
     #llamdo de la funcion para calcular
     Estado_Optimo_Ceba(db=db,current_user=current_user)
     ganancia_peso_ceba(session=db,current_user=current_user)
-    eliminarduplicados(db=db)
+    eliminarduplicados(db=db,current_user=current_user)
     ganancia_peso_historica(session=db, current_user=current_user)
 
     #tasa_supervivencia(session=Session, current_user=current_user)

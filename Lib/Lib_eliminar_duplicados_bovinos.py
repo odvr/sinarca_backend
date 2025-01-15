@@ -28,10 +28,11 @@ logger.addHandler(file_handler)
 '''
 Eliminar duplicados
 '''
-def eliminarduplicados(db: Session ):
+def eliminarduplicados(db: Session,current_user ):
     #consulta_ceba = condb.execute(modelo_bovinos_inventario.select().
                         #where(modelo_bovinos_inventario.columns.proposito=="Ceba")).fetchall()
-    itemsCeba = db.execute(modelo_ceba.select()).all()
+    itemsCeba = db.execute(modelo_ceba.select().where(
+                    modelo_bovinos_inventario.columns.usuario_id==current_user)).all()
 
 
     for i in itemsCeba:
@@ -60,7 +61,8 @@ def eliminarduplicados(db: Session ):
             db.execute(modelo_levante.delete().where(modelo_levante.c.id_levante == idle))
             db.commit()
 
-    itemsMuertes = db.execute(modelo_datos_muerte.select()).all()
+    itemsMuertes = db.execute(modelo_datos_muerte.select().where(
+                    modelo_bovinos_inventario.columns.usuario_id==current_user)).all()
     for MuestesDatos in itemsMuertes:
         estado = MuestesDatos[3]
         id = MuestesDatos[0]

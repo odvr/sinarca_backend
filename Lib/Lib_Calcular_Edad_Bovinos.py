@@ -23,10 +23,11 @@ file_handler.setFormatter(formatter)
 # Agrega el manejador de archivo al logger
 logger.addHandler(file_handler)
 
-def calculoEdad(db: Session ):
+def calculoEdad(db: Session,current_user ):
  try:
     # Realiza la consulta general de la tabla de bovinos
-    consulta_fecha_nacimiento = db.execute(modelo_bovinos_inventario.select()).fetchall()
+    consulta_fecha_nacimiento = db.execute(modelo_bovinos_inventario.select().where(
+                    modelo_bovinos_inventario.columns.usuario_id==current_user)).fetchall()
     #Recorre los campos de la consulta
     for i in consulta_fecha_nacimiento:
         #Toma el ID del bovino para calcular la edad el campo numero 0
@@ -48,6 +49,8 @@ def calculoEdad(db: Session ):
             # actualizacion del campo en la base de datos tomando la variable ID
             db.execute(modelo_bovinos_inventario.update().values(edad=Edad_Animal).where(
                 modelo_bovinos_inventario.columns.id_bovino == id))
+
+            print(id,Edad_Animal)
 
             db.commit()
 
