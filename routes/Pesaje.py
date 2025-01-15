@@ -133,7 +133,7 @@ async def inventario_prod_leche(db: Session = Depends(get_database_session),curr
 @pesaje.get("/listar_tabla_pesaje", response_model=list[esquema_modelo_Reporte_Pesaje], tags=["Pesaje"] )
 async def listar_tabla_pesaje(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
-        actualizacion_peso(session=db)
+        actualizacion_peso(session=db,current_user=current_user)
         #tabla_pesaje = db.query(modelo_datos_pesaje).all()
         tabla_pesaje = db.query(modelo_datos_pesaje).filter(modelo_datos_pesaje.c.usuario_id == current_user).all()
 

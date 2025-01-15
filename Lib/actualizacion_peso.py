@@ -49,14 +49,16 @@ logger.addHandler(file_handler)
 """la siguiente funcion consulta los pesos de cada animal, toma el ultimo peso registrado
 segun fecha y lo actualiza en el campo peso de la tabla de bovinos"""
 
-def actualizacion_peso(session: Session):
+def actualizacion_peso(session: Session,current_user):
     try:
 
 
         # Realiza la consulta general de la tabla de registro de pesos
 
 
-        consulta_id = session.query(modelo_bovinos_inventario).all()
+        consulta_id = session.query(modelo_bovinos_inventario).where(
+                    modelo_bovinos_inventario.columns.usuario_id==current_user).all()
+
 
 
         # Recorre los campos de la consulta
