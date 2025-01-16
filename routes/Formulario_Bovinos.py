@@ -96,9 +96,9 @@ async def crear_bovinos(nombre_bovino: Optional [str] = Form(None), chip_asociad
             modelo_bovinos_inventario.select().where( modelo_bovinos_inventario.columns.chip_asociado == chip_asociado,
 
                                                      modelo_bovinos_inventario.columns.usuario_id == current_user)).all()
-
+        print (Consulta_Nomnbres_Chip)
         # Verificar si alguna de las consultas tiene resultados
-        if Consulta_Nomnbres_Bovinos or Consulta_Nomnbres_Chip:
+        if Consulta_Nomnbres_Bovinos or  Consulta_Nomnbres_Chip:
             return Response(status_code=status.HTTP_409_CONFLICT)
         else:
             if registroIngresoHato == "2000-01-01":
