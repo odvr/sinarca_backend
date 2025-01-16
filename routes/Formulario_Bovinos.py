@@ -82,7 +82,7 @@ async def crear_bovinos(nombre_bovino: Optional [str] = Form(None), chip_asociad
                         medio_pago_compra: Optional [str] = Form(None), comprador_compras: Optional [str] = Form(None), id_bovino_madre: Optional [str] = Form(None), id_bovino_padre: Optional [str] = Form(None), inseminacion:Optional [str] = Form(None),TiposPesaje:Optional [str] = Form(None),
                         id_registro_marca: Optional [str] = Form(None),LoteSeleccionado:Optional [str] = Form(None),registroIngresoHato: Optional[date] = None, db: Session = Depends(get_database_session),
                         current_user: Esquema_Usuario = Depends(get_current_user)):
-    eliminarduplicados(db=db)
+    eliminarduplicados(db=db,current_user=current_user)
     vientres_aptos(session=db, current_user=current_user)
 
     try:
@@ -700,7 +700,7 @@ Funcion Caga Animal
     "/crear_carga_animal/{id_bovino}",
     status_code=status.HTTP_201_CREATED,tags=["Formualario_Bovinos"])
 async def CrearCargaAnimal(id_bovino: str,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
-    eliminarduplicados(db=db)
+    eliminarduplicados(db=db,current_user=current_user)
     nombre_bovino = crud.bovinos_inventario.Buscar_Nombre(db=db, id_bovino=id_bovino,
                                                                            current_user=current_user)
 

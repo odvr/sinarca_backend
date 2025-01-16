@@ -391,7 +391,7 @@ La siguiente api crea en la tabla de leche con la llave foranea de id_bovino est
     status_code=status.HTTP_201_CREATED)
 async def CrearProdLeche( id_bovino: str,
                    ordeno: str,proposito:str,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
-    eliminarduplicados(db=db)
+    eliminarduplicados(db=db,current_user=current_user)
 
     try:
 

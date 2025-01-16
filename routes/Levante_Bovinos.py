@@ -58,7 +58,7 @@ Lista los animales en Levante
 async def inventario_levante(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
     Estado_Optimo_Levante(db=db,current_user=current_user)
     ganancia_peso_levante(session=db,current_user=current_user)
-    eliminarduplicados(db=db)
+    eliminarduplicados(db=db,current_user=current_user)
 
 
     try:
@@ -98,7 +98,7 @@ async def Animales_Optimo_Levante(db: Session = Depends(get_database_session),cu
     "/crear_prod_levante/{id_bovino}/{proposito}",
     status_code=status.HTTP_201_CREATED)
 async def CrearProdLevante(id_bovino: str,proposito:str,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
-    eliminarduplicados(db=db)
+    eliminarduplicados(db=db,current_user=current_user)
 
     try:
 
