@@ -50,7 +50,6 @@ def calculoEdad(db: Session,current_user ):
             db.execute(modelo_bovinos_inventario.update().values(edad=Edad_Animal).where(
                 modelo_bovinos_inventario.columns.id_bovino == id))
 
-            print(id,Edad_Animal)
 
             db.commit()
 

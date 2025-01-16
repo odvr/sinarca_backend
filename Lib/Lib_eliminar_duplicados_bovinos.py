@@ -32,7 +32,7 @@ def eliminarduplicados(db: Session,current_user ):
     #consulta_ceba = condb.execute(modelo_bovinos_inventario.select().
                         #where(modelo_bovinos_inventario.columns.proposito=="Ceba")).fetchall()
     itemsCeba = db.execute(modelo_ceba.select().where(
-                    modelo_bovinos_inventario.columns.usuario_id==current_user)).all()
+                    modelo_ceba.columns.usuario_id==current_user)).all()
 
 
     for i in itemsCeba:
@@ -62,7 +62,7 @@ def eliminarduplicados(db: Session,current_user ):
             db.commit()
 
     itemsMuertes = db.execute(modelo_datos_muerte.select().where(
-                    modelo_bovinos_inventario.columns.usuario_id==current_user)).all()
+                    modelo_datos_muerte.columns.usuario_id==current_user)).all()
     for MuestesDatos in itemsMuertes:
         estado = MuestesDatos[3]
         id = MuestesDatos[0]
