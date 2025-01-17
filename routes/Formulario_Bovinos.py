@@ -87,18 +87,29 @@ async def crear_bovinos(nombre_bovino: Optional [str] = Form(None), chip_asociad
 
     try:
 
+        # Verifica si existe un bovino con el nombre dado
+        Consulta_Nomnbres_Bovinos = db.execute(
+            modelo_bovinos_inventario.select().where(
+                modelo_bovinos_inventario.columns.nombre_bovino == nombre_bovino,  # Usamos el nombre enviado
+                modelo_bovinos_inventario.columns.usuario_id == current_user  # Usamos el usuario actual
+            )
+        ).first()
 
-        Consulta_Nomnbres_Bovinos = db.execute(modelo_bovinos_inventario.select().where(modelo_bovinos_inventario.columns.nombre_bovino ==nombre_bovino ,
-
-                    modelo_bovinos_inventario.columns.usuario_id == current_user)).all()
-
+        # Verifica si existe un bovino con el chip dado
         Consulta_Nomnbres_Chip = db.execute(
-            modelo_bovinos_inventario.select().where( modelo_bovinos_inventario.columns.chip_asociado == chip_asociado,
+            modelo_bovinos_inventario.select().where(
+                modelo_bovinos_inventario.columns.chip_asociado == chip_asociado,  # Usamos el chip enviado
+                modelo_bovinos_inventario.columns.usuario_id == current_user  # Usamos el usuario actual
+            )
+        ).first()
 
-                                                     modelo_bovinos_inventario.columns.usuario_id == current_user)).all()
+        if Consulta_Nomnbres_Bovinos or (Consulta_Nomnbres_Chip and Consulta_Nomnbres_Chip.chip_asociado is not None):
+            if Consulta_Nomnbres_Bovinos:
+                print(f"Nombre duplicado: {Consulta_Nomnbres_Bovinos.nombre_bovino}")
+            if Consulta_Nomnbres_Chip and Consulta_Nomnbres_Chip.chip_asociado is not None:
+                print(f"Chip duplicado: {Consulta_Nomnbres_Chip.chip_asociado}")
 
-        # Verificar si alguna de las consultas tiene resultados
-        if Consulta_Nomnbres_Bovinos or  Consulta_Nomnbres_Chip:
+            # Devuelve un conflicto si hay duplicados
             return Response(status_code=status.HTTP_409_CONFLICT)
         else:
             if registroIngresoHato == "2000-01-01":
