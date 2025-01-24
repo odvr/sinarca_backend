@@ -31,6 +31,8 @@ def enviar_correo(destinatario, asunto,Notificacion):
 
     mensaje = """
     
+
+    
     <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html dir="ltr" xmlns="http://www.w3.org/1999/xhtml" xmlns:o="urn:schemas-microsoft-com:office:office" lang="es" style="font-family:arial, 'helvetica neue', helvetica, sans-serif">
  <head>
@@ -105,7 +107,7 @@ a[x-apple-data-detectors] {
                   <td align="left" style="padding:0;Margin:0;width:560px">
                    <table width="100%" cellspacing="0" cellpadding="0" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px">
                      <tr>
-                      <td align="center" style="padding:0;Margin:0;font-size:0px"><a target="_blank" href="https://sinarca.co/" style="-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;text-decoration:underline;color:#709317;font-size:14px"><img src="https://ffzppoq.stripocdn.email/content/guids/CABINET_4bd5c81cc2f525fcbc2d6e291205caf07d7be3642d9804f6763bb999ae5b2fdc/images/sin_titulo_1photoroompngphotoroom.png" alt="Ruta Ganadera " style="display:block;border:0;outline:none;text-decoration:none;-ms-interpolation-mode:bicubic" height="145" title="Ruta Ganadera "></a></td>
+                      <td align="center" style="padding:0;Margin:0;font-size:0px"><a target="_blank" href="https://sinarca.co/" style="-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;text-decoration:underline;color:#709317;font-size:14px"><img src="https://sinarca.co/static/media/logos.bc3b951a9e95e58975da.png" alt="Ruta Ganadera " style="display:block;border:0;outline:none;text-decoration:none;-ms-interpolation-mode:bicubic" height="145" title="Ruta Ganadera "></a></td>
                      </tr>
                    </table></td>
                  </tr>
@@ -263,6 +265,7 @@ a[x-apple-data-detectors] {
   </div>
  </body>
 </html>
+    
     
     """
     mensaje = mensaje.replace('{{NotificacionesCorreo}}', Notificacion)

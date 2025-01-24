@@ -413,7 +413,7 @@ class esquema_partos(BaseModel):
 
 class esquema_palpaciones(BaseModel):
     id_palpacion: int
-    id_bovino: int
+    id_bovino:Optional[int] = None
     fecha_palpacion: Optional[date] = None
     diagnostico_prenez: Optional[str] = None
     observaciones: Optional[str] = None

@@ -4,6 +4,8 @@ Librerias requeridas
 '''
 
 import logging
+
+from Lib.Envia_Boletines_Informativos import enviar_Boletines
 from Lib.enviar_correos import enviar_correo
 from sqlalchemy.orm import Session
 from fastapi import APIRouter, Response,Form
@@ -96,6 +98,37 @@ async def envioCorreolandingPage(destinatario:  Optional [List[str]] = Form(None
 
                                                                           )
             db.execute(ingresoEnvio)
+
+            if tipoDestinatario == "Noticias":
+                Asunto = "  Boletín Informativo"
+                mensaje = """ <div class="container">
+    
+        <h2>¡Recuerda Pesar tu Ganado Periódicamente!</h2>
+        <p>En <strong>Ruta Ganadera</strong>, queremos recordarte la <strong>importancia del pesaje periódico</strong> de tu ganado bovino. Esta práctica esencial te ayudará a mantener el control de tu producción, mejorar el bienestar de tus animales y optimizar los recursos de tu finca.</p>
+
+        <h2>📋 ¿Por qué es fundamental pesar tu ganado?</h2>
+        <ul>
+            <li>✅ <strong>Monitoreo del crecimiento:</strong> Detecta si los animales están alcanzando sus metas de peso en cada etapa de su desarrollo.</li>
+            <li>✅ <strong>Salud y bienestar:</strong> Identifica rápidamente posibles problemas de salud relacionados con el peso.</li>
+            <li>✅ <strong>Trazabilidad y mercado:</strong> Mantén un registro actualizado para cumplir con estándares de calidad.</li>
+            <li>✅ <strong>Optimización económica:</strong> Ajusta la alimentación y evita gastos innecesarios, aumentando la rentabilidad.</li>
+        </ul>
+
+        <h2>📅 Recomendación de frecuencia</h2>
+        <p>Te recomendamos realizar el pesaje de tus animales <strong>al menos una vez al mes</strong> o adaptarlo según las necesidades de tu sistema de producción.</p>
+      
+        <h2>📈 Beneficios del pesaje regular</h2>
+        <ul>
+            <li>🔹 Asegura que tu ganado alcance su máximo potencial productivo.</li>
+            <li>🔹 Facilita la planificación de reproducción y comercialización.</li>
+            <li>🔹 Contribuye al bienestar general de tus animales, lo que se traduce en mayor calidad y rendimiento.</li>
+        </ul>
+
+        <p><strong>¡Haz del pesaje periódico una prioridad!</strong></p>
+        <p>Una acción tan simple como monitorear el peso de tu ganado puede marcar una gran diferencia en los resultados de tu negocio. Si necesitas más información o quieres recibir recomendaciones personalizadas, estamos a tu disposición.</p>
+
+                """
+                enviar_Boletines(correo,Asunto, mensaje )
             db.commit()
     return Response(status_code=status.HTTP_201_CREATED)
 

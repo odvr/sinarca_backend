@@ -8,9 +8,9 @@ from typing import Annotated
 from Lib.palpaciones import palpaciones
 # # importa la conexion de la base de datos
 from config.db import get_session
-from fastapi import Form
+from fastapi import Form,Query
 # # importa el esquema de los bovinos
-from models.modelo_bovinos import modelo_palpaciones
+from models.modelo_bovinos import modelo_palpaciones, modelo_bovinos_inventario
 from fastapi import  status,  APIRouter, Response,Request
 from datetime import date
 from starlette.status import HTTP_204_NO_CONTENT
@@ -18,6 +18,7 @@ from fastapi import  Depends
 from routes.rutas_bovinos import get_current_user
 from schemas.schemas_bovinos import  Esquema_Usuario, esquema_palpaciones
 from sqlalchemy.orm import Session
+from sqlalchemy import  or_
 from typing import Optional
 # Configuracion de la libreria para los logs de sinarca
 # Crea un objeto logger
@@ -131,3 +132,51 @@ async def eliminar_bovino(id_bovino: int,db: Session = Depends(get_database_sess
 
     # retorna un estado de no contenido
     return Response(status_code=HTTP_204_NO_CONTENT)
+
+
+
+"""
+Reporte por Lotes
+"""
+
+@Palpaciones_Bovinos.get("/ConsultarReportePalpaciones", response_model=list[esquema_palpaciones], tags=["Palpaciones"])
+async def ConsultarReportePalpaciones(
+    fecha_inicio: Optional[date] = Query(None),
+    fecha_fin: Optional[date] = Query(None),
+    lote: Optional[str] = Query(None),
+    db: Session = Depends(get_database_session),
+    current_user: Esquema_Usuario = Depends(get_current_user)
+):
+    try:
+      
+        ConsultarPorLote = db.query(
+            modelo_palpaciones.c.id_palpacion,
+            modelo_palpaciones.c.id_bovino,
+            modelo_palpaciones.c.fecha_palpacion,
+            modelo_palpaciones.c.diagnostico_prenez,
+            modelo_palpaciones.c.observaciones,
+            modelo_palpaciones.c.usuario_id,
+            modelo_palpaciones.c.nombre_bovino,
+            modelo_bovinos_inventario.c.nombre_lote_bovino,
+            modelo_palpaciones.c.dias_gestacion,
+            modelo_palpaciones.c.fecha_estimada_prenez,
+            modelo_palpaciones.c.fecha_estimada_parto
+        ).join(
+            modelo_bovinos_inventario, modelo_bovinos_inventario.c.id_bovino == modelo_palpaciones.c.id_bovino
+        ).filter(
+            modelo_bovinos_inventario.columns.usuario_id == current_user,
+            modelo_bovinos_inventario.columns.nombre_lote_bovino == lote
+        )
+
+        if fecha_inicio:
+            ConsultarPorLote = ConsultarPorLote.filter(modelo_palpaciones.c.fecha_palpacion >= fecha_inicio)
+        if fecha_fin:
+            ConsultarPorLote = ConsultarPorLote.filter(modelo_palpaciones.c.fecha_palpacion <= fecha_fin)
+
+        return ConsultarPorLote.all()
+
+    except Exception as e:
+        logger.error(f'Error al obtener Reporte Palpaciones: {e}')
+        raise
+    finally:
+        db.close()
