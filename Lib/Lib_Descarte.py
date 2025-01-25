@@ -16,12 +16,13 @@ logger.addHandler(file_handler)
 
 """la siguiente funcion trae los campos de edad y peso de cada animal
 a los animales de descarte"""
-def descarte(db: Session ):
+def descarte(db: Session,current_user):
   try:
       # join de tablas
     consulta_animales = db.query(modelo_descarte.c.id_bovino, modelo_bovinos_inventario.c.edad,
                             modelo_bovinos_inventario.c.peso).\
-        join(modelo_descarte, modelo_descarte.c.id_bovino == modelo_bovinos_inventario.c.id_bovino).all()
+        join(modelo_descarte, modelo_descarte.c.id_bovino == modelo_bovinos_inventario.c.id_bovino).where(
+                    modelo_bovinos_inventario.columns.usuario_id==current_user).all()
     for i in consulta_animales:
         # Toma el ID del bovino en este caso es el campo 0
         id = i[0]

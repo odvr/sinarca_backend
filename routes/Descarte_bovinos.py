@@ -50,7 +50,7 @@ def get_database_session():
 async def listarAnimalesDescarte(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
 
     try:
-        descarte(db=db)
+        descarte(db=db,current_user=current_user)
         #itemsAnimalesDescarte = db.execute(modelo_descarte.select()).all()
         itemsAnimalesDescarte = db.query(modelo_descarte).filter(modelo_descarte.c.usuario_id == current_user).all()
 

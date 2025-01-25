@@ -2,6 +2,9 @@
 Librerias requeridas
 '''
 import logging
+
+from sqlalchemy.sql.functions import current_user
+
 from Lib.Lib_Intervalo_Partos import intervalo_partos
 from Lib.Lib_eliminar_duplicados_bovinos import eliminarduplicados
 from Lib.Registro_partos import registro_partos_animales
@@ -86,26 +89,26 @@ async def inventario_prod_leche(db: Session = Depends(get_database_session),
 
     try:
         "Librerias Requeridas"
-        #peso_segun_raza(session=db,current_user=current_user)
-        Edad_Primer_Parto(session=db)
-        Edad_Sacrificio_Lecheras(condb=db)
+        peso_segun_raza(session=db,current_user=current_user)
+        Edad_Primer_Parto(session=db,current_user=current_user)
+        Edad_Sacrificio_Lecheras(condb=db,current_user=current_user)
         promedio_litros_leche(session=db,current_user=current_user)
-        #intervalo_partos(session=db,current_user=current_user)
-        EliminarDuplicadosLeche(condb=db)
+        intervalo_partos(session=db,current_user=current_user)
+        EliminarDuplicadosLeche(condb=db,current_user=current_user)
 
-        #IEP_por_raza(session= db,current_user=current_user)
+        IEP_por_raza(session= db,current_user=current_user)
         registro_partos_animales(session= db,current_user=current_user)
         dias_abiertos(session= db,current_user=current_user)
 
 
-        #abuelo_materno(session=db, current_user=current_user)
-        #abuela_materna(session=db, current_user=current_user)
-        #abuelo_paterno(session=db, current_user=current_user)
-        #abuela_paterna(session=db, current_user=current_user)
-        #bisabuelo_materno(session=db, current_user=current_user)
-        #bisabuelo_paterno(session=db, current_user=current_user)
-        #endogamia(session=db, current_user=current_user)
-        #intervalo_partos(session=db, current_user=current_user)
+        abuelo_materno(session=db, current_user=current_user)
+        abuela_materna(session=db, current_user=current_user)
+        abuelo_paterno(session=db, current_user=current_user)
+        abuela_paterna(session=db, current_user=current_user)
+        bisabuelo_materno(session=db, current_user=current_user)
+        bisabuelo_paterno(session=db, current_user=current_user)
+        endogamia(session=db, current_user=current_user)
+        intervalo_partos(session=db, current_user=current_user)
         tipo_ganado_leche(session=db, current_user=current_user)
 
         #itemsLeche = db.query(modelo_leche).all()
@@ -470,12 +473,13 @@ y la fecha de nacimiento para devolver la eeda (en meses) en la que la novilla
 """
 
 
-def Edad_Primer_Parto(session:Session):
+def Edad_Primer_Parto(session:Session,current_user):
   try:
     # join de las tablas de leche y bovinos con los campos requeridos
     consulta_global = session.query(modelo_bovinos_inventario.c.id_bovino,
                       modelo_bovinos_inventario.c.fecha_nacimiento, modelo_leche.c.fecha_primer_parto). \
-        join(modelo_leche, modelo_bovinos_inventario.c.id_bovino == modelo_leche.c.id_bovino).all()
+        join(modelo_leche, modelo_bovinos_inventario.c.id_bovino == modelo_leche.c.id_bovino).where(
+                    modelo_bovinos_inventario.columns.usuario_id==current_user).all()
     # Recorre los campos de la consulta
     for i in consulta_global:
         # Toma el ID del bovino para calcular la la edad del primer parto de cada animal
@@ -513,10 +517,11 @@ del tiempo actual
 
 
 
-def Edad_Sacrificio_Lecheras(condb:Session):
+def Edad_Sacrificio_Lecheras(condb:Session,current_user):
   try:
     # consulta de la fecha de primer parto
-    Consulta_P1 = condb.execute(modelo_leche.select()).fetchall()
+    Consulta_P1 = condb.execute(modelo_leche.select().where(
+                    modelo_leche.columns.usuario_id==current_user)).fetchall()
     # Recorre los campos de la consulta
     for i in Consulta_P1:
         # Toma el ID del bovino para calcular la edad de vida util
@@ -553,7 +558,8 @@ productiva
 def Dias_Abiertos(condb=Session):
   try:
     # consulta a la tabla
-    Consulta_fechas = condb.execute(modelo_leche.select()).fetchall()
+    Consulta_fechas = condb.execute(modelo_leche.select().where(
+                    modelo_leche.columns.usuario_id==current_user)).fetchall()
     # Recorre los campos de la consulta
     for i in Consulta_fechas:
         # Toma el ID del bovino para calcular la variable
@@ -577,8 +583,9 @@ def Dias_Abiertos(condb=Session):
   finally:
       condb.close()
 
-def EliminarDuplicadosLeche(condb:Session):
-    itemsLeche = condb.execute(modelo_leche.select()).all()
+def EliminarDuplicadosLeche(condb:Session,current_user):
+    itemsLeche = condb.execute(modelo_leche.select().where(
+                    modelo_leche.columns.usuario_id==current_user)).all()
 
 
 
