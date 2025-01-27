@@ -147,6 +147,8 @@ async def ConsultarReportePalpaciones(
     db: Session = Depends(get_database_session),
     current_user: Esquema_Usuario = Depends(get_current_user)
 ):
+
+    ""
     try:
 
         ConsultarPorLote = db.query(
