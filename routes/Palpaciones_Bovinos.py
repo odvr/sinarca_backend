@@ -139,16 +139,16 @@ async def eliminar_bovino(id_bovino: int,db: Session = Depends(get_database_sess
 Reporte por Lotes
 """
 
-@Palpaciones_Bovinos.get("/ConsultarReportePalpaciones", response_model=list[esquema_palpaciones], tags=["Palpaciones"])
+@Palpaciones_Bovinos.get("/ConsultarReportePalpaciones/{fecha_inicio}/{fecha_fin}/{lote}", response_model=list[esquema_palpaciones], tags=["Palpaciones"])
 async def ConsultarReportePalpaciones(
-    fecha_inicio: Optional[date] = Query(None),
-    fecha_fin: Optional[date] = Query(None),
-    lote: Optional[str] = Query(None),
+    fecha_inicio: date,
+    fecha_fin: date,
+    lote: str,
     db: Session = Depends(get_database_session),
     current_user: Esquema_Usuario = Depends(get_current_user)
 ):
     try:
-      
+
         ConsultarPorLote = db.query(
             modelo_palpaciones.c.id_palpacion,
             modelo_palpaciones.c.id_bovino,
