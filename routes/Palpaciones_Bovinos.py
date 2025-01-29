@@ -5,6 +5,8 @@ import logging
 
 import crud
 from typing import Annotated
+
+from Lib.Script.Lib_notificacion_palpaciones_partos import notificacion_proximidad_parto
 from Lib.palpaciones import palpaciones
 # # importa la conexion de la base de datos
 from config.db import get_session
@@ -49,6 +51,7 @@ async def Listar_Palpaciones(db: Session = Depends(get_database_session),current
     try:
 
         palpaciones(session=db, current_user=current_user)
+        notificacion_proximidad_parto(session=db, current_user=current_user)
 
 
         ItemsPalpaciones = db.query(modelo_palpaciones).filter(modelo_palpaciones.c.usuario_id == current_user).all()

@@ -834,6 +834,14 @@ modelo_indicadores_finca = Table("indicadores_finca", meta,Column("id_indicadore
     Column("IEP_hato_finca", Float),
     Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")),
     Column("id_finca", Integer, ForeignKey("fincas.id_finca")),
-    Column("nombre_finca", String(300))
-)
+    Column("nombre_finca", String(300)))
+
+modelo_notificacion_proximidad_parto = Table("notificacion_proximidad_parto", meta, Column("id_notificacion", Integer, primary_key=True),
+                               Column("id_bovino", Integer),
+                               Column("nombre_bovino", String(300)),
+                               Column("fecha_estimada_parto", Date),
+                               Column("fecha_mensaje", Date),
+                               Column("mensaje", String(300)),
+                               Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
+
 meta.create_all(engine)

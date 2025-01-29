@@ -1160,3 +1160,16 @@ class esquema_indicadores_finca(BaseModel):
     class Config:
         orm_mode = True
         env_file = ".env"
+
+
+class esquema_notificacion_proximidad_parto(BaseModel):
+    id_notificacion   : int
+    id_bovino: Optional[int] = None
+    nombre_bovino: Optional[str] = None
+    fecha_estimada_parto : Optional[date] = None
+    fecha_mensaje: Optional[date] = None
+    mensaje: Optional[str] = None
+    usuario_id: Optional[str] = None
+    class Config:
+        orm_mode = True
+        env_file = ".env"
