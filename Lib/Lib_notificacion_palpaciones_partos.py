@@ -16,7 +16,9 @@ from sqlalchemy.sql.functions import current_user
 # importa la conexion de la base de datos
 from sqlalchemy.orm import Session
 
+import crud
 from Lib.enviar_correos import enviar_correo
+from config.db import get_session
 # importa el esquema de los bovinos
 from models.modelo_bovinos import modelo_bovinos_inventario, modelo_leche, modelo_historial_partos, \
     modelo_orden_peso, modelo_palpaciones, modelo_notificacion_proximidad_parto, modelo_usuarios
@@ -55,12 +57,13 @@ logger.addHandler(file_handler)
 #from twilio.rest import Client
 """la siguinete funcion determina e"""
 
-def notificacion_proximidad_parto(session:Session,current_user):
+def notificacion_proximidad_parto():
+    # Crear una sesión de base de datos
+    session: Session = get_session()
     try:
         #consulta que trae el el listado de animales preñadas
         animales_palapaciones_partos= session.query(modelo_palpaciones).\
-            filter(modelo_palpaciones.c.diagnostico_prenez=="Preñada",
-                   modelo_palpaciones.c.usuario_id==current_user).all()
+            filter(modelo_palpaciones.c.diagnostico_prenez=="Preñada").all()
         # recorre el bucle
         for i in animales_palapaciones_partos:
             # Toma el ID del bovino
@@ -69,6 +72,8 @@ def notificacion_proximidad_parto(session:Session,current_user):
             fecha_estimada_parto = i.fecha_estimada_parto
             # Toma el nombre del bovino
             nombre_bovino = i.nombre_bovino
+            #toma el usuario
+            usuario_id= i.usuario_id
 
             #estima la diferencia en dias entre la fecha estimada de parto y la fecha actual
             diferencia= fecha_estimada_parto-date.today()
@@ -88,7 +93,8 @@ def notificacion_proximidad_parto(session:Session,current_user):
                     consulta_notificacion = session.query(modelo_notificacion_proximidad_parto). \
                         filter(modelo_notificacion_proximidad_parto.c.id_bovino == id_bovino,
                                modelo_notificacion_proximidad_parto.c.fecha_estimada_parto == fecha_estimada_parto,
-                               modelo_notificacion_proximidad_parto.c.usuario_id == current_user).all()
+                               modelo_notificacion_proximidad_parto.c.usuario_id == usuario_id).all()
+                    print(consulta_notificacion)
 
                     if consulta_notificacion is None or consulta_notificacion==[]:
                         #si no se ha generado, se genera y se carga
@@ -97,15 +103,15 @@ def notificacion_proximidad_parto(session:Session,current_user):
                                                                            fecha_estimada_parto=fecha_estimada_parto,
                                                                            fecha_mensaje=fecha_mensaje,
                                                                            mensaje=mensaje,
-                                                                           usuario_id=current_user)
+                                                                           usuario_id=usuario_id)
 
                         session.execute(ingresoNotificacion)
+                        session.commit()
+
 
                         #finalmente se consulta el correo del usuario y se envia la notificacion por correo
-                        consulta_usuario = session.query(modelo_usuarios). \
-                            filter(modelo_usuarios.c.usuario_id == current_user).first()
-
-                        correo_usuario= consulta_usuario[4]
+                        correo_usuario = crud.bovinos_inventario.Buscar_Correo_Usuario(db=session,
+                                                                                          usuario_id=usuario_id)
 
                         enviar_correo(correo_usuario,"Bovino con fecha próxima de parto",mensaje)
 
@@ -121,7 +127,9 @@ def notificacion_proximidad_parto(session:Session,current_user):
 
         session.commit()
     except Exception as e:
-        logger.error(f'Error Funcion tipo_ganado_leche: {e}')
-        raise
+        logger.error(f'Error Funcion notificacion_proximidad_parto: {e}')
+        # Revertir cambios si ocurre un error
+        session.rollback()
+        raise e
     finally:
         session.close()

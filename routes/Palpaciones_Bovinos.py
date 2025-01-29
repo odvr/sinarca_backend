@@ -4,23 +4,21 @@ Librerias requeridas
 import logging
 
 import crud
-from typing import Annotated
 
-from Lib.Script.Lib_notificacion_palpaciones_partos import notificacion_proximidad_parto
+from Lib.Lib_notificacion_palpaciones_partos import notificacion_proximidad_parto
 from Lib.palpaciones import palpaciones
 # # importa la conexion de la base de datos
 from config.db import get_session
-from fastapi import Form,Query
+from fastapi import Form
 # # importa el esquema de los bovinos
 from models.modelo_bovinos import modelo_palpaciones, modelo_bovinos_inventario
-from fastapi import  status,  APIRouter, Response,Request
+from fastapi import  status,  APIRouter, Response
 from datetime import date
 from starlette.status import HTTP_204_NO_CONTENT
 from fastapi import  Depends
 from routes.rutas_bovinos import get_current_user
 from schemas.schemas_bovinos import  Esquema_Usuario, esquema_palpaciones
 from sqlalchemy.orm import Session
-from sqlalchemy import  or_
 from typing import Optional
 # Configuracion de la libreria para los logs de sinarca
 # Crea un objeto logger
@@ -51,7 +49,6 @@ async def Listar_Palpaciones(db: Session = Depends(get_database_session),current
     try:
 
         palpaciones(session=db, current_user=current_user)
-        notificacion_proximidad_parto(session=db, current_user=current_user)
 
 
         ItemsPalpaciones = db.query(modelo_palpaciones).filter(modelo_palpaciones.c.usuario_id == current_user).all()
