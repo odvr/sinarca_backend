@@ -86,7 +86,7 @@ def notificacion_proximidad_parto():
                     pass
                 #caso contrario se genera
                 else:
-                    mensaje = f'el bovino {nombre_bovino}, tiene una fecha aproximada de parto para el día {fecha_estimada_parto}, considera estar atento'
+                    mensaje = f'El bovino {nombre_bovino}, tiene una fecha aproximada de parto para el día {fecha_estimada_parto}, considera estar atento'
                     fecha_mensaje = date.today()
 
                     #consulta que averigua si la notificacion ya se genero
@@ -94,7 +94,7 @@ def notificacion_proximidad_parto():
                         filter(modelo_notificacion_proximidad_parto.c.id_bovino == id_bovino,
                                modelo_notificacion_proximidad_parto.c.fecha_estimada_parto == fecha_estimada_parto,
                                modelo_notificacion_proximidad_parto.c.usuario_id == usuario_id).all()
-                    print(consulta_notificacion)
+
 
                     if consulta_notificacion is None or consulta_notificacion==[]:
                         #si no se ha generado, se genera y se carga

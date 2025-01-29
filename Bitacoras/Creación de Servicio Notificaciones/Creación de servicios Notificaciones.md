@@ -87,3 +87,53 @@ Deberías ver la tarea que escribiste:
 
 5. Prueba Manualmente el Script
 `/bin/bash /app/Lib/Script/Notificaciones.sh >> /app/Lib/Script/Logs/Logs.log 2>&1`
+
+
+Anexo del Servicio 
+
+
+Se realiza ajuste 
+
+
+
+Para programar la ejecución de Logs_Notificaciones.sh en Crontab, sigue estos pasos:
+
+1️⃣ Asegúrate de que el script tenga permisos de ejecución:
+Ejecuta en la terminal:
+
+
+`chmod +x /app/Lib/Script/Notificaciones.sh`
+
+2️⃣ Edita el crontab:
+Abre el crontab con:
+
+`crontab -e`
+
+3️⃣ Agrega una línea para programar la tarea:
+Por ejemplo, si deseas ejecutar el script cada día a las 8:00 AM:
+
+`0 8 * * * /app/Lib/Script/Logs_Notificaciones.sh`
+
+📌 Explicación del cronjob (0 8 * * *):
+
+0 → Minuto 0
+8 → Hora 8 AM
+* → Cualquier día del mes
+* → Cualquier mes
+* → Cualquier día de la semana
+Si quieres ejecutarlo cada hora:
+
+`0 * * * * /app/Lib/Script/Logs_Notificaciones.sh`
+Si quieres ejecutarlo cada 5 minutos:
+
+
+`*/5 * * * * /app/Lib/Script/Logs_Notificaciones.sh`
+4️⃣ Verifica que el cron esté corriendo:
+Después de guardarlo en crontab -e, revisa si está programado con:
+
+
+
+`crontab -l`
+5️⃣ Revisa los logs de cron si no funciona:
+
+`cat /var/log/syslog | grep CRON****`
