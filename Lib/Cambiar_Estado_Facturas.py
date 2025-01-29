@@ -29,7 +29,7 @@ def CambiarEstadoFactura():
         for factura in ConsultarFechaFactura:
             fechaVencimiento = factura.fecha_vencimiento
             estadoFactura = factura.estado
-            if fechaVencimiento < FechaActual and estadoFactura == "pendiente":
+            if fechaVencimiento <= FechaActual and estadoFactura == "pendiente":
                 # Consultar facturas que no han vencido
                 ConsultarFechaFactura = session.query(modelo_facturas). \
                     filter(modelo_facturas.c.fecha_vencimiento >= FechaActual).all()
