@@ -8,7 +8,7 @@ Librerias requeridas
 import logging
 from datetime import date, timedelta
 
-from fastapi import APIRouter
+
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy import desc
 from sqlalchemy.sql.functions import current_user
@@ -20,20 +20,7 @@ import crud
 from Lib.enviar_correos import enviar_correo
 from config.db import get_session
 # importa el esquema de los bovinos
-from models.modelo_bovinos import modelo_bovinos_inventario, modelo_leche, modelo_historial_partos, \
-    modelo_orden_peso, modelo_palpaciones, modelo_notificacion_proximidad_parto, modelo_usuarios
-
-oauth2_scheme = OAuth2PasswordBearer("/token")
-
-
-
-
-
-
-
-
-# Configuracion de las rutas para fash api
-rutas_bovinos = APIRouter()
+from models.modelo_bovinos import   modelo_palpaciones, modelo_notificacion_proximidad_parto, modelo_usuarios
 
 # Configuracion de la libreria para los logs de sinarca
 # Crea un objeto logger
