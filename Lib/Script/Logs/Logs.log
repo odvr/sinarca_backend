@@ -1,0 +1,20 @@
+[Wed Jan 29 19:41:46 UTC 2025] Ejecutando el script Python...
+Traceback (most recent call last):
+  File "/app/Lib/Script/Notificaciones.py", line 12, in <module>
+    notificacion_proximidad_parto()
+  File "/app/Lib/Lib_notificacion_palpaciones_partos.py", line 133, in notificacion_proximidad_parto
+    raise e
+  File "/app/Lib/Lib_notificacion_palpaciones_partos.py", line 79, in notificacion_proximidad_parto
+    diferencia= fecha_estimada_parto-date.today()
+TypeError: unsupported operand type(s) for -: 'NoneType' and 'datetime.date'
+[Wed Jan 29 19:41:48 UTC 2025] Script Python terminado.
+[Wed Jan 29 19:49:01 UTC 2025] Ejecutando el script Python...
+[Wed Jan 29 19:49:03 UTC 2025] Script Python terminado.
+[Wed Jan 29 19:58:29 UTC 2025] Ejecutando el script Python...
+[]
+[Wed Jan 29 19:58:35 UTC 2025] Script Python terminado.
+[Wed Jan 29 20:04:22 UTC 2025] Ejecutando el script Python...
+[Wed Jan 29 20:04:24 UTC 2025] Script Python terminado.
+[Wed Jan 29 20:09:37 UTC 2025] Ejecutando el script Python...
+[(1, 137, b'HOLA MUNDO DANIEL VARGAS ', datetime.date(2025, 2, 11), datetime.date(2025, 1, 29), b'el bovino HOLA MUNDO DANIEL VARGAS , tiene una fecha aproximada de parto para el d\xc3\xada 2025-02-11, considera estar atento', b'admin')]
+[Wed Jan 29 20:09:40 UTC 2025] Script Python terminado.

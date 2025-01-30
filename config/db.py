@@ -22,15 +22,23 @@ file_handler.setFormatter(formatter)
 # Agrega el manejador de archivo al logger
 logger.addHandler(file_handler)
 
+"""
+Configuaración del Correo
+"""
+
+remitente = 'rutaganadera.co@gmail.com'
+password = 'ppxg ldje ckty ktmd'
+servidor_smtp = 'smtp.gmail.com'
+puerto_smtp = 587
 
 """
 Registra tu base de datos siguiendo los parametros en el ejemplo:
 mariadb+mariadbconnector://usuario:password@IPbasededatos:puerto/nombreBasededatos"
 """
-engine = sqlalchemy.create_engine("mariadb+mariadbconnector://root:t&G2aL#p9B#z@3.87.217.60:3306/sinarca")
+engine = sqlalchemy.create_engine("mariadb+mariadbconnector://root:1q2w3e4r@host.docker.internal:3307/sinarca1")
 meta = MetaData()
 def get_session():
-    engine = sqlalchemy.create_engine("mariadb+mariadbconnector://root:t&G2aL#p9B#z@3.87.217.60:3306/sinarca")
+    engine = sqlalchemy.create_engine("mariadb+mariadbconnector://root:1q2w3e4r@host.docker.internal:3307/sinarca1")
     try:
         Session = sessionmaker(bind=engine)
         session = Session()
@@ -39,7 +47,12 @@ def get_session():
     except Exception as e:
         logger.error(f'Error al Conectar la Base de datos: {e}')
         raise e
+"""
+Se incluye la ruta base para realizar la eliminación del path fisico de las Imagenes de Perfil
 
+"""
+
+Rutabase = "/app"
 
 
 
