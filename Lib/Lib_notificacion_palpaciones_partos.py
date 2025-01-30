@@ -7,15 +7,10 @@ Librerias requeridas
 
 import logging
 from datetime import date, timedelta
-
-
-from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy import desc
 from sqlalchemy.sql.functions import current_user
-
 # importa la conexion de la base de datos
 from sqlalchemy.orm import Session
-
 import crud
 from Lib.enviar_correos import enviar_correo
 from config.db import get_session
