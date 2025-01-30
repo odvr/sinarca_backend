@@ -11,5 +11,5 @@ export PYTHONPATH="/app"
 
 # Ejecutar el script Python y redirigir los logs
 echo "[$(date)] Ejecutando el script Python..." >> "$LOG_PATH"
-python "$SCRIPT_PATH" >> "$LOG_PATH" 2>&1
+python3 "$SCRIPT_PATH" >> "$LOG_PATH" 2>&1
 echo "[$(date)] Script Python terminado." >> "$LOG_PATH"
