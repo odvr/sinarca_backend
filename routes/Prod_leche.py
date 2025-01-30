@@ -65,6 +65,7 @@ async def id_inventario_bovino_leche(id_bovino: str,db: Session = Depends(get_da
 
     try:
         # Consultar los datos de producción de leche del bovino especificado
+        promedio_litros_leche(session=db, current_user=current_user)
         consulta = db.execute(
             modelo_leche.select().where(modelo_leche.columns.id_bovino == id_bovino)).first()
         # Cerrar la sesión
@@ -92,23 +93,23 @@ async def inventario_prod_leche(db: Session = Depends(get_database_session),
         peso_segun_raza(session=db,current_user=current_user)
         Edad_Primer_Parto(session=db,current_user=current_user)
         Edad_Sacrificio_Lecheras(condb=db,current_user=current_user)
-        promedio_litros_leche(session=db,current_user=current_user)
+
         intervalo_partos(session=db,current_user=current_user)
         EliminarDuplicadosLeche(condb=db,current_user=current_user)
 
-        IEP_por_raza(session= db,current_user=current_user)
-        registro_partos_animales(session= db,current_user=current_user)
-        dias_abiertos(session= db,current_user=current_user)
+        #IEP_por_raza(session= db,current_user=current_user)
+        #registro_partos_animales(session= db,current_user=current_user)
+        #dias_abiertos(session= db,current_user=current_user)
 
 
-        abuelo_materno(session=db, current_user=current_user)
-        abuela_materna(session=db, current_user=current_user)
-        abuelo_paterno(session=db, current_user=current_user)
-        abuela_paterna(session=db, current_user=current_user)
-        bisabuelo_materno(session=db, current_user=current_user)
-        bisabuelo_paterno(session=db, current_user=current_user)
-        endogamia(session=db, current_user=current_user)
-        intervalo_partos(session=db, current_user=current_user)
+        #abuelo_materno(session=db, current_user=current_user)
+        #abuela_materna(session=db, current_user=current_user)
+        #abuelo_paterno(session=db, current_user=current_user)
+        #abuela_paterna(session=db, current_user=current_user)
+        #bisabuelo_materno(session=db, current_user=current_user)
+        #bisabuelo_paterno(session=db, current_user=current_user)
+        #endogamia(session=db, current_user=current_user)
+        #intervalo_partos(session=db, current_user=current_user)
         tipo_ganado_leche(session=db, current_user=current_user)
 
         #itemsLeche = db.query(modelo_leche).all()
@@ -442,6 +443,7 @@ async def CrearProdLeche( id_bovino: str,
 async def Listar_Historial_Dias_Abiertos(id_bovino: str,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
 
     try:
+        dias_abiertos(session=db, current_user=current_user)
         consulta = db.execute(
             modelo_dias_abiertos.select().where(modelo_dias_abiertos.columns.id_bovino == id_bovino)).all()
         palpaciones(session=db, current_user=current_user)

@@ -94,7 +94,7 @@ async def listar_tabla_endogamia(db: Session = Depends(get_database_session),cur
         bisabuelo_materno(session=db, current_user=current_user)
         bisabuelo_paterno(session=db, current_user=current_user)
         endogamia(session=db, current_user=current_user)
-        endogamia(session=db, current_user=current_user)
+
 
     except Exception as e:
         logger.error(f'Error al obtener TABLA DE ENDOGAMIA: {e}')
