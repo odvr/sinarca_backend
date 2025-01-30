@@ -6,10 +6,7 @@ Librerias requeridas
 '''
 
 import logging
-from datetime import date, timedelta
-from sqlalchemy import desc
-from sqlalchemy.sql.functions import current_user
-# importa la conexion de la base de datos
+from datetime import date
 from sqlalchemy.orm import Session
 import crud
 from Lib.enviar_correos import enviar_correo
