@@ -50,7 +50,7 @@ class Crear_Indicadores:
         db.execute(update(modelo_indicadores).
                    where(modelo_indicadores.c.id_indicadores == current_user).
                    values(vacas_prenadas_porcentaje=vacas_estado_pren))
-
+        db.commit()
         # Actualización del porcentaje de vacas en ordeño
         vacas_ordeno_porcentaje = 0
         if ordeno is not None and no_ordeno is not None and (ordeno != 0 or no_ordeno != 0):
