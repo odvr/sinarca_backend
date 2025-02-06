@@ -223,40 +223,15 @@ async def vacas_prenadas_porcentaje(db: Session = Depends(get_database_session),
         current_user: Esquema_Usuario = Depends(get_current_user)):
   try:
     # consulta de vacas prenadas y vacas vacias en la base de datos
-    prenadas, vacias = db.query(modelo_indicadores.c.vacas_prenadas, modelo_indicadores.c.vacas_vacias).\
+    vacas_prenadas_porcentaje = db.query(modelo_indicadores.c.vacas_prenadas_porcentaje).\
         filter(modelo_indicadores.c.id_indicadores == current_user).first()
-    #prenadas, vacias = db.query(modelo_indicadores.c.vacas_prenadas, modelo_indicadores.c.vacas_vacias,modelo_indicadores.c.usuario_id).filter(modelo_indicadores.c.usuario_id == current_user).first()
-
-    # calculo del total de animales
-    if prenadas is None or vacias is None:
-        vacas_estado_pren =0
-        # actualizacion de campos
-        db.execute(update(modelo_indicadores).
-                        where(modelo_indicadores.c.id_indicadores == current_user).
-                        values(vacas_prenadas_porcentaje=vacas_estado_pren))
-    elif prenadas==0:
-        vacas_estado_pren = 0
-        # actualizacion de campos
-        db.execute(update(modelo_indicadores).
-                        where(modelo_indicadores.c.id_indicadores == current_user).
-                        values(vacas_prenadas_porcentaje=vacas_estado_pren))
-    else:
-        # calculo procentaje de vacas prenadas
-        totales = prenadas + vacias
-        vacas_estado_pren = (prenadas / totales) * 100
-        # actualizacion de campos
-        db.execute(update(modelo_indicadores).
-                        where(modelo_indicadores.c.id_indicadores == current_user).
-                        values(vacas_prenadas_porcentaje=vacas_estado_pren))
-
-
-    db.commit()
+    return  vacas_prenadas_porcentaje
   except Exception as e:
       logger.error(f'Error Funcion vacas_prenadas_porcentaje: {e}')
       raise
   finally:
       db.close()
-  return vacas_estado_pren
+
 
 
 @Produccion_Leche.get("/Calcular_animales_ordeno")
@@ -290,41 +265,17 @@ async def animales_en_ordeno(db: Session = Depends(get_database_session),current
 async def porcentaje_ordeno_calcular(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
         animales_no_ordeno(session=db)
+        crud.crear_indicadores.Cargar_Indicadores_Gestion(db=db,current_user=current_user)
         # consulta de animales ordenados y no ordenados
-        ordeno, no_ordeno = db.query \
-            (modelo_indicadores.c.vacas_en_ordeno, modelo_indicadores.c.vacas_no_ordeno).\
+        porcentaje = db.query \
+            (modelo_indicadores.c.porcentaje_ordeno).\
             filter(modelo_indicadores.c.id_indicadores == current_user).first()
-        if ordeno == 0 and no_ordeno == 0 or ordeno is None and no_ordeno is None:
-            vacas_ordeno_porcentaje = 0
-            # actualizacion de campos
-            db.execute(update(modelo_indicadores).
-                            where(modelo_indicadores.c.id_indicadores == current_user).
-                            values(porcentaje_ordeno=vacas_ordeno_porcentaje))
-            logger.info(f'Funcion porcentaje_ordeno {vacas_ordeno_porcentaje} ')
-            db.commit()
-        elif ordeno is None or no_ordeno is None:
-            vacas_ordeno_porcentaje = 0
-            # actualizacion de campos
-            db.execute(update(modelo_indicadores).
-                            where(modelo_indicadores.c.id_indicadores == current_user).
-                            values(porcentaje_ordeno=vacas_ordeno_porcentaje))
-
-            db.commit()
-        else:
-            # porcentaje de vacas en ordeno
-            vacas_ordeno_porcentaje = (ordeno / (no_ordeno + ordeno)) * 100
-            # actualizacion de campos
-            db.execute(update(modelo_indicadores).
-                            where(modelo_indicadores.c.id_indicadores == current_user).
-                            values(porcentaje_ordeno=vacas_ordeno_porcentaje))
-
-            db.commit()
+        return  porcentaje
     except Exception as e:
         logger.error(f'Error Funcion porcentaje_ordeno: {e}')
         raise
     finally:
         db.close()
-    return vacas_ordeno_porcentaje
 
 @Produccion_Leche.get("/Calcular_vacas_vacias")
 async def vacas_vacias(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
