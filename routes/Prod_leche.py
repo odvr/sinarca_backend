@@ -265,6 +265,7 @@ async def animales_en_ordeno(db: Session = Depends(get_database_session),current
 async def porcentaje_ordeno_calcular(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
         animales_no_ordeno(session=db)
+        "Realiza el llamado del metodo para realizar el cargue de infoformación en los indicadores "
         crud.crear_indicadores.Cargar_Indicadores_Gestion(db=db,current_user=current_user)
         # consulta de animales ordenados y no ordenados
         porcentaje = db.query \
