@@ -2,17 +2,12 @@
 Librerias requeridas
 '''
 import logging
-
+from fastapi.encoders import jsonable_encoder
 from sqlalchemy.sql.functions import current_user
-
 from Lib.Lib_Intervalo_Partos import intervalo_partos
 from Lib.Lib_eliminar_duplicados_bovinos import eliminarduplicados
-from Lib.Registro_partos import registro_partos_animales
 from Lib.clasificacion_ganado_leche import tipo_ganado_leche
 from Lib.dias_abiertos import dias_abiertos
-from Lib.endogamia import abuelo_materno, endogamia, abuela_materna, abuelo_paterno, abuela_paterna, bisabuelo_materno, \
-    bisabuelo_paterno
-from Lib.funcion_IEP_por_raza import IEP_por_raza
 from Lib.funcion_litros_leche import promedio_litros_leche
 from Lib.funcion_litros_por_raza import litros_por_raza
 from Lib.funcion_peso_por_raza import peso_segun_raza
@@ -27,7 +22,7 @@ from datetime import date,  timedelta
 from routes.rutas_bovinos import get_current_user
 from sqlalchemy import update
 from schemas.schemas_bovinos import esquema_produccion_leche, esquema_orden_litros, Esquema_Usuario, \
-    esquema_dias_abiertos
+    esquema_dias_abiertos, esquema_indicadores_finca
 from fastapi import  Depends,HTTPException
 from sqlalchemy.orm import Session
 # Configuracion de la libreria para los logs de sinarca
@@ -90,7 +85,7 @@ async def inventario_prod_leche(db: Session = Depends(get_database_session),
 
     try:
         "Librerias Requeridas"
-        peso_segun_raza(session=db,current_user=current_user)
+        #peso_segun_raza(session=db,current_user=current_user)
         Edad_Primer_Parto(session=db,current_user=current_user)
         Edad_Sacrificio_Lecheras(condb=db,current_user=current_user)
 
@@ -111,7 +106,7 @@ async def inventario_prod_leche(db: Session = Depends(get_database_session),
         #endogamia(session=db, current_user=current_user)
         #intervalo_partos(session=db, current_user=current_user)
         tipo_ganado_leche(session=db, current_user=current_user)
-
+        crud.crear_indicadores.Cargar_Indicadores_Gestion(db=db,current_user=current_user)
         #itemsLeche = db.query(modelo_leche).all()
         itemsLeche = db.query(modelo_leche).filter(modelo_leche.c.usuario_id == current_user).all()
 
@@ -220,17 +215,24 @@ async def porcentaje_ordeno(db: Session = Depends(get_database_session),
 
 @Produccion_Leche.get("/Calcular_vacas_prenadas_porcentaje")
 async def vacas_prenadas_porcentaje(db: Session = Depends(get_database_session),
-        current_user: Esquema_Usuario = Depends(get_current_user)):
-  try:
-    # consulta de vacas prenadas y vacas vacias en la base de datos
-    vacas_prenadas_porcentaje = db.query(modelo_indicadores.c.vacas_prenadas_porcentaje).\
-        filter(modelo_indicadores.c.id_indicadores == current_user).first()
-    return  vacas_prenadas_porcentaje
-  except Exception as e:
-      logger.error(f'Error Funcion vacas_prenadas_porcentaje: {e}')
-      raise
-  finally:
-      db.close()
+                                    current_user: Esquema_Usuario = Depends(get_current_user)):
+    try:
+        # Consulta de vacas prenadas y vacas vacías en la base de datos
+        vacas_prenadas_porcentaje = db.query(modelo_indicadores.c.vacas_prenadas_porcentaje). \
+            filter(modelo_indicadores.c.id_indicadores == current_user).first()
+
+        # Verificar que el resultado no sea None
+        if vacas_prenadas_porcentaje is None:
+            return 0
+
+        # Retornar el porcentaje de vacas prenadas como un valor simple
+        return vacas_prenadas_porcentaje[0] if vacas_prenadas_porcentaje else 0
+
+    except Exception as e:
+        logger.error(f'Error Funcion vacas_prenadas_porcentaje: {e}')
+        raise HTTPException(status_code=500, detail="Error interno del servidor")
+    finally:
+        db.close()
 
 
 
@@ -262,19 +264,28 @@ async def animales_en_ordeno(db: Session = Depends(get_database_session),current
 
 
 @Produccion_Leche.get("/Calcular_porcentaje_ordeno")
-async def porcentaje_ordeno_calcular(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+async def vacas_prenadas_porcentaje(db: Session = Depends(get_database_session),
+                                    current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
-        animales_no_ordeno(session=db)
-        "Realiza el llamado del metodo para realizar el cargue de infoformación en los indicadores "
-        crud.crear_indicadores.Cargar_Indicadores_Gestion(db=db,current_user=current_user)
-        # consulta de animales ordenados y no ordenados
-        porcentaje = db.query \
-            (modelo_indicadores.c.porcentaje_ordeno).\
+        # Consulta de vacas prenadas y vacas vacías en la base de datos
+        vacas_prenadas_porcentaje = db.query(modelo_indicadores.c.vacas_prenadas_porcentaje). \
             filter(modelo_indicadores.c.id_indicadores == current_user).first()
-        return  porcentaje
+
+        # Verificar que el resultado no sea None
+        if vacas_prenadas_porcentaje is None:
+            return {"vacas_prenadas_porcentaje": 0}
+
+        # Convertir el resultado a un diccionario si es necesario
+        if isinstance(vacas_prenadas_porcentaje, dict):
+            result = vacas_prenadas_porcentaje
+        else:
+            result = {"vacas_prenadas_porcentaje": vacas_prenadas_porcentaje[0]}
+
+        return jsonable_encoder(result)
+
     except Exception as e:
-        logger.error(f'Error Funcion porcentaje_ordeno: {e}')
-        raise
+        logger.error(f'Error Funcion vacas_prenadas_porcentaje: {e}')
+        raise HTTPException(status_code=500, detail="Error interno del servidor")
     finally:
         db.close()
 
