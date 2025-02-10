@@ -84,38 +84,26 @@ async def inventario_prod_leche(db: Session = Depends(get_database_session),
         current_user: Esquema_Usuario = Depends(get_current_user)):
 
     try:
+        itemsLeche = db.query(modelo_leche).filter(modelo_leche.c.usuario_id == current_user).all()
         "Librerias Requeridas"
         #peso_segun_raza(session=db,current_user=current_user)
-        Edad_Primer_Parto(session=db,current_user=current_user)
-        Edad_Sacrificio_Lecheras(condb=db,current_user=current_user)
 
-        intervalo_partos(session=db,current_user=current_user)
+
+
+        tipo_ganado_leche(session=db, current_user=current_user)
+
         EliminarDuplicadosLeche(condb=db,current_user=current_user)
 
-        #IEP_por_raza(session= db,current_user=current_user)
-        #registro_partos_animales(session= db,current_user=current_user)
-        #dias_abiertos(session= db,current_user=current_user)
-
-
-        #abuelo_materno(session=db, current_user=current_user)
-        #abuela_materna(session=db, current_user=current_user)
-        #abuelo_paterno(session=db, current_user=current_user)
-        #abuela_paterna(session=db, current_user=current_user)
-        #bisabuelo_materno(session=db, current_user=current_user)
-        #bisabuelo_paterno(session=db, current_user=current_user)
-        #endogamia(session=db, current_user=current_user)
-        #intervalo_partos(session=db, current_user=current_user)
-        tipo_ganado_leche(session=db, current_user=current_user)
         crud.crear_indicadores.Cargar_Indicadores_Gestion(db=db,current_user=current_user)
         #itemsLeche = db.query(modelo_leche).all()
-        itemsLeche = db.query(modelo_leche).filter(modelo_leche.c.usuario_id == current_user).all()
+        return itemsLeche
 
     except Exception as e:
         logger.error(f'Error al obtener inventario de Produccion Leche: {e}')
         raise
     finally:
         db.close()
-    return itemsLeche
+
 
 
 
@@ -174,37 +162,16 @@ def animales_no_ordeno(session:Session,current_user):
 async def porcentaje_ordeno(db: Session = Depends(get_database_session),
         current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
-        animales_no_ordeno(session=db,current_user=current_user)
-        # consulta de animales ordenados y no ordenados
-        ordeno, no_ordeno = db.query \
-            (modelo_indicadores.c.vacas_en_ordeno, modelo_indicadores.c.vacas_no_ordeno).\
-            filter(modelo_indicadores.c.id_indicadores == current_user).first()
-        if ordeno == 0 and no_ordeno == 0 or ordeno is None and no_ordeno is None:
-            vacas_ordeno_porcentaje = 0
-            # actualizacion de campos
-            db.execute(update(modelo_indicadores).
-                            where(modelo_indicadores.c.id_indicadores == current_user).
-                            values(porcentaje_ordeno=vacas_ordeno_porcentaje))
+        animales_no_ordeno(session=db, current_user=current_user)
+        porcentaje = db.query(modelo_indicadores.c.porcentaje_ordeno).filter(
+            modelo_indicadores.c.id_indicadores == current_user).first()
 
-            db.commit()
-        elif ordeno is None or no_ordeno is None:
-            vacas_ordeno_porcentaje = 0
-            # actualizacion de campos
-            db.execute(update(modelo_indicadores).
-                            where(modelo_indicadores.c.id_indicadores == current_user).
-                            values(porcentaje_ordeno=vacas_ordeno_porcentaje))
-
-            db.commit()
+        # Retorna directamente el valor de porcentaje_ordeno
+        if porcentaje:
+            return porcentaje.porcentaje_ordeno
         else:
-            # porcentaje de vacas en ordeno
-            vacas_ordeno_porcentaje = (ordeno / (no_ordeno + ordeno)) * 100
-            # actualizacion de campos
-            db.execute(update(modelo_indicadores).
-                            where(modelo_indicadores.c.id_indicadores == current_user).
-                            values(porcentaje_ordeno=vacas_ordeno_porcentaje))
+            return None
 
-            db.commit()
-        return vacas_ordeno_porcentaje
     except Exception as e:
         logger.error(f'Error Funcion porcentaje_ordeno: {e}')
         raise
@@ -218,6 +185,7 @@ async def vacas_prenadas_porcentaje(db: Session = Depends(get_database_session),
                                     current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
         # Consulta de vacas prenadas y vacas vacías en la base de datos
+        Edad_Sacrificio_Lecheras(condb=db, current_user=current_user)
         vacas_prenadas_porcentaje = db.query(modelo_indicadores.c.vacas_prenadas_porcentaje). \
             filter(modelo_indicadores.c.id_indicadores == current_user).first()
 
@@ -238,25 +206,21 @@ async def vacas_prenadas_porcentaje(db: Session = Depends(get_database_session),
 
 @Produccion_Leche.get("/Calcular_animales_ordeno")
 async def animales_en_ordeno(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
- try:
-    # join, consulta y conteo de animales vivos que son ordenados
-    vacas_ordeno = db.query(modelo_bovinos_inventario.c.estado, modelo_leche.c.ordeno). \
-        join(modelo_leche, modelo_bovinos_inventario.c.id_bovino == modelo_leche.c.id_bovino). \
-        filter(modelo_bovinos_inventario.c.estado == 'Vivo', modelo_leche.c.ordeno == 'Si',
-               modelo_leche.c.usuario_id == current_user,
-               modelo_bovinos_inventario.columns.usuario_id==current_user).count()
-    # actualizacion de campos
-    db.execute(update(modelo_indicadores).
-                    where(modelo_indicadores.c.id_indicadores == current_user).
-                    values(vacas_en_ordeno=vacas_ordeno))
+    try:
+        calcular_animales_ordeno = db.query(modelo_indicadores.c.vacas_en_ordeno).filter(
+            modelo_indicadores.c.id_indicadores == current_user).first()
 
-    db.commit()
-    return vacas_ordeno
- except Exception as e:
-     logger.error(f'Error Funcion animales_en_ordeno: {e}')
-     raise
- finally:
-     db.close()
+        # Retorna directamente el valor de vacas_en_ordeno
+        if calcular_animales_ordeno:
+            return calcular_animales_ordeno.vacas_en_ordeno
+        else:
+            return None
+
+    except Exception as e:
+        logger.error(f'Error Funcion animales_en_ordeno: {e}')
+        raise
+    finally:
+        db.close()
 
 
 
@@ -267,6 +231,7 @@ async def animales_en_ordeno(db: Session = Depends(get_database_session),current
 async def vacas_prenadas_porcentaje(db: Session = Depends(get_database_session),
                                     current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
+        intervalo_partos(session=db, current_user=current_user)
         # Consulta de vacas prenadas y vacas vacías en la base de datos
         vacas_prenadas_porcentaje = db.query(modelo_indicadores.c.vacas_prenadas_porcentaje). \
             filter(modelo_indicadores.c.id_indicadores == current_user).first()
@@ -292,19 +257,15 @@ async def vacas_prenadas_porcentaje(db: Session = Depends(get_database_session),
 @Produccion_Leche.get("/Calcular_vacas_vacias")
 async def vacas_vacias(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
-        # join de tabla bovinos y tabla leche mediante id_bovino \
-        # filtrado y conteo animales con datos prenez Vacia que se encuentren vivos
-        consulta_vacias = db.query(modelo_bovinos_inventario.c.estado, modelo_leche.c.datos_prenez). \
-            join(modelo_leche, modelo_bovinos_inventario.c.id_bovino == modelo_leche.c.id_bovino). \
-            filter(modelo_bovinos_inventario.c.estado == 'Vivo', modelo_leche.c.datos_prenez == 'Vacia',
-                   modelo_leche.columns.tipo_ganado != "Hembra de levante",
-                   modelo_leche.c.usuario_id == current_user).count()
-        # actualizacion del campo
-        db.execute(update(modelo_indicadores).
-                        where(modelo_indicadores.c.id_indicadores == current_user).
-                        values(vacas_vacias=consulta_vacias))
+        Edad_Primer_Parto(session=db, current_user=current_user)
+        vacas_vacias = db.query(modelo_indicadores.c.vacas_vacias).filter(
+            modelo_indicadores.c.id_indicadores == current_user).first()
 
-        db.commit()
+        # Retorna directamente el valor de vacas_vacias
+        if vacas_vacias:
+            return vacas_vacias.vacas_vacias
+        else:
+            return None
 
     except Exception as e:
         logger.error(f'Error al Calcular Vacas Vacias: {e}')
@@ -312,40 +273,26 @@ async def vacas_vacias(db: Session = Depends(get_database_session),current_user:
     finally:
         db.close()
 
-    return consulta_vacias
 
 
 @Produccion_Leche.get("/Calcular_vacas_prenadas")
 async def vacas_prenadas_calcular(db: Session = Depends(get_database_session),
         current_user: Esquema_Usuario = Depends(get_current_user)):
-  try:
-    # join de tabla bovinos y tabla leche mediante id_bovino \
-    # filtrado y conteo animales con datos prenez Prenada que se encuentren vivos
+    try:
+        consulta_prenadas = db.query(modelo_indicadores.c.vacas_prenadas).filter(
+            modelo_indicadores.c.id_indicadores == current_user).first()
 
+        # Retorna directamente el valor de vacas_prenadas
+        if consulta_prenadas:
+            return consulta_prenadas.vacas_prenadas
+        else:
+            return None
 
-    consulta_prenadas = db.query(modelo_bovinos_inventario.c.estado, modelo_leche.c.datos_prenez,modelo_bovinos_inventario.c.usuario_id). \
-        join(modelo_leche, modelo_bovinos_inventario.c.id_bovino == modelo_leche.c.id_bovino). \
-        filter(modelo_bovinos_inventario.c.estado == 'Vivo', modelo_leche.c.datos_prenez == 'Preñada',
-               modelo_leche.c.usuario_id==current_user).count()
-    # actualizacion del campo
-    db.execute(update(modelo_indicadores).
-                    where(modelo_indicadores.c.id_indicadores == current_user).
-                    values(vacas_prenadas=consulta_prenadas))
-
-    db.commit()
-
-    return consulta_prenadas
-
-
-  except Exception as e:
-      logger.error(f'Error Funcion vacas_prenadas: {e}')
-      raise
-  finally:
-      db.close()
-
-
-
-
+    except Exception as e:
+        logger.error(f'Error al Calcular Vacas Prenadas: {e}')
+        raise
+    finally:
+        db.close()
 
 
 """
