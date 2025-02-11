@@ -1,6 +1,6 @@
 
 '''
-Librerias requeridas
+Librerias requesters
 '''
 from sqlalchemy.orm import Session
 import logging
@@ -73,7 +73,7 @@ async def listar_contar_AnimalesDescarte(db: Session = Depends(get_database_sess
 
 
     except Exception as e:
-        logger.error(f'Error al obtener inventario de Anamales de Descarte: {e}')
+        logger.error(f'Error al obtener inventario de Anamales de Descartes: {e}')
         raise
     finally:
         db.close()
@@ -89,6 +89,7 @@ Crear Descarte
 async def CrearDescarte(id_bovino: str,razon_descarte:str,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
 
     try:
+
         descarte(db=db)
         nombre_bovino = crud.bovinos_inventario.Buscar_Nombre(db=db, id_bovino=id_bovino, current_user=current_user)
         ingresodescarte = modelo_descarte.insert().values(id_bovino=id_bovino,razon_descarte=razon_descarte,usuario_id=current_user,nombre_bovino=nombre_bovino)

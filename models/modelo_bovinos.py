@@ -527,14 +527,12 @@ modelo_periodos_lactancia = Table("periodos_lactancia", meta, Column("id_lactanc
 modelo_periodos_secado = Table("periodos_secado", meta, Column("id_secado", Integer, primary_key=True),
                                Column("id_bovino", Integer),
                                Column("nombre_bovino", String(300)),
-                               Column("fecha_recomendada_secado", Date),
-                               Column("secado_realizado", String(300)),
                                Column("fecha_inicio_secado", Date),
                                Column("fecha_final_secado", Date),
+                               Column("tratamiento", String(300)),
                                Column("duracion", Integer),
-                               Column("interpretacion", String(300)),
-                               Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")),
-                               Column("tratamiento", String(300)))
+                               Column("observaciones", String(300)),
+                               Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
 
 modelo_abortos = Table("abortos", meta, Column("id_aborto", Integer, primary_key=True),
                                Column("id_bovino", Integer),

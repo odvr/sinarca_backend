@@ -44,6 +44,7 @@ from routes.periodos_pico_lactancia import periodos_lactancia, registro_periodo_
 from routes.Lotes_Bovinos import  Lotes_Bovinos
 from routes.Plan_Sanitario_Bovinos import Plan_Sanitario_Bovinos
 from routes.Erp import ERP
+from routes.Periodos_secado import Periodos_secado
 '''
 CORS o "intercambio de recursos de origen cruzado"se refiere a las situaciones 
 en las que una interfaz que se ejecuta en un navegador tiene código JavaScript que se comunica
@@ -102,6 +103,7 @@ app.include_router(CorreosLandingPage)
 app.include_router(Lotes_Bovinos)
 app.include_router(Plan_Sanitario_Bovinos)
 app.include_router(ERP)
+app.include_router(Periodos_secado)
 
 
 

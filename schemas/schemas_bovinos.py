@@ -760,14 +760,13 @@ class esquema_periodos_secado(BaseModel):
     id_secado: int
     id_bovino: int
     nombre_bovino: Optional[str] = None
-    fecha_recomendada_secado: Optional[date] = None
-    secado_realizado: Optional[str] = None
     fecha_inicio_secado: Optional[date] = None
     fecha_final_secado: Optional[date] = None
-    duracion:Optional[int] = None
-    interpretacion: Optional[str] = None
-    usuario_id: Optional[str] = None
     tratamiento: Optional[str] = None
+    duracion:Optional[int] = None
+    observaciones: Optional[str] = None
+    usuario_id: Optional[str] = None
+
     class Config:
         orm_mode = True
         env_file = ".env"
