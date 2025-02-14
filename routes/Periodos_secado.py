@@ -10,6 +10,7 @@ from starlette.status import HTTP_204_NO_CONTENT
 
 from Lib.canastillas_pajillas import nombre_canastilla, conteo_pajillas, eliminacion_canastilla
 from Lib.eliminacion_pajillas import eliminacion_pajilla
+from Lib.duracion_secado import duracion_secado
 
 from config.db import   get_session
 # importa el esquema de los bovinos
@@ -62,6 +63,7 @@ async def crear_registro_periodo_secado(id_bovino:int= Form(...),fecha_inicio_se
 
         db.execute(ingresoRegistroPeriodoSecado)
         db.commit()
+        duracion_secado(session=db, current_user=current_user)
 
 
 
@@ -82,6 +84,7 @@ async def editar_registro_periodo_secado(id_secado:int= Form(...),fecha_inicio_s
 
         db.execute(modelo_periodos_secado.update().values(usuario_id=current_user,fecha_inicio_secado=fecha_inicio_secado,fecha_final_secado=fecha_final_secado,tratamiento=tratamiento,observaciones=observaciones).where(modelo_periodos_secado.columns.id_secado==id_secado))
         db.commit()
+        duracion_secado(session=db, current_user=current_user)
 
 
 
