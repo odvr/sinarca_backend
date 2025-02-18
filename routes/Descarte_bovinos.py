@@ -66,7 +66,7 @@ async def listarAnimalesDescarte(db: Session = Depends(get_database_session),cur
 async def listar_contar_AnimalesDescarte(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
 
     try:
-        descarte(db=db)
+        descarte(db=db, current_user=current_user)
 
         #itemsAnimalesDescarte = db.query(modelo_descarte).where(modelo_descarte.columns.id_descarte).count()
         itemsAnimalesDescarte = db.query(modelo_descarte).filter(modelo_descarte.c.usuario_id == current_user,modelo_descarte.columns.id_descarte).count()
