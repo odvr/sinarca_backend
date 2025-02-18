@@ -114,7 +114,7 @@ async def listar_tabla_periodos_secado(db: Session = Depends(get_database_sessio
 
 
 
-@Periodos_secado.delete("/eliminar_registro_periodos_secado",tags=["Periodos_secado"])
+@Periodos_secado.delete("/eliminar_registro_periodos_secado/{id_secado}",tags=["Periodos_secado"])
 async def eliminar_periodos_secado(id_secado: int,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user) ):
 
     try:
