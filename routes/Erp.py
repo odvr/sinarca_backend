@@ -19,11 +19,12 @@ from Lib.GenerarRadicadoFactura import generar_radicado
 from config.db import   get_session
 # importa el esquema de los bovinos
 from models.modelo_bovinos import modelo_clientes, modelo_cotizaciones, modelo_facturas, modelo_ventas, \
-    modelo_bovinos_inventario, modelo_pagos, modelo_empleados, modelo_nomina, modelo_proveedores
-from sqlalchemy.orm import Session
+    modelo_bovinos_inventario, modelo_pagos, modelo_empleados, modelo_nomina, modelo_proveedores, \
+    modelo_produccion_general_leche
+from sqlalchemy.orm import Session, session
 from routes.rutas_bovinos import get_current_user
 from schemas.schemas_bovinos import Esquema_Usuario, esquema_clientes, esquema_cotizaciones, esquema_facturas, \
-    esquema_pagos, esquema_empleados, esquema_nomina, esquema_provedores
+    esquema_pagos, esquema_empleados, esquema_nomina, esquema_provedores, esquema_produccion_general_leche
 from typing import Optional,List
 import json
 
@@ -184,6 +185,7 @@ async def CrearFactura(
     detalle: Optional[str] = Form(None),
     tipo_venta: Optional[str] = Form(None),
     animales: Optional[List[str]] = Form(None),
+    leche: Optional[List[str]] = Form(None),
     descripcion: Optional[str] = Form(None),
     db: Session = Depends(get_database_session),
     current_user: Esquema_Usuario = Depends(get_current_user)
@@ -214,6 +216,26 @@ async def CrearFactura(
                 nombre_cliente_proveedor=nombre_cliente_proveedor
             )
 
+        if estado == "pagada":
+            CrearFactura = modelo_facturas.insert().values(
+
+                fecha_emision=fecha_emision,
+                radicado_factura=Radicado,
+                saldo_restante=0,
+                fecha_vencimiento=fecha_vencimiento,
+                monto_total=monto_total,
+                destino=destino,
+                estado=estado,
+                lote_asociado=lote_asociado,
+                tipo_venta=tipo_venta,
+                metodo_pago=metodo_pago,
+                detalle=detalle,
+                usuario_id=current_user,
+                descripcion=descripcion,
+                nombre_cliente_proveedor=nombre_cliente_proveedor
+            )
+
+
         else:
             CrearFactura = modelo_facturas.insert().values(
 
@@ -221,6 +243,7 @@ async def CrearFactura(
                 radicado_factura=Radicado,
                 fecha_vencimiento=fecha_vencimiento,
                 monto_total=monto_total,
+                saldo_restante=monto_total,
                 destino=destino,
                 estado=estado,
                 lote_asociado=lote_asociado,
@@ -265,7 +288,20 @@ async def CrearFactura(
 
                 db.execute(ingresoVentas)
                 db.commit()
+        if tipo_venta == "Leche":
+            fecha_actual = datetime.now()
+            for listros_leche in leche:
+                ListrosLeche = json.loads(listros_leche)  # Deserializa la cadena JSON
+                leche = ListrosLeche['cantidadLitros']  # Accede al id_bovino
+                fecha_ordeno = ListrosLeche['fecha']
+                precio_venta = ListrosLeche['precio_venta']  # Accede al peso
 
+                ingreso_tabla_general_leche = modelo_produccion_general_leche.insert().values(leche=leche, fecha_ordeno=fecha_ordeno,precio_venta=precio_venta,
+                                                              fecha_registro_sistema=fecha_actual,
+                                                              factura_id = id_factura_asociada,
+                                                              usuario_id=current_user)
+                db.execute(ingreso_tabla_general_leche)
+                db.commit()
 
 
 
@@ -309,18 +345,17 @@ async def ListarFactura(factura_id : int,db: Session = Depends(get_database_sess
         raise
     finally:
         db.close()
-
-
 @ERP.put("/EditarFactura/{factura_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def CambiarDatosFactura(
-         factura_id : int,
+         factura_id: int,
          estado: Optional[str] = Form(None),
          fecha_vencimiento: Optional[date] = Form(None),
-         pagos: Optional[List[str]] = Form(None),
+         pagos: Optional[str] = Form(None),
+         monto_total: Optional[float] = Form(None),
          descripcion: Optional[str] = Form(None),
-         db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+         db: Session = Depends(get_database_session), current_user: Esquema_Usuario = Depends(get_current_user)):
     """
-    Cuando se editan  Facturas y existen Abonos el realiza el Ingreso de los Abonos
+    Cuando se editan Facturas y existen Abonos el realiza el Ingreso de los Abonos
     :param factura_id:
     :param estado:
     :param fecha_vencimiento:
@@ -330,19 +365,62 @@ async def CambiarDatosFactura(
     """
     try:
 
-            db.execute(modelo_facturas.update().values(
-                estado=estado,
-                fecha_vencimiento = fecha_vencimiento,
-                descripcion=descripcion
+        db.execute(modelo_facturas.update().values(
+            estado=estado,
+            fecha_vencimiento=fecha_vencimiento,
+            monto_total=monto_total,
+            descripcion=descripcion
+        ).where(
+            modelo_facturas.columns.factura_id == factura_id))
+        db.commit()
+
+        if not pagos:
+            print("La lista de pagos está vacía")
+        else:
+            pagos = json.loads(pagos)  # Asegúrate de convertir la cadena JSON a una lista de diccionarios
+            if estado == "pagada":
+                db.execute(modelo_facturas.update().values(
+                    saldo_restante=0
+                ).where(
+                    modelo_facturas.c.factura_id == factura_id
+                ))
+                db.commit()
 
 
+                "Busca si tiene  Bovinos asociados  para regresarlos al inventario y actualizarlo "
+            if estado == "anulada":
 
-            ).where(
-                modelo_facturas.columns.factura_id == factura_id))
-            db.commit()
+                ConsultarBovinosVendidos = set(
+                    db.query(modelo_facturas.c.estado, modelo_facturas.c.factura_id, modelo_ventas.c.id_bovino).
+                    join(modelo_ventas, modelo_facturas.c.factura_id == modelo_ventas.c.id_factura_asociada).filter(
+                        modelo_ventas.c.usuario_id == current_user).all()
+                )
+                for Bovinos in ConsultarBovinosVendidos:
+                    idBovino = Bovinos[2]
+                    EstadoBovino = "Vivo"
 
-            if not pagos:
-                print("La lista de pagos está vacía")
+                    db.execute(modelo_bovinos_inventario.update().values(
+                        estado=EstadoBovino,
+                    ).where(
+                        modelo_bovinos_inventario.columns.id_bovino == idBovino))
+                    db.commit()
+                    db.execute(modelo_ventas.delete().where(
+                        modelo_ventas.c.id_bovino == idBovino))
+                    db.commit()
+
+                ConsultarVentaDeLeche = set(
+                    db.query(modelo_facturas.c.estado, modelo_produccion_general_leche.c.id_produccion_leche).
+                    join(modelo_facturas,
+                         modelo_facturas.c.factura_id == modelo_produccion_general_leche.c.factura_id).filter(
+                        modelo_facturas.c.usuario_id == current_user).all()
+                )
+
+                for ProduccionLeche in ConsultarVentaDeLeche:
+                    id_produccion_leche = ProduccionLeche[1]
+                    db.execute(modelo_produccion_general_leche.delete().where(modelo_produccion_general_leche.c.id_produccion_leche == id_produccion_leche))
+                    db.commit()
+
+
             else:
                 # Consultar el monto total de la factura y verificar que exista
                 factura = db.query(modelo_facturas).filter(
@@ -362,8 +440,7 @@ async def CambiarDatosFactura(
                         modelo_pagos.c.usuario_id == current_user
                     ).scalar() or 0  # Si no hay abonos previos, asigna 0
 
-                    for pago in pagos:
-                        abono = json.loads(pago)
+                    for abono in pagos:
                         fecha_pago = abono['fecha_pago']
                         metodo_pago = abono['metodo_pago']
                         monto_abono = float(abono['monto'])
@@ -380,21 +457,20 @@ async def CambiarDatosFactura(
                             usuario_id=current_user
                         ))
 
-                        # Calcular el nuevo saldo restante
-                        saldo_restante = monto_total_factura - total_abonos_actuales
+                    # Calcular el nuevo saldo restante
+                    saldo_restante = monto_total_factura - total_abonos_actuales
 
-                        # Determinar si la factura debe marcarse como pagada o permanecer pendiente
-                        estado_factura = "pagada" if saldo_restante <= 0 else "pendiente"
+                    # Determinar si la factura debe marcarse como pagada o permanecer pendiente
+                    estado_factura = "pagada" if saldo_restante <= 0 else estado  # Usa el estado proporcionado
 
-                        # Actualizar saldo restante y estado de la factura en la base de datos
-                        db.execute(modelo_facturas.update().values(
-                            saldo_restante=saldo_restante,
-                            estado=estado_factura
-                        ).where(
-                            modelo_facturas.c.factura_id == factura_id
-                        ))
-                        db.commit()
-
+                    # Actualizar saldo restante y estado de la factura en la base de datos
+                    db.execute(modelo_facturas.update().values(
+                        saldo_restante=saldo_restante,
+                        estado=estado_factura
+                    ).where(
+                        modelo_facturas.c.factura_id == factura_id
+                    ))
+                    db.commit()
 
     except Exception as e:
         logger.error(f'Error al Editar Factura: {e}')
@@ -404,7 +480,6 @@ async def CambiarDatosFactura(
         db.close()
 
     return Response(status_code=HTTP_204_NO_CONTENT)
-
 
 @ERP.get("/Abonos_Asociados/{factura_id}",response_model=list[esquema_pagos] )
 async def ListarAbonosAsociados(factura_id:int,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
@@ -417,6 +492,23 @@ async def ListarAbonosAsociados(factura_id:int,db: Session = Depends(get_databas
 
     except Exception as e:
         logger.error(f'Error al obtener Abonos Asociados a las facturas : {e}')
+        raise
+    finally:
+        db.close()
+
+
+
+@ERP.get("/ListarLitrosLecheAsociadosFacturas/{id_factura_asociada}",response_model=list[esquema_produccion_general_leche] )
+async def ListarLitrosLecheAsociadosFacturas(id_factura_asociada:int,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+    try:
+        ListarLitrosAsociadosFactura = db.query(modelo_produccion_general_leche).where(modelo_produccion_general_leche.columns.factura_id == id_factura_asociada).all()
+        if ListarLitrosAsociadosFactura is None:
+            raise HTTPException(status_code=404, detail="Factura  no encontrada")
+        else:
+            return ListarLitrosAsociadosFactura
+
+    except Exception as e:
+        logger.error(f'Error al obtener Listado de litros de leche: {e}')
         raise
     finally:
         db.close()
@@ -452,15 +544,39 @@ async def ConsultarCartera(fecha_inicio : date,fecha_fin : date,tipo_factura : s
     finally:
         db.close()
 
-@ERP.get("/Calcular_Total_Ventas",tags=["ERP"])
-async def CalcularVentas(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+
+@ERP.get("/Calcular_Total_Ventas", tags=["ERP"])
+async def CalcularVentas(db: Session = Depends(get_database_session),
+                         current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
         "Consulta del total de la factura"
-        ConsultaVentas = db.query(func.sum(modelo_facturas.columns.monto_total)).filter(modelo_facturas.c.detalle == "Factura de Venta",modelo_facturas.c.estado == "pagada",
-                   modelo_facturas.c.usuario_id == current_user).all()
-        ConsultaVentas = ConsultaVentas[0][0]
+        ConsultaVentas = db.query(func.sum(modelo_facturas.columns.monto_total)).filter(
+            modelo_facturas.c.detalle == "Factura de Venta",
+            modelo_facturas.c.estado == "pagada",
+            modelo_facturas.c.usuario_id == current_user
+        ).all()
+        ConsultaVentas = ConsultaVentas[0][0] if ConsultaVentas[0][0] is not None else 0
 
-        return ConsultaVentas
+
+
+
+
+        """
+        La siguiente consulta realiza una validación entre la tabla de Pagos Abonos y la tabla de facturas esto con el fin de validar qué facturas están activas 
+        """
+        ConsultarPagosConFacturasActivas = set(
+            db.query(modelo_facturas.c.estado, modelo_facturas.c.factura_id, modelo_pagos.c.monto).
+            join(modelo_pagos, modelo_facturas.c.factura_id == modelo_pagos.c.factura_id).filter(
+                modelo_pagos.c.usuario_id == current_user).all()
+        )
+        # Ejemplo de resultado {('anulada', 116, 100.0), ('anulada', 117, 100.0), ('vencida', 118, 100.0), ('anulada', 115, 200.0)}
+
+        total_pagos_activos = sum(
+            monto for estado, _, monto in ConsultarPagosConFacturasActivas if estado not in ['anulada', 'pagada'])
+
+        total_ventas = ConsultaVentas + total_pagos_activos
+
+        return total_ventas
     except Exception as e:
         logger.error(f'Error en Calcular TotalVentas: {e}')
         raise HTTPException(status_code=500, detail="Error interno del servidor")
@@ -561,10 +677,14 @@ async def ingresos_por_destino(db: Session = Depends(get_database_session),curre
     )
     return [{"destino": d.destino, "ingreso_total": d.ingreso_total} for d in destinos]
 
+
 @ERP.get("/analisis_saldo_restante")
-async def analisis_saldo_restante(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user) ):
+async def analisis_saldo_restante(
+        db: Session = Depends(get_database_session),
+        current_user: Esquema_Usuario = Depends(get_current_user)
+):
     """
-    Proporciona el promedio y total del saldo restante en las facturas.
+    Proporciona el promedio y total del saldo restante en las facturas que están en estado 'vencida' o 'pendiente'.
     """
 
     resultado = (
@@ -572,9 +692,13 @@ async def analisis_saldo_restante(db: Session = Depends(get_database_session),cu
             func.sum(modelo_facturas.c.saldo_restante).label("saldo_total"),
             func.avg(modelo_facturas.c.saldo_restante).label("saldo_promedio")
         )
-        .filter(modelo_facturas.c.usuario_id == current_user)
+        .filter(
+            modelo_facturas.c.usuario_id == current_user,
+            modelo_facturas.c.estado.in_(["vencida", "pendiente"])  # Aplicando el nuevo filtro
+        )
         .one()
     )
+
     return {"saldo_total": resultado.saldo_total, "saldo_promedio": resultado.saldo_promedio}
 
 @ERP.get("/tendencias_mensuales")
@@ -587,7 +711,7 @@ async def tendencias_mensuales(db: Session = Depends(get_database_session),curre
             extract('month', modelo_facturas.c.fecha_emision).label("mes"),
             func.sum(modelo_facturas.c.monto_total).label("ingreso_mensual")
         )
-        .filter(modelo_facturas.c.usuario_id == current_user,extract('year', modelo_facturas.c.fecha_emision) == func.extract('year', func.now()))
+        .filter(modelo_facturas.c.usuario_id == current_user,modelo_facturas.c.estado == "pagada",extract('year', modelo_facturas.c.fecha_emision) == func.extract('year', func.now()))
         .group_by(extract('month', modelo_facturas.c.fecha_emision))
         .order_by(extract('month', modelo_facturas.c.fecha_emision))
         .all()
@@ -605,7 +729,7 @@ async def facturacion_anual(db: Session = Depends(get_database_session),current_
             func.sum(modelo_facturas.c.monto_total).label("ingreso_anual")
         )
         .group_by(extract('year', modelo_facturas.c.fecha_emision))
-        .filter(modelo_facturas.c.usuario_id == current_user,modelo_facturas.c.detalle == "Factura de Venta")
+        .filter(modelo_facturas.c.usuario_id == current_user,modelo_facturas.c.detalle == "Factura de Venta",modelo_facturas.c.estado == "pagada")
         .order_by(extract('year', modelo_facturas.c.fecha_emision))
         .all()
     )

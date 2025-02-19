@@ -842,4 +842,14 @@ modelo_notificacion_proximidad_parto = Table("notificacion_proximidad_parto", me
                                Column("mensaje", String(300)),
                                Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
 
+
+
+modelo_produccion_general_leche  = Table("produccion_general_leche", meta, Column("id_produccion_leche", Integer, primary_key=True),
+                               Column("leche", Integer),
+                               Column("fecha_ordeno", DateTime),
+                               Column("fecha_registro_sistema", Date),
+                               Column("precio_venta", String(300)),
+                                         Column("factura_id", Integer, ForeignKey("facturas.factura_id")),
+                               Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
+
 meta.create_all(engine)

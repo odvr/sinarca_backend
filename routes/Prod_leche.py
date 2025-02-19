@@ -1,6 +1,7 @@
 '''
 Librerias requeridas
 '''
+from datetime import  datetime
 import logging
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.sql.functions import current_user
@@ -10,19 +11,20 @@ from Lib.clasificacion_ganado_leche import tipo_ganado_leche
 from Lib.dias_abiertos import dias_abiertos
 from Lib.funcion_litros_leche import promedio_litros_leche
 from Lib.funcion_litros_por_raza import litros_por_raza
-from Lib.funcion_peso_por_raza import peso_segun_raza
+from typing import Optional,List
 from Lib.palpaciones import palpaciones
+import json
 # # importa la conexion de la base de datos
 from config.db import  get_session
 # # importa el esquema de los bovinos
 from models.modelo_bovinos import modelo_leche, modelo_bovinos_inventario, \
-    modelo_indicadores, modelo_orden_litros, modelo_dias_abiertos
-from fastapi import  status,  APIRouter, Response
+    modelo_indicadores, modelo_orden_litros, modelo_dias_abiertos, modelo_produccion_general_leche
+from fastapi import  status,  APIRouter, Response,Form
 from datetime import date,  timedelta
 from routes.rutas_bovinos import get_current_user
 from sqlalchemy import update
 from schemas.schemas_bovinos import esquema_produccion_leche, esquema_orden_litros, Esquema_Usuario, \
-    esquema_dias_abiertos, esquema_indicadores_finca
+    esquema_dias_abiertos
 from fastapi import  Depends,HTTPException
 from sqlalchemy.orm import Session
 # Configuracion de la libreria para los logs de sinarca
@@ -517,3 +519,62 @@ def EliminarDuplicadosLeche(condb:Session,current_user):
 
 
 
+
+
+@Produccion_Leche.post("/agregar_litros_diarios_leche_general", status_code=status.HTTP_201_CREATED, tags=["ERP"])
+async def CrearFactura(
+    leche: Optional[List[str]] = Form(None),
+     db: Session = Depends(get_database_session),
+    current_user: Esquema_Usuario = Depends(get_current_user)
+):
+
+    """
+    La Siguiente API agrega la cantidad de leche en el inventario de Producción de Leche General
+    :param leche:
+    :param db:
+    :param current_user:
+    :return:
+    """
+
+    try:
+
+        fecha_actual = datetime.now()
+        for listros_leche in leche:
+            ListrosLeche = json.loads(listros_leche)  # Deserializa la cadena JSON
+            leche = ListrosLeche['cantidadLitros']  # Accede al id_bovino
+            fecha_ordeno = ListrosLeche['fecha']
+            precio_venta = ListrosLeche['precio_venta']  # Accede al peso
+            id_factura_asociada = ListrosLeche['id_factura']  # Accede al peso
+
+            ingreso_tabla_general_leche = modelo_produccion_general_leche.insert().values(leche=leche,
+                                                                                          fecha_ordeno=fecha_ordeno,
+                                                                                          precio_venta=precio_venta,
+                                                                                          fecha_registro_sistema=fecha_actual,
+                                                                                          factura_id=id_factura_asociada,
+                                                                                          usuario_id=current_user)
+            db.execute(ingreso_tabla_general_leche)
+            db.commit()
+
+
+
+    except Exception as e:
+        # Ampliar el log de errores para incluir detalles de la excepción y los datos recibidos
+        logger.error(f'Error al Crear Factura: {e}')
+        raise
+    finally:
+        db.close()
+
+    return Response(status_code=status.HTTP_201_CREATED)
+
+
+@Produccion_Leche.delete("/eliminar_litro_diario/{id_produccion_leche}")
+async def Eliminar_cliente(id_produccion_leche: int,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user) ):
+    try:
+        db.execute(modelo_produccion_general_leche.delete().where(modelo_produccion_general_leche.c.id_produccion_leche == id_produccion_leche))
+        db.commit()
+        return
+    except Exception as e:
+        logger.error(f'Error al Intentar Eliminar Proveedor: {e}')
+        raise
+    finally:
+        db.close()

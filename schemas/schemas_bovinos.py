@@ -10,6 +10,8 @@ from datetime import date
 from typing import Optional,Union
 from uuid import UUID
 from decimal import Decimal
+
+from pydantic.datetime_parse import datetime
 from sqlalchemy.orm import relationship
 from sqlalchemy import create_engine, Column, Integer, String
 from sqlalchemy.orm import sessionmaker
@@ -1169,6 +1171,18 @@ class esquema_notificacion_proximidad_parto(BaseModel):
     fecha_estimada_parto : Optional[date] = None
     fecha_mensaje: Optional[date] = None
     mensaje: Optional[str] = None
+    usuario_id: Optional[str] = None
+    class Config:
+        orm_mode = True
+        env_file = ".env"
+
+class esquema_produccion_general_leche(BaseModel):
+    id_produccion_leche   : int
+    leche: Optional[int] = None
+    fecha_ordeno: Optional[datetime] = None
+    fecha_registro_sistema : Optional[date] = None
+    precio_venta: Optional[str] = None
+    factura_id: Optional[int] = None
     usuario_id: Optional[str] = None
     class Config:
         orm_mode = True
