@@ -126,6 +126,7 @@ class Esquema_bovinos(BaseModel):
     chip_asociado: Optional[str] = None
     id_finca   : Optional [int] = None
     nombre_finca: Optional[str] = None
+    edad_YY_MM_DD: Optional[str] = None
 
     #Este Config La clase se utiliza para proporcionar configuraciones a Pydantic.
     class Config:

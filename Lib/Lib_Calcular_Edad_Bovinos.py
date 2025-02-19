@@ -46,8 +46,20 @@ def calculoEdad(db: Session,current_user ):
             # realiza el calculo correspondiente para calcular los meses entre fechas (edad del animal)
             Edad_Animal = (datetime.today().year - fecha_nacimiento.year) * 12 + datetime.today().month - fecha_nacimiento.month
 
+            # Calcular la diferencia
+            diferencia = date.today() - fecha_nacimiento
+
+            # Calcular los años, meses y días
+            años = diferencia.days // 365  # Aproximado, ya que no todas los años tienen 365 días
+            resto_dias = diferencia.days % 365
+            meses = resto_dias // 30  # Aproximado, ya que no todos los meses tienen 30 días
+            dias = resto_dias % 30
+
+            edad_YY_MM_DD= f'{años} años {meses} meses {dias} días'
+
+
             # actualizacion del campo en la base de datos tomando la variable ID
-            db.execute(modelo_bovinos_inventario.update().values(edad=Edad_Animal).where(
+            db.execute(modelo_bovinos_inventario.update().values(edad=Edad_Animal,edad_YY_MM_DD=edad_YY_MM_DD).where(
                 modelo_bovinos_inventario.columns.id_bovino == id))
 
 
@@ -64,8 +76,20 @@ def calculoEdad(db: Session,current_user ):
                # realiza el calculo correspondiente para calcular los meses entre fechas (edad del animal)
                 Edad_Animal = (fecha_venta[4].year - fecha_nacimiento.year) * 12 + (
                             fecha_venta[4].month - fecha_nacimiento.month)
+
+                # Calcular la diferencia
+                diferencia = fecha_venta[4] - fecha_nacimiento
+
+                # Calcular los años, meses y días
+                años = diferencia.days // 365  # Aproximado, ya que no todas los años tienen 365 días
+                resto_dias = diferencia.days % 365
+                meses = resto_dias // 30  # Aproximado, ya que no todos los meses tienen 30 días
+                dias = resto_dias % 30
+
+                edad_YY_MM_DD= f'{años} años {meses} meses {dias} días'
+
                 # actualizacion del campo en la base de datos tomando la variable ID
-                db.execute(modelo_bovinos_inventario.update().values(edad=Edad_Animal).where(
+                db.execute(modelo_bovinos_inventario.update().values(edad=Edad_Animal,edad_YY_MM_DD=edad_YY_MM_DD).where(
                     modelo_bovinos_inventario.columns.id_bovino == id))
 
                 db.commit()
@@ -83,8 +107,20 @@ def calculoEdad(db: Session,current_user ):
                    # realiza el calculo correspondiente para calcular los meses entre fechas (edad del animal)
                    Edad_Animal = (fecha_muerte[4].year - fecha_nacimiento.year) * 12 + (
                                fecha_muerte[4].month - fecha_nacimiento.month)
+
+                   # Calcular la diferencia
+                   diferencia = fecha_muerte[4] - fecha_nacimiento
+
+                   # Calcular los años, meses y días
+                   años = diferencia.days // 365  # Aproximado, ya que no todas los años tienen 365 días
+                   resto_dias = diferencia.days % 365
+                   meses = resto_dias // 30  # Aproximado, ya que no todos los meses tienen 30 días
+                   dias = resto_dias % 30
+
+                   edad_YY_MM_DD= f'{años} años {meses} meses {dias} días'
+
                    # actualizacion del campo en la base de datos tomando la variable ID
-                   db.execute(modelo_bovinos_inventario.update().values(edad=Edad_Animal).where(
+                   db.execute(modelo_bovinos_inventario.update().values(edad=Edad_Animal,edad_YY_MM_DD=edad_YY_MM_DD).where(
                        modelo_bovinos_inventario.columns.id_bovino == id))
 
                    db.commit()
