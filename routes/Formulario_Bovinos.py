@@ -399,19 +399,21 @@ async def crear_bovino_masivo(bovinos: List[dict], db: Session = Depends(get_dat
             raza = bovino['raza']
             sexo = bovino['sexo']
             marca = bovino['marca']
+            id_registro_marca = bovino['idRegistroMarca']
             proposito = bovino['proposito']
             lote = bovino['lote']
             mansedumbre = "Manso"
             estado="Vivo"
             ordeno="No"
             peso = 0
-
+            print(id_registro_marca)
             Consulta_Nomnbres_Bovinos = db.execute(modelo_bovinos_inventario.select().where(
                 modelo_bovinos_inventario.columns.nombre_bovino == nombre_bovino,
 
                 modelo_bovinos_inventario.columns.usuario_id == current_user)).all()
 
-
+            Ruta_marca = crud.bovinos_inventario.Buscar_Ruta_Fisica_Marca(db=db, id_registro_marca=id_registro_marca,
+                                                                          current_user=current_user)
             # Verificar si alguna de las consultas tiene resultados
             if Consulta_Nomnbres_Bovinos:
                 return Response(status_code=status.HTTP_409_CONFLICT)
@@ -429,6 +431,7 @@ async def crear_bovino_masivo(bovinos: List[dict], db: Session = Depends(get_dat
                                                                     peso= peso,
                                                                     sexo=sexo,
                                                                     marca=marca,
+                                                                    ruta_imagen_marca =Ruta_marca ,
                                                                     proposito=proposito,
                                                                     mansedumbre=mansedumbre,
                                                                     estado=estado,
