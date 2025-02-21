@@ -74,7 +74,7 @@ id_capacidad: Optional [int] = Form(None)
 @Formulario_Bovino.post(
     "/crear_bovino",
     status_code=status.HTTP_201_CREATED, tags=["Formualario_Bovinos"])
-async def crear_bovinos(nombre_bovino: Optional [str] = Form(None), chip_asociado: Optional [str] = Form(None),fecha_nacimiento:  Optional [date] = Form(None), raza:  Optional [str] = Form(None), sexo:  Optional [str] = Form(None), marca:  Optional [str] = Form(None), proposito:  Optional [str] = Form(None),
+async def crear_bovinos(nombre_bovino: Optional [str] = Form(None), numero_chapeta: Optional [str] = Form(None),chip_asociado: Optional [str] = Form(None),fecha_nacimiento:  Optional [date] = Form(None), raza:  Optional [str] = Form(None), sexo:  Optional [str] = Form(None), marca:  Optional [str] = Form(None), proposito:  Optional [str] = Form(None),
                         mansedumbre:  Optional [str] = Form(None), estado:  Optional [str] = Form(None), compra_bovino:  Optional [str] = Form(None), fecha_pesaje:  Optional [date] = Form(None), peso:  Optional [float] = Form(None),
                         ordeno:  Optional [str] = Form(None), fecha_muerte:  Optional [date] = Form(None), razon_muerte:  Optional [str] = Form(None), numero_bono_venta:  Optional [str] = Form(None),
                         fecha_venta:  Optional [date] = Form(None), precio_venta:  Optional [int] = Form(None), razon_venta:  Optional [str] = Form(None), medio_pago:  Optional [str] = Form(None), comprador:  Optional [str] = Form(None),
@@ -112,8 +112,8 @@ async def crear_bovinos(nombre_bovino: Optional [str] = Form(None), chip_asociad
             # Devuelve un conflicto si hay duplicados
             return Response(status_code=status.HTTP_409_CONFLICT)
         else:
-            if registroIngresoHato == "2000-01-01":
-                registroIngresoHato = "null"
+            if not registroIngresoHato:
+                registroIngresoHato = datetime.now()
 
             FechaDeRegistroBovino = datetime.now()
             Ruta_marca = crud.bovinos_inventario.Buscar_Ruta_Fisica_Marca(db=db, id_registro_marca=id_registro_marca,
@@ -122,6 +122,7 @@ async def crear_bovinos(nombre_bovino: Optional [str] = Form(None), chip_asociad
             ingreso = modelo_bovinos_inventario.insert().values(nombre_bovino=nombre_bovino,
                                                                 fecha_nacimiento=fecha_nacimiento,
                                                                 raza=raza,
+                                                                numero_chapeta = numero_chapeta,
                                                                 chip_asociado=chip_asociado,
                                                                 sexo=sexo,
                                                                 marca=marca,
@@ -401,12 +402,13 @@ async def crear_bovino_masivo(bovinos: List[dict], db: Session = Depends(get_dat
             marca = bovino['marca']
             id_registro_marca = bovino['idRegistroMarca']
             proposito = bovino['proposito']
+            numero_chapeta = bovino['numero_chapeta']
             lote = bovino['lote']
             mansedumbre = "Manso"
             estado="Vivo"
             ordeno="No"
             peso = 0
-            print(id_registro_marca)
+
             Consulta_Nomnbres_Bovinos = db.execute(modelo_bovinos_inventario.select().where(
                 modelo_bovinos_inventario.columns.nombre_bovino == nombre_bovino,
 
@@ -423,7 +425,7 @@ async def crear_bovino_masivo(bovinos: List[dict], db: Session = Depends(get_dat
 
 
                 FechaDeRegistroBovino = datetime.now()
-
+                registroIngresoHato = datetime.now()
 
                 ingreso = modelo_bovinos_inventario.insert().values(nombre_bovino=nombre_bovino,
                                                                     fecha_nacimiento=fecha_nacimiento,
@@ -436,8 +438,9 @@ async def crear_bovino_masivo(bovinos: List[dict], db: Session = Depends(get_dat
                                                                     mansedumbre=mansedumbre,
                                                                     estado=estado,
                                                                     usuario_id=current_user,
-
+                                                                    numero_chapeta=numero_chapeta,
                                                                     nombre_lote_bovino=lote,
+                                                                    fecha_de_ingreso_hato = registroIngresoHato,
                                                                     fecha_de_ingreso_sistema=FechaDeRegistroBovino
                                                                     )
 
@@ -784,16 +787,38 @@ async def Buscar_id_Chip(
 '''
 La siguiente funcion realiza la actualizacion completa de la tabla de bovinos para cambiar los registros
 '''
-@Formulario_Bovino.put("/cambiar_datos_bovino/{id_bovino}/{fecha_nacimiento}/{edad}/{raza}/{sexo}/{peso}/{marca}/{proposito}/{mansedumbre}/{estado}/{compra_bovino}/{ruta_imagen_marca}/{fecha_de_ingreso_hato}", status_code=status.HTTP_201_CREATED)
-async def cambiar_esta_bovino(id_bovino:str,fecha_nacimiento:date,edad:int,raza:str,sexo:str,peso:float,marca:str,proposito:str,mansedumbre:str,estado:str,compra_bovino:str,ruta_imagen_marca:str,fecha_de_ingreso_hato:date,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+@Formulario_Bovino.put("/cambiar_datos_bovino/{id_bovino}", status_code=status.HTTP_201_CREATED)
+async def cambiar_esta_bovino(
+        id_bovino:str,
+        fecha_nacimiento: Optional[date] = Form(None),
+        edad: Optional[int] = Form(None),
+        raza: Optional[str] = Form(None),
+        sexo: Optional[str] = Form(None),
+        peso: Optional[float] = Form(None),
+        marca: Optional[str] = Form(None),
+        proposito: Optional[str] = Form(None),
+        mansedumbre: Optional[str] = Form(None),
+        estado: Optional[str] = Form(None),
+        compra_bovino: Optional[str] = Form(None),
+        ruta_imagen_marca: Optional[str] = Form(None),
+        fecha_de_ingreso_hato: Optional[date] = Form(None),
+        numero_chapeta: Optional[str] = Form(None),
+        db: Session = Depends(get_database_session),
+        current_user: Esquema_Usuario = Depends(get_current_user)
+):
     try:
 
-        """Busca la ruta fisica del path de la foto Marca ya que desde el frondEnd Se envia el ID de la tabla"""
+        if not id_bovino:
+            logger.error("El ID del bovino no puede ser None")
+            return Response(status_code=status.HTTP_400_BAD_REQUEST, content="El ID del bovino es requerido")
+
+              # Busca la ruta física del path de la foto Marca ya que desde el frontend se envía el ID de la tabla
         Ruta_marca = crud.bovinos_inventario.Buscar_Ruta_Fisica_Marca(db=db, id_registro_marca=ruta_imagen_marca,
                                                                       current_user=current_user)
 
-        db.execute(modelo_bovinos_inventario.update().values(
 
+        # Realiza la actualización
+        db.execute(modelo_bovinos_inventario.update().values(
             fecha_nacimiento=fecha_nacimiento,
             edad=edad,
             raza=raza,
@@ -805,15 +830,13 @@ async def cambiar_esta_bovino(id_bovino:str,fecha_nacimiento:date,edad:int,raza:
             estado=estado,
             compra_bovino=compra_bovino,
             ruta_imagen_marca=Ruta_marca,
-            fecha_de_ingreso_hato=fecha_de_ingreso_hato
-
-        ).where(
-            modelo_bovinos_inventario.columns.id_bovino == id_bovino))
+            fecha_de_ingreso_hato=fecha_de_ingreso_hato,
+            numero_chapeta=numero_chapeta
+        ).where(modelo_bovinos_inventario.columns.id_bovino == id_bovino))
         db.commit()
 
         if ruta_imagen_marca == "null":
             db.execute(modelo_bovinos_inventario.update().values(
-
                 fecha_nacimiento=fecha_nacimiento,
                 edad=edad,
                 raza=raza,
@@ -824,27 +847,18 @@ async def cambiar_esta_bovino(id_bovino:str,fecha_nacimiento:date,edad:int,raza:
                 mansedumbre=mansedumbre,
                 estado=estado,
                 compra_bovino=compra_bovino,
-                fecha_de_ingreso_hato=fecha_de_ingreso_hato
-
-
-            ).where(
-                modelo_bovinos_inventario.columns.id_bovino == id_bovino))
+                fecha_de_ingreso_hato=fecha_de_ingreso_hato,
+                numero_chapeta=numero_chapeta
+            ).where(modelo_bovinos_inventario.columns.id_bovino == id_bovino))
             db.commit()
 
-
-            # Retorna una consulta con el id actualizado
-            #resultado_actualizado = condb.execute(
-            #modelo_bovinos_inventario.select().where(modelo_bovinos_inventario.columns.id_bovino == id_bovino)).first()
-
+        logger.info(f'Bovino con ID {id_bovino} actualizado correctamente')
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
     except Exception as e:
         logger.error(f'Error al Editar Bovino: {e}')
         raise
-
     finally:
         db.close()
-
-    return Response(status_code=HTTP_204_NO_CONTENT)
-
 # Montar la carpeta de archivos estáticos
 #Formulario_Bovino.mount("/static", StaticFiles(directory="../static/uploads"), name="static")
 
