@@ -2,7 +2,7 @@
 Librerias requeridas
 '''
 import logging
-from Lib.Lib_Intervalo_Partos import intervalo_partos, promedio_intervalo_partos
+from Lib.Lib_Intervalo_Partos import intervalo_partos, promedio_intervalo_partos,conteo_partos
 # # importa la conexion de la base de datos
 from config.db import get_session
 # # importa el esquema de los bovinos
@@ -37,6 +37,7 @@ def get_database_session():
 async def listar_tabla_Intervalo_Partos(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
         intervalo_partos(session=db,current_user=current_user)
+        conteo_partos(session=db,current_user=current_user)
         promedio_intervalo_partos(session=db,current_user=current_user)
         #itemsListarIntevaloPartos = db.execute(modelo_historial_intervalo_partos.select()).all()
         itemsListarIntevaloPartos = db.query(modelo_historial_intervalo_partos).filter(modelo_historial_intervalo_partos.c.usuario_id == current_user).all()

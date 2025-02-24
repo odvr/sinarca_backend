@@ -111,7 +111,8 @@ modelo_leche = Table("produccion_leche", meta,
                      Column("tipo_ganado", String(300)),
                      Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")),
                      Column("nombre_bovino", String(300)),
-                     Column("dias_abiertos", Integer))
+                     Column("dias_abiertos", Integer),
+                     Column("cantidad_partos_manual", Integer))
 
 modelo_datos_muerte = Table("datos_muerte", meta,
                             Column("id_datos_muerte", Integer, primary_key=True),

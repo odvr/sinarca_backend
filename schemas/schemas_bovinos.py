@@ -181,6 +181,7 @@ class esquema_produccion_leche(BaseModel):
     usuario_id: Optional[str] = None
     nombre_bovino:Optional[str] = None
     dias_abiertos: Optional[int] = None
+    cantidad_partos_manual: Optional[int] = None
     class Config:
         orm_mode = True
         env_file = ".env"
