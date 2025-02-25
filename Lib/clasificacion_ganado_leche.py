@@ -75,6 +75,7 @@ def tipo_ganado_leche(session:Session,current_user):
             peso_bovino_leche = i[3]
             # Toma la edad del bovino, este es el campo numero 4
             edad_bovino_leche = i[4]
+
             #si el animal esta muerto o vendido se indicara esto
             if estado_bovino_leche=="Muerto":
                 tipo_ganado = "Este animal ha fallecido"
@@ -134,33 +135,42 @@ def tipo_ganado_leche(session:Session,current_user):
                     #se consulta la fecha de su ultimo parto y la cria que pario
                     consulta_ultimo_parto = list(session.execute(modelo_historial_partos.select(). \
                                                         where(modelo_historial_partos.columns.id_bovino == id_bovino_leche). \
-                                                        order_by(desc(modelo_historial_partos.columns.fecha_parto))).first())
-                    #se consulta el estado de la cria parida
-                    consulta_estado_cria= session.query(modelo_bovinos_inventario.c.estado). \
-                   where(modelo_bovinos_inventario.c.id_bovino==consulta_ultimo_parto[4]).first()
-                    #si la cria esta muerta o vendida entonces la vaca sera escotera
-                    if consulta_estado_cria[0]!="Vivo":
+                                                        order_by(desc(modelo_historial_partos.columns.fecha_parto))).all())
+
+                    if consulta_ultimo_parto==[] or  consulta_ultimo_parto[0][4] is None:
                         tipo_ganado = "Escotera"
                         session.execute(modelo_leche.update().values(tipo_ganado=tipo_ganado). \
                                         where(modelo_leche.columns.id_bovino == id_bovino_leche))
                         session.commit()
-                    #si la cria esta viva se evaluara si es escotera o pradida segun la edad de la cria
-                    elif consulta_estado_cria[0]=="Vivo":
-                        #se calcula el tiempo entre el ultimo parto y la fecha actual
-                        tiempo_ultimo_parto = date.today() - consulta_ultimo_parto[2]
-                        #si han transcurrido por lo menos 305 dias,
-                        # el ternero ya debio haber destetado, entonces la vaca sera escotera
-                        if tiempo_ultimo_parto >= timedelta(305):
+
+                    else:
+                        #se consulta el estado de la cria parida
+                        consulta_estado_cria= session.query(modelo_bovinos_inventario.c.estado). \
+                        where(modelo_bovinos_inventario.c.id_bovino==consulta_ultimo_parto[0][4]).first()
+                        #si la cria esta muerta o vendida entonces la vaca sera escotera
+                        if consulta_estado_cria[0]!="Vivo":
                             tipo_ganado = "Escotera"
                             session.execute(modelo_leche.update().values(tipo_ganado=tipo_ganado). \
-                                            where(modelo_leche.columns.id_bovino == id_bovino_leche))
+                                        where(modelo_leche.columns.id_bovino == id_bovino_leche))
                             session.commit()
+                        #si la cria esta viva se evaluara si es escotera o pradida segun la edad de la cria
+                        elif consulta_estado_cria[0]=="Vivo":
+                            #se calcula el tiempo entre el ultimo parto y la fecha actual
+                            tiempo_ultimo_parto = date.today() - consulta_ultimo_parto[0][2]
+                            #si han transcurrido por lo menos 305 dias,
+                            # el ternero ya debio haber destetado, entonces la vaca sera escotera
+                            if tiempo_ultimo_parto >= timedelta(305):
+                                tipo_ganado = "Escotera"
+                                session.execute(modelo_leche.update().values(tipo_ganado=tipo_ganado). \
+                                            where(modelo_leche.columns.id_bovino == id_bovino_leche))
+                                session.commit()
                         #si no ha transcurrido este timpo, la vaca sera una vaca parida
                         else:
                             tipo_ganado = "Parida"
                             session.execute(modelo_leche.update().values(tipo_ganado=tipo_ganado). \
                                             where(modelo_leche.columns.id_bovino == id_bovino_leche))
                             session.commit()
+
             else:
                 pass
 
