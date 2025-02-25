@@ -4,7 +4,7 @@ Librerias requeridas
 '''
 import logging
 
-from Lib.EliminacionTotal import eliminacionBovino
+from Lib.EliminacionTotal import eliminacionBovino, delete_bovino_data
 from starlette.status import HTTP_204_NO_CONTENT
 from config.db import  get_session
 from sqlalchemy.orm import Session
@@ -40,7 +40,10 @@ def get_database_session():
 async def Eliminar_total(id_bovino: str,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
 
-       eliminacionBovino(id_bovino,session=db)
+        delete_bovino_data(db=db, id_bovino=id_bovino)
+        #return Response(status_code=204)
+
+       #eliminacionBovino(id_bovino,session=db)
 
 
     except Exception as e:

@@ -6,7 +6,7 @@ import logging
 import json
 from sqlalchemy import func,extract
 import crud
-from Lib.Lib_Intervalo_Partos import intervalo_partos, fecha_aproximada_parto
+from Lib.Lib_Intervalo_Partos import intervalo_partos, fecha_aproximada_parto, conteo_partos
 # # importa la conexion de la base de datos
 from sqlalchemy.orm import Session
 
@@ -21,7 +21,7 @@ from Lib.funcion_peso_por_raza import peso_segun_raza
 from config.db import get_session
 # # importa el esquema de los bovinos
 from models.modelo_bovinos import modelo_historial_partos, modelo_partos, modelo_bovinos_inventario, \
-    modelo_registro_celos, modelo_abortos
+    modelo_registro_celos, modelo_abortos, modelo_leche
 from datetime import date
 from fastapi import APIRouter, Response
 from fastapi import  status
@@ -30,7 +30,7 @@ from fastapi import  Depends
 
 from routes.Prod_leche import Edad_Primer_Parto, Edad_Sacrificio_Lecheras, EliminarDuplicadosLeche
 from routes.rutas_bovinos import get_current_user
-from schemas.schemas_bovinos import esquema_historial_partos, Esquema_Usuario, esquema_partos
+from schemas.schemas_bovinos import esquema_historial_partos, Esquema_Usuario, esquema_partos, esquema_produccion_leche
 from routes.rutas_bovinos import get_current_user
 # Configuracion de la libreria para los logs de sinarca
 # Crea un objeto logger
@@ -110,6 +110,75 @@ async def listar_tabla_Partos_Animales(db: Session = Depends(get_database_sessio
     return itemsListarPartos
 
 
+
+
+
+@partos_bovinos.put("/Actualizar_Partos_Manuales/{idBovino}/{cantidad_partos_manual}")
+async def actualizar_partos_bovinos_manualmente(idBovino: int, cantidad_partos_manual: int, db: Session = Depends(get_database_session), current_user: Esquema_Usuario = Depends(get_current_user)):
+    try:
+        db.execute(modelo_leche.update().values(cantidad_partos_manual=cantidad_partos_manual).where(
+            modelo_leche.c.id_bovino == idBovino,
+            modelo_leche.c.usuario_id == current_user))
+        db.commit()
+
+
+        conteo_partos(session=db,current_user=current_user)
+    except Exception as e:
+        logger.error(f'Error al actualizar los partos manualmente: {e}')
+        raise
+    finally:
+        db.close()
+
+
+"""
+Partos Manuales 
+"""
+
+@partos_bovinos.get("/ListarPartosAgregadosManualMente",response_model=list[esquema_produccion_leche])
+async def ListarPartosAgregadosManualMente( db: Session = Depends(get_database_session), current_user: Esquema_Usuario = Depends(get_current_user)):
+    try:
+        ListadoPartos = db.execute(
+            modelo_leche.select().where(
+                modelo_leche.c.usuario_id == current_user,
+                modelo_leche.c.cantidad_partos_manual.isnot(None)
+            )
+        ).all()
+        return ListadoPartos
+
+
+    except Exception as e:
+        logger.error(f'Error al Listar Partos Agregados Manualmente o Partos sin Registro en Arbol Genialogico: {e}')
+        raise
+    finally:
+        db.close()
+
+
+
+@partos_bovinos.delete("/EliminarPartosSinRegistro/{id_leche}", status_code=HTTP_204_NO_CONTENT)
+async def EliminarPartosSinRegistro(id_leche: str,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user) ):
+
+    try:
+
+        db.execute(
+            modelo_leche.update().where(
+                modelo_leche.c.id_leched == id_leche,
+                modelo_leche.c.usuario_id == current_user
+            ).values(cantidad_partos_manual=None)
+        )
+        db.commit()
+        return Response(status_code=HTTP_204_NO_CONTENT)
+
+    except Exception as e:
+        logger.error(f'Error al Intentar Eliminar los Partos Agregados ManualMente: {e}')
+        raise
+    finally:
+        db.close()
+
+
+
+
+
+
 @partos_bovinos.get("/historial_partos_anuales" )
 async def listar_historial_partos_anuales(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user) ):
     """
@@ -146,6 +215,8 @@ async def listar_historial_partos_anuales(db: Session = Depends(get_database_ses
 async def listar_tabla_Partos_Individual(id_bovino: str,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user) ):
     try:
         "Librerias Requeridas"
+
+        
         peso_segun_raza(session=db, current_user=current_user)
         Edad_Primer_Parto(session=db)
         Edad_Sacrificio_Lecheras(condb=db)
@@ -166,6 +237,9 @@ async def listar_tabla_Partos_Individual(id_bovino: str,db: Session = Depends(ge
         endogamia(session=db, current_user=current_user)
         intervalo_partos(session=db, current_user=current_user)
         tipo_ganado_leche(session=db, current_user=current_user)
+        
+
+
         itemsListarPartos = db.execute(
             modelo_historial_partos.select().where(modelo_historial_partos.columns.id_bovino == id_bovino)).all()
 

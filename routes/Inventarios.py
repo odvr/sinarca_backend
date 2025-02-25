@@ -18,12 +18,12 @@ from Lib.vida_util_macho_reproductor_bovino import vida_util_macho_reproductor
 from config.db import   get_session
 # importa el esquema de los bovinos
 from models.modelo_bovinos import modelo_usuarios, modelo_bovinos_inventario, modelo_indicadores, \
-    modelo_arbol_genealogico, modelo_ceba, modelo_levante, modelo_datos_pesaje, modelo_macho_reproductor
+    modelo_arbol_genealogico, modelo_ceba, modelo_levante, modelo_datos_pesaje, modelo_macho_reproductor, modelo_leche
 from sqlalchemy.orm import Session
 
 from routes.rutas_bovinos import get_current_user
 from schemas.schemas_bovinos import Esquema_Usuario, Esquema_bovinos, esquema_arbol_genealogico, \
-    esquema_produccion_ceba, esquema_produccion_levante, esquema_modelo_Reporte_Pesaje
+    esquema_produccion_ceba, esquema_produccion_levante, esquema_modelo_Reporte_Pesaje, esquema_produccion_leche
 
 # Configuracion de las rutas para fash api
 Inventarios = APIRouter()
@@ -70,6 +70,23 @@ async def inventario_bovino(db: Session = Depends(get_database_session),current_
 
     return items
 
+
+
+
+@Inventarios.get("/Listar_Solo_Produccion_leche",response_model=list[esquema_produccion_leche],tags=["produccionLeche"] )
+async def Listar_Solo_Produccion_leche(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+
+    try:
+        hembras = db.query(modelo_leche). \
+            filter( modelo_leche.c.usuario_id == current_user).all()
+
+
+    except Exception as e:
+        logger.error(f'Error al obtener Listado de Solo produccion leche: {e}')
+        raise
+    finally:
+        db.close()
+    return hembras
 
 
 @Inventarios.get("/Buscar_Historial_Bovino/{id_bovino}", response_model=list, tags=["Inventarios"])

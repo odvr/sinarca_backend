@@ -52,7 +52,7 @@ def get_database_session():
 async def listar_tabla_lotes(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
 
     try:
-        crud.crud_bovinos_inventario.bovinos_inventario.ActualizarCantidadAnimalesEnLote(db=db,current_user=current_user)
+
         LotesBovinos = db.query(modelo_lotes_bovinos). \
             filter( modelo_lotes_bovinos.c.usuario_id == current_user).all()
 
@@ -77,7 +77,8 @@ async def crear_lotes_bovinos(nombre_lote: str = Form(...),
                                         current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
 
-
+        crud.crud_bovinos_inventario.bovinos_inventario.ActualizarCantidadAnimalesEnLote(db=db,
+                                                                                         current_user=current_user)
         #Realiza una consulta para validar si el nombre ya existe o no existe.
         Consulta_Nomnbres_Lote = db.execute(
             modelo_bovinos_inventario.select().where(

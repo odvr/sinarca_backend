@@ -2,8 +2,9 @@
 Librerias requeridas
 @autor : odvr
 '''
-from sqlalchemy.testing.plugin.plugin_base import logging
+from sqlalchemy import Table, Column, Integer, ForeignKey, delete
 import logging
+from config.db import meta, engine
 
 
 
@@ -37,6 +38,91 @@ formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(messag
 file_handler.setFormatter(formatter)
 # Agrega el manejador de archivo al logger
 logger.addHandler(file_handler)
+# List of all tables that contain the id_bovino column in the order of dependency
+
+
+# List of all tables that contain the id_veterinaria column in the order of dependency
+dependent_veterinaria_tables = [
+    "Comentarios_Veterinaria",  # Dependent on veterinaria
+    "Evoluciones_Bovinos"
+]
+# List of all tables that contain the id_veterinaria column in the order of dependency
+dependent_veterinaria_tables = [
+    "comentarios_veterinaria"
+]
+
+# List of all tables that contain the id_bovino column in the order of dependency
+dependent_bovino_tables = [
+    "veterinaria",  # This should be after comentarios_veterinaria
+    "Evoluciones_Bovinos",
+    "produccion_ceba",
+    "produccion_levante",
+    "produccion_leche",
+    "datos_muerte",
+    "arbol_genealogico",
+    "macho_reproductor",
+    "ventas",
+    "compra_bovino",
+    "ReportesPesaje",
+    "registro_vacunacion_bovinos",
+    "descarte",
+    "partos",
+    "palpaciones",
+    "dias_abiertos",
+    "carga_animal",
+    "pastoreo",
+    "vientres_aptos",
+    "historial_partos",
+    "intervalo_partos",
+    "litros_leche",
+    "reporte_curva_lactancia_general",
+    "orden_por_IEP",
+    "orden_por_litros",
+    "orden_por_peso",
+    "registro_celos",
+    "tasas_concepcion",
+    "ganancia_historica_peso",
+    "natalidad_o_paricion_real",
+    "periodos_lactancia",
+    "periodos_secado",
+    "abortos",
+    "evaluaciones_macho_reproductor",
+    "lotes_bovinos",
+    "manejo_ternero_recien_nacido_lotes",
+    "eventos_asociados_lotes",
+    "descorne_lotes",
+    "control_parasitos_lote",
+    "control_podologia_lotes",
+    "notificacion_proximidad_parto"
+]
+
+def delete_bovino_data(db: Session, id_bovino: int):
+    try:
+        # Delete from tables that depend on veterinaria first
+        for table_name in dependent_veterinaria_tables:
+            table = Table(table_name, meta, autoload_with=engine)
+            if 'id_veterinaria' in table.c:
+                subquery = db.query(table.c.id_veterinaria).join(Table('veterinaria', meta, autoload_with=engine)).filter(Table('veterinaria', meta, autoload_with=engine).c.id_bovino == id_bovino).subquery()
+                stmt = delete(table).where(table.c.id_veterinaria.in_(subquery))
+                db.execute(stmt)
+
+        # Delete from tables that depend on bovinos
+        for table_name in dependent_bovino_tables:
+            table = Table(table_name, meta, autoload_with=engine)
+            if 'id_bovino' in table.c:
+                stmt = delete(table).where(table.c.id_bovino == id_bovino)
+                db.execute(stmt)
+
+        # Finally, delete from the main bovinos table
+        bovino_table = Table("bovinos", meta, autoload_with=engine)
+        stmt = delete(bovino_table).where(bovino_table.c.id_bovino == id_bovino)
+        db.execute(stmt)
+
+        db.commit()
+
+    except Exception as e:
+        db.rollback()
+        raise e
 
 """la siguiente funcion tiene como objetivo eliminar el bovino que se desee:"""
 def eliminacionBovino(id_bov_eliminar,session: Session):
