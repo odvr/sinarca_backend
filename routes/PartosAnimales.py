@@ -218,11 +218,11 @@ async def listar_tabla_Partos_Individual(id_bovino: str,db: Session = Depends(ge
 
         
         peso_segun_raza(session=db, current_user=current_user)
-        Edad_Primer_Parto(session=db)
-        Edad_Sacrificio_Lecheras(condb=db)
+        Edad_Primer_Parto(session=db, current_user=current_user)
+        #Edad_Sacrificio_Lecheras(condb=db)
         promedio_litros_leche(session=db, current_user=current_user)
         intervalo_partos(session=db, current_user=current_user)
-        EliminarDuplicadosLeche(condb=db)
+        #EliminarDuplicadosLeche(condb=db)
 
         IEP_por_raza(session=db, current_user=current_user)
         registro_partos_animales(session=db, current_user=current_user)

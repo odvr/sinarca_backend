@@ -67,6 +67,7 @@ logger.addHandler(file_handler)
 en la base de datos"""
 def conteo_partos(session:Session,current_user):
     try:
+
         consulta_animales_leche=session.query(modelo_leche.c.id_bovino,modelo_leche.c.cantidad_partos_manual). \
         filter(modelo_leche.c.usuario_id==current_user).all()
 
@@ -82,11 +83,26 @@ def conteo_partos(session:Session,current_user):
                     filter(modelo_historial_partos.columns.id_bovino == id_bovino_partos).count()
 
             if cantidad_partos_manual is None:
+                 valor_defecto=None
                  # actualizacion de campos
-                 agregar_partos = modelo_leche.update().values(num_partos=cantidad_partos). \
-                                where(modelo_leche.columns.id_bovino == id_bovino_partos)
-                 session.execute(agregar_partos)
-                 session.commit()
+                 if cantidad_partos == 0:
+                     # tambien se actualizara los valores de edad primer parto y fecha primer parto
+                     valor_defecto = None
+
+                     session.execute(modelo_leche.update().values(edad_primer_parto=valor_defecto,
+                                                                  fecha_primer_parto=valor_defecto,
+                                                                  fecha_vida_util=valor_defecto).where(
+                         modelo_leche.columns.id_bovino == id_bovino_partos))
+
+                     session.commit()
+
+                 else:
+                     agregar_partos = modelo_leche.update().values(num_partos=cantidad_partos). \
+                         where(modelo_leche.columns.id_bovino == id_bovino_partos)
+                     session.execute(agregar_partos)
+                     session.commit()
+
+
 
             else:
                  total_num_partos= cantidad_partos +  cantidad_partos_manual
@@ -98,19 +114,27 @@ def conteo_partos(session:Session,current_user):
                  session.commit()
 
 
-            if cantidad_partos==0 or cantidad_partos==1:
-                  #tambien se actualizara los valores de edad primer parto y fecha primer parto
-                  valor_defecto = None
+            consulta_fecha_primer_parto = session.query(modelo_historial_partos). \
+                filter(modelo_historial_partos.columns.id_bovino == id_bovino_partos). \
+                order_by(asc(modelo_historial_partos.columns.fecha_parto)).all()
 
-                  session.execute(modelo_leche.update().values(edad_primer_parto=valor_defecto,
+            print(id_bovino_partos,consulta_fecha_primer_parto[0][2])
+
+            if consulta_fecha_primer_parto==[] or consulta_fecha_primer_parto[0][2] is None:
+                valor_defecto = None
+                session.execute(modelo_leche.update().values(edad_primer_parto=valor_defecto,
                                                              fecha_primer_parto=valor_defecto,
                                                              fecha_vida_util=valor_defecto).where(
-                        modelo_leche.columns.id_bovino == id_bovino_partos))
+                    modelo_leche.columns.id_bovino == id_bovino_partos))
 
-                  session.commit()
+                session.commit()
 
             else:
-                pass
+                session.execute(modelo_leche.update().values(fecha_primer_parto=consulta_fecha_primer_parto[0][2]).where(
+                    modelo_leche.columns.id_bovino == id_bovino_partos))
+
+                session.commit()
+
 
 
         session.commit()
