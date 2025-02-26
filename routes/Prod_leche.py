@@ -7,6 +7,7 @@ from fastapi.encoders import jsonable_encoder
 from sqlalchemy.sql.functions import current_user
 from Lib.Lib_Intervalo_Partos import intervalo_partos
 from Lib.Lib_eliminar_duplicados_bovinos import eliminarduplicados
+from Lib.Registro_partos import registro_partos_animales
 from Lib.clasificacion_ganado_leche import tipo_ganado_leche
 from Lib.dias_abiertos import dias_abiertos
 from Lib.funcion_litros_leche import promedio_litros_leche
@@ -88,7 +89,7 @@ async def inventario_prod_leche(db: Session = Depends(get_database_session),
     try:
         itemsLeche = db.query(modelo_leche).filter(modelo_leche.c.usuario_id == current_user).all()
         "Librerias Requeridas"
-        #peso_segun_raza(session=db,current_user=current_user)
+        registro_partos_animales(session=db,current_user=current_user)
 
 
 
