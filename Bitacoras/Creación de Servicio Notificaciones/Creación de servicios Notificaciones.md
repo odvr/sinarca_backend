@@ -137,3 +137,5 @@ Después de guardarlo en crontab -e, revisa si está programado con:
 5️⃣ Revisa los logs de cron si no funciona:
 
 `cat /var/log/syslog | grep CRON****`
+
+

@@ -9,6 +9,7 @@ from http.client import HTTPException
 from sqlalchemy import and_
 from fastapi import APIRouter, Request
 
+from Lib.Notificaciones.Notificaciones_Whatsapp import enviar_Notificaciones_Whatsapp
 from Lib.Tasa_Supervivencia import tasa_supervivencia
 from Lib.enviar_correos_publicidad import enviar_correo_bienvenida
 from Lib.perdida_Terneros import perdida_Terneros1
@@ -307,8 +308,9 @@ async def Buscar_Indicadores(db: Session = Depends(get_database_session),current
       db.close()
 
 
-@rutas_bovinos.get("/HolaMundo",tags=["Pruebas"])
-async def HolaMundo():
+@rutas_bovinos.get("/HolaMundo/{numero}/{mensaje}",tags=["Pruebas"])
+async def HolaMundo(numero:int,mensaje:str):
+    enviar_Notificaciones_Whatsapp(NumeroCliente=numero,Mensaje=mensaje)
     return {"message": "Hello World"}
 
 
