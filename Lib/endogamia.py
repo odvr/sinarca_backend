@@ -17,6 +17,7 @@ from models.modelo_bovinos import modelo_bovinos_inventario, modelo_leche, model
     modelo_arbol_genealogico, modelo_registro_pajillas
 from sqlalchemy.orm import Session
 from sqlalchemy import func, desc
+import crud.crud_bovinos_inventario
 
 # Configuracion de las rutas para fash api
 rutas_bovinos = APIRouter()
@@ -44,6 +45,68 @@ logger.addHandler(file_handler)
 
 """"A continuacion se muestran las funciones que determinan los lazos familiares"""
 
+def actualizacion_nombres_Arbol_genealogico(session: Session,current_user):
+    try:
+        # Realiza la consulta general de la tabla de arbol genealogico
+        consulta_bovinos = session.query(modelo_arbol_genealogico).\
+            filter(modelo_arbol_genealogico.columns.usuario_id == current_user).all()
+
+
+        # Recorre los campos de la consulta
+        for i in consulta_bovinos:
+            id_bovino = i.id_bovino
+            id_bovino_madre = i.id_bovino_madre
+            id_bovino_padre = i.id_bovino_padre
+            inseminacion = i.inseminacion
+
+
+            nombre_bovino = crud.bovinos_inventario.Buscar_Nombre(db=session, id_bovino=id_bovino, current_user=current_user)
+            #actualizacion del campo
+            session.execute(modelo_arbol_genealogico.update().values(nombre_bovino=nombre_bovino).filter(modelo_arbol_genealogico.columns.id_bovino == id_bovino,modelo_arbol_genealogico.columns.usuario_id == current_user))
+            session.commit()
+
+            if inseminacion=="Si":
+                 pajilla = session.query(modelo_registro_pajillas).where(
+                 modelo_registro_pajillas.columns.id_pajillas == id_bovino_padre).\
+                 filter(modelo_registro_pajillas.columns.usuario_id == current_user).first()
+                 try:
+                     nombre_pajilla= f'Pajilla {pajilla[1]} ({pajilla[3]})'
+                     session.execute(modelo_arbol_genealogico.update().values(nombre_bovino_padre=nombre_pajilla).filter(
+                        modelo_arbol_genealogico.columns.id_bovino == id_bovino))
+                     session.commit()
+                 except Exception as e:
+                     logger.error(f'AL CONSULTAR PAJILLAS nombre_pajilla : {e}')
+                     raise
+            else:
+                if id_bovino_padre is None:
+                    nombre_bovino_padre="No registra"
+                    #actualizacion del campo
+                    session.execute(modelo_arbol_genealogico.update().values(nombre_bovino_padre=nombre_bovino_padre).filter(modelo_arbol_genealogico.columns.id_bovino == id_bovino,modelo_arbol_genealogico.columns.usuario_id == current_user))
+                    session.commit()
+                else:
+                    nombre_bovino_padre = crud.bovinos_inventario.Buscar_Nombre(db=session, id_bovino=id_bovino_padre, current_user=current_user)
+                    #actualizacion del campo
+                    session.execute(modelo_arbol_genealogico.update().values(nombre_bovino_padre=nombre_bovino_padre).filter(modelo_arbol_genealogico.columns.id_bovino == id_bovino,modelo_arbol_genealogico.columns.usuario_id == current_user))
+                    session.commit()
+
+
+            if id_bovino_madre is None:
+                nombre_bovino_madre="No registra"
+                #actualizacion del campo
+                session.execute(modelo_arbol_genealogico.update().values(nombre_bovino_madre=nombre_bovino_madre).filter(modelo_arbol_genealogico.columns.id_bovino == id_bovino,modelo_arbol_genealogico.columns.usuario_id == current_user))
+                session.commit()
+
+            else:
+                nombre_bovino_madre = crud.bovinos_inventario.Buscar_Nombre(db=session, id_bovino=id_bovino_madre, current_user=current_user)
+                #actualizacion del campo
+                session.execute(modelo_arbol_genealogico.update().values(nombre_bovino_madre=nombre_bovino_madre).filter(modelo_arbol_genealogico.columns.id_bovino == id_bovino,modelo_arbol_genealogico.columns.usuario_id == current_user))
+                session.commit()
+
+    except Exception as e:
+        logger.error(f'Error Funcion actualizacion_nombres_Arbol_genealogico: {e}')
+        raise
+
+
 def abuelo_materno(session: Session,current_user):
     try:
         # Realiza la consulta general de la tabla de arbol genealogico
@@ -58,6 +121,7 @@ def abuelo_materno(session: Session,current_user):
             nombre_bovino_madre = i[15]
             # Toma el ID del usuario, este es el campo numero 13
             usuario_id = i[13]
+
             # consulta de relaciones familiares
             # consulta padre de la madre(abuelo materno)
             consulta_nombre_abuelo_materno = session.query(modelo_arbol_genealogico).\
@@ -266,55 +330,6 @@ def bisabuelo_paterno(session: Session,current_user):
 """A continuacion se muestra la funcion de indice de endogamia"""
 def endogamia(session: Session,current_user):
  try:
-     # Realiza la consulta general de la tabla de arbol genealogico
-     consulta_id_bovinos = session.query(modelo_arbol_genealogico).\
-            where(modelo_arbol_genealogico.columns.usuario_id == current_user).all()
-     # Recorre los campos de la consulta
-     for i in consulta_id_bovinos:
-         # Toma el nombre del bovino, este es el campo numero 1
-         id = i[1]
-         # Toma el ID de la madre del bovino, este es el campo numero 2
-         id_madre = i[2]
-         # Toma el ID del padre bovino, este es el campo numero 3
-         id_padre = i[3]
-         # Toma si el anial es de inseminacion o no, este es el campo numero 23
-         inseminacion = i[23]
-
-         # traemos el campo de nombre, padre y madre y lo actualizamos
-         nombre_bovino = list(session.query(modelo_bovinos_inventario).where(modelo_bovinos_inventario.columns.id_bovino == id).first())
-         if inseminacion=="Si":
-             pajilla = session.query(modelo_registro_pajillas).where(
-                 modelo_registro_pajillas.columns.id_pajillas == id_padre).\
-                 filter(modelo_registro_pajillas.columns.usuario_id == current_user).first()
-             try:
-                 nombre_pajilla= f'Pajilla {pajilla[1]} ({pajilla[3]})'
-                 session.execute(modelo_arbol_genealogico.update().values(nombre_bovino_padre=nombre_pajilla).filter(
-                     modelo_arbol_genealogico.columns.id_bovino == id))
-                 session.commit()
-             except Exception as e:
-                 logger.error(f'AL CONSULTAR PAJILLAS nombre_pajilla : {e}')
-                 raise
-         else:
-
-             try:
-                 nombre_bovino_padre = session.query(modelo_bovinos_inventario).where(
-                     modelo_bovinos_inventario.columns.id_bovino == id_padre).first()
-
-                 session.execute(
-                     modelo_arbol_genealogico.update().values(nombre_bovino_padre=nombre_bovino_padre[12]).where(
-                         modelo_arbol_genealogico.columns.id_bovino == id))
-                 session.commit()
-             except Exception as e:
-                logger.error(f'AL CONSULTAR INCENTARIO modelo_bovinos_inventario : {e} ')
-                raise
-
-         nombre_bovino_madre = list(session.query(modelo_bovinos_inventario).where(modelo_bovinos_inventario.columns.id_bovino == id_madre).first())
-         # actualizacion del campo
-         session.execute(modelo_arbol_genealogico.update().values(
-             nombre_bovino=nombre_bovino[12],
-             nombre_bovino_madre=nombre_bovino_madre[12]).where(
-             modelo_arbol_genealogico.columns.id_bovino == id))
-         session.commit()
 
      # para poder realizar esta funcion correctamente, los lazos familiares y sus campos deben estar listos y llenados
      # por lo tanto se debe llamar a las funcies que establecen dichos lazos familiares

@@ -11,7 +11,7 @@ from fastapi import APIRouter, Response,status
 from fastapi import APIRouter, Depends
 
 from Lib.endogamia import endogamia, abuelo_materno, abuela_materna, abuelo_paterno, abuela_paterna, bisabuelo_materno, \
-    bisabuelo_paterno
+    bisabuelo_paterno,actualizacion_nombres_Arbol_genealogico
 from Lib.perdida_Terneros import perdida_Terneros1
 from config.db import   get_session
 # importa el esquema de los bovinos
@@ -87,6 +87,7 @@ async def listar_tabla_endogamia(db: Session = Depends(get_database_session),cur
 
         itemsAnimalesEndogamia = db.query(modelo_arbol_genealogico).filter(modelo_arbol_genealogico.c.usuario_id == current_user).all()
 
+        actualizacion_nombres_Arbol_genealogico(session=db, current_user=current_user)
         abuelo_materno(session=db, current_user=current_user)
         abuela_materna(session=db, current_user=current_user)
         abuelo_paterno(session=db, current_user=current_user)
