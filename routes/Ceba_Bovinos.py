@@ -53,64 +53,73 @@ def get_database_session():
 '''Listar animales en Ceba'''
 
 
-@Ceba_Bovinos.get("/listar_prod_ceba",response_model=list,tags=["Ceba"])
-async def inventario_ceba(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
-    #llamdo de la funcion para calcular
-    Estado_Optimo_Ceba(db=db,current_user=current_user)
-    ganancia_peso_ceba(session=db,current_user=current_user)
-    eliminarduplicados(db=db,current_user=current_user)
+@Ceba_Bovinos.get("/listar_prod_ceba", response_model=list, tags=["Ceba"])
+async def inventario_ceba(db: Session = Depends(get_database_session),
+                          current_user: Esquema_Usuario = Depends(get_current_user)):
+    # llamada de la función para calcular
+    Estado_Optimo_Ceba(db=db, current_user=current_user)
+    ganancia_peso_ceba(session=db, current_user=current_user)
+    eliminarduplicados(db=db, current_user=current_user)
     ganancia_peso_historica(session=db, current_user=current_user)
 
-    #tasa_supervivencia(session=Session, current_user=current_user)
-
     try:
-
-
         itemsListarGananciasPesos = db.query(modelo_ganancia_historica_peso).filter(
             modelo_ganancia_historica_peso.c.usuario_id == current_user).first()
-        ConsultaCeba = db.query(modelo_ceba).filter(modelo_ceba.c.usuario_id == current_user).all()
+
+        # Realiza una consulta para obtener los datos de modelo_ceba junto con el sexo desde modelo_bovinos_inventario
+        ConsultaCeba = db.query(
+            modelo_ceba.c.id_bovino,
+            modelo_ceba.c.edad,
+            modelo_ceba.c.peso,
+            modelo_ceba.c.estado,
+            modelo_ceba.c.proposito,
+            modelo_ceba.c.estado_optimo_ceba,
+            modelo_ceba.c.nombre_bovino,
+            modelo_ceba.c.ganancia_media_diaria,
+            modelo_bovinos_inventario.c.sexo,
+            modelo_bovinos_inventario.c.edad_YY_MM_DD
+        ).join(
+            modelo_bovinos_inventario,
+            modelo_ceba.c.id_bovino == modelo_bovinos_inventario.c.id_bovino
+        ).filter(
+            modelo_ceba.c.usuario_id == current_user
+        ).all()
 
         ConsultaHistorialCeba = []
 
         if ConsultaCeba is not None:
             for Ceba in ConsultaCeba:
                 historial_item = {
-
-
                     "id_bovino": Ceba.id_bovino,
                     "edad": Ceba.edad,
                     "peso": Ceba.peso,
                     "estado": Ceba.estado,
                     "proposito": Ceba.proposito,
                     "estado_optimo_ceba": Ceba.estado_optimo_ceba,
-
                     "nombre_bovino": Ceba.nombre_bovino,
                     "ganancia_media_diaria": Ceba.ganancia_media_diaria,
-
+                    "sexo": Ceba.sexo, # Agrega el sexo del animal
+                    "edad_YY_MM_DD": Ceba.edad_YY_MM_DD
                 }
                 ConsultaHistorialCeba.append(historial_item)
 
         if itemsListarGananciasPesos is not None:
             ConsultaHistorialCeba.append({
-
                 "ganancia_diaria_media": itemsListarGananciasPesos.ganancia_diaria_media,
                 "peso_anterior": itemsListarGananciasPesos.peso_anterior,
                 "peso_posterior": itemsListarGananciasPesos.peso_posterior,
                 "fecha_anterior": itemsListarGananciasPesos.fecha_anterior,
                 "fecha_posterior": itemsListarGananciasPesos.fecha_posterior,
-
                 "dias": itemsListarGananciasPesos.dias,
             })
 
         return ConsultaHistorialCeba
 
-
     except Exception as e:
-        logger.error(f'Error al obtener inventario de Produccion Levante: {e}')
+        logger.error(f'Error al obtener inventario de Producción Levante: {e}')
         raise
     finally:
         db.close()
-
 
 
 "la siguiente funcion"

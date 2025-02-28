@@ -53,24 +53,58 @@ def get_database_session():
 Lista los animales en Levante
 
 """
-
-@Levante_Bovinos.get("/listar_prod_levante",response_model=list[esquema_produccion_levante])
-async def inventario_levante(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
-    Estado_Optimo_Levante(db=db,current_user=current_user)
-    ganancia_peso_levante(session=db,current_user=current_user)
-    eliminarduplicados(db=db,current_user=current_user)
-
+@Levante_Bovinos.get("/listar_prod_levante", response_model=list)
+async def inventario_levante(db: Session = Depends(get_database_session),
+                             current_user: Esquema_Usuario = Depends(get_current_user)):
+    Estado_Optimo_Levante(db=db, current_user=current_user)
+    ganancia_peso_levante(session=db, current_user=current_user)
+    eliminarduplicados(db=db, current_user=current_user)
 
     try:
-        #itemsLevante = db.execute(modelo_levante.select()).all()
-        itemsLevante = db.query(modelo_levante).filter(modelo_levante.c.usuario_id == current_user).all()
+        # Realiza una consulta para obtener los datos de modelo_levante junto con el sexo desde modelo_bovinos_inventario
+        itemsLevante = db.query(
+            modelo_levante.c.id_levante,
+            modelo_levante.c.id_bovino,
+            modelo_levante.c.edad,
+            modelo_levante.c.peso,
+            modelo_levante.c.estado,
+            modelo_levante.c.proposito,
+            modelo_levante.c.estado_optimo_levante,
+            modelo_levante.c.nombre_bovino,
+            modelo_levante.c.ganancia_media_diaria,
+            modelo_bovinos_inventario.c.sexo,
+            modelo_bovinos_inventario.c.edad_YY_MM_DD
+        ).join(
+            modelo_bovinos_inventario,
+            modelo_levante.c.id_bovino == modelo_bovinos_inventario.c.id_bovino
+        ).filter(
+            modelo_levante.c.usuario_id == current_user
+        ).all()
 
+        # Preparar la lista de resultados incluyendo el sexo
+        resultados = []
+        for item in itemsLevante:
+            resultado = {
+                "id_levante": item.id_levante,
+                "id_bovino": item.id_bovino,
+                "edad": item.edad,
+                "peso": item.peso,
+                "estado": item.estado,
+                "proposito": item.proposito,
+                "estado_optimo_levante": item.estado_optimo_levante,
+                "nombre_bovino": item.nombre_bovino,
+                "ganancia_media_diaria": item.ganancia_media_diaria,
+                "sexo": item.sexo,
+                "edad_YY_MM_DD": item.edad_YY_MM_DD
+            }
+            resultados.append(resultado)
+
+        return resultados
     except Exception as e:
-        logger.error(f'Error al obtener inventario de Produccion Levante: {e}')
+        logger.error(f'Error al obtener inventario de Producción Levante: {e}')
         raise
     finally:
         db.close()
-    return itemsLevante
 
 @Levante_Bovinos.get("/Calcular_Animales_Optimo_Levante")
 async def Animales_Optimo_Levante(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
