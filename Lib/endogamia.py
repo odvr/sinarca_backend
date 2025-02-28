@@ -69,14 +69,25 @@ def actualizacion_nombres_Arbol_genealogico(session: Session,current_user):
                  pajilla = session.query(modelo_registro_pajillas).where(
                  modelo_registro_pajillas.columns.id_pajillas == id_bovino_padre).\
                  filter(modelo_registro_pajillas.columns.usuario_id == current_user).first()
-                 try:
-                     nombre_pajilla= f'Pajilla {pajilla[1]} ({pajilla[3]})'
+
+                 if pajilla==():
+                     nombre_pajilla= "No registra"
                      session.execute(modelo_arbol_genealogico.update().values(nombre_bovino_padre=nombre_pajilla).filter(
                         modelo_arbol_genealogico.columns.id_bovino == id_bovino))
                      session.commit()
-                 except Exception as e:
-                     logger.error(f'AL CONSULTAR PAJILLAS nombre_pajilla : {e}')
-                     raise
+
+                 else:
+                     try:
+                         nombre_pajilla= f'Pajilla {pajilla[1]} ({pajilla[3]})'
+                         session.execute(modelo_arbol_genealogico.update().values(nombre_bovino_padre=nombre_pajilla).filter(
+                           modelo_arbol_genealogico.columns.id_bovino == id_bovino))
+                         session.commit()
+
+                     except Exception as e:
+                         logger.error(f'AL CONSULTAR PAJILLAS nombre_pajilla : {e}')
+                         raise
+
+
             else:
                 if id_bovino_padre is None:
                     nombre_bovino_padre="No registra"
@@ -362,7 +373,18 @@ def endogamia(session: Session,current_user):
          # bucle if que determina la consanguinidad
          #se debe tener en cuenta los animales con un "no registra" en algun lazo familiar
          #si el padre del bovino es el mismo abuelo materno del bovino entoces sera padre x hija:
-         if nombre_padre == nombre_abuelo_materno:
+
+         if nombre_padre=="No registra" or nombre_madre=="No registra":
+             apareamiento = "No existe información disponible"
+             porcentaje_endogamia = None
+             notificacion = "No existe información disponible"
+             # actualizacion del campo
+             session.execute(modelo_arbol_genealogico.update().values(tipo_de_apareamiento=apareamiento,
+                                                                    consanguinidad=porcentaje_endogamia,
+                                                                    notificacion=notificacion).filter(modelo_arbol_genealogico.columns.nombre_bovino == nombre,modelo_arbol_genealogico.columns.usuario_id == usuario_id))
+             session.commit()
+
+         elif nombre_padre == nombre_abuelo_materno:
             if nombre_abuelo_materno=="No registra":
              apareamiento = "individuos no relacionados"
              porcentaje_endogamia = 0
