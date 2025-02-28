@@ -21,6 +21,9 @@ from sqlalchemy.orm import Session
 
 from routes.rutas_bovinos import get_current_user
 from schemas.schemas_bovinos import Esquema_Token, Esquema_Usuario, Esquema_bovinos, esquema_arbol_genealogico
+from fastapi import Form
+from typing import Optional
+from typing import List
 
 # Configuracion de las rutas para fash api
 Endogamia = APIRouter()
@@ -107,8 +110,8 @@ async def listar_tabla_endogamia(db: Session = Depends(get_database_session),cur
 """
 Crear Indice de Endogamia
 """
-@Endogamia.post("/calcular_indice_endogamia/{id_bovino}/{id_bovino_madre}/{id_bovino_padre}/{inseminacion}",status_code=200)
-async def crear_endogamia(id_bovino:str,id_bovino_madre: str,id_bovino_padre:str,inseminacion:str,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+@Endogamia.post("/calcular_indice_endogamia",status_code=200)
+async def crear_endogamia(id_bovino:str= Form(...),id_bovino_madre: Optional [int] = Form(None),id_bovino_padre:Optional [int] = Form(None),inseminacion:str= Form(...),db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
 
     try:
         ingresoEndogamia = modelo_arbol_genealogico.insert().values(id_bovino=id_bovino,
@@ -120,6 +123,7 @@ async def crear_endogamia(id_bovino:str,id_bovino_madre: str,id_bovino_padre:str
 
         db.execute(ingresoEndogamia)
         db.commit()
+        actualizacion_nombres_Arbol_genealogico(session=db, current_user=current_user)
         abuelo_materno(session=db, current_user=current_user)
         abuela_materna(session=db, current_user=current_user)
         abuelo_paterno(session=db, current_user=current_user)

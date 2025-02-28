@@ -200,8 +200,8 @@ class esquema_datos_muerte(BaseModel):
 class esquema_arbol_genealogico(BaseModel):
     id_arbol_genealogico: int
     id_bovino: int
-    id_bovino_madre: int
-    id_bovino_padre: int
+    id_bovino_madre: Optional[int] = None
+    id_bovino_padre: Optional[int] = None
     abuelo_paterno:Optional[int] = None
     abuela_paterna:Optional[int] = None
     abuelo_materno:Optional[int] = None
