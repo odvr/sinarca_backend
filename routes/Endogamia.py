@@ -110,8 +110,8 @@ async def listar_tabla_endogamia(db: Session = Depends(get_database_session),cur
 """
 Crear Indice de Endogamia
 """
-@Endogamia.post("/calcular_indice_endogamia",status_code=200)
-async def crear_endogamia(id_bovino:str= Form(...),id_bovino_madre: Optional [int] = Form(None),id_bovino_padre:Optional [int] = Form(None),inseminacion:str= Form(...),db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+@Endogamia.post("/calcular_indice_endogamia/{id_bovino}",status_code=200)
+async def crear_endogamia(id_bovino:str,id_bovino_madre: Optional [int] = Form(None),id_bovino_padre:Optional [int] = Form(None),inseminacion:str= Form(...),db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
 
     try:
         ingresoEndogamia = modelo_arbol_genealogico.insert().values(id_bovino=id_bovino,
