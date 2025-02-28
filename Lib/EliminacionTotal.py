@@ -98,11 +98,35 @@ dependent_bovino_tables = [
 
 def delete_bovino_data(db: Session, id_bovino: int):
     try:
+        # Modelo de la tabla arbol_genealogico
+        modelo_arbol_genealogico = Table("arbol_genealogico", meta, autoload_with=engine)
+
+        # Consulta de bovino en la tabla de arbol genealogico
+        consulta_bovino_arbol = db.query(modelo_arbol_genealogico).filter(
+            modelo_arbol_genealogico.c.id_bovino == id_bovino).all()
+        if consulta_bovino_arbol:
+            db.execute(modelo_arbol_genealogico.delete().where(modelo_arbol_genealogico.c.id_bovino == id_bovino))
+            db.commit()
+
+        consulta_bovino_arbol_padre = db.query(modelo_arbol_genealogico).filter(
+            modelo_arbol_genealogico.c.id_bovino_padre == id_bovino).all()
+        if consulta_bovino_arbol_padre:
+            db.execute(modelo_arbol_genealogico.delete().where(modelo_arbol_genealogico.c.id_bovino_padre == id_bovino))
+            db.commit()
+
+        consulta_bovino_arbol_madre = db.query(modelo_arbol_genealogico).filter(
+            modelo_arbol_genealogico.c.id_bovino_madre == id_bovino).all()
+        if consulta_bovino_arbol_madre:
+            db.execute(modelo_arbol_genealogico.delete().where(modelo_arbol_genealogico.c.id_bovino_madre == id_bovino))
+            db.commit()
+
         # Delete from tables that depend on veterinaria first
         for table_name in dependent_veterinaria_tables:
             table = Table(table_name, meta, autoload_with=engine)
             if 'id_veterinaria' in table.c:
-                subquery = db.query(table.c.id_veterinaria).join(Table('veterinaria', meta, autoload_with=engine)).filter(Table('veterinaria', meta, autoload_with=engine).c.id_bovino == id_bovino).subquery()
+                subquery = db.query(table.c.id_veterinaria).join(
+                    Table('veterinaria', meta, autoload_with=engine)).filter(
+                    Table('veterinaria', meta, autoload_with=engine).c.id_bovino == id_bovino).subquery()
                 stmt = delete(table).where(table.c.id_veterinaria.in_(subquery))
                 db.execute(stmt)
 
