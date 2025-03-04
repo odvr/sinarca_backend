@@ -32,7 +32,7 @@ from routes.Endogamia import crear_endogamia
 from routes.rutas_bovinos import get_current_user
 from schemas.schemas_bovinos import Esquema_Token, Esquema_Usuario, Esquema_bovinos, esquema_arbol_genealogico, \
     esquema_registro_marca
-
+from fastapi.responses import JSONResponse
 # Configuracion de las rutas para fash api
 Formulario_Bovino = APIRouter()
 
@@ -379,8 +379,8 @@ async def crear_bovinos(nombre_bovino: Optional [str] = Form(None), numero_chape
                     db.commit()
                 """
 
-                # endogamia(condb=db)
-            return Response(status_code=status.HTTP_201_CREATED)
+
+            return JSONResponse(status_code=status.HTTP_201_CREATED, content={"id_bovino": nombre_bovino})
 
 
     except Exception as e:
