@@ -342,32 +342,41 @@ async def crear_bovinos(nombre_bovino: Optional [str] = Form(None), numero_chape
                 pass
 
             if inseminacion == "Si":
-                idBovinoPadre = crud.bovinos_inventario.Buscar_ID_Nombre_Padre(db=db, id_bovino_padre=id_bovino_padre,
-                                                                               current_user=current_user)
-                ingresoEndogamia = modelo_arbol_genealogico.insert().values(id_bovino=id_bovino,
-                                                                            id_bovino_madre=id_bovino_madre,
-                                                                            id_bovino_padre=idBovinoPadre,
-                                                                            inseminacion=inseminacion,
-                                                                            usuario_id=current_user
-                                                                            )
-
-                db.execute(ingresoEndogamia)
-                db.commit()
-
-            if inseminacion == "0":
-                pass
-            else:
-                pass
-                """
-                ingresoEndogamia = modelo_arbol_genealogico.insert().values(id_bovino=id_bovino,
+                id_bovino_padre = crud.bovinos_inventario.Buscar_ID_Nombre_Padre(db=db, id_bovino_padre=id_bovino_padre,current_user=current_user)
+                print(type(id_bovino_padre))
+                ingresoEndogamiaInseminacion = modelo_arbol_genealogico.insert().values(id_bovino=id_bovino,
                                                                             id_bovino_madre=id_bovino_madre,
                                                                             id_bovino_padre=id_bovino_padre,
                                                                             inseminacion=inseminacion,
                                                                             usuario_id=current_user
                                                                             )
 
+                db.execute(ingresoEndogamiaInseminacion)
+                db.commit()
+
+            if inseminacion == "0":
+                pass
+            if inseminacion == "No":
+
+                ingresoEndogamia = modelo_arbol_genealogico.insert().values(id_bovino=id_bovino,
+                                                                            id_bovino_madre=id_bovino_madre,
+                                                                            id_bovino_padre=id_bovino_padre,
+                                                                            usuario_id=current_user,
+                                                                            inseminacion=inseminacion
+                                                                            )
+
                 db.execute(ingresoEndogamia)
                 db.commit()
+                """
+                    ingresoEndogamia = modelo_arbol_genealogico.insert().values(id_bovino=id_bovino,
+                                                     id_bovino_madre=id_bovino_madre,
+                                                     id_bovino_padre=id_bovino_padre,usuario_id=current_user,
+                                                     inseminacion=inseminacion
+                                                   )
+
+
+                     db.execute(ingresoEndogamia)
+                    db.commit()
                 """
 
                 # endogamia(condb=db)
