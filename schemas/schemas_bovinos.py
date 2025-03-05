@@ -109,13 +109,13 @@ class Esquema_bovinos(BaseModel):
     id_bovino : int
     fecha_nacimiento: date
     edad: Optional[int] = None
-    sexo :str
-    raza : str
+    sexo :Optional[str] = None
+    raza : Optional[str] = None
     peso: Optional[float] = None
-    marca :str
-    proposito: str
-    mansedumbre : str
-    estado: str
+    marca :Optional[str] = None
+    proposito: Optional[str] = None
+    mansedumbre :Optional[str] = None
+    estado: Optional[str] = None
     compra_bovino: Optional[str] = None
     usuario_id:Optional[str] = None
     nombre_bovino:Optional[str] = None
