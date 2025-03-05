@@ -16,7 +16,9 @@ from typing import List
 import uuid
 from fastapi import APIRouter, UploadFile, File
 import crud.crud_bovinos_inventario
+from Lib.Lib_Calcular_Edad_Bovinos import calculoEdad
 from Lib.Lib_eliminar_duplicados_bovinos import eliminarduplicados
+from Lib.actualizacion_peso import actualizacion_peso
 from Lib.endogamia import endogamia, abuelo_materno, abuela_materna, abuelo_paterno, abuela_paterna, bisabuelo_materno, \
     bisabuelo_paterno
 from Lib.funcion_vientres_aptos import vientres_aptos
@@ -378,6 +380,9 @@ async def crear_bovinos(nombre_bovino: Optional [str] = Form(None), numero_chape
                      db.execute(ingresoEndogamia)
                     db.commit()
                 """
+            calculoEdad(db=db, current_user=current_user)
+            actualizacion_peso(session=db, current_user=current_user)
+            eliminarduplicados(db=db, current_user=current_user)
 
 
             return JSONResponse(status_code=status.HTTP_201_CREATED, content={"id_bovino": nombre_bovino})
