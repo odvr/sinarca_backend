@@ -9,8 +9,11 @@ from http.client import HTTPException
 from sqlalchemy import and_
 from fastapi import APIRouter, Request
 
+from Lib.Lib_Calcular_Edad_Bovinos import calculoEdad
+from Lib.Lib_eliminar_duplicados_bovinos import eliminarduplicados
 from Lib.Notificaciones.Notificaciones_Whatsapp import enviar_Notificaciones_Whatsapp
 from Lib.Tasa_Supervivencia import tasa_supervivencia
+from Lib.actualizacion_peso import actualizacion_peso
 from Lib.enviar_correos_publicidad import enviar_correo_bienvenida
 from Lib.perdida_Terneros import perdida_Terneros1
 from config.db import   get_session
@@ -388,6 +391,7 @@ async def animales_edad_0_9(db: Session = Depends(get_database_session),current_
 @rutas_bovinos.get("/Calcular_animales_edad_9_12",tags=["dashboard"])
 async def animales_edad_9_12(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
   try:
+    calculoEdad(db=db, current_user=current_user)
     # consulta y conteo de animales con edades entre 10 a 12 meses
     edades_9_12 = db.query(modelo_bovinos_inventario). \
         where(and_(
@@ -414,6 +418,7 @@ async def animales_edad_9_12(db: Session = Depends(get_database_session),current
 @rutas_bovinos.get("/Calcular_animales_edad_12_24",tags=["dashboard"])
 async def animales_edad_12_24(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
  try:
+    actualizacion_peso(session=db, current_user=current_user)
     # consulta y conteo de animales con edades entre 13 a 24 meses
     edades_12_24 = db.query(modelo_bovinos_inventario). \
         where(and_(
@@ -440,6 +445,7 @@ async def animales_edad_12_24(db: Session = Depends(get_database_session),curren
 @rutas_bovinos.get("/Calcular_animales_edad_24_36",tags=["dashboard"])
 async def animales_edad_24_36(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
+        eliminarduplicados(db=db, current_user=current_user)
         # consulta y conteo de animales con edades entre 25 a 36 meses
         edades_24_36 = db.query(modelo_bovinos_inventario). \
             where(and_(
