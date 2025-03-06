@@ -2,7 +2,7 @@
 Librerias requeridas
 @autor : odvr
 '''
-from sqlalchemy import Table, Column, Integer, ForeignKey, delete
+from sqlalchemy import Table, Column, Integer, ForeignKey, delete,select
 import logging
 from config.db import meta, engine
 
@@ -38,7 +38,6 @@ formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(messag
 file_handler.setFormatter(formatter)
 # Agrega el manejador de archivo al logger
 logger.addHandler(file_handler)
-# List of all tables that contain the id_bovino column in the order of dependency
 
 
 # List of all tables that contain the id_veterinaria column in the order of dependency
@@ -46,13 +45,10 @@ dependent_veterinaria_tables = [
     "Comentarios_Veterinaria",  # Dependent on veterinaria
     "Evoluciones_Bovinos"
 ]
-# List of all tables that contain the id_veterinaria column in the order of dependency
-dependent_veterinaria_tables = [
-    "comentarios_veterinaria"
-]
 
 # List of all tables that contain the id_bovino column in the order of dependency
 dependent_bovino_tables = [
+    "comentarios_veterinaria",
     "veterinaria",  # This should be after comentarios_veterinaria
     "Evoluciones_Bovinos",
     "produccion_ceba",
@@ -124,11 +120,18 @@ def delete_bovino_data(db: Session, id_bovino: int):
         for table_name in dependent_veterinaria_tables:
             table = Table(table_name, meta, autoload_with=engine)
             if 'id_veterinaria' in table.c:
-                subquery = db.query(table.c.id_veterinaria).join(
+                subquery = select(table.c.id_veterinaria).join(
                     Table('veterinaria', meta, autoload_with=engine)).filter(
-                    Table('veterinaria', meta, autoload_with=engine).c.id_bovino == id_bovino).subquery()
+                    Table('veterinaria', meta, autoload_with=engine).c.id_bovino == id_bovino)
                 stmt = delete(table).where(table.c.id_veterinaria.in_(subquery))
                 db.execute(stmt)
+
+        # Handle the dependent tables for partos first
+        registro_celos_table = Table("registro_celos", meta, autoload_with=engine)
+        partos_table = Table("partos", meta, autoload_with=engine)
+        subquery_partos = select(partos_table.c.id_parto).where(partos_table.c.id_bovino == id_bovino)
+        db.execute(delete(registro_celos_table).where(registro_celos_table.c.id_servicio.in_(subquery_partos)))
+        db.commit()
 
         # Delete from tables that depend on bovinos
         for table_name in dependent_bovino_tables:
@@ -146,7 +149,8 @@ def delete_bovino_data(db: Session, id_bovino: int):
 
     except Exception as e:
         db.rollback()
-        raise e
+
+
 
 """la siguiente funcion tiene como objetivo eliminar el bovino que se desee:"""
 def eliminacionBovino(id_bov_eliminar,session: Session):

@@ -10,11 +10,6 @@ import logging
 
 
 from fastapi import APIRouter, Depends,Form
-import json
-from Lib.Lib_Calcular_Edad_Bovinos import calculoEdad
-from Lib.Lib_eliminar_duplicados_bovinos import eliminarduplicados
-from Lib.actualizacion_peso import actualizacion_peso
-from Lib.vida_util_macho_reproductor_bovino import vida_util_macho_reproductor
 from config.db import   get_session
 # importa el esquema de los bovinos
 from models.modelo_bovinos import modelo_usuarios, modelo_bovinos_inventario, modelo_indicadores, \

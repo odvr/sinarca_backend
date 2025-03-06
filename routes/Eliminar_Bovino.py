@@ -41,9 +41,7 @@ async def Eliminar_total(id_bovino: str,db: Session = Depends(get_database_sessi
     try:
 
         delete_bovino_data(db=db, id_bovino=id_bovino)
-        #return Response(status_code=204)
 
-       #eliminacionBovino(id_bovino,session=db)
 
 
     except Exception as e:
