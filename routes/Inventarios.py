@@ -6,19 +6,14 @@ Librerias requeridas
 '''
 
 import logging
-
-
-
-from fastapi import APIRouter, Depends,Form
+from fastapi import APIRouter, Depends
 from config.db import   get_session
 # importa el esquema de los bovinos
-from models.modelo_bovinos import modelo_usuarios, modelo_bovinos_inventario, modelo_indicadores, \
-    modelo_arbol_genealogico, modelo_ceba, modelo_levante, modelo_datos_pesaje, modelo_macho_reproductor, modelo_leche
+from models.modelo_bovinos import  modelo_bovinos_inventario, modelo_arbol_genealogico, modelo_ceba, modelo_levante, modelo_datos_pesaje, modelo_macho_reproductor, modelo_leche
 from sqlalchemy.orm import Session
-
+from sqlalchemy import or_
 from routes.rutas_bovinos import get_current_user
-from schemas.schemas_bovinos import Esquema_Usuario, Esquema_bovinos, esquema_arbol_genealogico, \
-    esquema_produccion_ceba, esquema_produccion_levante, esquema_modelo_Reporte_Pesaje, esquema_produccion_leche
+from schemas.schemas_bovinos import Esquema_Usuario, Esquema_bovinos, esquema_produccion_leche
 
 # Configuracion de las rutas para fash api
 Inventarios = APIRouter()
@@ -101,19 +96,21 @@ async def Buscar_Historial_Bovino(id_bovino: int , db: Session = Depends(get_dat
 
         tabla_pesaje = db.query(modelo_datos_pesaje).filter(modelo_datos_pesaje.columns.id_bovino == id_bovino,
                                                           modelo_datos_pesaje.c.usuario_id == current_user).all()
-        ConsultaEndogamia = db.query(modelo_arbol_genealogico).filter(modelo_arbol_genealogico.columns.id_bovino == id_bovino,
-                                                                      modelo_arbol_genealogico.columns.id_bovino_madre == id_bovino,
-                                                                      modelo_arbol_genealogico.columns.id_bovino_padre == id_bovino,
-                                                                      modelo_arbol_genealogico.columns.abuelo_paterno == id_bovino,
-                                                                      modelo_arbol_genealogico.columns.abuela_paterna == id_bovino,
-                                                                      modelo_arbol_genealogico.columns.abuelo_materno == id_bovino,
-                                                                      modelo_arbol_genealogico.columns.abuela_materna == id_bovino,
-                                                                      modelo_arbol_genealogico.columns.bisabuelo_materno == id_bovino,
-                                                                      modelo_arbol_genealogico.columns.bisabuelo_paterno == id_bovino,
 
-                                                                      modelo_arbol_genealogico.c.usuario_id == current_user).first()
-
-
+        ConsultaEndogamia = db.query(modelo_arbol_genealogico).filter(
+            or_(
+                modelo_arbol_genealogico.columns.id_bovino == id_bovino,
+                modelo_arbol_genealogico.columns.id_bovino_madre == id_bovino,
+                modelo_arbol_genealogico.columns.id_bovino_padre == id_bovino,
+                modelo_arbol_genealogico.columns.abuelo_paterno == id_bovino,
+                modelo_arbol_genealogico.columns.abuela_paterna == id_bovino,
+                modelo_arbol_genealogico.columns.abuelo_materno == id_bovino,
+                modelo_arbol_genealogico.columns.abuela_materna == id_bovino,
+                modelo_arbol_genealogico.columns.bisabuelo_materno == id_bovino,
+                modelo_arbol_genealogico.columns.bisabuelo_paterno == id_bovino
+            ),
+            modelo_arbol_genealogico.c.usuario_id == current_user
+        ).first()
 
         try:
             Historial = []
