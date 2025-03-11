@@ -1189,3 +1189,61 @@ class esquema_produccion_general_leche(BaseModel):
     class Config:
         orm_mode = True
         env_file = ".env"
+
+
+
+class EsquemaReportesSemanales(BaseModel):
+    id_reporte: int
+    fecha_generacion: datetime
+    total_animales: Optional[int] = None
+    animales_produccion_leche: Optional[int] = None
+    animales_levante: Optional[int] = None
+    animales_ceba: Optional[int] = None
+    nacimientos_semanales: Optional[str] = None
+    porcentaje_endogamia: Optional[str] = None
+    animales_muertos_semanales: Optional[str] = None
+    animales_vendidos_semanales: Optional[str] = None
+    animales_comprados_semanales: Optional[str] = None
+    registro_pesos_semanales: Optional[str] = None
+    historial_perdida_terneros_anual: Optional[str] = None
+    bovinos_descartes: Optional[str] = None
+    historial_natalidad_paricion_real: Optional[str] = None
+    periodo_iep_promedio: Optional[str] = None
+    natalidad_paricion_real: Optional[str] = None
+    tasa_supervivencia_actual: Optional[str] = None
+    intervalo_entre_partos: Optional[str] = None
+    porcentaje_ordeno: Optional[str] = None
+    vacas_vacias: Optional[str] = None
+    vacas_prenadas: Optional[str] = None
+    porcentaje_prenadas: Optional[str] = None
+    proximos_periodos_secado: Optional[str] = None
+    planes_sanitarios_lotes_agendados: Optional[str] = None
+    proyecciones_partos: Optional[str] = None
+    animales_optimos_levante: Optional[str] = None
+    animales_optimos_ceba: Optional[str] = None
+    ventas_totales: Optional[int] = None
+    total_compras: Optional[int] = None
+    total_nomina: Optional[int] = None
+    saldos_totales: Optional[int] = None
+    saldos_promedios: Optional[int] = None
+    facturacion_anual: Optional[str] = None
+    usuario_id: Optional[str] = None
+    perdida_de_terneros: Optional[float] = None
+    machos: Optional[int] = None
+    hembras: Optional[int] = None
+    vacas_en_ordeno: Optional[int] = None
+    vacas_no_ordeno: Optional[int] = None
+    animales_rango_edades_0_9: Optional[int] = None
+    animales_rango_edades_9_12: Optional[int] = None
+    animales_rango_edades_12_24: Optional[int] = None
+    animales_rango_edades_24_36: Optional[int] = None
+    animales_rango_edades_mayor_36: Optional[int] = None
+    vientres_aptos: Optional[int] = None
+    relacion_toros_vientres_aptos: Optional[int] = None
+    interpretacion_relacion_toros_vientres_aptos: Optional[str] = None
+    total_unidades_animales: Optional[str] = None
+    IEP_hato: Optional[float] = None
+
+    class Config:
+        orm_mode = True
+        env_file = ".env"

@@ -854,4 +854,64 @@ modelo_produccion_general_leche  = Table("produccion_general_leche", meta, Colum
                                          Column("factura_id", Integer, ForeignKey("facturas.factura_id")),
                                Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
 
+
+
+
+
+modelo_reporte_Semanal = Table(
+    "reportes_semanales", meta,
+    Column("id_reporte", Integer, primary_key=True),
+    Column("fecha_generacion", DateTime),
+    Column("total_animales", Integer),
+    Column("animales_produccion_leche", Integer),
+    Column("animales_levante", Integer),
+    Column("animales_ceba", Integer),
+    Column("nacimientos_semanales", String(500)),
+    Column("porcentaje_endogamia", String(500)),
+    Column("animales_muertos_semanales", String(500)),
+    Column("animales_vendidos_semanales", String(500)),
+    Column("animales_comprados_semanales", String(500)),
+    Column("registro_pesos_semanales", String(500)),
+    Column("historial_perdida_terneros_anual", String(500)),
+    Column("bovinos_descartes", String(500)),
+    Column("historial_natalidad_paricion_real", String(500)),
+    Column("periodo_iep_promedio", String(500)),
+    Column("natalidad_paricion_real", String(500)),
+    Column("tasa_supervivencia_actual", String(500)),
+    Column("intervalo_entre_partos", String(500)),
+    Column("porcentaje_ordeno", String(500)),
+    Column("vacas_vacias", String(500)),
+    Column("vacas_prenadas", String(500)),
+    Column("porcentaje_prenadas", String(500)),
+    Column("proximos_periodos_secado", String(500)),
+    Column("planes_sanitarios_lotes_agendados", String(500)),
+    Column("proyecciones_partos", String(500)),
+    Column("animales_optimos_levante", String(500)),
+    Column("animales_optimos_ceba", String(500)),
+    Column("ventas_totales", Integer),
+    Column("total_compras", Integer),
+    Column("total_nomina", Integer),
+    Column("saldos_totales", Integer),
+    Column("saldos_promedios", Integer),
+    Column("facturacion_anual", String(500)),
+    Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")),
+    Column("perdida_de_terneros", Float),
+    Column("machos", Integer),
+    Column("hembras", Integer),
+    Column("vacas_en_ordeno", Integer),
+    Column("vacas_no_ordeno", Integer),
+    Column("animales_rango_edades_0_9", Integer),
+    Column("animales_rango_edades_9_12", Integer),
+    Column("animales_rango_edades_12_24", Integer),
+    Column("animales_rango_edades_24_36", Integer),
+    Column("animales_rango_edades_mayor_36", Integer),
+    Column("vientres_aptos", Integer),
+    Column("relacion_toros_vientres_aptos", Integer),
+    Column("interpretacion_relacion_toros_vientres_aptos", String(300)),
+    Column("total_unidades_animales", String(300)),
+    Column("IEP_hato", Float)
+)
+
+
+
 meta.create_all(engine)

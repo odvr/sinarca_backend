@@ -237,6 +237,32 @@ class CRUDBovinos:
 
             return None
 
+    def Buscar_Celular_Usuario(self, db: Session, usuario_id):
+        """
+        Realiza la Busquedo del numero de celular para cada usuario
+
+        :param db:
+        :param usuario_id:
+        :return:
+        """
+        try:
+            BuscarCelularUusuario = db.query(modelo_usuarios).filter(
+                modelo_usuarios.columns.usuario_id == usuario_id
+            ).first()
+
+            # Manejar el caso en que BuscarCorreo sea None
+            if BuscarCelularUusuario is None:
+                return None
+
+            CelularUsuario = BuscarCelularUusuario.telefono
+            db.close()
+
+            return CelularUsuario
+        except AttributeError as e:
+            pass
+
+            return None
+
 
     def VerificarConsultaDatosFotoPerfilBovino(self,Buscar_Datos_Foto_Perfil,Rutabase):
         if not Buscar_Datos_Foto_Perfil:

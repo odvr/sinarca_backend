@@ -9,6 +9,7 @@ from http.client import HTTPException
 from sqlalchemy import and_
 from fastapi import APIRouter, Request
 
+from Lib.Generador_Reportes_Semanales.Generador_Reportes_Semanales import GenerarReportesSemanales
 from Lib.Lib_Calcular_Edad_Bovinos import calculoEdad
 from Lib.Lib_eliminar_duplicados_bovinos import eliminarduplicados
 from Lib.Notificaciones.Notificaciones_Whatsapp import enviar_Notificaciones_Whatsapp
@@ -311,10 +312,11 @@ async def Buscar_Indicadores(db: Session = Depends(get_database_session),current
       db.close()
 
 
-@rutas_bovinos.get("/HolaMundo/{numero}/{mensaje}",tags=["Pruebas"])
-async def HolaMundo(numero:int,mensaje:str):
-    enviar_Notificaciones_Whatsapp(NumeroCliente=numero,Mensaje=mensaje)
-    return {"message": "Hello World"}
+@rutas_bovinos.get("/HolaMundo",tags=["Pruebas"])
+async def HolaMundo():
+    #enviar_Notificaciones_Whatsapp(NumeroCliente=numero,Mensaje=mensaje)
+    GenerarReportesSemanales()
+    return
 
 
 
