@@ -19,8 +19,9 @@ def enviar_Notificaciones_Whatsapp(NumeroCliente, Mensaje):
 
     if not NumeroCliente.startswith("57"):  # Agregar código de país si falta
         NumeroCliente = "57" + NumeroCliente
-
-    url = "http://notificaciones-whatsapp-api-1:3000/send-message"
+    # Producción http://notificaciones-sinarca-whatsapp-api-1:3000/send-message
+    # Pruebas url = "http://notificaciones-whatsapp-api-1:3000/send-message"
+    url = "http://notificaciones-sinarca-whatsapp-api-1:3000/send-message"
     data = json.dumps({"number": NumeroCliente, "message": Mensaje}).encode("utf-8")
     req = urllib.request.Request(url, data=data, headers={'Content-Type': 'application/json'}, method="POST")
 
