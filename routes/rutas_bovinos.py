@@ -4,6 +4,9 @@ Librerias requeridas
 '''
 
 import logging
+
+from starlette.status import HTTP_204_NO_CONTENT
+
 import crud
 from http.client import HTTPException
 from sqlalchemy import and_
@@ -20,10 +23,11 @@ from Lib.perdida_Terneros import perdida_Terneros1
 from config.db import   get_session
 from crud.crud_bovinos_inventario import CRUDBovinos
 # importa el esquema de los bovinos
-from models.modelo_bovinos import modelo_usuarios, modelo_bovinos_inventario, modelo_indicadores, modelo_asociados
+from models.modelo_bovinos import modelo_usuarios, modelo_bovinos_inventario, modelo_indicadores, modelo_asociados, \
+    modelo_reporte_Semanal
 from sqlalchemy.orm import Session
 
-from schemas.schemas_bovinos import Esquema_Token, Esquema_Usuario, esquema_indicadores
+from schemas.schemas_bovinos import Esquema_Token, Esquema_Usuario, esquema_indicadores, EsquemaReportesSemanales
 
 '''***********'''
 from passlib.context import CryptContext
@@ -597,3 +601,30 @@ async def perdida_TernerosAPI(db: Session = Depends(get_database_session),curren
      raise
  finally:
      db.close()
+
+
+"""
+La siguiente API realiza el envio de reportes para todos los usuarios
+"""
+
+@rutas_bovinos.post("/ReportesSemanales",status_code=HTTP_204_NO_CONTENT,tags=["Reportes Semanales"])
+async def GenrearReportesSemanales():
+    try:
+        GenerarReportesSemanales()
+        return
+    except Exception as e:
+      logger.error(f'Error Funcion perdida_Terneros: {e}')
+      raise
+
+
+
+@rutas_bovinos.get("/ListarHistorialReportesSemanales",tags=["Reportes Semanales"],response_model=list[EsquemaReportesSemanales])
+async def HistorialReportesSemanales(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+    try:
+        ListarHistorialReportes = db.query(modelo_reporte_Semanal).all()
+        return ListarHistorialReportes
+    except Exception as e:
+      logger.error(f'Error Funcion perdida_Terneros: {e}')
+      raise
+
+
