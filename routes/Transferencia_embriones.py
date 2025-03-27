@@ -50,11 +50,12 @@ def get_database_session():
 
 
 @Transferencia_embriones.post("/crear_registro_embrion",status_code=200,tags=["Embriones"])
-async def crear_registro_embrion(raza:str= Form(...),inf_madre_biologica:str= Form(...),inf_padre_biologico:str= Form(...),estado:str= Form(...),fecha_implante: Optional [date] = Form(None),id_receptora: Optional [int] = Form(None),resultado_trasnplante: Optional [str] = Form(None),id_bovino_hijo: Optional [int] = Form(None), observaciones: Optional [str] = Form(None),db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+async def crear_registro_embrion(codigo_nombre_embrion:str= Form(...),raza:str= Form(...),inf_madre_biologica:str= Form(...),inf_padre_biologico:str= Form(...),estado:str= Form(...),fecha_implante: Optional [date] = Form(None),id_receptora: Optional [int] = Form(None),resultado_trasnplante: Optional [str] = Form(None),id_bovino_hijo: Optional [int] = Form(None), observaciones: Optional [str] = Form(None),db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
 
     try:
 
-        ingresoRegistroEmbrion = modelo_embriones_transferencias.insert().values(raza=raza,
+        ingresoRegistroEmbrion = modelo_embriones_transferencias.insert().values(codigo_nombre_embrion=codigo_nombre_embrion,
+                                                                           raza=raza,
                                                                            inf_madre_biologica=inf_madre_biologica,
                                                                            inf_padre_biologico=inf_padre_biologico,
                                                                            estado=estado,
@@ -80,12 +81,13 @@ async def crear_registro_embrion(raza:str= Form(...),inf_madre_biologica:str= Fo
 
 
 @Transferencia_embriones.put("/Editar_registro_embrion",status_code=200,tags=["Embriones"])
-async def editar_registro_embrion(id_embrion:int= Form(...),raza:str= Form(...),inf_madre_biologica:str= Form(...),inf_padre_biologico:str= Form(...),estado:str= Form(...),fecha_implante: Optional [date] = Form(None),id_receptora: Optional [int] = Form(None),resultado_trasnplante: Optional [str] = Form(None),id_bovino_hijo: Optional [int] = Form(None), observaciones: Optional [str] = Form(None), db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+async def editar_registro_embrion(codigo_nombre_embrion:str= Form(...),raza:str= Form(...),id_embrion:int= Form(...),raza:str= Form(...),inf_madre_biologica:str= Form(...),inf_padre_biologico:str= Form(...),estado:str= Form(...),fecha_implante: Optional [date] = Form(None),id_receptora: Optional [int] = Form(None),resultado_trasnplante: Optional [str] = Form(None),id_bovino_hijo: Optional [int] = Form(None), observaciones: Optional [str] = Form(None), db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
 
     try:
 
 
-        db.execute(modelo_embriones_transferencias.update().values(raza=raza,
+        db.execute(modelo_embriones_transferencias.update().values(codigo_nombre_embrion=codigo_nombre_embrion,
+                                                                   raza=raza,
                                                                    inf_madre_biologica=inf_madre_biologica,
                                                                    inf_padre_biologico=inf_padre_biologico,
                                                                    estado=estado,
