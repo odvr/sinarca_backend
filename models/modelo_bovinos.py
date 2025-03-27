@@ -388,8 +388,24 @@ modelo_historial_partos = Table("historial_partos", meta, Column("id_parto", Int
                               Column("tipo_parto", String(300)),
                               Column("id_bovino_hijo", Integer),
                               Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")),
+                              Column("id_bovino_madre", Integer),
+                              Column("id_bovino_padre", Integer),
                               Column("nombre_madre", String(300)),
-                              Column("nombre_hijo", String(300)))
+                              Column("nombre_padre", String(300)),
+                              Column("nombre_hijo", String(300)),
+                              Column("cantidad", Integer),
+                              Column("tecnica_reproduccion", String(300)),
+                              Column("observaciones", String(300)))
+
+modelo_detalles_partos = Table("detalles_partos", meta, Column("id_detalle_parto", Integer, primary_key=True),
+                              Column("id_bovino_madre", Integer),
+                              Column("id_bovino_padre", Integer),
+                              Column("nombre_madre", String(300)),
+                              Column("nombre_padre", String(300)),
+                              Column("fecha_parto", Date),
+                              Column("id_bovino_hijo", Integer),
+                              Column("nombre_hijo", String(300)),
+                              Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
 
 modelo_historial_intervalo_partos = Table("intervalo_partos", meta, Column("id_intervalo", Integer, primary_key=True),
                               Column("id_bovino", Integer),
@@ -911,6 +927,21 @@ modelo_reporte_Semanal = Table(
     Column("total_unidades_animales", String(300)),
     Column("IEP_hato", Float)
 )
+
+modelo_embriones_transferencias = Table("embriones_transferencias", meta, Column("id_embrion", Integer, primary_key=True),
+                              Column("inf_madre_biologica", String(300)),
+                              Column("inf_padre_biologico", String(300)),
+                              Column("estado", String(300)),
+                              Column("fecha_implante", Date),
+                              Column("id_receptora", Integer),
+                              Column("nombre_receptora", String(300)),
+                              Column("resultado_trasnplante", String(300)),
+                              Column("fecha_parto", Date),
+                              Column("id_bovino_hijo", Integer),
+                              Column("nombre_hijo", String(300)),
+                              Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")),
+                              Column("observaciones", String(300)),
+                              Column("raza", String(300)))
 
 
 

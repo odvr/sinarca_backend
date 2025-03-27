@@ -82,10 +82,15 @@ def conteo_partos(session:Session,current_user):
             cantidad_partos = session.query(modelo_historial_partos). \
                     filter(modelo_historial_partos.columns.id_bovino == id_bovino_partos).count()
 
+            # cosulta que determina la cantidad de partos rpovenientes por transferencia de embriones de cada animal
+            cantidad_partos_TE = session.query(modelo_embriones_transferencias). \
+                    filter(modelo_embriones_transferencias.columns.id_receptora == id_bovino_partos,
+                    modelo_embriones_transferencias.columns.resultado_trasnplante == "Exitoso").count()
+
             if cantidad_partos_manual is None:
                  valor_defecto=None
                  # actualizacion de campos
-                 if cantidad_partos == 0:
+                 if cantidad_partos == 0 and cantidad_partos_TE==0:
                      # tambien se actualizara los valores de edad primer parto y fecha primer parto
                      valor_defecto = None
 
@@ -97,7 +102,7 @@ def conteo_partos(session:Session,current_user):
                      session.commit()
 
                  else:
-                     agregar_partos = modelo_leche.update().values(num_partos=cantidad_partos). \
+                     agregar_partos = modelo_leche.update().values(num_partos=(cantidad_partos+cantidad_partos_TE)). \
                          where(modelo_leche.columns.id_bovino == id_bovino_partos)
                      session.execute(agregar_partos)
                      session.commit()
@@ -105,7 +110,7 @@ def conteo_partos(session:Session,current_user):
 
 
             else:
-                 total_num_partos= cantidad_partos +  cantidad_partos_manual
+                 total_num_partos= cantidad_partos +  cantidad_partos_manual + cantidad_partos_TE
 
                  # actualizacion de campos
                  agregar_partos = modelo_leche.update().values(num_partos=total_num_partos). \
@@ -118,7 +123,6 @@ def conteo_partos(session:Session,current_user):
                 filter(modelo_historial_partos.columns.id_bovino == id_bovino_partos). \
                 order_by(asc(modelo_historial_partos.columns.fecha_parto)).all()
 
-            print(id_bovino_partos,consulta_fecha_primer_parto[0][2])
 
             if consulta_fecha_primer_parto==[] or consulta_fecha_primer_parto[0][2] is None:
                 valor_defecto = None

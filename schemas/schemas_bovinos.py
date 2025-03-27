@@ -539,8 +539,30 @@ class esquema_historial_partos(BaseModel):
     tipo_parto: Optional[str] = None
     id_bovino_hijo:Optional[int] = None
     usuario_id: Optional[str] = None
+    id_bovino_madre:Optional[int] = None
+    id_bovino_padre:Optional[int] = None
     nombre_madre:Optional[str] = None
+    nombre_padre:Optional[str] = None
+    cantidad:Optional[int] = None
+    tecnica_reproduccion:Optional[str] = None
+    observaciones:Optional[str] = None
+    class Config:
+        orm_mode = True
+        env_file = ".env"
+
+
+class esquema_detalles_partos(BaseModel):
+    id_detalle_parto:Optional[int] = None
+    id_bovino_madre:Optional[int] = None
+    id_bovino_padre:Optional[int] = None
+    nombre_madre:Optional[str] = None
+    nombre_padre:Optional[str] = None
+    fecha_parto: Optional[date] = None
+    id_bovino_hijo:Optional[int] = None
     nombre_hijo: Optional[str] = None
+    usuario_id: Optional[str] = None
+    nombre_madre:Optional[str] = None
+
     class Config:
         orm_mode = True
         env_file = ".env"
@@ -1244,6 +1266,27 @@ class EsquemaReportesSemanales(BaseModel):
     total_unidades_animales: Optional[str] = None
     IEP_hato: Optional[float] = None
 
+    class Config:
+        orm_mode = True
+        env_file = ".env"
+
+
+
+class esquema_embriones_transferencias(BaseModel):
+    id_embrion:Optional[int] = None
+    inf_madre_biologica: Optional[str] = None
+    inf_padre_biologico: Optional[str] = None
+    estado: Optional[str] = None
+    fecha_implante: Optional[date] = None
+    id_receptora:Optional[int] = None
+    nombre_receptora:Optional[str] = None
+    resultado_trasnplante:Optional[str] = None
+    fecha_parto: Optional[date] = None
+    id_bovino_hijo:Optional[int] = None
+    nombre_hijo: Optional[str] = None
+    usuario_id: Optional[str] = None
+    observaciones:Optional[str] = None
+    raza:Optional[str] = None
     class Config:
         orm_mode = True
         env_file = ".env"
