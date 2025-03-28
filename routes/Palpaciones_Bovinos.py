@@ -148,7 +148,7 @@ async def ConsultarReportePalpaciones(
     current_user: Esquema_Usuario = Depends(get_current_user)
 ):
     try:
-      
+
         ConsultarPorLote = db.query(
             modelo_palpaciones.c.id_palpacion,
             modelo_palpaciones.c.id_bovino,
