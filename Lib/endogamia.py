@@ -70,7 +70,13 @@ def actualizacion_nombres_Arbol_genealogico(session: Session,current_user):
                  modelo_registro_pajillas.columns.id_pajillas == id_bovino_padre).\
                  filter(modelo_registro_pajillas.columns.usuario_id == current_user).first()
 
-                 if pajilla==():
+                 if pajilla==() or pajilla is None:
+                     nombre_pajilla= "No registra"
+                     session.execute(modelo_arbol_genealogico.update().values(nombre_bovino_padre=nombre_pajilla).filter(
+                        modelo_arbol_genealogico.columns.id_bovino == id_bovino))
+                     session.commit()
+
+                 elif pajilla==[] or pajilla is None:
                      nombre_pajilla= "No registra"
                      session.execute(modelo_arbol_genealogico.update().values(nombre_bovino_padre=nombre_pajilla).filter(
                         modelo_arbol_genealogico.columns.id_bovino == id_bovino))
