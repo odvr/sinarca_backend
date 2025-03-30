@@ -561,7 +561,6 @@ class esquema_detalles_partos(BaseModel):
     id_bovino_hijo:Optional[int] = None
     nombre_hijo: Optional[str] = None
     usuario_id: Optional[str] = None
-    nombre_madre:Optional[str] = None
 
     class Config:
         orm_mode = True
@@ -1274,6 +1273,7 @@ class EsquemaReportesSemanales(BaseModel):
 
 class esquema_embriones_transferencias(BaseModel):
     id_embrion:Optional[int] = None
+    codigo_nombre_embrion: Optional[str] = None
     inf_madre_biologica: Optional[str] = None
     inf_padre_biologico: Optional[str] = None
     estado: Optional[str] = None

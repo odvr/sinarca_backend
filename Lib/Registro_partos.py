@@ -88,6 +88,7 @@ def registro_partos_animales(session: Session,current_user):
                  where(modelo_detalles_partos.c.id_bovino_hijo == id_bovino).all()
          #en caso de no existir, se insertara el parto
          if existencia==[] or existencia is None:
+
                  ingresoPartos = modelo_detalles_partos.insert().values(id_bovino_madre=id_bovino_madre,
                                                                         id_bovino_padre=id_bovino_padre,
                                                                         nombre_madre=nombre_bovino_madre,
@@ -126,44 +127,47 @@ def registro_partos_animales(session: Session,current_user):
              pass
 
      #consulta que trae los datos de madre e hijos
-     consulta_detalles_partos = session.query(modelo_detalles_partos). \
-         filter(modelo_detalles_partos.c.usuario_id == current_user).all()
 
-
+     consulta_detalles_partos = list(set(session.query(modelo_detalles_partos.c.id_bovino_madre,
+             modelo_detalles_partos.c.id_bovino_padre,
+             modelo_detalles_partos.c.nombre_madre,
+             modelo_detalles_partos.c.nombre_padre,
+             modelo_detalles_partos.c.fecha_parto). \
+                 filter(modelo_detalles_partos.c.usuario_id == current_user).all()))
 
      #recorre el bucle for
      for i in consulta_detalles_partos:
-         nombre_madre = i[3]
-         nombre_padre = i[4]
-         nombre_hijo = i[7]
-         fecha_parto = i[5]
-         id_bovino_hijo = i[6]
-         id_bovino_madre = i[1]
-         id_bovino_padre = i[2]
+         nombre_madre = i[2]
+         nombre_padre = i[3]
+         fecha_parto = i[4]
+         id_bovino_madre = i[0]
+         id_bovino_padre = i[1]
 
 
-         consulta_partos_multiples=session.query(modelo_detalles_partos.c.nombre_hijo). \
+         consulta_partos_multiples=session.query(modelo_detalles_partos.c.nombre_hijo,
+                 modelo_detalles_partos.c.id_bovino_hijo). \
                  filter(modelo_detalles_partos.c.nombre_madre == nombre_madre,
                  modelo_detalles_partos.c.nombre_padre == nombre_padre,
                  modelo_detalles_partos.c.fecha_parto == fecha_parto,
                  modelo_detalles_partos.c.usuario_id == current_user,
                  modelo_detalles_partos.c.nombre_madre!="No registra").all()
 
-
-
-
          cantidad=len(consulta_partos_multiples)
+
 
          if cantidad==1:
              nombre_hijo=consulta_partos_multiples[0][0]
+             id_bovino_hijo=consulta_partos_multiples[0][1]
              tipo="Único"
+
+
              existencia = session.query(modelo_historial_partos). \
                  where(modelo_historial_partos.c.id_bovino_hijo == id_bovino_hijo).all()
              if existencia==[] or existencia is None:
-                 ingresoPartos = modelo_historial_partos.insert().values(id_bovino_madre=id_bovino_madre,
+                 ingresoPartos = modelo_historial_partos.insert().values(id_bovino=id_bovino_madre,
                                                                         id_bovino_padre=id_bovino_padre,
-                                                                        nombre_madre=nombre_bovino_madre,
-                                                                        nombre_padre=nombre_bovino_padre,
+                                                                        nombre_madre=nombre_madre,
+                                                                        nombre_padre=nombre_padre,
                                                                          fecha_parto=fecha_parto,
                                                                          id_bovino_hijo=id_bovino_hijo,
                                                                          usuario_id=current_user,
@@ -174,10 +178,10 @@ def registro_partos_animales(session: Session,current_user):
                  session.commit()
 
              else:
-                 session.execute(modelo_historial_partos.update().values(id_bovino_madre=id_bovino_madre,
+                 session.execute(modelo_historial_partos.update().values(id_bovino=id_bovino_madre,
                                                                         id_bovino_padre=id_bovino_padre,
-                                                                        nombre_madre=nombre_bovino_madre,
-                                                                        nombre_padre=nombre_bovino_padre,
+                                                                        nombre_madre=nombre_madre,
+                                                                        nombre_padre=nombre_padre,
                                                                          fecha_parto=fecha_parto,
                                                                          id_bovino_hijo=id_bovino_hijo,
                                                                          usuario_id=current_user,
@@ -195,10 +199,10 @@ def registro_partos_animales(session: Session,current_user):
              existencia = session.query(modelo_historial_partos). \
                  where(modelo_historial_partos.c.nombre_hijo == nombres_hijos).all()
              if existencia==[] or existencia is None:
-                 ingresoPartos = modelo_historial_partos.insert().values(id_bovino_madre=id_bovino_madre,
+                 ingresoPartos = modelo_historial_partos.insert().values(id_bovino=id_bovino_madre,
                                                                         id_bovino_padre=id_bovino_padre,
-                                                                        nombre_madre=nombre_bovino_madre,
-                                                                        nombre_padre=nombre_bovino_padre,
+                                                                        nombre_madre=nombre_madre,
+                                                                        nombre_padre=nombre_padre,
                                                                          fecha_parto=fecha_parto,
                                                                          id_bovino_hijo=None,
                                                                          usuario_id=current_user,
@@ -209,10 +213,10 @@ def registro_partos_animales(session: Session,current_user):
                  session.commit()
 
              else:
-                 session.execute(modelo_historial_partos.update().values(id_bovino_madre=id_bovino_madre,
+                 session.execute(modelo_historial_partos.update().values(id_bovino=id_bovino_madre,
                                                                         id_bovino_padre=id_bovino_padre,
-                                                                        nombre_madre=nombre_bovino_madre,
-                                                                        nombre_padre=nombre_bovino_padre,
+                                                                        nombre_madre=nombre_madre,
+                                                                        nombre_padre=nombre_padre,
                                                                          fecha_parto=fecha_parto,
                                                                          id_bovino_hijo=None,
                                                                          usuario_id=current_user,
@@ -234,28 +238,48 @@ def registro_partos_animales(session: Session,current_user):
              nombre_madre=i[8]
              nombre_padre=i[9]
              cantidad=i[11]
+             id_bovino_madre=i[1]
+
 
              if cantidad==1:
+                 verificacion_cantidad=session.query(modelo_detalles_partos). \
+                 filter(modelo_detalles_partos.c.nombre_madre == nombre_madre,
+                 modelo_detalles_partos.c.nombre_padre == nombre_padre,
+                 modelo_detalles_partos.c.fecha_parto == fecha_parto,
+                 modelo_detalles_partos.c.usuario_id == current_user).count()
+
+                 if verificacion_cantidad==1:
+                         pass
+
+                 else:
+                         session.execute(modelo_historial_partos.delete(). \
+                                             where(modelo_historial_partos.c.id_parto == id_parto))
+                         session.commit()
+
                  consulta_existencia_partos=session.query(modelo_detalles_partos.c.nombre_hijo). \
-                     filter(modelo_detalles_partos.c.id_bovino_hijo==id_bovino_hijo).all()
+                     filter(modelo_detalles_partos.c.id_bovino_hijo==id_bovino_hijo,
+                     modelo_detalles_partos.c.fecha_parto==fecha_parto).all()
+
+
 
 
                  if consulta_existencia_partos==[] or consulta_existencia_partos is None:
                      session.execute(modelo_historial_partos.delete(). \
                                              where(modelo_historial_partos.c.id_parto == id_parto))
                      session.commit()
+
                  else:
                      pass
 
              elif  cantidad>1:
+
                  consulta_partos_multiples=session.query(modelo_detalles_partos.c.nombre_hijo). \
-                     filter(modelo_detalles_partos.c.nombre_madre == nombre_madre,
-                     modelo_detalles_partos.c.nombre_padre == nombre_padre,
+                     filter(modelo_detalles_partos.c.id_bovino_madre == id_bovino_madre,
                      modelo_detalles_partos.c.fecha_parto == fecha_parto,
-                     modelo_detalles_partos.c.usuario_id == current_user,
-                     modelo_detalles_partos.c.nombre_madre!="No registra").all()
+                     modelo_detalles_partos.c.usuario_id == current_user).all()
 
                  nombres_hijos= (", ".join(str(sublista[0]) for sublista in consulta_partos_multiples))
+
 
                  if nombres_hijos==nombre_hijo:
                          pass

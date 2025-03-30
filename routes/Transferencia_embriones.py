@@ -81,7 +81,7 @@ async def crear_registro_embrion(codigo_nombre_embrion:str= Form(...),raza:str= 
 
 
 @Transferencia_embriones.put("/Editar_registro_embrion",status_code=200,tags=["Embriones"])
-async def editar_registro_embrion(codigo_nombre_embrion:str= Form(...),raza:str= Form(...),id_embrion:int= Form(...),raza:str= Form(...),inf_madre_biologica:str= Form(...),inf_padre_biologico:str= Form(...),estado:str= Form(...),fecha_implante: Optional [date] = Form(None),id_receptora: Optional [int] = Form(None),resultado_trasnplante: Optional [str] = Form(None),id_bovino_hijo: Optional [int] = Form(None), observaciones: Optional [str] = Form(None), db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+async def editar_registro_embrion(codigo_nombre_embrion:str= Form(...),id_embrion:int= Form(...),raza:str= Form(...),inf_madre_biologica:str= Form(...),inf_padre_biologico:str= Form(...),estado:str= Form(...),fecha_implante: Optional [date] = Form(None),id_receptora: Optional [int] = Form(None),resultado_trasnplante: Optional [str] = Form(None),id_bovino_hijo: Optional [int] = Form(None), observaciones: Optional [str] = Form(None), db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
 
     try:
 
@@ -114,9 +114,11 @@ async def editar_registro_embrion(codigo_nombre_embrion:str= Form(...),raza:str=
 
 
 @Transferencia_embriones.get("/listar_tabla_embriones",response_model=list[esquema_periodos_secado],tags=["Embriones"])
-async def listar_tabla_periodos_secado(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+async def listar_tabla_embriones(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
 
+
+        registro_embriones(session=db, current_user=current_user)
         ConsultaRegistroEmbriones = db.query(modelo_embriones_transferencias).filter(modelo_embriones_transferencias.c.usuario_id == current_user).all()
         return ConsultaRegistroEmbriones
     except Exception as e:

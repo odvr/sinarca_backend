@@ -75,6 +75,8 @@ def registro_embriones(session: Session,current_user):
          resultado_trasnplante = i[7]
          id_bovino_hijo = i[9]
 
+         print(id_embrion,id_receptora)
+
          if estado=="Transferido" and id_receptora!=None:
              nombre_bovino = crud.bovinos_inventario.Buscar_Nombre(db=db, id_bovino=id_receptora, current_user=current_user)
 

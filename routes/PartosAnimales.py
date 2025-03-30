@@ -224,7 +224,7 @@ async def listar_tabla_Partos_Individual(id_bovino: str,db: Session = Depends(ge
         intervalo_partos(session=db, current_user=current_user)
         #EliminarDuplicadosLeche(condb=db)
 
-        IEP_por_raza(session=db, current_user=current_user)
+        #IEP_por_raza(session=db, current_user=current_user)
         registro_partos_animales(session=db, current_user=current_user)
         dias_abiertos(session=db, current_user=current_user)
 

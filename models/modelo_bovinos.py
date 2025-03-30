@@ -929,6 +929,7 @@ modelo_reporte_Semanal = Table(
 )
 
 modelo_embriones_transferencias = Table("embriones_transferencias", meta, Column("id_embrion", Integer, primary_key=True),
+                              Column("codigo_nombre_embrion", String(300)),
                               Column("inf_madre_biologica", String(300)),
                               Column("inf_padre_biologico", String(300)),
                               Column("estado", String(300)),
