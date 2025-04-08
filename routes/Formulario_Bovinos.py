@@ -460,6 +460,7 @@ async def crear_bovino_masivo(bovinos: List[dict], db: Session = Depends(get_dat
 
                 result = db.execute(ingreso)
                 db.commit()
+                calculoEdad(db=db, current_user=current_user)
 
                 # Obtener el ID del bovino insertado
                 id_bovino = result.inserted_primary_key[0]
