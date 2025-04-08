@@ -53,6 +53,9 @@ async def listar_tabla_lotes(db: Session = Depends(get_database_session),current
 
     try:
 
+        crud.crud_bovinos_inventario.bovinos_inventario.ActualizarCantidadAnimalesEnLote(db=db,
+                                                                                         current_user=current_user)
+
         LotesBovinos = db.query(modelo_lotes_bovinos). \
             filter( modelo_lotes_bovinos.c.usuario_id == current_user).all()
 
