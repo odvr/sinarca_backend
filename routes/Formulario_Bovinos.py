@@ -458,6 +458,7 @@ async def crear_bovino_masivo(bovinos: List[dict], db: Session = Depends(get_dat
 
                 result = db.execute(ingreso)
                 db.commit()
+                calculoEdad(db=db, current_user=current_user)
 
                 calculoEdad(db=db, current_user=current_user)
 
