@@ -20,7 +20,8 @@ from typing import Optional
 from datetime import date
 from routes.rutas_bovinos import get_current_user
 import crud
-from schemas.schemas_bovinos import  Esquema_Usuario, esquema_periodos_secado, esquema_canastillas
+from schemas.schemas_bovinos import Esquema_Usuario, esquema_periodos_secado, esquema_canastillas, \
+    esquema_embriones_transferencias
 from Lib.transferencia_embriones import registro_embriones
 
 # Configuracion de las rutas para fash api
@@ -32,7 +33,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 # Crea un manejador de archivo para guardar el log
-log_file = 'Log_Sinarca.log'
+log_file = 'LogEmbriones.log'
 file_handler = logging.FileHandler(log_file)
 
 # Define el formato del log
@@ -49,36 +50,55 @@ def get_database_session():
         db.close()
 
 
-@Transferencia_embriones.post("/crear_registro_embrion",status_code=200,tags=["Embriones"])
-async def crear_registro_embrion(codigo_nombre_embrion:str= Form(...),raza:str= Form(...),inf_madre_biologica:str= Form(...),inf_padre_biologico:str= Form(...),estado:str= Form(...),fecha_implante: Optional [date] = Form(None),id_receptora: Optional [int] = Form(None),resultado_trasnplante: Optional [str] = Form(None),id_bovino_hijo: Optional [int] = Form(None), observaciones: Optional [str] = Form(None),db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
-
+@Transferencia_embriones.post("/crear_registro_embrion", status_code=200, tags=["Embriones"])
+async def crear_registro_embrion(
+    codigo_nombre_embrion: str = Form(...),
+    raza: str = Form(...),
+    inf_madre_biologica: str = Form(...),
+    inf_padre_biologico: str = Form(...),
+    estado: str = Form(...),
+    fecha_implante: Optional[date] = Form(None),
+    id_receptora: Optional[int] = Form(None),
+    resultado_trasnplante: Optional[str] = Form(None),
+    id_bovino_hijo: Optional[int] = Form(None),
+    observaciones: Optional[str] = Form(None),
+    db: Session = Depends(get_database_session),
+    current_user: Esquema_Usuario = Depends(get_current_user),
+):
     try:
+        # Log de todos los valores recibidos
+        logger.info(f"Datos recibidos: codigo_nombre_embrion={codigo_nombre_embrion}, raza={raza}, "
+                    f"inf_madre_biologica={inf_madre_biologica}, inf_padre_biologico={inf_padre_biologico}, "
+                    f"estado={estado}, fecha_implante={fecha_implante}, id_receptora={id_receptora}, "
+                    f"resultado_trasnplante={resultado_trasnplante}, id_bovino_hijo={id_bovino_hijo}, "
+                    f"observaciones={observaciones}")
 
-        ingresoRegistroEmbrion = modelo_embriones_transferencias.insert().values(codigo_nombre_embrion=codigo_nombre_embrion,
-                                                                           raza=raza,
-                                                                           inf_madre_biologica=inf_madre_biologica,
-                                                                           inf_padre_biologico=inf_padre_biologico,
-                                                                           estado=estado,
-                                                                           fecha_implante=fecha_implante,
-                                                                           observaciones=observaciones,
-                                                                           id_receptora=id_receptora,
-                                                                           resultado_trasnplante=resultado_trasnplante,
-                                                                           id_bovino_hijo=id_bovino_hijo)
+        # Insertar los datos en la base de datos
+        ingresoRegistroEmbrion = modelo_embriones_transferencias.insert().values(
+            codigo_nombre_embrion=codigo_nombre_embrion,
+            raza=raza,
+            inf_madre_biologica=inf_madre_biologica,
+            inf_padre_biologico=inf_padre_biologico,
+            estado=estado,
+            fecha_implante=fecha_implante,
+            observaciones=observaciones,
+            id_receptora=id_receptora,
+            resultado_trasnplante=resultado_trasnplante,
+            usuario_id=current_user,
+            id_bovino_hijo=id_bovino_hijo,
+        )
 
         db.execute(ingresoRegistroEmbrion)
         db.commit()
         registro_embriones(session=db, current_user=current_user)
 
-
-
     except Exception as e:
-        logger.error(f'Error al Crear INGRESO DE registro_embrion: {e}')
+        logger.error(f"Error al Crear INGRESO DE registro_embrion: {e}")
         raise
     finally:
         db.close()
 
     return
-
 
 @Transferencia_embriones.put("/Editar_registro_embrion",status_code=200,tags=["Embriones"])
 async def editar_registro_embrion(codigo_nombre_embrion:str= Form(...),id_embrion:int= Form(...),raza:str= Form(...),inf_madre_biologica:str= Form(...),inf_padre_biologico:str= Form(...),estado:str= Form(...),fecha_implante: Optional [date] = Form(None),id_receptora: Optional [int] = Form(None),resultado_trasnplante: Optional [str] = Form(None),id_bovino_hijo: Optional [int] = Form(None), observaciones: Optional [str] = Form(None), db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
@@ -113,7 +133,7 @@ async def editar_registro_embrion(codigo_nombre_embrion:str= Form(...),id_embrio
 
 
 
-@Transferencia_embriones.get("/listar_tabla_embriones",response_model=list[esquema_periodos_secado],tags=["Embriones"])
+@Transferencia_embriones.get("/listar_tabla_embriones",response_model=list[esquema_embriones_transferencias],tags=["Embriones"])
 async def listar_tabla_embriones(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
 
@@ -127,6 +147,19 @@ async def listar_tabla_embriones(db: Session = Depends(get_database_session),cur
     finally:
         db.close()
 
+@Transferencia_embriones.get("/listar_tabla_embriones/{id_embrion}",response_model=list[esquema_embriones_transferencias],tags=["Embriones"])
+async def listar_embriones_registro(id_embrion: int ,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+    try:
+
+
+
+        ConsultaRegistroEmbriones = db.query(modelo_embriones_transferencias).filter(modelo_embriones_transferencias.c.usuario_id == current_user,modelo_embriones_transferencias.c.id_embrion == id_embrion).all()
+        return ConsultaRegistroEmbriones
+    except Exception as e:
+        logger.error(f'Error al obtener tabla_embriones_transferencias : {e}')
+        raise
+    finally:
+        db.close()
 
 
 @Transferencia_embriones.delete("/eliminar_registro_embriones{id_embrion}",tags=["Embriones"])

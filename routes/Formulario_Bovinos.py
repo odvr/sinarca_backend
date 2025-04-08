@@ -82,7 +82,7 @@ async def crear_bovinos(nombre_bovino: Optional [str] = Form(None), numero_chape
                         fecha_venta:  Optional [date] = Form(None), precio_venta:  Optional [int] = Form(None), razon_venta:  Optional [str] = Form(None), medio_pago:  Optional [str] = Form(None), comprador:  Optional [str] = Form(None),
                         numero_bono_compra:  Optional [str] = Form(None), fecha_compra: Optional [date] = Form(None), precio_compra: Optional [int] = Form(None), razon_compra: Optional [str] = Form(None),
                         medio_pago_compra: Optional [str] = Form(None), comprador_compras: Optional [str] = Form(None), id_bovino_madre: Optional [str] = Form(None), id_bovino_padre: Optional [str] = Form(None), inseminacion:Optional [str] = Form(None),TiposPesaje:Optional [str] = Form(None),
-                        id_registro_marca: Optional [str] = Form(None),LoteSeleccionado:Optional [str] = Form(None),registroIngresoHato: Optional[date] = None, db: Session = Depends(get_database_session),
+                        id_registro_marca: Optional [str] = Form(None),LoteSeleccionado:Optional [str] = Form(None), db: Session = Depends(get_database_session),
                         current_user: Esquema_Usuario = Depends(get_current_user)):
     eliminarduplicados(db=db,current_user=current_user)
     vientres_aptos(session=db, current_user=current_user)
@@ -114,8 +114,7 @@ async def crear_bovinos(nombre_bovino: Optional [str] = Form(None), numero_chape
             # Devuelve un conflicto si hay duplicados
             return Response(status_code=status.HTTP_409_CONFLICT)
         else:
-            if not registroIngresoHato:
-                registroIngresoHato = datetime.now()
+
 
             FechaDeRegistroBovino = datetime.now()
             Ruta_marca = crud.bovinos_inventario.Buscar_Ruta_Fisica_Marca(db=db, id_registro_marca=id_registro_marca,
@@ -134,7 +133,6 @@ async def crear_bovinos(nombre_bovino: Optional [str] = Form(None), numero_chape
                                                                 compra_bovino=compra_bovino,
                                                                 usuario_id=current_user,
                                                                 ruta_imagen_marca=Ruta_marca,
-                                                                fecha_de_ingreso_hato=registroIngresoHato,
                                                                 fecha_de_ingreso_sistema=FechaDeRegistroBovino
                                                                 )
 
@@ -439,7 +437,7 @@ async def crear_bovino_masivo(bovinos: List[dict], db: Session = Depends(get_dat
 
 
                 FechaDeRegistroBovino = datetime.now()
-                registroIngresoHato = datetime.now()
+
 
                 ingreso = modelo_bovinos_inventario.insert().values(nombre_bovino=nombre_bovino,
                                                                     fecha_nacimiento=fecha_nacimiento,
@@ -454,12 +452,19 @@ async def crear_bovino_masivo(bovinos: List[dict], db: Session = Depends(get_dat
                                                                     usuario_id=current_user,
                                                                     numero_chapeta=numero_chapeta,
                                                                     nombre_lote_bovino=lote,
-                                                                    fecha_de_ingreso_hato = registroIngresoHato,
+
                                                                     fecha_de_ingreso_sistema=FechaDeRegistroBovino
                                                                     )
 
                 result = db.execute(ingreso)
                 db.commit()
+
+                calculoEdad(db=db, current_user=current_user)
+
+                crud.crud_bovinos_inventario.bovinos_inventario.ActualizarCantidadAnimalesEnLote(db=db,
+                                                                                                 current_user=current_user)
+
+
 
                 # Obtener el ID del bovino insertado
                 id_bovino = result.inserted_primary_key[0]
@@ -815,7 +820,6 @@ async def cambiar_esta_bovino(
         estado: Optional[str] = Form(None),
         compra_bovino: Optional[str] = Form(None),
         ruta_imagen_marca: Optional[str] = Form(None),
-        fecha_de_ingreso_hato: Optional[date] = Form(None),
         numero_chapeta: Optional[str] = Form(None),
         db: Session = Depends(get_database_session),
         current_user: Esquema_Usuario = Depends(get_current_user)
@@ -844,7 +848,7 @@ async def cambiar_esta_bovino(
             estado=estado,
             compra_bovino=compra_bovino,
             ruta_imagen_marca=Ruta_marca,
-            fecha_de_ingreso_hato=fecha_de_ingreso_hato,
+
             numero_chapeta=numero_chapeta
         ).where(modelo_bovinos_inventario.columns.id_bovino == id_bovino))
         db.commit()
@@ -861,7 +865,6 @@ async def cambiar_esta_bovino(
                 mansedumbre=mansedumbre,
                 estado=estado,
                 compra_bovino=compra_bovino,
-                fecha_de_ingreso_hato=fecha_de_ingreso_hato,
                 numero_chapeta=numero_chapeta
             ).where(modelo_bovinos_inventario.columns.id_bovino == id_bovino))
             db.commit()
