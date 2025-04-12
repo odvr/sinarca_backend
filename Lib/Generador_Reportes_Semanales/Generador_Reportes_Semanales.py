@@ -85,6 +85,7 @@ f"✅ *Fin del reporte.*"
 
             # Insertar reporte en la base de datos
             IngresoReporteSemanal = modelo_reporte_Semanal.insert().values(
+                usuario_id=usuario_id,
                 fecha_generacion=fecha_generacionReporte,
                 total_animales=IndicadoresCliente.total_animales,
                 animales_produccion_leche=IndicadoresCliente.animales_leche,
