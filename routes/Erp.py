@@ -12,6 +12,7 @@ from starlette.status import HTTP_204_NO_CONTENT
 
 import crud
 from Lib.Cambiar_Estado_Facturas import CambiarEstadoFacturaSinEnviarNotificacion
+from Lib.Eliminar_Facturas import eliminarFactura
 
 from Lib.GenerarRadicadoFactura import generar_radicado
 
@@ -342,6 +343,20 @@ async def ListarFactura(factura_id : int,db: Session = Depends(get_database_sess
 
     except Exception as e:
         logger.error(f'Error al obtener la factura: {e}')
+        raise
+    finally:
+        db.close()
+
+
+@ERP.delete("/EliminarFactura/{factura_id}")
+async def EliminarFactura(factura_id: int,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user) ):
+    try:
+
+        eliminarFactura(db=db,factura_id=factura_id)
+
+        return
+    except Exception as e:
+        logger.error(f'Error al Intentar Eliminar Cliente: {e}')
         raise
     finally:
         db.close()
