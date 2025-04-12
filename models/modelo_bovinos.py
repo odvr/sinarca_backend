@@ -928,21 +928,46 @@ modelo_reporte_Semanal = Table(
     Column("IEP_hato", Float)
 )
 
-modelo_embriones_transferencias = Table("embriones_transferencias", meta, Column("id_embrion", Integer, primary_key=True),
-                              Column("codigo_nombre_embrion", String(300)),
-                              Column("inf_madre_biologica", String(300)),
-                              Column("inf_padre_biologico", String(300)),
-                              Column("estado", String(300)),
-                              Column("fecha_implante", Date),
-                              Column("id_receptora", Integer),
-                              Column("nombre_receptora", String(300)),
-                              Column("resultado_trasnplante", String(300)),
-                              Column("fecha_parto", Date),
-                              Column("id_bovino_hijo", Integer),
-                              Column("nombre_hijo", String(300)),
-                              Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")),
-                              Column("observaciones", String(300)),
-                              Column("raza", String(300)))
+modelo_embriones_transferencias = Table("embriones_transferencias", meta,
+                                        Column("id_embrion", Integer, primary_key=True),
+                                        Column("codigo_nombre_embrion", String(300)),
+                                        Column("inf_madre_biologica", String(300)),
+                                        Column("inf_padre_biologico", String(300)),
+                                        Column("estado", String(300)),
+                                        Column("fecha_implante", Date),
+                                        Column("id_receptora", Integer),
+                                        Column("nombre_receptora", String(300)),
+                                        Column("resultado_trasnplante", String(300)),
+                                        Column("fecha_parto", Date),
+                                        Column("id_bovino_hijo", Integer),
+                                        Column("nombre_hijo", String(300)),
+                                        Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")),
+                                        Column("observaciones", String(300)),
+                                        Column("raza", String(300)),
+
+                                        # Nuevos campos agregados después de 'raza'
+                                        Column("raza_madre_biologica", String(300)),
+                                        Column("genetica_madre_biologica", String(300)),
+                                        Column("edad_madre_biologica", String(300)),
+                                        Column("historial_madre_biologica", String(300)),
+                                        Column("tratamientos_hormonales_madre_biologica", String(300)),
+                                        Column("raza_padre_biologico", String(300)),
+                                        Column("genetica_padre_biologico", String(300)),
+                                        Column("edad_padre_biologico", String(300)),
+                                        Column("historial_reproductivo_padre_biologico", String(300)),
+                                        Column("fecha_extracion", Date),
+                                        Column("calidad_embrion", String(300)),
+                                        Column("metodo_recoleccion", String(300)),
+                                        Column("codigo_unico", String(300)),
+                                        Column("lote_procedencia", String(300)),
+                                        Column("caracteristicas_geneticas", String(300)),
+                                        Column("tanque_nitrogeno", String(300)),
+                                        Column("pajilla", String(300)),
+                                        Column("numero_canister", String(300)),
+                                        Column("historial_completo", String(300)),
+                                        Column("programacion_transferencia", String(300)),
+                                        Column("tecnica_utilizada", String(300))
+                                        )
 
 
 

@@ -1287,6 +1287,27 @@ class esquema_embriones_transferencias(BaseModel):
     usuario_id: Optional[str] = None
     observaciones:Optional[str] = None
     raza:Optional[str] = None
+    raza_madre_biologica: Optional[str] = None
+    genetica_madre_biologica: Optional[str] = None
+    edad_madre_biologica: Optional[str] = None
+    historial_madre_biologica: Optional[str] = None
+    tratamientos_hormonales_madre_biologica: Optional[str] = None
+    raza_padre_biologico: Optional[str] = None
+    genetica_padre_biologico: Optional[str] = None
+    edad_padre_biologico: Optional[str] = None
+    historial_reproductivo_padre_biologico: Optional[str] = None
+    fecha_extracion: Optional[date] = None
+    calidad_embrion: Optional[str] = None
+    metodo_recoleccion: Optional[str] = None
+    codigo_unico: Optional[str] = None
+    lote_procedencia: Optional[str] = None
+    caracteristicas_geneticas: Optional[str] = None
+    tanque_nitrogeno: Optional[str] = None
+    pajilla: Optional[str] = None
+    numero_canister: Optional[str] = None
+    historial_completo: Optional[str] = None
+    programacion_transferencia: Optional[str] = None
+    tecnica_utilizada: Optional[str] = None
     class Config:
         orm_mode = True
         env_file = ".env"
