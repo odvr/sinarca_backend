@@ -281,13 +281,17 @@ def registro_partos_animales(session: Session,current_user):
                  nombres_hijos= (", ".join(str(sublista[0]) for sublista in consulta_partos_multiples))
 
 
+
+
                  if nombres_hijos==nombre_hijo:
                          pass
                  else:
                          session.execute(modelo_historial_partos.delete(). \
                                      where(modelo_historial_partos.c.id_parto == id_parto))
                          session.commit()
+             elif cantidad is None:
 
+                 pass
 
  except Exception as e:
      logger.error(f'Error Funcion registro_partos_animales: {e}')
