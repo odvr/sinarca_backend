@@ -4,29 +4,24 @@ Librerias requeridas
 '''
 import logging
 from datetime import date, datetime
-from http.client import HTTPException
-
 from fastapi import APIRouter, Depends,Form,Response,status,Body
 from sqlalchemy import func, or_, extract
+from http.client import HTTPException
 from starlette.status import HTTP_204_NO_CONTENT
-
 import crud
 from Lib.Cambiar_Estado_Facturas import CambiarEstadoFacturaSinEnviarNotificacion
 from Lib.Eliminar_Facturas import eliminarFactura
-
 from Lib.GenerarRadicadoFactura import generar_radicado
-
-
 from config.db import   get_session
 # importa el esquema de los bovinos
 from models.modelo_bovinos import modelo_clientes, modelo_cotizaciones, modelo_facturas, modelo_ventas, \
     modelo_bovinos_inventario, modelo_pagos, modelo_empleados, modelo_nomina, modelo_proveedores, \
-    modelo_produccion_general_leche
+    modelo_produccion_general_leche, modelo_usuarios
 from sqlalchemy.orm import Session, session
 from routes.rutas_bovinos import get_current_user
 from schemas.schemas_bovinos import Esquema_Usuario, esquema_clientes, esquema_cotizaciones, esquema_facturas, \
     esquema_pagos, esquema_empleados, esquema_nomina, esquema_provedores, esquema_produccion_general_leche
-from typing import Optional,List
+from typing import Optional,List,Dict, Any
 import json
 
 
@@ -817,6 +812,22 @@ async def CrearEmpleado(
 
 
 
+@ERP.get("/BuscarDatosEmpleados/{empleado_id}",tags=["Empleados"],response_model=list[esquema_empleados])
+async def BuscarUsuario(empleado_id:int,db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+  try:
+    ListarEmpleado = db.query(modelo_empleados).filter(modelo_empleados.c.usuario_id == current_user,
+                                                         modelo_empleados.c.empleado_id == empleado_id).all()
+    #DatosEmpleados = crud.InformacionReportesUsuarios.BuscarDatosEmpleado(db=db, empleado_id=empleado_id)
+    return ListarEmpleado
+  except Exception as e:
+      logger.error(f'Error Al Intentar Buscar el Usuario: {e}')
+      raise
+  finally:
+      db.close()
+
+
+
+
 @ERP.get("/ListarEmpleados",  response_model=list[esquema_empleados],tags=["ERP"] )
 async def ListarEmpleados(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
 
@@ -858,6 +869,17 @@ async def ListaEmpleado(empleado_id : int,db: Session = Depends(get_database_ses
         raise
     finally:
         db.close()
+
+
+@ERP.get("/EnviarNotificacionDesprendiblePago",tags=["Empleados"])
+async def EnviarNotifi():
+    try:
+        pass
+    except Exception as e:
+        logger.error(f'Error Enviar Notificación Vía Whatsapp {e}')
+        raise
+
+
 
 
 
@@ -906,6 +928,27 @@ async def EditarEmpleado(
         db.close()
 
     return Response(status_code=HTTP_204_NO_CONTENT)
+
+
+@ERP.get("/HistorialNomina/{empleado_id}", response_model=list[esquema_nomina], tags=["ERP"])
+async def HistorialNomina(
+    empleado_id: int,
+    db: Session = Depends(get_database_session),
+    current_user: Esquema_Usuario = Depends(get_current_user)
+):
+    try:
+
+        ItemsNomina = db.query(modelo_nomina).filter(modelo_nomina.c.empleado_id == empleado_id).all()
+
+        return ItemsNomina
+    except Exception as e:
+        logger.error(f'Error al obtener historial de nómina: {e}')
+        raise
+    finally:
+        db.close()
+
+
+
 
 @ERP.get("/Calcular_Total_Nomina",tags=["ERP"])
 async def CalcularNomina(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):

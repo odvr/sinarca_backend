@@ -7,7 +7,7 @@ import logging
 from http.client import HTTPException
 
 from models.modelo_bovinos import modelo_bovinos_inventario, modelo_datos_muerte, modelo_ventas, modelo_compra, \
-    modelo_facturas, modelo_pagos, modelo_empleados
+    modelo_facturas, modelo_pagos, modelo_empleados, modelo_usuarios
 
 # Configuracion de la libreria para los logs de sinarca
 # Crea un objeto logger
@@ -33,6 +33,33 @@ class InformacionReportes:
 
     def get(self, db: Session, id: Any) -> Any:
         return db.query(self.model).filter(self.model.id == id).first()
+
+
+
+
+    """ 
+    Informes para información de la empresa Ganadera 
+    """
+
+    def BuscarDatosEmpleado(self, db: Session, empleado_id):
+
+        try:
+            BuscarDatosEmpleado  = db.query(modelo_empleados).filter(
+                modelo_empleados.c.empleado_id == empleado_id).all()
+
+
+
+            # Manejar el caso en que Buscar_Datos_usuario sea None
+            if BuscarDatosEmpleado is None:
+                return None
+
+            db.close()
+
+            return BuscarDatosEmpleado
+        except AttributeError as e:
+            # Manejar la excepción de AttributeError
+
+            return None  # o cualquier valor predeterminado que desees
 
     def Buscar_Animales_Nacidos_EnlosUltimos_7_dias(self,db: Session,current_user):
         hace_7_dias = datetime.utcnow() - timedelta(days=7)

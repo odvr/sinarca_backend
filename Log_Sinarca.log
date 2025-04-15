@@ -5283,3 +5283,547 @@
 2025-01-30 01:42:13,804 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2031-11-12 
 2025-01-30 01:42:13,817 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2023-04-24 
 2025-01-30 01:42:13,832 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2027-09-20 
+2025-04-08 19:16:49,131 - routes.rutas_bovinos - ERROR - Error Get_current_user 
+2025-04-08 19:17:25,192 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-08 19:17:25,196 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-08 19:17:25,313 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-08 19:17:25,320 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-08 19:17:25,331 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-08 19:17:25,527 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-08 19:17:25,532 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-08 19:17:25,540 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-08 19:17:25,546 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-08 19:17:25,550 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-08 19:17:25,558 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-08 19:17:28,052 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2026-01-14 
+2025-04-08 19:17:28,058 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2023-04-24 
+2025-04-08 19:17:28,065 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2027-09-20 
+2025-04-08 19:23:17,475 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2026-01-14 
+2025-04-08 19:23:17,481 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2023-04-24 
+2025-04-08 19:23:17,488 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2027-09-20 
+2025-04-08 19:25:07,742 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2026-01-14 
+2025-04-08 19:25:07,747 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2023-04-24 
+2025-04-08 19:25:07,752 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2027-09-20 
+2025-04-08 21:25:31,065 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2026-01-14 
+2025-04-08 21:25:31,102 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2023-04-24 
+2025-04-08 21:25:31,138 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2027-09-20 
+2025-04-08 21:31:11,111 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-08 21:31:11,117 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-08 21:31:11,276 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-08 21:31:11,280 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-08 21:31:11,285 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-08 21:31:11,508 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-08 21:31:11,512 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-08 21:31:11,516 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-08 21:31:11,519 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-08 21:31:11,524 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-08 21:31:11,530 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-08 21:31:13,824 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2026-01-14 
+2025-04-08 21:31:13,830 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2023-04-24 
+2025-04-08 21:31:13,834 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2027-09-20 
+2025-04-10 15:15:59,571 - routes.rutas_bovinos - ERROR - Error Get_current_user 
+2025-04-10 15:16:08,045 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-10 15:16:08,050 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-10 15:16:08,189 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-10 15:16:08,195 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-10 15:16:08,200 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-10 15:16:08,428 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-10 15:16:08,433 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-10 15:16:08,437 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-10 15:16:08,441 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-10 15:16:08,445 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-10 15:16:08,448 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-10 15:22:05,261 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2026-01-14 
+2025-04-10 15:22:05,268 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2023-04-24 
+2025-04-10 15:22:05,273 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2027-09-20 
+2025-04-11 14:14:39,871 - routes.rutas_bovinos - ERROR - Error Get_current_user 
+2025-04-11 14:14:39,873 - routes.rutas_bovinos - ERROR - Error Get_current_user 
+2025-04-11 14:14:47,365 - routes.rutas_bovinos - ERROR - Error Get_current_user 
+2025-04-11 14:15:04,193 - routes.rutas_bovinos - ERROR - Error Get_current_user 
+2025-04-11 14:15:15,539 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 14:15:15,542 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 14:15:15,606 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 14:15:15,608 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 14:15:15,610 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 14:15:15,707 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 14:15:15,709 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 14:15:15,711 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 14:15:15,714 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 14:15:15,716 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 14:15:15,718 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 14:15:18,486 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2026-01-14 
+2025-04-11 14:15:18,492 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2023-04-24 
+2025-04-11 14:15:18,497 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2027-09-20 
+2025-04-11 16:22:46,672 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:22:46,731 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:22:48,079 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:22:48,143 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:22:48,171 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:22:49,004 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:22:49,019 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:22:49,046 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:22:49,062 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:22:49,081 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:22:49,101 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:23:40,490 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:23:40,503 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:23:41,367 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:23:41,381 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:23:41,415 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:23:41,982 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:23:41,991 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:23:42,001 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:23:42,017 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:23:42,027 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:23:42,037 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:24:57,654 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:24:57,658 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:24:57,842 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:24:57,845 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:24:57,860 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:24:58,159 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:24:58,170 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:24:58,174 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:24:58,178 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:24:58,185 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:24:58,190 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:26:09,685 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:26:09,699 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:26:09,968 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:26:09,980 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:26:09,986 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:26:10,377 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:26:10,388 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:26:10,395 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:26:10,401 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:26:10,410 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:26:10,427 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:27:23,441 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:27:23,456 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:27:23,747 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:27:23,754 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:27:23,758 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:27:24,242 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:27:24,251 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:27:24,257 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:27:24,260 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:27:24,266 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:27:24,273 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:28:26,486 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2026-01-14 
+2025-04-11 16:28:26,500 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2023-04-24 
+2025-04-11 16:28:26,510 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2027-09-20 
+2025-04-11 16:29:43,144 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Este animal esta Vendido, no se puede calcular su estado 
+2025-04-11 16:29:43,176 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Este animal esta Muerto, no se puede calcular su estado 
+2025-04-11 16:29:43,189 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Este animal esta Muerto, no se puede calcular su estado 
+2025-04-11 16:29:43,219 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado Optimo 
+2025-04-11 16:29:43,243 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado NO Optimo, este animal tiene una edad mayor a 42 meses 
+2025-04-11 16:29:43,273 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado NO Optimo, este animal tiene una edad mayor a 42 meses 
+2025-04-11 16:29:43,284 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado NO Optimo, este animal tiene una edad mayor a 42 meses 
+2025-04-11 16:29:43,294 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado Optimo 
+2025-04-11 16:29:43,304 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado Optimo 
+2025-04-11 16:29:43,315 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado Optimo 
+2025-04-11 16:29:43,327 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado NO Optimo, este animal tiene una edad mayor a 42 meses 
+2025-04-11 16:29:43,336 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado NO Optimo, este animal tiene una edad mayor a 42 meses 
+2025-04-11 16:29:43,348 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado Optimo 
+2025-04-11 16:29:43,358 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado Optimo 
+2025-04-11 16:29:43,371 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Este animal esta Vendido, no se puede calcular su estado 
+2025-04-11 16:29:43,380 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado NO Optimo, este animal tiene un peso menor a 300 kilos 
+2025-04-11 16:29:43,389 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado Optimo 
+2025-04-11 16:29:43,400 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Este animal esta Vendido, no se puede calcular su estado 
+2025-04-11 16:29:43,413 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado Optimo 
+2025-04-11 16:29:43,423 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado NO Optimo, este animal tiene un peso menor a 300 kilos y una edad mayor a 42 meses 
+2025-04-11 16:29:43,437 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado NO Optimo, este animal tiene una edad mayor a 42 meses 
+2025-04-11 16:29:43,447 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado NO Optimo, este animal tiene una edad mayor a 42 meses 
+2025-04-11 16:29:43,453 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado NO Optimo, este animal tiene una edad mayor a 42 meses 
+2025-04-11 16:29:43,467 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado NO Optimo, este animal tiene una edad mayor a 42 meses 
+2025-04-11 16:29:43,478 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado NO Optimo, este animal tiene una edad mayor a 42 meses 
+2025-04-11 16:29:43,485 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado NO Optimo, este animal tiene una edad mayor a 42 meses 
+2025-04-11 16:29:43,492 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado NO Optimo, este animal tiene una edad mayor a 42 meses 
+2025-04-11 16:29:43,499 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado NO Optimo, este animal tiene una edad mayor a 42 meses 
+2025-04-11 16:29:43,510 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Este animal esta Vendido, no se puede calcular su estado 
+2025-04-11 16:29:43,517 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Este animal esta Vendido, no se puede calcular su estado 
+2025-04-11 16:29:43,525 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado NO Optimo, este animal tiene una edad mayor a 42 meses 
+2025-04-11 16:29:43,534 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado NO Optimo, este animal tiene un peso menor a 300 kilos 
+2025-04-11 16:29:43,548 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado Optimo 
+2025-04-11 16:29:43,558 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado Optimo 
+2025-04-11 16:29:43,570 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado NO Optimo, este animal tiene un peso menor a 300 kilos 
+2025-04-11 16:29:43,581 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado Optimo 
+2025-04-11 16:29:43,590 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado NO Optimo, este animal tiene un peso menor a 300 kilos y una edad mayor a 42 meses 
+2025-04-11 16:29:43,599 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado NO Optimo, este animal tiene un peso menor a 300 kilos y una edad mayor a 42 meses 
+2025-04-11 16:29:43,612 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado NO Optimo, este animal tiene un peso menor a 300 kilos 
+2025-04-11 16:29:43,621 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado Optimo 
+2025-04-11 16:29:43,631 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado NO Optimo, este animal tiene un peso menor a 300 kilos 
+2025-04-11 16:29:43,647 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado NO Optimo, este animal tiene un peso menor a 300 kilos 
+2025-04-11 16:29:43,661 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado NO Optimo, este animal tiene un peso menor a 300 kilos 
+2025-04-11 16:29:43,671 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado NO Optimo, este animal tiene un peso menor a 300 kilos 
+2025-04-11 16:29:43,683 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado NO Optimo, este animal tiene un peso menor a 300 kilos 
+2025-04-11 16:29:43,692 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado NO Optimo, este animal tiene un peso menor a 300 kilos 
+2025-04-11 16:29:43,700 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado NO Optimo, este animal tiene un peso menor a 300 kilos 
+2025-04-11 16:29:43,712 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado NO Optimo, este animal tiene un peso menor a 300 kilos 
+2025-04-11 16:29:43,722 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado NO Optimo, este animal tiene un peso menor a 300 kilos 
+2025-04-11 16:29:43,732 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado Optimo 
+2025-04-11 16:29:46,502 - routes.rutas_bovinos - ERROR - Error Get_current_user 
+2025-04-11 16:30:39,737 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:30:39,746 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:30:40,163 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:30:40,189 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:30:40,200 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:30:40,943 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:30:40,946 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:30:40,951 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:30:40,965 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:30:40,972 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:30:40,977 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:30:47,722 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:30:47,725 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:30:47,829 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:30:47,834 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:30:47,847 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:30:48,090 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:30:48,093 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:30:48,098 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:30:48,102 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:30:48,105 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:30:48,107 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:31:10,932 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Este animal esta Vendido, no se puede calcular su estado 
+2025-04-11 16:31:10,938 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Este animal esta Muerto, no se puede calcular su estado 
+2025-04-11 16:31:10,944 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Este animal esta Muerto, no se puede calcular su estado 
+2025-04-11 16:31:10,950 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado Optimo 
+2025-04-11 16:31:10,957 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado NO Optimo, este animal tiene una edad mayor a 42 meses 
+2025-04-11 16:31:10,963 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado NO Optimo, este animal tiene una edad mayor a 42 meses 
+2025-04-11 16:31:10,971 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado NO Optimo, este animal tiene una edad mayor a 42 meses 
+2025-04-11 16:31:10,978 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado Optimo 
+2025-04-11 16:31:10,989 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado Optimo 
+2025-04-11 16:31:10,994 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado Optimo 
+2025-04-11 16:31:11,002 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado NO Optimo, este animal tiene una edad mayor a 42 meses 
+2025-04-11 16:31:11,007 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado NO Optimo, este animal tiene una edad mayor a 42 meses 
+2025-04-11 16:31:11,014 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado Optimo 
+2025-04-11 16:31:11,020 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado Optimo 
+2025-04-11 16:31:11,026 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Este animal esta Vendido, no se puede calcular su estado 
+2025-04-11 16:31:11,033 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado NO Optimo, este animal tiene un peso menor a 300 kilos 
+2025-04-11 16:31:11,040 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado Optimo 
+2025-04-11 16:31:11,046 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Este animal esta Vendido, no se puede calcular su estado 
+2025-04-11 16:31:11,054 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado Optimo 
+2025-04-11 16:31:11,059 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado NO Optimo, este animal tiene un peso menor a 300 kilos y una edad mayor a 42 meses 
+2025-04-11 16:31:11,065 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado NO Optimo, este animal tiene una edad mayor a 42 meses 
+2025-04-11 16:31:11,071 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado NO Optimo, este animal tiene una edad mayor a 42 meses 
+2025-04-11 16:31:11,077 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado NO Optimo, este animal tiene una edad mayor a 42 meses 
+2025-04-11 16:31:11,084 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado NO Optimo, este animal tiene una edad mayor a 42 meses 
+2025-04-11 16:31:11,093 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado NO Optimo, este animal tiene una edad mayor a 42 meses 
+2025-04-11 16:31:11,103 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado NO Optimo, este animal tiene una edad mayor a 42 meses 
+2025-04-11 16:31:11,110 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado NO Optimo, este animal tiene una edad mayor a 42 meses 
+2025-04-11 16:31:11,119 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado NO Optimo, este animal tiene una edad mayor a 42 meses 
+2025-04-11 16:31:11,130 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Este animal esta Vendido, no se puede calcular su estado 
+2025-04-11 16:31:11,161 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Este animal esta Vendido, no se puede calcular su estado 
+2025-04-11 16:31:11,190 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado NO Optimo, este animal tiene una edad mayor a 42 meses 
+2025-04-11 16:31:11,208 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado NO Optimo, este animal tiene un peso menor a 300 kilos 
+2025-04-11 16:31:11,239 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado Optimo 
+2025-04-11 16:31:11,258 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado Optimo 
+2025-04-11 16:31:11,276 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado NO Optimo, este animal tiene un peso menor a 300 kilos 
+2025-04-11 16:31:11,304 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado Optimo 
+2025-04-11 16:31:11,332 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado NO Optimo, este animal tiene un peso menor a 300 kilos y una edad mayor a 42 meses 
+2025-04-11 16:31:11,363 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado NO Optimo, este animal tiene un peso menor a 300 kilos y una edad mayor a 42 meses 
+2025-04-11 16:31:11,383 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado NO Optimo, este animal tiene un peso menor a 300 kilos 
+2025-04-11 16:31:11,461 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado Optimo 
+2025-04-11 16:31:11,477 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado NO Optimo, este animal tiene un peso menor a 300 kilos 
+2025-04-11 16:31:11,498 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado NO Optimo, este animal tiene un peso menor a 300 kilos 
+2025-04-11 16:31:11,516 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado NO Optimo, este animal tiene un peso menor a 300 kilos 
+2025-04-11 16:31:11,560 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado NO Optimo, este animal tiene un peso menor a 300 kilos 
+2025-04-11 16:31:11,592 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado NO Optimo, este animal tiene un peso menor a 300 kilos 
+2025-04-11 16:31:11,624 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado NO Optimo, este animal tiene un peso menor a 300 kilos 
+2025-04-11 16:31:11,667 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado NO Optimo, este animal tiene un peso menor a 300 kilos 
+2025-04-11 16:31:11,690 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado NO Optimo, este animal tiene un peso menor a 300 kilos 
+2025-04-11 16:31:11,706 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado NO Optimo, este animal tiene un peso menor a 300 kilos 
+2025-04-11 16:31:11,721 - Lib.Levante_Ceba_Bovinos - INFO - Funcion Estado_Optimo_Ceba Estado Optimo 
+2025-04-11 16:31:14,341 - routes.rutas_bovinos - ERROR - Error Get_current_user 
+2025-04-11 16:33:19,399 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:33:19,406 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:33:19,645 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:33:19,653 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:33:19,663 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:33:19,938 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:33:19,942 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:33:19,945 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:33:19,951 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:33:19,959 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:33:19,975 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:52:45,835 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2026-01-14 
+2025-04-11 16:52:46,201 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2023-04-24 
+2025-04-11 16:52:46,386 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2027-09-20 
+2025-04-11 16:58:18,649 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:58:18,689 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:58:19,288 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:58:19,292 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:58:19,301 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:58:19,846 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:58:19,852 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:58:19,865 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:58:19,878 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:58:19,887 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:58:19,894 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:58:25,048 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:58:25,055 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:58:25,266 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:58:25,275 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:58:25,281 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:58:25,586 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:58:25,595 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:58:25,604 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:58:25,608 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:58:25,619 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:58:25,631 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:59:55,210 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:59:55,225 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:59:55,828 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:59:55,840 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:59:55,859 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:59:58,539 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:59:58,603 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:59:58,639 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:59:58,667 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:59:58,678 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 16:59:58,713 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 17:25:34,190 - routes.Muertes_Bovinos - ERROR - Error al obtener Listar ID de Bovino: 
+2025-04-11 17:25:34,925 - routes.Ventas_Bovinos - ERROR - Error al obtener Bovinos de venta: 
+2025-04-11 17:25:42,477 - routes.Datos_Compra - ERROR - Error al obtener Bovinos de Compra: 
+2025-04-11 17:25:44,558 - routes.Prod_leche - ERROR - Error al obtener Listar Produccion Leche: 
+2025-04-11 20:16:43,026 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2026-01-14 
+2025-04-11 20:16:43,048 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2023-04-24 
+2025-04-11 20:16:43,055 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2027-09-20 
+2025-04-11 20:46:25,277 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 20:46:25,296 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 20:46:25,420 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 20:46:25,428 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 20:46:25,431 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 20:46:25,601 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 20:46:25,604 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 20:46:25,609 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 20:46:25,612 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 20:46:25,615 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-11 20:46:25,620 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-12 04:31:43,254 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2026-01-14 
+2025-04-12 04:31:43,273 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2023-04-24 
+2025-04-12 04:31:43,281 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2027-09-20 
+2025-04-12 19:58:48,966 - routes.rutas_bovinos - ERROR - Error Get_current_user 
+2025-04-12 19:58:48,973 - routes.rutas_bovinos - ERROR - Error Get_current_user 
+2025-04-12 19:58:48,973 - routes.rutas_bovinos - ERROR - Error Get_current_user 
+2025-04-12 19:58:54,641 - routes.rutas_bovinos - ERROR - Error Get_current_user 
+2025-04-12 19:59:07,379 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-12 19:59:07,384 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-12 19:59:07,492 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-12 19:59:07,495 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-12 19:59:07,498 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-12 19:59:07,643 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-12 19:59:07,646 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-12 19:59:07,649 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-12 19:59:07,651 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-12 19:59:07,660 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-12 19:59:07,662 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-12 19:59:09,614 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2026-01-14 
+2025-04-12 19:59:09,619 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2023-04-24 
+2025-04-12 19:59:09,627 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2027-09-20 
+2025-04-12 21:42:27,700 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2026-01-14 
+2025-04-12 21:42:27,766 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2023-04-24 
+2025-04-12 21:42:27,784 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2027-09-20 
+2025-04-12 21:44:45,195 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2026-01-14 
+2025-04-12 21:44:45,206 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2023-04-24 
+2025-04-12 21:44:45,215 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2027-09-20 
+2025-04-12 21:45:01,734 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-12 21:45:01,742 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-12 21:45:01,938 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-12 21:45:01,944 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-12 21:45:01,948 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-12 21:45:02,150 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-12 21:45:02,155 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-12 21:45:02,160 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-12 21:45:02,163 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-12 21:45:02,166 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-12 21:45:02,170 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-12 21:45:49,545 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2026-01-14 
+2025-04-12 21:45:49,556 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2023-04-24 
+2025-04-12 21:45:49,566 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2027-09-20 
+2025-04-12 21:53:16,649 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2026-01-14 
+2025-04-12 21:53:16,666 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2023-04-24 
+2025-04-12 21:53:16,683 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2027-09-20 
+2025-04-12 21:59:41,498 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2026-01-14 
+2025-04-12 21:59:41,504 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2023-04-24 
+2025-04-12 21:59:41,510 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2027-09-20 
+2025-04-12 21:59:55,650 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2026-01-14 
+2025-04-12 21:59:55,662 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2023-04-24 
+2025-04-12 21:59:55,672 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2027-09-20 
+2025-04-12 22:04:09,276 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2026-01-14 
+2025-04-12 22:04:09,283 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2023-04-24 
+2025-04-12 22:04:09,293 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2027-09-20 
+2025-04-12 22:13:49,892 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2026-01-14 
+2025-04-12 22:13:49,918 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2023-04-24 
+2025-04-12 22:13:49,942 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2027-09-20 
+2025-04-12 22:15:10,840 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2026-01-14 
+2025-04-12 22:15:10,850 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2023-04-24 
+2025-04-12 22:15:10,857 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2027-09-20 
+2025-04-12 22:19:40,543 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-12 22:19:40,560 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-12 22:19:40,752 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-12 22:19:40,757 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-12 22:19:40,763 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-12 22:19:40,888 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-12 22:19:40,892 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-12 22:19:40,895 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-12 22:19:40,898 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-12 22:19:40,900 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-12 22:19:40,903 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-12 22:22:35,504 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2026-01-14 
+2025-04-12 22:22:35,516 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2023-04-24 
+2025-04-12 22:22:35,522 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2027-09-20 
+2025-04-12 22:25:11,734 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2026-01-14 
+2025-04-12 22:25:11,749 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2023-04-24 
+2025-04-12 22:25:11,763 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2027-09-20 
+2025-04-12 22:27:27,482 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-12 22:27:27,487 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-12 22:27:27,572 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-12 22:27:27,576 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-12 22:27:27,579 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-12 22:27:27,715 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-12 22:27:27,718 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-12 22:27:27,721 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-12 22:27:27,723 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-12 22:27:27,725 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-12 22:27:27,728 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-12 22:27:38,108 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2026-01-14 
+2025-04-12 22:27:38,117 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2023-04-24 
+2025-04-12 22:27:38,124 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2027-09-20 
+2025-04-12 22:36:27,079 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2026-01-14 
+2025-04-12 22:36:27,113 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2023-04-24 
+2025-04-12 22:36:27,135 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2027-09-20 
+2025-04-12 22:39:12,039 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2026-01-14 
+2025-04-12 22:39:12,133 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2023-04-24 
+2025-04-12 22:39:12,158 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2027-09-20 
+2025-04-12 22:46:31,530 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2026-01-14 
+2025-04-12 22:46:31,560 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2023-04-24 
+2025-04-12 22:46:31,581 - routes.Prod_leche - INFO - Funcion Edad_Sacrificio_Lecheras 2027-09-20 
+2025-04-12 23:05:39,005 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-12 23:05:46,835 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-12 23:41:58,580 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-12 23:41:58,587 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-12 23:42:46,944 - routes.Muertes_Bovinos - ERROR - Error al obtener Listar ID de Bovino: 
+2025-04-12 23:42:47,054 - routes.Datos_Compra - ERROR - Error al obtener Bovinos de Compra: 
+2025-04-12 23:42:47,122 - routes.Ventas_Bovinos - ERROR - Error al obtener Bovinos de venta: 
+2025-04-12 23:42:47,431 - routes.Prod_leche - ERROR - Error al obtener Listar Produccion Leche: 
+2025-04-12 23:43:01,752 - routes.Formulario_Bovinos - INFO - Bovino con ID 168 actualizado correctamente
+2025-04-12 23:43:09,831 - routes.Muertes_Bovinos - ERROR - Error al obtener Listar ID de Bovino: 
+2025-04-12 23:43:09,854 - routes.Datos_Compra - ERROR - Error al obtener Bovinos de Compra: 
+2025-04-12 23:43:10,087 - routes.Ventas_Bovinos - ERROR - Error al obtener Bovinos de venta: 
+2025-04-12 23:43:10,338 - routes.Prod_leche - ERROR - Error al obtener Listar Produccion Leche: 
+2025-04-12 23:43:19,833 - routes.Formulario_Bovinos - INFO - Bovino con ID 214 actualizado correctamente
+2025-04-12 23:43:24,284 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-12 23:43:24,288 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-12 23:43:24,291 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-13 00:01:51,107 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-13 00:01:51,157 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-13 00:01:51,162 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-13 00:02:39,632 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-13 00:02:39,636 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-13 00:02:39,640 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-13 03:17:15,935 - routes.Erp - ERROR - Error al obtener tabla Facturas: 'list' object has no attribute 'nomina_id'
+2025-04-13 03:17:45,892 - routes.Erp - ERROR - Error al obtener tabla Facturas: 'list' object has no attribute 'nomina_id'
+2025-04-13 03:20:42,640 - routes.Erp - ERROR - Error al obtener tabla Facturas: 'list' object has no attribute 'nombre_empleado'
+2025-04-13 03:22:30,120 - routes.Erp - ERROR - Error al obtener tabla Facturas: 'list' object has no attribute 'nombre_empleado'
+2025-04-13 03:23:36,266 - routes.Erp - ERROR - Error al obtener tabla Facturas: 'list' object has no attribute 'nombre_empleado'
+2025-04-13 03:25:18,913 - routes.Erp - ERROR - Error al obtener tabla Facturas: 'list' object has no attribute 'nombre_predio'
+2025-04-13 03:26:16,364 - routes.Erp - ERROR - Error al obtener tabla Facturas: 'list' object has no attribute 'nombre_empleado'
+2025-04-14 01:21:08,203 - routes.rutas_bovinos - ERROR - Error Get_current_user 
+2025-04-14 01:21:08,209 - routes.rutas_bovinos - ERROR - Error Get_current_user 
+2025-04-14 01:21:08,213 - routes.rutas_bovinos - ERROR - Error Get_current_user 
+2025-04-14 01:21:08,251 - routes.rutas_bovinos - ERROR - Error Get_current_user 
+2025-04-14 01:21:17,722 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-14 01:21:17,728 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-14 01:21:17,960 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-14 01:21:17,965 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-14 01:21:17,970 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-14 01:21:18,207 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-14 01:21:18,215 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-14 01:21:18,220 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-14 01:21:18,225 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-14 01:21:18,230 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-14 01:21:18,235 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-14 01:21:32,825 - routes.Erp - ERROR - Error al obtener tabla Facturas: 'list' object has no attribute 'nombre_predio'
+2025-04-14 01:36:07,847 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-14 01:36:07,856 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-14 01:36:08,000 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-14 01:36:08,006 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-14 01:36:08,012 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-14 01:36:08,200 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-14 01:36:08,205 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-14 01:36:08,208 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-14 01:36:08,213 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-14 01:36:08,217 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-14 01:36:08,222 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-14 01:37:07,079 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-14 01:37:07,081 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-14 01:37:07,084 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-14 18:59:05,392 - routes.rutas_bovinos - ERROR - Error Get_current_user 
+2025-04-14 18:59:05,520 - routes.rutas_bovinos - ERROR - Error Get_current_user 
+2025-04-14 18:59:05,768 - routes.rutas_bovinos - ERROR - Error Get_current_user 
+2025-04-14 18:59:06,044 - routes.rutas_bovinos - ERROR - Error Get_current_user 
+2025-04-14 18:59:06,276 - routes.rutas_bovinos - ERROR - Error Get_current_user 
+2025-04-14 18:59:06,507 - routes.rutas_bovinos - ERROR - Error Get_current_user 
+2025-04-14 18:59:35,102 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-14 18:59:35,110 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-14 18:59:35,224 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-14 18:59:35,228 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-14 18:59:35,232 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-14 18:59:35,394 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-14 18:59:35,396 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-14 18:59:35,400 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-14 18:59:35,403 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-14 18:59:35,406 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-14 18:59:35,411 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-14 18:59:43,555 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-14 18:59:43,563 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-14 18:59:43,567 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-14 19:52:15,873 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-14 19:52:15,958 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-14 19:52:15,979 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-15 00:50:08,605 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-15 00:50:08,615 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-15 00:50:08,785 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-15 00:50:08,791 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-15 00:50:08,802 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-15 00:50:09,037 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-15 00:50:09,040 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-15 00:50:09,050 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-15 00:50:09,052 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-15 00:50:09,055 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-15 00:50:09,057 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-15 00:56:28,006 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-15 00:56:28,012 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-15 00:56:28,103 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-15 00:56:28,110 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-15 00:56:28,113 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-15 00:56:28,263 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-15 00:56:28,265 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-15 00:56:28,268 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-15 00:56:28,270 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-15 00:56:28,276 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-15 00:56:28,279 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-15 00:56:41,776 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-15 00:56:41,783 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-15 00:56:41,809 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-15 00:59:21,880 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-15 00:59:21,889 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-15 00:59:21,893 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-15 00:59:21,896 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-15 00:59:52,896 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-15 00:59:52,909 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-15 00:59:52,914 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-15 00:59:57,107 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-15 00:59:57,111 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-15 00:59:57,117 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-15 01:04:17,456 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-15 01:04:17,471 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-15 01:04:17,477 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-15 01:13:56,513 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-15 01:13:56,579 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-15 01:13:56,731 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-15 01:14:21,092 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-15 01:14:21,101 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
+2025-04-15 01:14:21,107 - Lib.actualizacion_peso - ERROR - Error Funcion actualizacion_peso: None
