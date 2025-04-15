@@ -76,7 +76,7 @@ id_capacidad: Optional [int] = Form(None)
 @Formulario_Bovino.post(
     "/crear_bovino",
     status_code=status.HTTP_201_CREATED, tags=["Formualario_Bovinos"])
-async def crear_bovinos(nombre_bovino: Optional [str] = Form(None), numero_chapeta: Optional [str] = Form(None),chip_asociado: Optional [str] = Form(None),fecha_nacimiento:  Optional [date] = Form(None), raza:  Optional [str] = Form(None), sexo:  Optional [str] = Form(None), marca:  Optional [str] = Form(None), proposito:  Optional [str] = Form(None),
+async def crear_bovinos(nombre_bovino: Optional [str] = Form(None), numero_chapeta: Optional [str] = Form(None), numero_upp: Optional [str] = Form(None), numero_siniiga: Optional [str] = Form(None),chip_asociado: Optional [str] = Form(None),fecha_nacimiento:  Optional [date] = Form(None), raza:  Optional [str] = Form(None), sexo:  Optional [str] = Form(None), marca:  Optional [str] = Form(None), proposito:  Optional [str] = Form(None),
                         mansedumbre:  Optional [str] = Form(None), estado:  Optional [str] = Form(None), compra_bovino:  Optional [str] = Form(None), fecha_pesaje:  Optional [date] = Form(None), peso:  Optional [float] = Form(None),
                         ordeno:  Optional [str] = Form(None), fecha_muerte:  Optional [date] = Form(None), razon_muerte:  Optional [str] = Form(None), numero_bono_venta:  Optional [str] = Form(None),
                         fecha_venta:  Optional [date] = Form(None), precio_venta:  Optional [int] = Form(None), razon_venta:  Optional [str] = Form(None), medio_pago:  Optional [str] = Form(None), comprador:  Optional [str] = Form(None),
@@ -124,6 +124,8 @@ async def crear_bovinos(nombre_bovino: Optional [str] = Form(None), numero_chape
                                                                 fecha_nacimiento=fecha_nacimiento,
                                                                 raza=raza,
                                                                 numero_chapeta = numero_chapeta,
+                                                                numero_siniiga = numero_siniiga,
+                                                                numero_upp=numero_upp,
                                                                 chip_asociado=chip_asociado,
                                                                 sexo=sexo,
                                                                 marca=marca,
@@ -415,6 +417,8 @@ async def crear_bovino_masivo(bovinos: List[dict], db: Session = Depends(get_dat
             id_registro_marca = bovino['idRegistroMarca']
             proposito = bovino['proposito']
             numero_chapeta = bovino['numero_chapeta']
+            numero_siniiga = bovino['numero_siniiga']
+            numero_upp = bovino['numero_upp']
             lote = bovino['lote']
             mansedumbre = "Manso"
             estado="Vivo"
@@ -452,6 +456,8 @@ async def crear_bovino_masivo(bovinos: List[dict], db: Session = Depends(get_dat
                                                                     usuario_id=current_user,
                                                                     numero_chapeta=numero_chapeta,
                                                                     nombre_lote_bovino=lote,
+                                                                    numero_siniiga = numero_siniiga,
+                                                                    numero_upp = numero_upp,
 
                                                                     fecha_de_ingreso_sistema=FechaDeRegistroBovino
                                                                     )
@@ -822,6 +828,8 @@ async def cambiar_esta_bovino(
         compra_bovino: Optional[str] = Form(None),
         ruta_imagen_marca: Optional[str] = Form(None),
         numero_chapeta: Optional[str] = Form(None),
+        numero_siniiga: Optional[str] = Form(None),
+        numero_upp: Optional[str] = Form(None),
         db: Session = Depends(get_database_session),
         current_user: Esquema_Usuario = Depends(get_current_user)
 ):
@@ -850,7 +858,9 @@ async def cambiar_esta_bovino(
             compra_bovino=compra_bovino,
             ruta_imagen_marca=Ruta_marca,
 
-            numero_chapeta=numero_chapeta
+            numero_chapeta=numero_chapeta,
+            numero_siniiga = numero_siniiga,
+            numero_upp=numero_upp
         ).where(modelo_bovinos_inventario.columns.id_bovino == id_bovino))
         db.commit()
 
@@ -866,7 +876,9 @@ async def cambiar_esta_bovino(
                 mansedumbre=mansedumbre,
                 estado=estado,
                 compra_bovino=compra_bovino,
-                numero_chapeta=numero_chapeta
+                numero_chapeta=numero_chapeta,
+                numero_siniiga = numero_siniiga,
+                numero_upp = numero_upp
             ).where(modelo_bovinos_inventario.columns.id_bovino == id_bovino))
             db.commit()
 

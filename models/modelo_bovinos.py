@@ -65,6 +65,8 @@ modelo_bovinos_inventario = Table("bovinos", meta,
                                   Column("id_finca", String(300), ForeignKey("fincas.id_finca")),
                                   Column("nombre_finca", String(300)),
                                   Column("edad_YY_MM_DD", String(300)),
+                                  Column("numero_siniiga", String(300)),
+                                  Column("numero_upp", String(300)),
                                   Column("numero_chapeta", String(300)))
 
 
