@@ -240,6 +240,8 @@ def registro_partos_animales(session: Session,current_user):
              cantidad=i[11]
              id_bovino_madre=i[1]
 
+             if cantidad is None:
+                 return
 
              if cantidad==1:
                  verificacion_cantidad=session.query(modelo_detalles_partos). \
@@ -289,9 +291,7 @@ def registro_partos_animales(session: Session,current_user):
                          session.execute(modelo_historial_partos.delete(). \
                                      where(modelo_historial_partos.c.id_parto == id_parto))
                          session.commit()
-             elif cantidad is None:
 
-                 pass
 
  except Exception as e:
      logger.error(f'Error Funcion registro_partos_animales: {e}')
