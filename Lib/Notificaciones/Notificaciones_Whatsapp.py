@@ -14,11 +14,7 @@ def enviar_Notificaciones_Whatsapp(NumeroCliente, Mensaje):
         print("Error: NumeroCliente es None")
         return
 
-    NumeroCliente = str(NumeroCliente)  # Convertir a string por seguridad
-    NumeroCliente = re.sub(r'\D', '', NumeroCliente)  # Eliminar caracteres no numéricos
 
-    if not NumeroCliente.startswith("57"):  # Agregar código de país si falta
-        NumeroCliente = "57" + NumeroCliente
     # Producción http://notificaciones-sinarca-whatsapp-api-1:3000/send-message
     # Pruebas url = "http://notificaciones-whatsapp-api-1:3000/send-message"
     url = "http://notificaciones-sinarca-whatsapp-api-1:3000/send-message"
