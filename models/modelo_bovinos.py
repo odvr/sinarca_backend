@@ -28,6 +28,7 @@ modelo_usuarios = Table("usuarios", meta, Column("id_usuario", Integer, primary_
                      Column("ubicacion_predio", String(300)),
                      Column("nombre_apellido", String(300)),
                      Column("fecha_de_registro", Date),
+                     Column("indicador_pais", Integer),
                      Column("ultimo_login", Date)
                         )
 

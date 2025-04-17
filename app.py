@@ -14,6 +14,7 @@ from routes.Descarte_bovinos import bovinos_descarte
 from routes.Formulario_Bovinos import Formulario_Bovino
 from routes.Historial_Perdida_Terneros import Historial_Perdida_Terneros
 from routes.Historial_tasa_supervivencia_Bovinos import Historial_Tasa_Supervivencia
+from routes.InvocarFunciones import invocarFunciones
 from routes.Palpaciones_Bovinos import Palpaciones_Bovinos
 from routes.PartosAnimales import partos_bovinos
 from routes.Pesaje import pesaje
@@ -106,6 +107,7 @@ app.include_router(Plan_Sanitario_Bovinos)
 app.include_router(ERP)
 app.include_router(Periodos_secado)
 app.include_router(Transferencia_embriones)
+app.include_router(invocarFunciones)
 
 
 

@@ -1,7 +1,7 @@
 from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union
 
 from sqlalchemy.orm import Session
-
+import re
 import logging
 
 from models.modelo_bovinos import modelo_bovinos_inventario, modelo_registro_marca, modelo_registro_pajillas, \
@@ -11,6 +11,7 @@ from models.modelo_bovinos import modelo_bovinos_inventario, modelo_registro_mar
 
 # Configuracion de la libreria para los logs de sinarca
 # Crea un objeto logger
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 # Crea un manejador de archivo para guardar el log
@@ -21,6 +22,7 @@ formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(messag
 file_handler.setFormatter(formatter)
 # Agrega el manejador de archivo al logger
 logger.addHandler(file_handler)
+
 
 class CRUDBovinos:
     def __init__(self):
@@ -254,10 +256,27 @@ class CRUDBovinos:
             if BuscarCelularUusuario is None:
                 return None
 
-            CelularUsuario = BuscarCelularUusuario.telefono
+
+            telefono = BuscarCelularUusuario.telefono
+            if not telefono:
+                return None
+            indicadorPais  = BuscarCelularUusuario.indicador_pais
+            NumeroCliente = str(telefono)  # Convertir a string por seguridad
+            indicadorPais = str(indicadorPais)
+            NumeroCliente = re.sub(r'\D', '', NumeroCliente)  # Eliminar caracteres no numéricos
+            if not NumeroCliente:
+                return None
+
+
+
+            if indicadorPais == None :
+                CelularUsuario = "57" + NumeroCliente
+                return CelularUsuario
+            else:
+                CelularUsuario = indicadorPais + NumeroCliente
+                return CelularUsuario
             db.close()
 
-            return CelularUsuario
         except AttributeError as e:
             pass
 

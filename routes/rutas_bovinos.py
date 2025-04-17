@@ -12,9 +12,11 @@ from http.client import HTTPException
 from sqlalchemy import and_
 from fastapi import APIRouter, Request
 
+from Lib.Cambiar_Estado_Facturas import CambiarEstadoFactura
 from Lib.Generador_Reportes_Semanales.Generador_Reportes_Semanales import GenerarReportesSemanales
 from Lib.Lib_Calcular_Edad_Bovinos import calculoEdad
 from Lib.Lib_eliminar_duplicados_bovinos import eliminarduplicados
+from Lib.Lib_notificacion_palpaciones_partos import notificacion_proximidad_parto
 from Lib.Notificaciones.Notificaciones_Whatsapp import enviar_Notificaciones_Whatsapp
 from Lib.Tasa_Supervivencia import tasa_supervivencia
 from Lib.actualizacion_peso import actualizacion_peso
@@ -316,11 +318,11 @@ async def Buscar_Indicadores(db: Session = Depends(get_database_session),current
       db.close()
 
 
-@rutas_bovinos.get("/HolaMundo",tags=["Pruebas"])
+@rutas_bovinos.get("/EnviarDesprendible",tags=["Pruebas"])
 async def HolaMundo():
-    #enviar_Notificaciones_Whatsapp(NumeroCliente=numero,Mensaje=mensaje)
-    GenerarReportesSemanales()
+    pass
     return
+
 
 
 
@@ -397,7 +399,7 @@ async def animales_edad_0_9(db: Session = Depends(get_database_session),current_
 @rutas_bovinos.get("/Calcular_animales_edad_9_12",tags=["dashboard"])
 async def animales_edad_9_12(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
   try:
-    calculoEdad(db=db, current_user=current_user)
+
     # consulta y conteo de animales con edades entre 10 a 12 meses
     edades_9_12 = db.query(modelo_bovinos_inventario). \
         where(and_(
@@ -424,7 +426,7 @@ async def animales_edad_9_12(db: Session = Depends(get_database_session),current
 @rutas_bovinos.get("/Calcular_animales_edad_12_24",tags=["dashboard"])
 async def animales_edad_12_24(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
  try:
-    actualizacion_peso(session=db, current_user=current_user)
+
     # consulta y conteo de animales con edades entre 13 a 24 meses
     edades_12_24 = db.query(modelo_bovinos_inventario). \
         where(and_(
@@ -451,7 +453,7 @@ async def animales_edad_12_24(db: Session = Depends(get_database_session),curren
 @rutas_bovinos.get("/Calcular_animales_edad_24_36",tags=["dashboard"])
 async def animales_edad_24_36(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
-        eliminarduplicados(db=db, current_user=current_user)
+
         # consulta y conteo de animales con edades entre 25 a 36 meses
         edades_24_36 = db.query(modelo_bovinos_inventario). \
             where(and_(
@@ -580,8 +582,7 @@ async def animales_muertos(db: Session = Depends(get_database_session),current_u
 @rutas_bovinos.get("/Calcular_perdida_Terneros")
 async def perdida_TernerosAPI(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
  try:
-    perdida_Terneros1(db=db,current_user=current_user)
-    tasa_supervivencia(session=db,current_user=current_user)
+
     response= db.query(modelo_indicadores). \
         filter(
         modelo_indicadores.c.id_indicadores == current_user, modelo_indicadores.c.perdida_de_terneros).first()
@@ -612,6 +613,21 @@ async def GenrearReportesSemanales():
     try:
         GenerarReportesSemanales()
         return
+    except Exception as e:
+      logger.error(f'Error Funcion perdida_Terneros: {e}')
+      raise
+
+
+@rutas_bovinos.post("/ReportesDiarios",status_code=HTTP_204_NO_CONTENT,tags=["Reportes Semanales"])
+async def GenrearReportesDiarios(current_user: Esquema_Usuario = Depends(get_current_user)):
+    try:
+
+
+        notificacion_proximidad_parto()
+        CambiarEstadoFactura()
+
+
+
     except Exception as e:
       logger.error(f'Error Funcion perdida_Terneros: {e}')
       raise

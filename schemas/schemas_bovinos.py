@@ -32,6 +32,7 @@ class Esquema_Usuario(BaseModel):
     nombre_apellido: Optional[str]
     fecha_de_registro: Optional[date]
     ultimo_login: Optional[date]
+    indicador_pais: Optional[int]
 
     class Config:
         orm_mode = True

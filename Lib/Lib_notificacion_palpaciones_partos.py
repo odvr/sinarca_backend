@@ -69,9 +69,14 @@ def notificacion_proximidad_parto():
                     pass
                 #caso contrario se genera
                 else:
-                    mensaje = f'El bovino {nombre_bovino}, tiene una fecha aproximada de parto para el día {fecha_estimada_parto}, considera estar atento'
-                    mensaje_movil=("hola")
+                    mensaje = f' Atención: el bovino {nombre_bovino} tiene una fecha estimada de parto para el día {fecha_estimada_parto}. Es muy importante estar atento durante estos días, ya que se aproxima un momento clave para su bienestar. ¡Gracias por tu compromiso! '
 
+                    # Realiza la Busqueda del Numero de Celular de los usuarios
+                    NumeroCelular = crud.bovinos_inventario.Buscar_Celular_Usuario(db=session, usuario_id=usuario_id)
+                    enviar_Notificaciones_Whatsapp(NumeroCelular,mensaje)
+                    correo_usuario = crud.bovinos_inventario.Buscar_Correo_Usuario(db=session,
+                                                                                   usuario_id=usuario_id)
+                    enviar_correo(correo_usuario, "Bovino con fecha próxima de parto", mensaje)
 
                     fecha_mensaje = date.today()
 
@@ -85,6 +90,12 @@ def notificacion_proximidad_parto():
 
                     if consulta_notificacion is None or consulta_notificacion==[]:
                         #si no se ha generado, se genera y se carga
+
+                        # finalmente se consulta el correo del usuario y se envia la notificacion por correo
+
+
+
+
                         ingresoNotificacion = modelo_notificacion_proximidad_parto.insert().values(id_bovino=id_bovino,
                                                                            nombre_bovino=nombre_bovino,
                                                                            fecha_estimada_parto=fecha_estimada_parto,
@@ -96,15 +107,8 @@ def notificacion_proximidad_parto():
                         session.commit()
 
 
-                        #finalmente se consulta el correo del usuario y se envia la notificacion por correo
-                        correo_usuario = crud.bovinos_inventario.Buscar_Correo_Usuario(db=session,
-                                                                                          usuario_id=usuario_id)
 
-                        #enviar_correo(correo_usuario,"Bovino con fecha próxima de parto",mensaje)
 
-                        telefono_usuario=crud.bovinos_inventario.Buscar_Celular_Usuario(db=session,usuario_id=usuario_id)
-                        print(telefono_usuario)
-                        enviar_Notificaciones_Whatsapp(telefono_usuario,mensaje_movil)
 
                         session.commit()
 
