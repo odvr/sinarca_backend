@@ -57,6 +57,17 @@ class CRUDBovinos:
             db.close()
             return Nombre_Bovino
 
+    def Buscar_ID_Bovino(self, db: Session, nombre_bovino, current_user):
+        ConsultarID = db.query(modelo_bovinos_inventario).filter(
+            modelo_bovinos_inventario.columns.nombre_bovino == nombre_bovino,
+            modelo_bovinos_inventario.c.usuario_id == current_user).first()
+        if ConsultarID is None:
+            return None
+        else:
+            ID_bovino  = ConsultarID.id_bovino
+            db.close()
+            return ID_bovino
+
     def Buscar_Lote_Bovino(self,db: Session,id_bovino, current_user):
         """
 

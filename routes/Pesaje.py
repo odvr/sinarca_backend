@@ -2,7 +2,7 @@
 Librerias requeridas
 '''
 import logging
-
+from typing import List
 import crud
 from Lib.actualizacion_peso import actualizacion_peso
 from Lib.funcion_peso_por_raza import peso_segun_raza
@@ -12,10 +12,10 @@ from sqlalchemy.orm import Session
 # # importa el esquema de los bovinos
 from models.modelo_bovinos import modelo_datos_pesaje, modelo_orden_peso
 from fastapi import APIRouter, Response
-from starlette.status import HTTP_204_NO_CONTENT
-from fastapi import  status, HTTPException, Depends
-from sqlalchemy import func
-from datetime import date, datetime, timedelta
+
+from fastapi import  status, HTTPException
+
+from datetime import date
 from fastapi import  Depends
 from routes.rutas_bovinos import get_current_user
 from schemas.schemas_bovinos import esquema_modelo_Reporte_Pesaje, esquema_orden_peso, Esquema_Usuario
@@ -161,3 +161,41 @@ async def listar_tabla_pesaje_Por_Animal(id_bovino:str,db: Session = Depends(get
     finally:
         db.close()
     return tabla_pesaje
+
+
+
+
+@pesaje.post(
+    "/CargarPesoMasivo",
+    status_code=status.HTTP_201_CREATED, tags=["Pesaje"]
+)
+async def CrearPesoMasivo (bovinos: List[dict], db: Session = Depends(get_database_session),
+                              current_user: Esquema_Usuario = Depends(get_current_user)):
+    try:
+        for bovino in bovinos:
+
+            nombre_bovino = bovino['nombre_bovino']
+            fecha_pesaje = bovino['fecha_pesaje']
+            peso = float(bovino['peso'])
+            tipo_pesaje="Periódico"
+
+
+            id_bovino = crud.bovinos_inventario.Buscar_ID_Bovino(db=db, nombre_bovino=nombre_bovino, current_user=current_user)
+
+            ingresoFechaPesaje = modelo_datos_pesaje.insert().values(id_bovino=id_bovino, fecha_pesaje=fecha_pesaje,
+                                                                     peso=peso, usuario_id=current_user,
+                                                                     nombre_bovino=nombre_bovino,
+                                                                     tipo_pesaje=tipo_pesaje)
+
+            db.execute(ingresoFechaPesaje)
+            db.commit()
+
+
+
+
+        return {"message": "Peso Registrado  exitosamente"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Error al guardar los bovinos: {e}")
+    finally:
+        db.close()
