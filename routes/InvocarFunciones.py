@@ -6,7 +6,7 @@ Librerias requeridas
 import logging
 from http.client import HTTPException
 from fastapi import APIRouter
-
+from fastapi import BackgroundTasks
 from Lib.Tasa_Supervivencia import tasa_supervivencia
 from Lib.actualizacion_peso import actualizacion_peso
 from Lib.perdida_Terneros import perdida_Terneros1
@@ -52,16 +52,16 @@ def get_database_session():
     finally:
         db.close()
 
-@invocarFunciones.get("/LLamarFunciones",tags=["Pruebas"])
-async def llamarfunciones (db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
-    try:
+
+@invocarFunciones.get("/LLamarFunciones", tags=["Pruebas"])
+async def llamarfunciones(background_tasks: BackgroundTasks, db: Session = Depends(get_database_session), current_user: Esquema_Usuario = Depends(get_current_user)):
+    def tareas():
         calculoEdad(db=db, current_user=current_user)
         eliminarduplicados(db=db, current_user=current_user)
         actualizacion_peso(session=db, current_user=current_user)
         perdida_Terneros1(db=db, current_user=current_user)
         tasa_supervivencia(session=db, current_user=current_user)
-    except Exception as e:
-      logger.error(f'Error LLamado de Funciones: {e}')
-      raise HTTPException(status_code=500, detail="Error interno del servidor")
-    finally:
         db.close()
+
+    background_tasks.add_task(tareas)
+    return {"mensaje": "Funciones en ejecución en segundo plano"}
