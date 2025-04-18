@@ -80,7 +80,7 @@ def notificacion_proximidad_parto():
                     correo_usuario = crud.bovinos_inventario.Buscar_Correo_Usuario(db=session,
                                                                                    usuario_id=usuario_id)
                     #Se Comenta la novedad de acuerdo a error presentado
-                    enviar_correo(correo_usuario, "Bovino con fecha próxima de parto", mensaje)
+                    #enviar_correo(correo_usuario, "Bovino con fecha próxima de parto", mensaje)
 
                     fecha_mensaje = date.today()
 
