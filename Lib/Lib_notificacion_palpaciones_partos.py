@@ -57,7 +57,10 @@ def notificacion_proximidad_parto():
             #toma el usuario
             usuario_id= i.usuario_id
 
-
+            # Validamos que la fecha no sea None
+            if not fecha_estimada_parto:
+                logger.warning(f'Bovino {id_bovino} ({nombre_bovino}) no tiene fecha estimada de parto.')
+                continue  # Saltamos este registro
             #estima la diferencia en dias entre la fecha estimada de parto y la fecha actual
             diferencia= fecha_estimada_parto-date.today()
             diferencia_dias=diferencia.days
@@ -77,7 +80,7 @@ def notificacion_proximidad_parto():
                     correo_usuario = crud.bovinos_inventario.Buscar_Correo_Usuario(db=session,
                                                                                    usuario_id=usuario_id)
                     #Se Comenta la novedad de acuerdo a error presentado
-                    #enviar_correo(correo_usuario, "Bovino con fecha próxima de parto", mensaje)
+                    enviar_correo(correo_usuario, "Bovino con fecha próxima de parto", mensaje)
 
                     fecha_mensaje = date.today()
 
