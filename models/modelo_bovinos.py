@@ -38,7 +38,7 @@ modelo_usuarios = Table("usuarios", meta, Column("id_usuario", Integer, primary_
 
 """
  Modelo para la tabla de Bovinos
- cuenta una relacion de uno a muchos para las siguientes tablas: 
+ cuenta una relacion de uno a muchos para las siguientes tablas:
  sexo
 
 """
@@ -972,6 +972,115 @@ modelo_embriones_transferencias = Table("embriones_transferencias", meta,
                                         Column("tecnica_utilizada", String(300))
                                         )
 
+
+modelo_hembras_donantes = Table("hembras_donantes", meta, Column("id_donante", Integer, primary_key=True),
+                               Column("id_bovino", Integer),
+                               Column("nombre_bovino", String(300)),
+                               Column("raza", String(300)),
+                               Column("edad", Integer),
+                               Column("edad_AA_MM_DD", String(300)),
+                               Column("embriones_producidos", Integer),
+                               Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
+
+
+modelo_extracciones_embriones = Table("extracciones_embriones", meta, Column("id_extraccion", Integer, primary_key=True),
+                               Column("id_bovino", Integer),
+                               Column("nombre_bovino", String(300)),
+                               Column("fecha_extraccion", Date),
+                               Column("observaciones", String(300)),
+                               Column("total_embriones", Integer),
+                               Column("embriones_viables", Integer),
+                               Column("responsable", String(300)),
+                               Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
+
+modelo_embriones = Table("embriones", meta, Column("id_embrion", Integer, primary_key=True),
+                               Column("codigo_identificador", String(300)),
+                               Column("id_extraccion", Integer),
+                               Column("extraccion", String(300)),
+                               Column("metodo", String(300)),
+                               Column("id_donante", Integer),
+                               Column("nombre_donante", String(300)),
+                               Column("padre_o_pajilla", String(300)),
+                               Column("id_padre_pajilla", Integer),
+                               Column("nombre_padre_o_pajilla", String(300)),
+                               Column("calidad_embrion", String(300)),
+                               Column("estado_embrion", String(300)),
+                               Column("productor", String(300)),
+                               Column("raza_madre", String(300)),
+                               Column("raza_padre", String(300)),
+                               Column("pedigree_madre", String(300)),
+                               Column("pedigree_padre", String(300)),
+                               Column("fecha_produccion_embrion", Date),
+                               Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
+
+
+modelo_transferencias_embriones = Table("transferencias_embriones", meta, Column("id_transferencia", Integer, primary_key=True),
+                               Column("id_embrion", Integer),
+                               Column("embrion", String(300)),
+                               Column("id_receptora", Integer),
+                               Column("nombre_receptora", String(300)),
+                               Column("fecha_transferencia", Date),
+                               Column("resultado", String(300)),
+                               Column("id_parto", Integer),
+                               Column("id_cria", Integer),
+                               Column("nombre_cria", String(300)),
+                               Column("observaciones", String(300)),
+                               Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
+
+
+
+
+modelo_termocriogenico_embriones = Table("termocriogenico_embriones", meta, Column("id_termo", Integer, primary_key=True),
+                               Column("nombre_termo_identificador", String(300)),
+                               Column("cantidad_canastillas", Integer),
+                               Column("ubicacion", String(300)),
+                               Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
+
+
+
+modelo_canastillas_embriones = Table("canastillas_embriones", meta, Column("id_canastilla_embrion", Integer, primary_key=True),
+                               Column("id_termo", Integer),
+                               Column("nombre_termo_identificador", String(300)),
+                               Column("nombre_codigo_canastilla", String(300)),
+                               Column("gondolas", Integer),
+                               Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
+
+
+modelo_gondolas_embriones = Table("gondolas_embriones", meta, Column("id_gondola", Integer, primary_key=True),
+                              Column("id_termo", Integer),
+                              Column("nombre_termo_identificador", String(300)),
+                              Column("id_canastilla_embrion", Integer),
+                              Column("nombre_codigo_canastilla", String(300)),
+                               Column("nombre_posicion_gondola", String(300)),
+                               Column("estado", String(300)),
+                               Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
+
+
+modelo_banco_embriones = Table("banco_embriones", meta, Column("id_banco", Integer, primary_key=True),
+                               Column("id_embrion", Integer),
+                               Column("nombre_codigo_embrion", String(300)),
+                               Column("fecha_ingreso", Date),
+                               Column("fecha_salida", Date),
+                               Column("id_termo", Integer),
+                               Column("termo", String(300)),
+                               Column("id_canastilla_embrion", Integer),
+                               Column("nombre_codigo_canastilla", String(300)),
+                               Column("id_gondola", Integer),
+                               Column("gondola_posicion", String(300)),
+                               Column("observaciones", String(300)),
+                               Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
+
+modelo_hembras_receptoras = Table("hembras_receptoras", meta, Column("id_receptora", Integer, primary_key=True),
+                               Column("id_bovino", Integer),
+                               Column("nombre_bovino", String(300)),
+                               Column("raza", String(300)),
+                               Column("edad", Integer),
+                               Column("edad_AA_MM_DD", String(300)),
+                               Column("transferencias_recibidas", Integer),
+                               Column("transferencias_exitosas", Integer),
+                               Column("transferecnias_fallidas", Integer),
+                               Column("tasa_exito", Float),
+                               Column("usuario_id", String(300), ForeignKey("usuarios.usuario_id")))
 
 
 meta.create_all(engine)

@@ -1314,3 +1314,159 @@ class esquema_embriones_transferencias(BaseModel):
     class Config:
         orm_mode = True
         env_file = ".env"
+
+class esquema_hembras_donantes(BaseModel):
+    id_donante:Optional[int] = None
+    id_bovino:Optional[int] = None
+    nombre_bovino: Optional[str] = None
+    raza: Optional[str] = None
+    edad:Optional[int] = None
+    edad_AA_MM_DD: Optional[str] = None
+    embriones_producidos:Optional[int] = None
+    usuario_id: Optional[str] = None
+
+    class Config:
+        orm_mode = True
+        env_file = ".env"
+
+class esquema_extracciones_embriones(BaseModel):
+    id_extraccion:Optional[int] = None
+    id_bovino:Optional[int] = None
+    nombre_bovino: Optional[str] = None
+    fecha_extraccion: Optional[date]
+    observaciones: Optional[str] = None
+    total_embriones:Optional[int] = None
+    embriones_viables:Optional[int] = None
+    responsable: Optional[str] = None
+    usuario_id: Optional[str] = None
+
+    class Config:
+        orm_mode = True
+        env_file = ".env"
+
+
+class esquema_embriones(BaseModel):
+    id_embrion:Optional[int] = None
+    codigo_identificador:Optional[str] = None
+    id_extraccion:Optional[int] = None
+    extraccion:Optional[str] = None
+    metodo:Optional[str] = None
+    id_donante:Optional[int] = None
+    nombre_donante:Optional[str] = None
+    padre_o_pajilla:Optional[str] = None
+    id_padre_pajilla:Optional[int] = None
+    nombre_padre_o_pajilla:Optional[str] = None
+    calidad_embrion:Optional[str] = None
+    estado_embrion:Optional[str] = None
+    productor:Optional[str] = None
+    raza_madre:Optional[str] = None
+    raza_padre:Optional[str] = None
+    pedigree_madre:Optional[str] = None
+    pedigree_padre:Optional[str] = None
+    fecha_produccion_embrion:Optional[date]
+    usuario_id: Optional[str] = None
+
+    class Config:
+        orm_mode = True
+        env_file = ".env"
+
+
+class esquema_transferencias_embriones(BaseModel):
+    id_transferencia:Optional[int] = None
+    id_embrion:Optional[int] = None
+    embrion:Optional[str] = None
+    id_receptora:Optional[int] = None
+    nombre_receptora:Optional[str] = None
+    fecha_transferencia:Optional[date]
+    resultado:Optional[str] = None
+    id_parto:Optional[int] = None
+    id_cria:Optional[int] = None
+    nombre_cria: Optional[str] = None
+    observaciones: Optional[str] = None
+    usuario_id: Optional[str] = None
+
+    class Config:
+        orm_mode = True
+        env_file = ".env"
+
+
+
+
+
+
+
+class esquema_termocriogenico_embriones(BaseModel):
+    id_termo:Optional[int] = None
+    nombre_termo_identificador:Optional[str] = None
+    cantidad_canastillas:Optional[int] = None
+    ubicacion:Optional[str] = None
+    usuario_id: Optional[str] = None
+
+    class Config:
+        orm_mode = True
+        env_file = ".env"
+
+
+class esquema_canastillas_embriones(BaseModel):
+    id_canastilla_embrion:Optional[int] = None
+    id_termo:Optional[int] = None
+    nombre_termo_identificador:Optional[str] = None
+    nombre_codigo_canastilla:Optional[str] = None
+    gondolas:Optional[int] = None
+    usuario_id: Optional[str] = None
+
+    class Config:
+        orm_mode = True
+        env_file = ".env"
+
+
+class esquema_gondolas_embriones(BaseModel):
+    id_gondola:Optional[int] = None
+    id_termo:Optional[int] = None
+    nombre_termo_identificador:Optional[str] = None
+    id_canastilla_embrion:Optional[int] = None
+    nombre_codigo_canastilla:Optional[str] = None
+    nombre_posicion_gondola:Optional[str] = None
+    estado:Optional[str] = None
+    usuario_id: Optional[str] = None
+
+    class Config:
+        orm_mode = True
+        env_file = ".env"
+
+
+
+class esquema_banco_embriones(BaseModel):
+    id_banco:Optional[int] = None
+    id_embrion:Optional[int] = None
+    nombre_codigo_embrion:Optional[str] = None
+    fecha_ingreso:Optional[date]
+    fecha_salida:Optional[date]
+    id_termo:Optional[int] = None
+    termo:Optional[str] = None
+    id_gondola:Optional[int] = None
+    gondola_posicion:Optional[str] = None
+    observaciones:Optional[str] = None
+    usuario_id: Optional[str] = None
+
+    class Config:
+        orm_mode = True
+        env_file = ".env"
+
+
+class esquema_hembras_receptoras(BaseModel):
+    id_receptora:Optional[int] = None
+    id_bovino:Optional[int] = None
+    nombre_bovino: Optional[str] = None
+    raza: Optional[str] = None
+    edad:Optional[int] = None
+    edad_AA_MM_DD: Optional[str] = None
+    transferencias_recibidas:Optional[int] = None
+    transferencias_exitosas:Optional[int] = None
+    transferecnias_fallidas:Optional[int] = None
+    tasa_exito:Optional[float] = None
+    usuario_id: Optional[str] = None
+
+    class Config:
+        orm_mode = True
+        env_file = ".env"
