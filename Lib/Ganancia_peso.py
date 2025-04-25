@@ -240,6 +240,40 @@ def ganancia_peso_historica(session: Session,current_user):
                             session.commit()
                             c=c+1
 
+                        consulta_existencia_intervalo_incorrecto = session.query(modelo_ganancia_historica_peso). \
+                                    filter(modelo_ganancia_historica_peso.columns.id_bovino == id_bovino,
+                                           modelo_ganancia_historica_peso.columns.fecha_anterior == fecha_inicial,
+                                           modelo_ganancia_historica_peso.columns.fecha_posterior!=fecha_final).all()
+
+                        if consulta_existencia_intervalo_incorrecto is None or consulta_existencia_intervalo_incorrecto==[]:
+                            pass
+
+                        else:
+
+                            session.execute(modelo_ganancia_historica_peso.delete(). \
+                                filter(modelo_ganancia_historica_peso.columns.id_bovino == id_bovino,
+                                           modelo_ganancia_historica_peso.columns.fecha_anterior == fecha_inicial,
+                                           modelo_ganancia_historica_peso.columns.fecha_posterior!=fecha_final))
+                            session.commit()
+
+
+
+                        consulta_existencia_intervalo_incorrecto2 = session.query(modelo_ganancia_historica_peso). \
+                                    filter(modelo_ganancia_historica_peso.columns.id_bovino == id_bovino,
+                                           modelo_ganancia_historica_peso.columns.fecha_anterior!=fecha_inicial,
+                                           modelo_ganancia_historica_peso.columns.fecha_posterior==fecha_final).all()
+
+                        if consulta_existencia_intervalo_incorrecto2 is None or consulta_existencia_intervalo_incorrecto2==[]:
+                            pass
+
+
+                        else:
+
+                            session.execute(modelo_ganancia_historica_peso.delete(). \
+                                filter(modelo_ganancia_historica_peso.columns.id_bovino == id_bovino,
+                                           modelo_ganancia_historica_peso.columns.fecha_anterior!=fecha_inicial,
+                                           modelo_ganancia_historica_peso.columns.fecha_posterior==fecha_final))
+                            session.commit()
 
 
         #ya que el usuario puede eliminar y modificar los registros de peso,
