@@ -82,6 +82,7 @@ def conteo_partos(session:Session,current_user):
             cantidad_partos = session.query(modelo_historial_partos). \
                     filter(modelo_historial_partos.columns.id_bovino == id_bovino_partos).count()
 
+
             # cosulta que determina la cantidad de partos rpovenientes por transferencia de embriones de cada animal
             cantidad_partos_TE = session.query(modelo_embriones_transferencias). \
                     filter(modelo_embriones_transferencias.columns.id_receptora == id_bovino_partos,
@@ -96,7 +97,8 @@ def conteo_partos(session:Session,current_user):
 
                      session.execute(modelo_leche.update().values(edad_primer_parto=valor_defecto,
                                                                   fecha_primer_parto=valor_defecto,
-                                                                  fecha_vida_util=valor_defecto).where(
+                                                                  fecha_vida_util=valor_defecto,
+                                                                  num_partos=0).where(
                          modelo_leche.columns.id_bovino == id_bovino_partos))
 
                      session.commit()

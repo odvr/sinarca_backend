@@ -98,16 +98,8 @@ def tipo_ganado_leche(session:Session,current_user):
                    where(modelo_leche.c.id_bovino==id_bovino_leche).first()
                 #si un animal no posee partos, entonces se evaluara si es novilla de vientre o una hembra de levante
                 if consulta_num_partos[0]==0 or consulta_num_partos[0] is None:
-                    #para ello se consulta el peso promedio de las hembras adultas de su raza
-                    consulta_peso_raza = session.query(modelo_orden_peso.c.peso_promedio_raza,modelo_bovinos_inventario.c.raza). \
-                        join(modelo_orden_peso, modelo_bovinos_inventario.c.id_bovino == modelo_orden_peso.c.id_bovino). \
-                        filter(modelo_bovinos_inventario.columns.sexo == "Hembra",
-                               modelo_orden_peso.c.raza==raza_bovino_leche,
-                               modelo_orden_peso.c.usuario_id==current_user).first()
-                    #si no existe un peso para su raza entonces se evaluara segun su edad
-                    if consulta_peso_raza is None or consulta_peso_raza==[]:
-                        #si el anaimal posee 28 o mas meses de edad sera una novilla de vientre
-                         if edad_bovino_leche >= 16:
+                        #si el anaimal posee 15 o mas meses de edad sera una novilla de vientre
+                         if edad_bovino_leche >= 15:
                              tipo_ganado = "Novilla de Vientre"
                              session.execute(modelo_leche.update().values(tipo_ganado=tipo_ganado). \
                                              where(modelo_leche.columns.id_bovino == id_bovino_leche))
@@ -118,20 +110,7 @@ def tipo_ganado_leche(session:Session,current_user):
                              session.execute(modelo_leche.update().values(tipo_ganado=tipo_ganado). \
                                              where(modelo_leche.columns.id_bovino == id_bovino_leche))
                              session.commit()
-                    #si existe un peso para su raza se evaluara acorde al peso
-                    else:
-                        #si cumple con 75% o mas del peso de su raza sera una novilla de vientre
-                        if peso_bovino_leche >= (0.75 * consulta_peso_raza[0]):
-                            tipo_ganado = "Novilla de Vientre"
-                            session.execute(modelo_leche.update().values(tipo_ganado=tipo_ganado). \
-                                            where(modelo_leche.columns.id_bovino == id_bovino_leche))
-                            session.commit()
-                        #si no lo cumple sera una hembra de levante
-                        else:
-                            tipo_ganado = "Hembra de levante"
-                            session.execute(modelo_leche.update().values(tipo_ganado=tipo_ganado). \
-                                            where(modelo_leche.columns.id_bovino == id_bovino_leche))
-                            session.commit()
+
                 #si posee por lo menos un parto entonces se evalua si sera escotera o parida
                 elif consulta_num_partos[0] > 0:
                     #se consulta la fecha de su ultimo parto y la cria que pario
