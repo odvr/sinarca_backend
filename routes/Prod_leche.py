@@ -5,7 +5,7 @@ from datetime import  datetime
 import logging
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.sql.functions import current_user
-from Lib.Lib_Intervalo_Partos import intervalo_partos
+from Lib.Lib_Intervalo_Partos import intervalo_partos, fecha_aproximada_parto, conteo_partos
 from Lib.Lib_eliminar_duplicados_bovinos import eliminarduplicados
 from Lib.Registro_partos import registro_partos_animales
 from Lib.clasificacion_ganado_leche import tipo_ganado_leche
@@ -90,8 +90,8 @@ async def inventario_prod_leche(db: Session = Depends(get_database_session),
         itemsLeche = db.query(modelo_leche).filter(modelo_leche.c.usuario_id == current_user).all()
         "Librerias Requeridas"
         registro_partos_animales(session=db,current_user=current_user)
-
-
+        conteo_partos(session=db,current_user=current_user)
+        palpaciones(session=db, current_user=current_user)
 
         tipo_ganado_leche(session=db, current_user=current_user)
 

@@ -76,6 +76,8 @@ def tipo_ganado_leche(session:Session,current_user):
             # Toma la edad del bovino, este es el campo numero 4
             edad_bovino_leche = i[4]
 
+
+
             #si el animal esta muerto o vendido se indicara esto
             if estado_bovino_leche=="Muerto":
                 tipo_ganado = "Este animal ha fallecido"
@@ -164,12 +166,12 @@ def tipo_ganado_leche(session:Session,current_user):
                                 session.execute(modelo_leche.update().values(tipo_ganado=tipo_ganado). \
                                             where(modelo_leche.columns.id_bovino == id_bovino_leche))
                                 session.commit()
-                        #si no ha transcurrido este timpo, la vaca sera una vaca parida
-                        else:
-                            tipo_ganado = "Parida"
-                            session.execute(modelo_leche.update().values(tipo_ganado=tipo_ganado). \
-                                            where(modelo_leche.columns.id_bovino == id_bovino_leche))
-                            session.commit()
+                            #si no ha transcurrido este timpo, la vaca sera una vaca parida
+                            else:
+                                tipo_ganado = "Parida"
+                                session.execute(modelo_leche.update().values(tipo_ganado=tipo_ganado). \
+                                                where(modelo_leche.columns.id_bovino == id_bovino_leche))
+                                session.commit()
 
             else:
                 pass
