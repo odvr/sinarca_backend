@@ -114,13 +114,12 @@ def tipo_ganado_leche(session:Session,current_user):
                 #si posee por lo menos un parto entonces se evalua si sera escotera o parida
                 elif consulta_num_partos[0] > 0:
                     #se consulta la fecha de su ultimo parto y la cria que pario
-                    consulta_ultimo_parto = list(session.execute(modelo_detalles_partos.select(). \
+                    consulta_ultimo_parto = session.execute(modelo_detalles_partos.select(). \
                                                         where(modelo_detalles_partos.columns.id_bovino_madre == id_bovino_leche). \
-                                                        order_by(desc(modelo_detalles_partos.columns.fecha_parto))).first())
+                                                        order_by(desc(modelo_detalles_partos.columns.fecha_parto))).first()
 
-                    print(id_bovino_leche,consulta_ultimo_parto)
 
-                    if consulta_ultimo_parto==[] or  consulta_ultimo_parto[5] is None:
+                    if consulta_ultimo_parto==[] or  consulta_ultimo_parto[5] is None or consulta_ultimo_parto is None:
                         tipo_ganado = "Escotera"
                         session.execute(modelo_leche.update().values(tipo_ganado=tipo_ganado). \
                                         where(modelo_leche.columns.id_bovino == id_bovino_leche))
