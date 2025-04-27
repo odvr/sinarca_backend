@@ -518,6 +518,30 @@ async def animales_sexo_macho(db: Session = Depends(get_database_session),curren
       db.close()
   return machos
 
+
+@rutas_bovinos.get("/TorosReproductores",tags=["dashboard"])
+async def Cantidad_Toros_Reproductores(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+  try:
+    # consulta de total de animales vivos con sexo macho
+    MachosReproductor = db.query(modelo_bovinos_inventario). \
+        filter(modelo_bovinos_inventario.c.estado == "Vivo",
+               modelo_bovinos_inventario.c.sexo == "Macho Reproductor",modelo_bovinos_inventario.c.usuario_id == current_user).count()
+
+
+    db.commit()
+    db.close()
+
+    return MachosReproductor
+  except Exception as e:
+      logger.error(f'Error En Machos reproductores: {e}')
+      raise
+  finally:
+      db.close()
+
+
+
+
+
 @rutas_bovinos.get("/Calcular_animales_hembras",tags=["dashboard"])
 async def animales_sexo_hembra(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
   try:

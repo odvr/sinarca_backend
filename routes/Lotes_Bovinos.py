@@ -45,6 +45,21 @@ def get_database_session():
 
 
 
+@Lotes_Bovinos.get("/Contar_Cantidad_Lotes",tags=["Lotes"] )
+async def Contar_Cantidad_Lotes(db: Session = Depends(get_database_session),current_user: Esquema_Usuario = Depends(get_current_user)):
+
+    try:
+
+
+        ContarCantidadLotes = db.query(modelo_lotes_bovinos). \
+            filter( modelo_lotes_bovinos.c.usuario_id == current_user).count()
+
+        return ContarCantidadLotes
+    except Exception as e:
+        logger.error(f'Error al obtener Tabla Lotes: {e}')
+        raise
+    finally:
+        db.close()
 
 
 
