@@ -126,6 +126,7 @@ def registro_partos_animales(session: Session,current_user):
          else:
              pass
 
+     #El siguiente codigo determina si el parto es unico o multiple
      #consulta que trae los datos de madre e hijos
 
      consulta_detalles_partos = list(set(session.query(modelo_detalles_partos.c.id_bovino_madre,
@@ -228,69 +229,70 @@ def registro_partos_animales(session: Session,current_user):
 
 
 
-         existencia_en_partos = session.query(modelo_historial_partos).all()
-         for i in existencia_en_partos:
-             # Toma el ID del hijo
-             id_parto = i[0]
-             id_bovino_hijo = i[4]
-             nombre_hijo=i[10]
-             fecha_parto=i[2]
-             nombre_madre=i[8]
-             nombre_padre=i[9]
-             cantidad=i[11]
-             id_bovino_madre=i[1]
-
-             if cantidad is None:
-                 return
-
-             if cantidad==1:
-                 verificacion_cantidad=session.query(modelo_detalles_partos). \
-                 filter(modelo_detalles_partos.c.nombre_madre == nombre_madre,
-                 modelo_detalles_partos.c.nombre_padre == nombre_padre,
-                 modelo_detalles_partos.c.fecha_parto == fecha_parto,
-                 modelo_detalles_partos.c.usuario_id == current_user).count()
-
-                 if verificacion_cantidad==1:
-                         pass
-
-                 else:
-                         session.execute(modelo_historial_partos.delete(). \
-                                             where(modelo_historial_partos.c.id_parto == id_parto))
-                         session.commit()
-
-                 consulta_existencia_partos=session.query(modelo_detalles_partos.c.nombre_hijo). \
-                     filter(modelo_detalles_partos.c.id_bovino_hijo==id_bovino_hijo,
-                     modelo_detalles_partos.c.fecha_parto==fecha_parto).all()
+     existencia_en_partos = session.query(modelo_historial_partos).filter(modelo_historial_partos.c.usuario_id == current_user).all()
+     for i in existencia_en_partos:
+         # Toma el ID del hijo
+         id_parto = i[0]
+         id_bovino_hijo = i[4]
+         nombre_hijo=i[10]
+         fecha_parto=i[2]
+         nombre_madre=i[8]
+         nombre_padre=i[9]
+         cantidad=i[11]
+         id_bovino_madre=i[1]
 
 
+         if cantidad is None:
+             return
 
+         if cantidad==1:
+             verificacion_cantidad=session.query(modelo_detalles_partos). \
+             filter(modelo_detalles_partos.c.nombre_madre == nombre_madre,
+             modelo_detalles_partos.c.nombre_padre == nombre_padre,
+             modelo_detalles_partos.c.fecha_parto == fecha_parto,
+             modelo_detalles_partos.c.usuario_id == current_user).count()
 
-                 if consulta_existencia_partos==[] or consulta_existencia_partos is None:
-                     session.execute(modelo_historial_partos.delete(). \
-                                             where(modelo_historial_partos.c.id_parto == id_parto))
-                     session.commit()
-
-                 else:
+             if verificacion_cantidad==1:
                      pass
 
-             elif  cantidad>1:
+             else:
+                     session.execute(modelo_historial_partos.delete(). \
+                                         where(modelo_historial_partos.c.id_parto == id_parto))
+                     session.commit()
 
-                 consulta_partos_multiples=session.query(modelo_detalles_partos.c.nombre_hijo). \
-                     filter(modelo_detalles_partos.c.id_bovino_madre == id_bovino_madre,
-                     modelo_detalles_partos.c.fecha_parto == fecha_parto,
-                     modelo_detalles_partos.c.usuario_id == current_user).all()
-
-                 nombres_hijos= (", ".join(str(sublista[0]) for sublista in consulta_partos_multiples))
-
-
+             consulta_existencia_partos=session.query(modelo_detalles_partos.c.nombre_hijo). \
+                 filter(modelo_detalles_partos.c.id_bovino_hijo==id_bovino_hijo,
+                 modelo_detalles_partos.c.fecha_parto==fecha_parto).all()
 
 
-                 if nombres_hijos==nombre_hijo:
-                         pass
-                 else:
-                         session.execute(modelo_historial_partos.delete(). \
-                                     where(modelo_historial_partos.c.id_parto == id_parto))
-                         session.commit()
+
+
+             if consulta_existencia_partos==[] or consulta_existencia_partos is None:
+                 session.execute(modelo_historial_partos.delete(). \
+                                         where(modelo_historial_partos.c.id_parto == id_parto))
+                 session.commit()
+
+             else:
+                 pass
+
+         elif  cantidad>1:
+
+             consulta_partos_multiples=session.query(modelo_detalles_partos.c.nombre_hijo). \
+                 filter(modelo_detalles_partos.c.id_bovino_madre == id_bovino_madre,
+                 modelo_detalles_partos.c.fecha_parto == fecha_parto,
+                 modelo_detalles_partos.c.usuario_id == current_user).all()
+
+             nombres_hijos= (", ".join(str(sublista[0]) for sublista in consulta_partos_multiples))
+
+
+
+
+             if nombres_hijos==nombre_hijo:
+                     pass
+             else:
+                     session.execute(modelo_historial_partos.delete(). \
+                                 where(modelo_historial_partos.c.id_parto == id_parto))
+                     session.commit()
 
 
  except Exception as e:

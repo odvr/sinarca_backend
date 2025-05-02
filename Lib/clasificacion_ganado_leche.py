@@ -17,7 +17,7 @@ from sqlalchemy.sql.functions import current_user
 from sqlalchemy.orm import Session
 # importa el esquema de los bovinos
 from models.modelo_bovinos import modelo_bovinos_inventario, modelo_leche, modelo_historial_partos, \
-    modelo_orden_peso
+    modelo_orden_peso, modelo_detalles_partos
 
 oauth2_scheme = OAuth2PasswordBearer("/token")
 
@@ -114,11 +114,12 @@ def tipo_ganado_leche(session:Session,current_user):
                 #si posee por lo menos un parto entonces se evalua si sera escotera o parida
                 elif consulta_num_partos[0] > 0:
                     #se consulta la fecha de su ultimo parto y la cria que pario
-                    consulta_ultimo_parto = list(session.execute(modelo_historial_partos.select(). \
-                                                        where(modelo_historial_partos.columns.id_bovino == id_bovino_leche). \
-                                                        order_by(desc(modelo_historial_partos.columns.fecha_parto))).all())
+                    consulta_ultimo_parto = session.execute(modelo_detalles_partos.select(). \
+                                                        where(modelo_detalles_partos.columns.id_bovino_madre == id_bovino_leche). \
+                                                        order_by(desc(modelo_detalles_partos.columns.fecha_parto))).first()
 
-                    if consulta_ultimo_parto==[] or  consulta_ultimo_parto[0][4] is None:
+
+                    if consulta_ultimo_parto==[] or  consulta_ultimo_parto[5] is None or consulta_ultimo_parto is None:
                         tipo_ganado = "Escotera"
                         session.execute(modelo_leche.update().values(tipo_ganado=tipo_ganado). \
                                         where(modelo_leche.columns.id_bovino == id_bovino_leche))
@@ -127,7 +128,8 @@ def tipo_ganado_leche(session:Session,current_user):
                     else:
                         #se consulta el estado de la cria parida
                         consulta_estado_cria= session.query(modelo_bovinos_inventario.c.estado). \
-                        where(modelo_bovinos_inventario.c.id_bovino==consulta_ultimo_parto[0][4]).first()
+                        filter(modelo_bovinos_inventario.c.nombre_bovino==consulta_ultimo_parto[7],
+                               modelo_bovinos_inventario.c.usuario_id==current_user).first()
                         #si la cria esta muerta o vendida entonces la vaca sera escotera
                         if consulta_estado_cria[0]!="Vivo":
                             tipo_ganado = "Escotera"
@@ -137,7 +139,7 @@ def tipo_ganado_leche(session:Session,current_user):
                         #si la cria esta viva se evaluara si es escotera o pradida segun la edad de la cria
                         elif consulta_estado_cria[0]=="Vivo":
                             #se calcula el tiempo entre el ultimo parto y la fecha actual
-                            tiempo_ultimo_parto = date.today() - consulta_ultimo_parto[0][2]
+                            tiempo_ultimo_parto = date.today() - consulta_ultimo_parto[5]
                             #si han transcurrido por lo menos 305 dias,
                             # el ternero ya debio haber destetado, entonces la vaca sera escotera
                             if tiempo_ultimo_parto >= timedelta(305):
