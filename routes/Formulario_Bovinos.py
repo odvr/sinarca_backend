@@ -395,11 +395,6 @@ async def crear_bovinos(nombre_bovino: Optional [str] = Form(None), numero_chape
         db.close()
 
 
-
-
-
-
-
 @Formulario_Bovino.post(
     "/CrearBovinosMasivo",
     status_code=status.HTTP_201_CREATED, tags=["Formualario_Bovinos"]
@@ -407,9 +402,22 @@ async def crear_bovinos(nombre_bovino: Optional [str] = Form(None), numero_chape
 async def crear_bovino_masivo(bovinos: List[dict], db: Session = Depends(get_database_session),
                               current_user: Esquema_Usuario = Depends(get_current_user)):
     try:
-        for bovino in bovinos:
+        existentes = []  # Lista para almacenar los bovinos que ya existían
+        creados = 0  # Contador de bovinos creados exitosamente
 
+        for bovino in bovinos:
             nombre_bovino = bovino['nombre_bovino']
+
+            # Verificar si el bovino ya existe
+            Consulta_Nomnbres_Bovinos = db.execute(modelo_bovinos_inventario.select().where(
+                modelo_bovinos_inventario.columns.nombre_bovino == nombre_bovino,
+                modelo_bovinos_inventario.columns.usuario_id == current_user)).all()
+
+            if Consulta_Nomnbres_Bovinos:
+                existentes.append(nombre_bovino)
+                continue  # Saltar este bovino y continuar con el siguiente
+
+            # Si no existe, proceder con la creación
             fecha_nacimiento = bovino['fecha_nacimiento']
             raza = bovino['raza']
             sexo = bovino['sexo']
@@ -421,153 +429,149 @@ async def crear_bovino_masivo(bovinos: List[dict], db: Session = Depends(get_dat
             numero_upp = bovino['numero_upp']
             lote = bovino['lote']
             mansedumbre = "Manso"
-            estado="Vivo"
-            ordeno="No"
+            estado = bovino['estado']
+            ordeno = "No"
             peso = 0
-
-            Consulta_Nomnbres_Bovinos = db.execute(modelo_bovinos_inventario.select().where(
-                modelo_bovinos_inventario.columns.nombre_bovino == nombre_bovino,
-
-                modelo_bovinos_inventario.columns.usuario_id == current_user)).all()
 
             Ruta_marca = crud.bovinos_inventario.Buscar_Ruta_Fisica_Marca(db=db, id_registro_marca=id_registro_marca,
                                                                           current_user=current_user)
-            # Verificar si alguna de las consultas tiene resultados
-            if Consulta_Nomnbres_Bovinos:
-                return Response(status_code=status.HTTP_409_CONFLICT)
 
+            FechaDeRegistroBovino = datetime.now()
 
-            else:
+            ingreso = modelo_bovinos_inventario.insert().values(
+                nombre_bovino=nombre_bovino,
+                fecha_nacimiento=fecha_nacimiento,
+                raza=raza,
+                peso=peso,
+                sexo=sexo,
+                marca=marca,
+                ruta_imagen_marca=Ruta_marca,
+                proposito=proposito,
+                mansedumbre=mansedumbre,
+                estado=estado,
+                usuario_id=current_user,
+                numero_chapeta=numero_chapeta,
+                nombre_lote_bovino=lote,
+                numero_siniiga=numero_siniiga,
+                numero_upp=numero_upp,
+                fecha_de_ingreso_sistema=FechaDeRegistroBovino
+            )
 
+            result = db.execute(ingreso)
+            db.commit()
+            calculoEdad(db=db, current_user=current_user)
+            crud.crud_bovinos_inventario.bovinos_inventario.ActualizarCantidadAnimalesEnLote(db=db,
+                                                                                             current_user=current_user)
 
-                FechaDeRegistroBovino = datetime.now()
+            # Obtener el ID del bovino insertado
+            id_bovino = result.inserted_primary_key[0]
 
-
-                ingreso = modelo_bovinos_inventario.insert().values(nombre_bovino=nombre_bovino,
-                                                                    fecha_nacimiento=fecha_nacimiento,
-                                                                    raza=raza,
-                                                                    peso= peso,
-                                                                    sexo=sexo,
-                                                                    marca=marca,
-                                                                    ruta_imagen_marca =Ruta_marca ,
-                                                                    proposito=proposito,
-                                                                    mansedumbre=mansedumbre,
-                                                                    estado=estado,
-                                                                    usuario_id=current_user,
-                                                                    numero_chapeta=numero_chapeta,
-                                                                    nombre_lote_bovino=lote,
-                                                                    numero_siniiga = numero_siniiga,
-                                                                    numero_upp = numero_upp,
-
-                                                                    fecha_de_ingreso_sistema=FechaDeRegistroBovino
-                                                                    )
-
-                result = db.execute(ingreso)
-                db.commit()
-                calculoEdad(db=db, current_user=current_user)
-
-                calculoEdad(db=db, current_user=current_user)
-
-                crud.crud_bovinos_inventario.bovinos_inventario.ActualizarCantidadAnimalesEnLote(db=db,
-                                                                                                 current_user=current_user)
-
-
-
-                # Obtener el ID del bovino insertado
-                id_bovino = result.inserted_primary_key[0]
-
-                # Animales de Ceba
-
+            # Animales de Ceba
+            if proposito == "Ceba":
                 consulta = db.execute(
                     modelo_ceba.select().where(
                         modelo_ceba.columns.id_bovino == id_bovino)).first()
-
-                if consulta is None and proposito == "Ceba":
-                    ingresopceba = modelo_ceba.insert().values(id_bovino=id_bovino, proposito=proposito,
-                                                               usuario_id=current_user, nombre_bovino=nombre_bovino)
+                if consulta is None:
+                    ingresopceba = modelo_ceba.insert().values(
+                        id_bovino=id_bovino,
+                        proposito=proposito,
+                        usuario_id=current_user,
+                        nombre_bovino=nombre_bovino
+                    )
                     db.execute(ingresopceba)
                     db.commit()
-                else:
 
-                    db.execute(modelo_ceba.update().where(modelo_ceba.c.id_bovino == id_bovino).values(
-                        proposito=proposito))
-                    db.commit()
-
-                # Realiza la validacion para el macho reproductor
+            # Macho reproductor
+            if proposito == "Macho Reproductor":
                 consulta_macho_reproductor_bovino = db.execute(
                     modelo_macho_reproductor.select().where(
                         modelo_macho_reproductor.columns.id_bovino == id_bovino)).first()
-
-                if consulta_macho_reproductor_bovino is None and proposito == "Macho Reproductor":
-                    CrearMacho = modelo_macho_reproductor.insert().values(id_bovino=id_bovino, usuario_id=current_user,
-                                                                          nombre_bovino=nombre_bovino)
-
+                if consulta_macho_reproductor_bovino is None:
+                    CrearMacho = modelo_macho_reproductor.insert().values(
+                        id_bovino=id_bovino,
+                        usuario_id=current_user,
+                        nombre_bovino=nombre_bovino
+                    )
                     db.execute(CrearMacho)
                     db.commit()
-                else:
 
-                    db.execute(
-                        modelo_macho_reproductor.update().where(
-                            modelo_macho_reproductor.c.id_bovino == id_bovino).values(
-                            id_bovino=id_bovino))
-                    db.commit()
-
-                # Crea los animales de levante
-
+            # Animales de levante
+            if proposito == "Levante":
                 consultaLevante = db.execute(
                     modelo_levante.select().where(
                         modelo_levante.columns.id_bovino == id_bovino)).first()
-
-                if consultaLevante is None and proposito == "Levante":
-                    ingresoplevante = modelo_levante.insert().values(id_bovino=id_bovino, proposito=proposito,
-                                                                     usuario_id=current_user,
-                                                                     nombre_bovino=nombre_bovino)
-
+                if consultaLevante is None:
+                    ingresoplevante = modelo_levante.insert().values(
+                        id_bovino=id_bovino,
+                        proposito=proposito,
+                        usuario_id=current_user,
+                        nombre_bovino=nombre_bovino
+                    )
                     db.execute(ingresoplevante)
                     db.commit()
 
-                else:
+            # Crea la carga Animal
+            ingresoCargaAnimal = modelo_carga_animal_y_consumo_agua.insert().values(
+                id_bovino=id_bovino,
+                usuario_id=current_user,
+                nombre_bovino=nombre_bovino
+            )
+            db.execute(ingresoCargaAnimal)
+            db.commit()
 
-                    db.execute(modelo_levante.update().where(modelo_levante.c.id_bovino == id_bovino).values(
-                        id_bovino=id_bovino, proposito=proposito, nombre_bovino=nombre_bovino))
-                    db.commit()
-
-                    db.commit()
-
-
-                # Crea la carga Animal
-
-                ingresoCargaAnimal = modelo_carga_animal_y_consumo_agua.insert().values(id_bovino=id_bovino,
-                                                                                        usuario_id=current_user,
-                                                                                        nombre_bovino=nombre_bovino)
-                db.execute(ingresoCargaAnimal)
-
-                db.commit()
-
-                """
-                Codigo para crear produccion de leche
-                """
+            # Producción de leche
+            if proposito == "Leche":
                 consultaLeche = db.execute(
                     modelo_leche.select().where(
                         modelo_leche.columns.id_bovino == id_bovino)).first()
-
-                if consultaLeche is None and proposito == "Leche":
-                    ingresopleche = modelo_leche.insert().values(id_bovino=id_bovino,
-
-                                                                 ordeno=ordeno, proposito=proposito,
-                                                                 usuario_id=current_user, nombre_bovino=nombre_bovino)
-
+                if consultaLeche is None:
+                    ingresopleche = modelo_leche.insert().values(
+                        id_bovino=id_bovino,
+                        ordeno=ordeno,
+                        proposito=proposito,
+                        usuario_id=current_user,
+                        nombre_bovino=nombre_bovino
+                    )
                     db.execute(ingresopleche)
                     db.commit()
-                else:
 
-                    db.execute(modelo_leche.update().where(modelo_leche.c.id_bovino == id_bovino).values(
+            # Registro de ventas
+            if estado == "Vendido":
+                consulta_Venta = db.execute(
+                    modelo_ventas.select().where(
+                        modelo_ventas.columns.id_bovino == id_bovino)).first()
+
+                if consulta_Venta is None:
+                    ingresoVentas = modelo_ventas.insert().values(
                         id_bovino=id_bovino,
-
-                        ordeno=ordeno, proposito=proposito))
+                        estado=estado,
+                        numero_bono_venta=None,
+                        fecha_venta=datetime.now(),
+                        precio_venta=None,
+                        razon_venta=None,
+                        medio_pago=None,
+                        comprador=None,
+                        usuario_id=current_user,
+                        nombre_bovino=nombre_bovino
+                    )
+                    db.execute(ingresoVentas)
                     db.commit()
 
-        return {"message": "Bovinos guardados exitosamente"}
+            creados += 1  # Incrementar contador de bovinos creados
+
+        # Preparar respuesta
+        response = {
+            "message": f"Se crearon {creados} bovinos exitosamente",
+            "creados": creados,
+            "total_recibidos": len(bovinos)
+        }
+
+        if existentes:
+            response["existentes"] = existentes
+            response["total_existentes"] = len(existentes)
+
+        return response
+
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Error al guardar los bovinos: {e}")
