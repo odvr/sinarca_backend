@@ -429,11 +429,10 @@ async def crear_bovino_masivo(bovinos: List[dict], db: Session = Depends(get_dat
             numero_upp = bovino['numero_upp']
             lote = bovino['lote']
             mansedumbre = "Manso"
-            estado = bovino['estado']
+            estado = "Vivo"
             ordeno = "No"
             peso = 0
-            if estado == "Vivo":
-                estado = "Vivo"
+
 
             Ruta_marca = crud.bovinos_inventario.Buscar_Ruta_Fisica_Marca(db=db, id_registro_marca=id_registro_marca,
                                                                           current_user=current_user)
