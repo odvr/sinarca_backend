@@ -231,7 +231,8 @@ def capacidad_carga(session:Session,current_user):
           filter(modelo_carga_animal_y_consumo_agua.c.usuario_id == current_user,
                  modelo_carga_animal_y_consumo_agua.c.id_lote == id_lote).first()
 
-        if consulta_carga_lote[0]==None:
+
+        if consulta_carga_lote[0]==None or consulta_carga_lote[0]==0:
             pass
         else:
             consumo_lote = consulta_carga_lote[0] * consumo_promedio

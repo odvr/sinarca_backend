@@ -490,7 +490,7 @@ class esquema_capacidad_carga(BaseModel):
     dias_descanso: Optional[int] = None
     id_finca   : Optional[int] = None
     nombre_finca: Optional[str] = None
-    id_potrero: int
+    id_potrero: Optional[int] = None
     nombre_potrero: Optional[str] = None
     class Config:
         orm_mode = True
