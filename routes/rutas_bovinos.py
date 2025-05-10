@@ -4,22 +4,22 @@ Librerias requeridas
 '''
 
 import logging
+import random
 
 from starlette.status import HTTP_204_NO_CONTENT
 
 import crud
 from http.client import HTTPException
 from sqlalchemy import and_
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, Form
 
 from Lib.Cambiar_Estado_Facturas import CambiarEstadoFactura
 from Lib.Generador_Reportes_Semanales.Generador_Reportes_Semanales import GenerarReportesSemanales
 from Lib.Lib_Calcular_Edad_Bovinos import calculoEdad
 from Lib.Lib_eliminar_duplicados_bovinos import eliminarduplicados
 from Lib.Lib_notificacion_palpaciones_partos import notificacion_proximidad_parto
-from Lib.Notificaciones.Notificaciones_Whatsapp import enviar_Notificaciones_Whatsapp
-from Lib.Tasa_Supervivencia import tasa_supervivencia
-from Lib.actualizacion_peso import actualizacion_peso
+from Lib.enviar_correos import enviar_correo
+
 from Lib.enviar_correos_publicidad import enviar_correo_bienvenida
 from Lib.perdida_Terneros import perdida_Terneros1
 from config.db import   get_session
@@ -263,12 +263,116 @@ async def CrearUsuarioAsociado(data: Esquema_Usuario,db: Session = Depends(get_d
 
     return user
 
+'''++++++++++++++++ Cambiar Contraseña  +++++++++++++++++++++++++++++++++++++++++'''
+
+# Diccionario temporal para almacenar códigos (en producción usa Redis o DB)
+reset_codes = {}
+print(reset_codes)
+
+
+def generate_reset_code(user_id: str) -> str:
+    """Genera un código de 6 dígitos y lo guarda con expiración."""
+    code = str(random.randint(100000, 999999))  # Código de 6 dígitos
+    expires_at = datetime.now() + timedelta(minutes=60)  # Válido por 10 minutos
+
+    reset_codes[user_id] = {
+        "code": code,
+        "expires_at": expires_at
+    }
+
+    return code
 
 
 
 
+@rutas_bovinos.post("/request-reset-code")
+async def request_reset_code(
+        email: str = Form(...) ,
+        db: Session = Depends(get_database_session)
+):
+
+    print(email)
+    # Buscar usuario por CORREO (no por usuario_id)
+    user = db.execute(
+        modelo_usuarios.select().where(modelo_usuarios.c.correo_electronico == email)
+    ).first()
+
+    if not user:
+        return {"message": "Si el correo existe, se enviará un código de verificación"}
+
+    # Generar y almacenar código usando usuario_id como clave
+    reset_code = generate_reset_code(user.usuario_id)
+    print(f"Código generado para {user.usuario_id}: {reset_code}")  # Debug
+
+    # Enviar correo
+    asunto = "Código para restablecer tu contraseña"
+    cuerpo = f"""
+    <h1>Restablecimiento de contraseña</h1>
+    <p>Tu código de verificación es: <strong>{reset_code}</strong></p>
+    <p>Tienes 30 minutos para usarlo.</p>
+    """
+    enviar_correo(email, asunto, cuerpo)
+
+    return {"message": "Código enviado (si el correo existe)"}
 
 
+@rutas_bovinos.post("/verify-reset-code")
+async def verify_reset_code(
+        email: str = Form(...) ,
+        code: str  = Form(...) ,
+        new_password: str = Form(...) ,
+        db: Session = Depends(get_database_session)
+):
+    # Buscar usuario por CORREO (igual que en request_reset_code)
+    user = db.execute(
+        modelo_usuarios.select().where(modelo_usuarios.c.correo_electronico == email)
+    ).first()
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Usuario no encontrado"
+        )
+
+    # Debug: Mostrar códigos almacenados
+    print("Códigos almacenados:", reset_codes)
+    print("Buscando código para:", user.usuario_id)
+
+    # Verificar código usando usuario_id como clave
+    stored_code = reset_codes.get(user.usuario_id)
+
+    if not stored_code:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Código no encontrado o expirado"
+        )
+
+    if stored_code["code"] != code:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Código inválido"
+        )
+
+    if datetime.now() > stored_code["expires_at"]:
+        del reset_codes[user.usuario_id]
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Código expirado"
+        )
+
+    # Actualizar contraseña
+    hashed_password = get_hashed_password(new_password)
+    db.execute(
+        modelo_usuarios.update()
+        .where(modelo_usuarios.c.usuario_id == user.usuario_id)
+        .values(hashed_password=hashed_password)
+    )
+    db.commit()
+
+    # Eliminar código usado
+    del reset_codes[user.usuario_id]
+
+    return {"message": "Contraseña actualizada correctamente"}
 '''+++++++++++++++++++++++++++++++++++++++++++++++++++++++++'''
 
 
